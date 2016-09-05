@@ -1,11 +1,14 @@
 /*
   Results for 10^6 elements
   - T_0: MFSet_NoPC_NoRK
-  - T_1: MFSet_PC_NoRK
-  - T_2: MFSet_PC_RK
-    - Fastest when N <= E
-  - T_3: MFSet_PC_NoRK_LL
-    - Fastest when N >> E
+  - T_1: MFSet_NoPC_RK
+  - T_2: MFSet_PC_NoRK
+  - T_3: MFSet_PC_RK
+    - Faster when N <= E
+  - T_4: MFSet_PC_NoRK_LL3u
+  - T_5: MFSet_PC_NoRK_LL2u
+  - T_6: MFSet_PC_NoRK_LL4u
+    - Faster when N >> E
 
   Plot:
     log_2(T_i) en NxE = {1,2,4..2^n} x {1,2,4,..,2^e}
