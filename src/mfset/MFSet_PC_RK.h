@@ -1,0 +1,85 @@
+#include <cstdio>
+#include <cstdint>
+#include <cstdlib>
+#include <vector>
+#include <chrono>
+
+// Path-Compression and Union-by-Rank
+class MFSet_PC_RK
+{
+public:
+    MFSet_PC_RK( uint32_t size ) { m_vecN.resize(size); Init(); }
+    ~MFSet_PC_RK() {}
+    inline void Init()
+        {
+            for( uint32_t it_n=0; it_n<m_vecN.size(); it_n++ )
+            {
+                m_vecN[it_n].m_Parent = it_n;
+                m_vecN[it_n].m_Rank = 0;
+            }
+        }
+    inline uint32_t Find( uint32_t n )
+        {
+            if( n != m_vecN[n].m_Parent )
+                m_vecN[n].m_Parent = Find( m_vecN[n].m_Parent );
+            return m_vecN[n].m_Parent;
+        }
+    inline void Merge( uint32_t n1, uint32_t n2 )
+        {
+            uint32_t root1( Find(n1) );
+            uint32_t root2( Find(n2) );
+            uint32_t rank1( m_vecN[root1].m_Rank );
+            uint32_t rank2( m_vecN[root2].m_Rank );
+            // Keep highest rank root, increase if same rank
+            if( rank1 > rank2 )
+                m_vecN[root2].m_Parent = root1;
+            else if( rank1 < rank2 )
+                m_vecN[root1].m_Parent = root2;
+            else if( //rank1 == rank2 && IMPORTANT: Implicitly true
+                root1 != root2 ) // IMPORTANT: DO NOTHING IF ALREADY MERGED
+            {
+                m_vecN[root2].m_Parent = root1;
+                m_vecN[root1].m_Rank++;
+            }
+        }
+    inline uint32_t EnumerateCC( bool b_verbose )
+        {
+            // Count and enumerate {S_i} \in S
+            std::vector< std::vector<uint32_t> > vec_cc;
+            {
+                auto start = std::chrono::system_clock::now();
+                const uint32_t num_nodes( m_vecN.size() );
+                std::vector<uint32_t> vec_cc_id( num_nodes, 0xFFFFFFFF );
+                for( uint32_t it_n=0; it_n<num_nodes; it_n++ )
+                {
+                    uint32_t root( Find( it_n ) );
+                    // create root CC if required
+                    if( vec_cc_id[root] == 0xFFFFFFFF )
+                    {
+                        vec_cc_id[root] = vec_cc.size();
+                        vec_cc.push_back( std::vector<uint32_t>() );
+                    }
+                    // Add to root CC
+                    vec_cc[ vec_cc_id[root] ].push_back( it_n );
+                }
+                auto end = std::chrono::system_clock::now();
+                std::chrono::duration<float> elapsed = end-start;
+                printf( "Enumerate CC = %d in %f sec \n", (int)vec_cc.size(), elapsed.count() );
+            }
+
+            if( b_verbose )
+            {
+                for( uint32_t it_cc=0; it_cc<vec_cc.size(); it_cc++ )
+                {
+                    printf( "CC[%d] = %d [", it_cc, (int)vec_cc[it_cc].size() );
+                    for( uint32_t it_nicc=0; it_nicc<vec_cc[it_cc].size(); it_nicc++ )
+                        printf( " %d", vec_cc[it_cc][it_nicc] );
+                    printf( " ]\n" );
+                }
+            }
+            return vec_cc.size();
+        }
+private:
+    struct Entry { uint32_t m_Parent; uint32_t m_Rank; };
+    std::vector<Entry> m_vecN;
+};

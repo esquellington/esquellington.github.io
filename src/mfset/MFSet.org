@@ -1,0 +1,126 @@
+* Intro
+The MF-Set / union-find is one of my favourite algorithms (LINK wikipedia)
+
+I've implemented it like 6 or 7 times,
+
+* Idea
+The basic idea is
+
+** Set
+given the set of integers 0..N-1, manage its subsets
+- Each element in exactly 1 subset
+- There is no empty subset
+
+MF-Set Ops:
+- Add element
+- Merge 2 sets
+- Lookup set that contains a given element
+- Enumerate disjoint subsets
+- Enumerate elements in a disjoint subset
+
+** Graph
+ALTERNATIVELY: A Graph with N nodes and E undirected edges, find the Connected Components
+Nodes = Set elements
+Edges = Merge ops
+CC = disjoint subset
+
+** General
+ASSUME elements[i] indexed by i \in 0..N-1
+Explain how this maps to indices of any array<T>
+
+* Applications
+** Graph connected components/clustering (LINK wikipedia?)
+** RBD partitions (LINK Bullet)
+   - Independent computation
+     - Parallelisation
+     - Per-partition convergence analysis & sleeping
+** Mesh CC (LINK geoproc?)
+   - high level reasoning/edition
+   - Ex: Split mesh into its CC
+     - IsConnected?
+     - For CD/BVH
+     - For compression
+** Reconstruct an Intersection Curve from unsorted Segments LINK thesis
+   - using prev/next INDEXES as intrusive list!
+   - reuse this idea for O(1) online enumeration
+     - May need next/last, instead of prev, to append lists in O(1)
+
+** Kruskal alg to compute MinSpanningTree
+   - Reason about structure, depth, complexity...
+** Mfset == minimitzar autòmats?? Util per reduir FSA
+* DataStructure/Algorithms
+* Algorithmic Optimizations
+- Path-compression
+  - Recursive
+  - Iterative
+- MS2L: Merge-smaller-to-larger
+  - Computing "size"
+** Cost Analysis
+** Ackerman??
+
+* Enumerating set elements
+** DONE Online: O(1)
+  - Merge with linked-lists of bucket-lists, done in CRS Partitions
+** DONE Post-process:
+  - Foreach n == Find(n) do Create CC if new and Add-to-CC always
+* Enumerating sets
+** DONE Online:
+  - Embed prev_root/next_root into entries, init list to contain ALL
+    nodes, but remove when merged-to
+** DONE Post-process
+  - Foreach n == Find(n)
+* Removing Nodes or Edges
+- Potentiall set Split
+- MST-edges
+- \todo Search for specific structure (bullet forum mentions it)
+
+* Demo
+** Basic
+** Path-Compression
+** MS2L
+* Benchmarks
+** Add: Add N nodes, Add E random edges
+** Add_Enumerate: Add N + Add E + Enumerate
+** Add_Enumerate_Interleaved: Add N + E * (Add e + Enumerate)
+** Add_Remove_Enumerate: Add N + R * (Add E + Remove R) + Enumerate
+* Plots
+** Increase N, E and R in Benchmarks
+** Real cost Vs Theoretical cost
+
+* Profiling & Optimization
+  - Use perf
+  - Try to improve it
+* Optimizations
+** Space
+   - Mergint to smallest-root allows m_Parent to be used as m_Last for
+     roots, saving additional m_Last attrib
+** Tradeoffs
+Té sentit mantenir calculat/sempre accessible
+- list-elements-per-CC
+- list-CC-roots
+
+Tradeoffs
+- Si alg s'usa incrementalment/de forma persistent (ex: CRS islands)
+- Si no, el cost d'init i update dels next/last i prev_root/next_root
+  SUPERA el cost O(N) final de cerca dels roots i construccio de
+  list-elements-per-CC (SOBRETOT si la reserva de mem no fos
+  necessaria, o alg en 2 passades bucketitzacio per guardar tot en un
+  únic array amb per-CC sub-arrays)
+
+DeleteEdge e = (n1,n2)
+- NOMES afecta a root(n1)
+- Es pot fer rebuild parcial
+- Nomes si e no és MST-edge
+  - MST-edges es podrien guardar en llista incrustada
+
+Comparar amb single-shot flood alg foreach(n) -> flood and gather accessible if not already flooded
+- Per a CC single-shot es més eficient, imagino
+- Per incremental no crec
+- REQUREIX relacio node->arestes[]
+
+Si cal guardar edges (n1,n2), associar-ne una llista doblement encadenada als ROOTS
+- Aixo permetria "reconstruir" qualsevol CC quan s'esborri una edge, per exemple
+
+* Beyond
+** Weighted edges, strong CC ?
+** Directed edges?
