@@ -49,31 +49,65 @@ Explain how this maps to indices of any array<T>
    - Reason about structure, depth, complexity...
 ** Mfset == minimitzar autòmats?? Util per reduir FSA
 * DataStructure/Algorithms
-* Algorithmic Optimizations
-- Path-compression
+* DONE Algorithmic Optimizations
+** DONE Path-compression
   - Recursive
   - Iterative
-- MS2L: Merge-smaller-to-larger
+** DONE MS2L: Merge-smaller-to-larger
   - Computing "size"
-** Cost Analysis
-** Ackerman??
+** TODO Cost Analysis
+*** Ackerman??
 
-* Enumerating set elements
+* DONE Enumerating set elements
 ** DONE Online: O(1)
   - Merge with linked-lists of bucket-lists, done in CRS Partitions
 ** DONE Post-process:
   - Foreach n == Find(n) do Create CC if new and Add-to-CC always
-* Enumerating sets
+* DONE Enumerating sets
 ** DONE Online:
   - Embed prev_root/next_root into entries, init list to contain ALL
     nodes, but remove when merged-to
 ** DONE Post-process
   - Foreach n == Find(n)
-* Removing Nodes or Edges
+* TODO Adding Nodes
+- Extend array, O(1) if no realloc, use 2x size FTW
+* TODO Removing Nodes
+- Potential set Split
+- Do NOT contract array<Node> to preserve node ids, instead, mark
+  Node as "empty", and LINK IT into an empty node list using
+  m_Pred/m_Succ list-CC that is not in use for empty nodes.
+* TODO Removing Edges
 - Potentiall set Split
 - MST-edges
 - \todo Search for specific structure (bullet forum mentions it)
-
+DeleteEdge e = (n1,n2)
+- NOMES afecta a root(n1)
+- Es pot fer rebuild parcial
+- Nomes si e no és MST-edge
+  - MST-edges es podrien guardar en llista incrustada
+* TODO Storing edges
+** Edges
+   - MFSet edge-array 0..E-1
+   - Edge = n1,n2,pred_edge_in_cc,succ_edge_in_cc
+   - Ideally, 1 bit to store IsMST
+** Nodes
+   - Roots need a ptr to First/Last Edge index to merge edges-in-CC
+     lists in O(1)
+   - Could add first_edge,last_edge to Node... but that'd grow to
+     6*uint32 per Node, TOO BIG
+     - non-root m_Pred/m_Succ are UNUSED
+     - a root can only have 0 children if it has also 0 edges (root,n_i)
+     - any root with >0 edges also has >0 children
+     - THEREFORE the non-root node root.m_Next has UNUSED
+       m_Pred/m_Succ, which CAN BE USED as first_edge/last_edge
+** PRIORITY: KEEP Node and Edge <= 128b
+* TODO Rebuild single CC
+- Use embedded list of nodes and edges to rebuild it from scratch
+- INSTEAD of rebuild on remove edge/node, we can FLAG root as DIRTY
+  (another bit we have to alloc somewhere) and rebuild the CC
+  on-access
+  - This way, consecutive removals will lead to a SINGLE Rebuild() on
+    the next access, not for each one!
 * Demo
 ** Basic
 ** Path-Compression
@@ -94,32 +128,31 @@ Explain how this maps to indices of any array<T>
 ** Space
    - Mergint to smallest-root allows m_Parent to be used as m_Last for
      roots, saving additional m_Last attrib
+   - Allows embedding root-list and keep node size <= 128b
+** Cache
+   - Sort lists incrementally whenever accessed by swapping
+     neighbours, costs O(1) per access but average/amortized cost
+     should improve
+   - list-CC
+   - list-nodes-in-CC
+   - list-edges-in-CC
 ** Tradeoffs
-Té sentit mantenir calculat/sempre accessible
-- list-elements-per-CC
-- list-CC-roots
-
-Tradeoffs
-- Si alg s'usa incrementalment/de forma persistent (ex: CRS islands)
-- Si no, el cost d'init i update dels next/last i prev_root/next_root
-  SUPERA el cost O(N) final de cerca dels roots i construccio de
-  list-elements-per-CC (SOBRETOT si la reserva de mem no fos
-  necessaria, o alg en 2 passades bucketitzacio per guardar tot en un
-  únic array amb per-CC sub-arrays)
-
-DeleteEdge e = (n1,n2)
-- NOMES afecta a root(n1)
-- Es pot fer rebuild parcial
-- Nomes si e no és MST-edge
-  - MST-edges es podrien guardar en llista incrustada
-
-Comparar amb single-shot flood alg foreach(n) -> flood and gather accessible if not already flooded
+   It's reasonable to keep track of
+   - list-nodes-in-CC
+   - list-CC
+   if the algorithm is used incrementally and CC persistence is
+   required (ex: CRS islands) by the user to enable other
+   optimizations Otherise, the cost of initialization and update of
+   next/last and pred/succ may exceed any O(N) cost of rebuilding the
+   lists when required/on access.
+** Alloc/Dealloc
+   - Single vector with nodes-in-CC organized in subarrays per-CC can
+     be build in a 2-pass count-and-classify alg.
+** Comparison
+- Comparar amb single-shot flood alg foreach(n) -> flood and gather accessible if not already flooded
 - Per a CC single-shot es més eficient, imagino
 - Per incremental no crec
 - REQUREIX relacio node->arestes[]
-
-Si cal guardar edges (n1,n2), associar-ne una llista doblement encadenada als ROOTS
-- Aixo permetria "reconstruir" qualsevol CC quan s'esborri una edge, per exemple
 
 * Beyond
 ** Weighted edges, strong CC ?
