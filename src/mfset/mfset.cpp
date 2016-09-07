@@ -27,6 +27,7 @@
 #include "MFSet_PC_NoRK_LL3u.h"
 #include "MFSet_PC_NoRK_LL2u.h"
 #include "MFSet_PC_NoRK_LL4u.h"
+#include "MFSet_PC_NoRK_LL4u_LE4u.h"
 
 inline void Seed( uint32_t s )
 {
@@ -113,6 +114,10 @@ int main( int argc, const char* argv[] )
     case 6:
         printf( "Test6(): +PC, -RK, +LL4u--------------------------\n" );
         num_cc = Test<MFSet_PC_NoRK_LL4u>( num_nodes, num_edges, bVerbose );
+        break;
+    case 7:
+        printf( "Test7(): +PC, -RK, +LL4u +LE4u--------------------\n" );
+        num_cc = Test<MFSet_PC_NoRK_LL4u_LE4u>( num_nodes, num_edges, bVerbose );
         break;
     default:
         break;

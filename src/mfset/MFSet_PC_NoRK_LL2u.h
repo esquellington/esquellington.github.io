@@ -4,18 +4,13 @@
 #include <vector>
 #include <chrono>
 
-/*\Try to use m_Last as m_Parent for non-root Nodes, to use only
-  2 uint32_t per node.
+/* Same as MFSet_PC_NoRK_LL3u, but reusing m_Last as m_Parent for
+  non-root Nodes, to use only 2x uint32_t per node instead of 3x
   - If m_Parent < it_n, it_n is a CHILD, and m_Parent is ACTUAL PARENT
   - Else if it_n < m_Parent, it_n is ROOT and m_Parent acts as m_Last
     - This includes m_Parent == m_Last == 0xFFFFFFFF (a ROOT with no children)
   An anonymous union m_Parent|m_Last is used according to these rules.
-
   \todo Try to SIMPLIFY Merge() code
-
-  \todo Embed prev_root/next_root list in elements, so that nodes
-  require exactly 4xuint32_t (fits in a single 128B cache entry), and
-  avoid foreach(n) CC search in EnumerateCC()
 */
 class MFSet_PC_NoRK_LL2u
 {

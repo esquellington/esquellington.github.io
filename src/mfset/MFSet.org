@@ -47,8 +47,36 @@ Explain how this maps to indices of any array<T>
 
 ** Kruskal alg to compute MinSpanningTree
    - Reason about structure, depth, complexity...
+** Matrix partitioning/parallelization??
+   - POTSER es podria aplicar a la idea de fons que tinc de
+     Partitioned Dynamics amb convergencia/freqs adaptatives per
+     partition??
+   - METIS sembla que usa idea semblant, veure
+     http://cgi.cs.arizona.edu/~mstrout/Papers/Papers12/lcpc2012-parcubed.pdf
+   - En aquesta tesi
+     http://dspace.uib.no/bitstream/handle/1956/5118/Dr.thesis_Mostofa_Ali_Patwary.pdf?sequence=1&isAllowed=y
+     en parlen amb detall, SI, es pot usar per a això!
+     - "Another application of the Union-Find algorithm is the
+       computation of an 12 elimination tree from a sparse, symmetric,
+       and positive definitematrix in numer- ical linear algebra [86,
+       144]. The elimination tree provides structural information
+       relevant to the sparse factorization process [87, 110]. The use
+       of the elimination tree includes, among others, finding
+       equivalent matrix reorderings [108], various sparse storage
+       schemes [86], and symbolic factorization [60]. The elimination
+       tree is usually defined through the Cholesky factor (in which,
+       nonzero elements above the diagonal have been transformed to be
+       equal to zero) [59]. However, to con- struct the elimination
+       tree directly from the sparse matrix efficiently, different
+       variations of Union-Find algorithms have been tried and found
+       to be efficient"
 ** Mfset == minimitzar autòmats?? Util per reduir FSA
 * DataStructure/Algorithms
+* Rem's algorithm
+  Sembla que es una variant MES RAPIDA que mfset amb PC i RK, que es
+  "l'optim teòric"
+  - http://www.ii.uib.no/~fredrikm/fredrik/papers/SEA2010.pdf
+  - 2010_ExperimentsOnUnionFindAlgorithms
 * DONE Algorithmic Optimizations
 ** DONE Path-compression
   - Recursive
@@ -85,6 +113,7 @@ DeleteEdge e = (n1,n2)
 - Es pot fer rebuild parcial
 - Nomes si e no és MST-edge
   - MST-edges es podrien guardar en llista incrustada
+Veure paper http://dl.acm.org/citation.cfm?id=545384
 * TODO Storing edges
 ** Edges
    - MFSet edge-array 0..E-1

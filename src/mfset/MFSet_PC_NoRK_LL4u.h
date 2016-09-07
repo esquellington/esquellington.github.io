@@ -4,16 +4,10 @@
 #include <vector>
 #include <chrono>
 
-/*\Try to use m_Last as m_Parent for non-root Nodes, to use only
-  2 uint32_t per node.
-  - If m_Parent < it_n, it_n is a CHILD, and m_Parent is ACTUAL PARENT
-  - Else if it_n < m_Parent, it_n is ROOT and m_Parent acts as m_Last
-    - This includes m_Parent == m_Last == 0xFFFFFFFF (a ROOT with no children)
-  An anonymous union m_Parent|m_Last is used according to these rules.
-
-  list of ROOTS is embedded as a pred/succ list in elements, so that nodes
-  require exactly 4xuint32_t (fits in a single 128B cache entry), and
-  avoid foreach(n) CC search in EnumerateCC()
+/* Same as MFSet_PC_NoRK_LL2u, but adding a list of ROOTS is embedded
+  as a PrecR/SuccR list in elements, so that nodes require exactly 4x
+  uint32_t (fits in a single 128B cache entry), and avoids foreach(n)
+  CC search in EnumerateCC()
 
   \todo Try to SIMPLIFY Merge() code
 */
@@ -26,27 +20,27 @@ public:
         {
             for( uint32_t it_n=0; it_n<m_vecN.size(); it_n++ )
             {
-                m_vecN[it_n].m_Next = 0xFFFFFFFF;
-                m_vecN[it_n].m_Parent = 0xFFFFFFFF; //Root
+                m_vecN[it_n].m_NextN = 0xFFFFFFFF;
+                m_vecN[it_n].m_ParentR = 0xFFFFFFFF; //Root
                 // root list
-                m_vecN[it_n].m_Pred = it_n-1;
-                m_vecN[it_n].m_Succ = it_n+1;
+                m_vecN[it_n].m_PredR = it_n-1;
+                m_vecN[it_n].m_SuccR = it_n+1;
             }
-            m_vecN.front().m_Pred = m_vecN.size()-1;
-            m_vecN.back().m_Succ = 0;
+            m_vecN.front().m_PredR = m_vecN.size()-1;
+            m_vecN.back().m_SuccR = 0;
         }
     inline uint32_t Find( uint32_t n )
         {
-            if( m_vecN[n].m_Parent < n ) // non-root, maybe empty
+            if( m_vecN[n].m_ParentR < n ) // non-root, maybe empty
             {
-                m_vecN[n].m_Parent = Find( m_vecN[n].m_Parent );
-                return m_vecN[n].m_Parent;
+                m_vecN[n].m_ParentR = Find( m_vecN[n].m_ParentR );
+                return m_vecN[n].m_ParentR;
             }
-            else //n < m_Parent
-                return n; //BECAUSE m_vecN[n].m_Parent is LAST
+            else //n < m_ParentR
+                return n; //BECAUSE m_vecN[n].m_ParentR is LAST
         }
 
-    /* Next-Last lists
+    /* NextN-LastN lists
        r1;
          r1 -> r1.n -> r1.nf ---> r1.l -> X
          |__________________________^
@@ -77,45 +71,45 @@ public:
             if( root1 == root2 ) return;
             else if( root2 < root1 ) std::swap(root1,root2);
 
-            uint32_t last2( m_vecN[root2].m_Last );
-            m_vecN[root2].m_Parent = root1;
+            uint32_t last2( m_vecN[root2].m_LastN );
+            m_vecN[root2].m_ParentR = root1;
 
             // Remove root2 from list of roots where root1 already is
-            m_vecN[ m_vecN[root2].m_Succ ].m_Pred = m_vecN[root2].m_Pred;
-            m_vecN[ m_vecN[root2].m_Pred ].m_Succ = m_vecN[root2].m_Succ;
+            m_vecN[ m_vecN[root2].m_SuccR ].m_PredR = m_vecN[root2].m_PredR;
+            m_vecN[ m_vecN[root2].m_PredR ].m_SuccR = m_vecN[root2].m_SuccR;
             // TEMPORAL: Recommended for safety, but NOT REQUIRED
-            // m_vecN[root2].m_Succ = 0xFFFFFFFF;
-            // m_vecN[root2].m_Pred = 0xFFFFFFFF;
+            // m_vecN[root2].m_SuccR = 0xFFFFFFFF;
+            // m_vecN[root2].m_PredR = 0xFFFFFFFF;
 
             //\todo THIS must be simpler, I'm sure...
-            if( m_vecN[root1].m_Next != 0xFFFFFFFF ) //l1 not empty
+            if( m_vecN[root1].m_NextN != 0xFFFFFFFF ) //l1 not empty
             {
-                m_vecN[ m_vecN[root1].m_Last ].m_Next = root2;
-                if( m_vecN[root2].m_Next != 0xFFFFFFFF ) //l2 not empty
-                    m_vecN[root1].m_Last = last2;
+                m_vecN[ m_vecN[root1].m_LastN ].m_NextN = root2;
+                if( m_vecN[root2].m_NextN != 0xFFFFFFFF ) //l2 not empty
+                    m_vecN[root1].m_LastN = last2;
                 else
-                    m_vecN[root1].m_Last = root2;
+                    m_vecN[root1].m_LastN = root2;
             }
-            else if( m_vecN[root2].m_Next != 0xFFFFFFFF ) //l2 not empty
+            else if( m_vecN[root2].m_NextN != 0xFFFFFFFF ) //l2 not empty
             {
-                m_vecN[ root1 ].m_Next = root2;
-                m_vecN[ root1 ].m_Last = last2;
+                m_vecN[ root1 ].m_NextN = root2;
+                m_vecN[ root1 ].m_LastN = last2;
             }
             else // both empty
             {
-                m_vecN[ root1 ].m_Next = root2;
-                m_vecN[ root1 ].m_Last = root2;
+                m_vecN[ root1 ].m_NextN = root2;
+                m_vecN[ root1 ].m_LastN = root2;
             }
 
             /* TEMPORAL: this is for safety, but does not affect result...
-            // l2.last becomes final \todo WE COULD REUSE its m_Last for list-length here
+            // l2.last becomes final \todo WE COULD REUSE its m_LastN for list-length here
             if( last2 != 0xFFFFFFFF )
             {
-            m_vecN[ last2 ].m_Next = 0xFFFFFFFF;
-            m_vecN[ last2 ].m_Last = 0xFFFFFFFF;
+            m_vecN[ last2 ].m_NextN = 0xFFFFFFFF;
+            m_vecN[ last2 ].m_LastN = 0xFFFFFFFF;
             }
-            // l2 becomes internal \todo WE COULD REUSE m_Last for list-length here
-            ???m_vecN[root2].m_Last = 0xFFFFFFFF;
+            // l2 becomes internal \todo WE COULD REUSE m_LastN for list-length here
+            ???m_vecN[root2].m_LastN = 0xFFFFFFFF;
             */
         }
     inline uint32_t EnumerateCC( bool b_verbose )
@@ -129,19 +123,19 @@ public:
                     const uint32_t first_root(0);
                     //\todo NO NEED, 0 WILL ALWAYS BE A ROOT because
                     //there's no other num smaller!!
-                    // while( first_root > m_vecN[first_root].m_Parent ) first_root++;
+                    // while( first_root > m_vecN[first_root].m_ParentR ) first_root++;
                     uint32_t it_cc( first_root );
                     do
                     {
                         // create and fill CC
                         vec_cc.push_back( std::vector<uint32_t>() );
                         vec_cc.back().push_back( it_cc );
-                        for( uint32_t it_ll=m_vecN[it_cc].m_Next;
+                        for( uint32_t it_ll=m_vecN[it_cc].m_NextN;
                              it_ll != 0xFFFFFFFF;
-                             it_ll = m_vecN[it_ll].m_Next )
+                             it_ll = m_vecN[it_ll].m_NextN )
                             vec_cc.back().push_back( it_ll );
                         // next root
-                        it_cc = m_vecN[it_cc].m_Succ;
+                        it_cc = m_vecN[it_cc].m_SuccR;
                     } while( it_cc != first_root );
                     auto end = std::chrono::system_clock::now();
                     std::chrono::duration<float> elapsed = end-start;
@@ -167,17 +161,17 @@ public:
                 const uint32_t first_root(0);
                 //\todo NO NEED, 0 WILL ALWAYS BE A ROOT because
                 //there's no other num smaller!!
-                // while( first_root > m_vecN[first_root].m_Parent ) first_root++;
+                // while( first_root > m_vecN[first_root].m_ParentR ) first_root++;
                 uint32_t it_cc( first_root );
                 do
                 {
                     // create and fill CC
-                    for( uint32_t it_ll=m_vecN[it_cc].m_Next;
+                    for( uint32_t it_ll=m_vecN[it_cc].m_NextN;
                          it_ll != 0xFFFFFFFF;
-                         it_ll = m_vecN[it_ll].m_Next )
+                         it_ll = m_vecN[it_ll].m_NextN )
                         sum += it_ll;
                     // next root
-                    it_cc = m_vecN[it_cc].m_Succ;
+                    it_cc = m_vecN[it_cc].m_SuccR;
                     num_cc++;
                 } while( it_cc != first_root );
                 auto end = std::chrono::system_clock::now();
@@ -191,10 +185,10 @@ public:
 private:
     struct Entry
     {
-        union { uint32_t m_Parent; uint32_t m_Last; };
-        uint32_t m_Next;
-        uint32_t m_Succ;
-        uint32_t m_Pred;
+        union { uint32_t m_ParentR; uint32_t m_LastN; };
+        uint32_t m_NextN;
+        uint32_t m_SuccR;
+        uint32_t m_PredR;
     };
     std::vector<Entry> m_vecN;
 };
