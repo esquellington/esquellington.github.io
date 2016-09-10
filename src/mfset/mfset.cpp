@@ -49,16 +49,21 @@ uint32_t Test( uint32_t num_nodes, uint32_t num_edges, bool b_verbose )
     Seed( 666 );
     {
         auto start = std::chrono::system_clock::now();
+        uint32_t num_added_edges;
         for( uint32_t it_e=0; it_e<num_edges; it_e++ )
         {
             uint32_t n1( Random(0,num_nodes) );
             uint32_t n2( Random(0,num_nodes) );
-            mfset.Merge( n1, n2 );
-            if( b_verbose ) printf( "e(%d,%d)\n", n1, n2 );
+            if( n1 != n2 )
+            {
+                mfset.Merge( n1, n2 );
+                num_added_edges++;
+                if( b_verbose ) printf( "e(%d,%d)\n", n1, n2 );
+            }
         }
         auto end = std::chrono::system_clock::now();
         std::chrono::duration<float> elapsed = end-start;
-        printf( "Merged %d in %f sec\n", num_edges, elapsed.count() );
+        printf( "Merged %d in %f sec\n", num_added_edges, elapsed.count() );
     }
 
     // Enumerate CC and return count

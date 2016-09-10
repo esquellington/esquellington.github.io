@@ -75,8 +75,11 @@ Explain how this maps to indices of any array<T>
 * Rem's algorithm
   Sembla que es una variant MES RAPIDA que mfset amb PC i RK, que es
   "l'optim teòric"
-  - http://www.ii.uib.no/~fredrikm/fredrik/papers/SEA2010.pdf
-  - 2010_ExperimentsOnUnionFindAlgorithms
+    - http://www.ii.uib.no/~fredrikm/fredrik/papers/SEA2010.pdf
+    - 2010_ExperimentsOnUnionFindAlgorithms
+  - Interleave Find(n1), Find(n2) ? no ho entenc massa be, pero
+    sembla que troba rapidament el cas en que n1 i n2 ja son fills
+    del mateix root, però no han estat encara comprimits del tot.
 * DONE Algorithmic Optimizations
 ** DONE Path-compression
   - Recursive
@@ -146,6 +149,12 @@ Veure paper http://dl.acm.org/citation.cfm?id=545384
 ** Add_Enumerate: Add N + Add E + Enumerate
 ** Add_Enumerate_Interleaved: Add N + E * (Add e + Enumerate)
 ** Add_Remove_Enumerate: Add N + R * (Add E + Remove R) + Enumerate
+** TODO Enumerate All N=8, E=0..K_8 graphs
+   - 8x8 = 64 parells, 2^64 bits representen tots els grafs possibles
+   - MOLTS menys, en realitat, pq adj-matrix és simetrica i té
+     diagonal a 0 forçosament
+   - 2^64 continua sent MASSA... veure so es pot generar tots els
+     grafs d'N nodes de forma sistematica i sense simetries?
 * Plots
 ** Increase N, E and R in Benchmarks
 ** Real cost Vs Theoretical cost

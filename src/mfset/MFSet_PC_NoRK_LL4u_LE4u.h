@@ -61,6 +61,7 @@ public:
     */
     inline void Merge( uint32_t n1, uint32_t n2 )
         {
+            // assert( n1 != n2 );
             uint32_t root1( Find(n1) );
             uint32_t root2( Find(n2) );
 
@@ -71,7 +72,12 @@ public:
             // do it by now
 
             // IMPORTANT: DO NOTHING IF ALREADY MERGED
-            if( root1 == root2 ) return;
+            if( root1 == root2 )
+            {
+                //\todo EVEN IF they're already in the same CC, the
+                //edge (n1,n2) MUST BE APPENDED to root1 list, which CANNOT BE EMPTY
+                return;
+            }
             else if( root2 < root1 ) std::swap(root1,root2);
 
             uint32_t last2( m_vecN[root2].m_LastN );
@@ -80,73 +86,82 @@ public:
             // Remove root2 from list of roots where root1 already is
             m_vecN[ m_vecN[root2].m_SuccR ].m_PredR = m_vecN[root2].m_PredR;
             m_vecN[ m_vecN[root2].m_PredR ].m_SuccR = m_vecN[root2].m_SuccR;
-            // TEMPORAL: Recommended for safety, but NOT REQUIRED
-            // m_vecN[root2].m_SuccR = 0xFFFFFFFF;
-            // m_vecN[root2].m_PredR = 0xFFFFFFFF;
 
-            //\todo THIS must be simpler, I'm sure...
-            if( m_vecN[root1].m_FirstN != 0xFFFFFFFF ) //l1 not empty
-            {
-                m_vecN[ m_vecN[root1].m_LastN ].m_NextN = root2;
-                if( m_vecN[root2].m_FirstN != 0xFFFFFFFF ) //l2 not empty
-                    m_vecN[root1].m_LastN = last2;
-                else
-                    m_vecN[root1].m_LastN = root2;
-                //\todo CONCAT root1 and root2 edge list!!
-            }
-            else if( m_vecN[root2].m_FirstN != 0xFFFFFFFF ) //l2 not empty
-            {
-                m_vecN[ root1 ].m_FirstN = root2;
-                m_vecN[ root1 ].m_LastN = last2;
-                //\todo CONCAT root1 and root2 edge list!!
-            }
-            else // both empty
-            {
-                m_vecN[ root1 ].m_FirstN = root2;
-                m_vecN[ root1 ].m_LastN = root2;
-                //\todo CONCAT root1 and root2 edge list!!
-            }
-
-            //---- Merge list-edges-in-CC and add new edge (n1,n2)
-            //TODO Disable assert for profiling
-            assert( m_vecN[root1].m_FirstN != 0xFFFFFFFF ); //ROOT CANNOT BE EMPTY, we've just Merged() it with root2
-            Node& child1( m_vecN[ m_vecN[root1].m_FirstN ] );
-
-            // Store edge \todo flag as MST, beccause it caused an actual Merge
+            // Add edge
+            // Store edge \todo flag as MST, because it caused an actual Merge
             uint32_t eid = m_vecE.size(); //\todo If we support deletion, find First Empty edge here
             m_vecE.push_back( Edge() );
             Edge& edge = m_vecE.back();
             edge.m_Node1 = n1;
             edge.m_Node2 = n2;
 
-            // \todo Link edge at the end of merged root list
-            if( child1.m_FirstE != 0xFFFFFFFF )
+            // Check emptiness
+            bool bEmpty1( m_vecN[root1].m_FirstN == 0xFFFFFFFF );
+            bool bEmpty2( m_vecN[root2].m_FirstN == 0xFFFFFFFF );
+            if( !bEmpty1 && !bEmpty2 ) //none empty
             {
-                // Add new edge
+                // Merge nodes-in-cc
+                m_vecN[ m_vecN[root1].m_LastN ].m_NextN = root2;
+                m_vecN[root1].m_LastN = last2;
+                // Merge edges-in-cc
+                Node& child1( m_vecN[ m_vecN[root1].m_FirstN ] );
+                Node& child2( m_vecN[ m_vecN[root2].m_FirstN ] );
+                assert( child1.m_FirstE != 0xFFFFFFFF && child1.m_LastE != 0xFFFFFFFF );
+                assert( child2.m_FirstE != 0xFFFFFFFF && child2.m_LastE != 0xFFFFFFFF );
+                m_vecE[ child1.m_LastE ].m_SuccE = child2.m_FirstE;
+                m_vecE[ child2.m_FirstE ].m_PredE = child1.m_LastE;
+                // Append edge to child2.m_LastE
+                m_vecE[ child2.m_LastE ].m_SuccE = eid;
+                edge.m_PredE = child2.m_LastE;
+                edge.m_SuccE = 0xFFFFFFFF;
+                child1.m_LastE = eid;
+                // TEMP: Unnecessary, done for safety
+                child2.m_FirstE = 0xFFFFFFFF;
+                child2.m_LastE = 0xFFFFFFFF;
+            }
+            else if( !bEmpty1 && bEmpty2 )
+            {
+                // Merge nodes-in-CC
+                m_vecN[ m_vecN[root1].m_LastN ].m_NextN = root2;
+                m_vecN[root1].m_LastN = root2;
+                // Append edge to child1.m_LastE, ignore empty child2.m_LastE)
+                Node& child1( m_vecN[ m_vecN[root1].m_FirstN ] );
+                m_vecE[ child1.m_LastE ].m_SuccE = eid;
+                edge.m_PredE = child1.m_LastE;
+                edge.m_SuccE = 0xFFFFFFFF;
+                child1.m_LastE = eid;
+            }
+            else if( bEmpty1 && !bEmpty2 )
+            {
+                // Merge nodes-in-CC
+                m_vecN[ root1 ].m_FirstN = root2;
+                m_vecN[ root1 ].m_LastN = last2;
+                // Append edge to child1.m_LastE, ignore empty child2.m_LastE)
+                Node& child2( m_vecN[ m_vecN[root2].m_FirstN ] );
+                m_vecE[ child2.m_LastE ].m_SuccE = eid;
+                edge.m_PredE = child2.m_LastE;
+                edge.m_SuccE = 0xFFFFFFFF;
+                child2.m_LastE = eid;
+                // Transfrer edges-in-CC to root1 and append edge to child1.m_LastN
+                Node& child1( m_vecN[ m_vecN[root1].m_FirstN ] );
+                child1.m_FirstE = child2.m_FirstE;
+                child1.m_LastE = child2.m_LastE;
+                // TEMP: Unnecessary, done for safety
+                child2.m_FirstE = 0xFFFFFFFF;
+                child2.m_LastE = 0xFFFFFFFF;
+            }
+            else // both empty
+            {
+                // Merge nodes
+                m_vecN[ root1 ].m_FirstN = root2;
+                m_vecN[ root1 ].m_LastN = root2;
+                // Append edge to child1, which is root2
+                Node& child1( m_vecN[root2] );
                 child1.m_FirstE = eid;
                 child1.m_LastE = eid;
-                edge.m_PredE = eid;
-                edge.m_SuccE = eid;
+                edge.m_PredE = 0xFFFFFFFF;
+                edge.m_SuccE = 0xFFFFFFFF;
             }
-            else // \todo Link edge at the end of edges-in-CC list
-            {
-                edge.m_PredE = child1.m_LastE;
-                edge.m_SuccE = m_vecE[child1.m_LastE].m_SuccE;
-                m_vecE[ edge.m_PredE ].m_SuccE = eid;
-                m_vecE[ edge.m_SuccE ].m_PredE = eid;
-                child1.m_LastE = eid;
-            }
-
-            /* TEMPORAL: this is for safety, but does not affect result...
-            // l2.last becomes final \todo WE COULD REUSE its m_LastN for list-length here
-            if( last2 != 0xFFFFFFFF )
-            {
-            m_vecN[ last2 ].m_NextN = 0xFFFFFFFF;
-            m_vecN[ last2 ].m_LastN = 0xFFFFFFFF;
-            }
-            // l2 becomes internal \todo WE COULD REUSE m_LastN for list-length here
-            ???m_vecN[root2].m_LastN = 0xFFFFFFFF;
-            */
         }
     inline uint32_t EnumerateCC( bool b_verbose )
         {
@@ -186,6 +201,7 @@ public:
                         printf( " %d", vec_cc[it_cc][it_nicc] );
                     printf( " ]\n" );
                 }
+                // TEMP: Call EnumerateCC_Edges here to test both at once
                 EnumerateCC_Edges(b_verbose);
                 return vec_cc.size();
             }
@@ -235,19 +251,19 @@ public:
                     uint32_t it_cc( first_root );
                     do
                     {
-                        // create and fill CC
+                        // create CC
                         vec_cc.push_back( std::vector<uint32_t>() );
-                        vec_cc.back().push_back( it_cc );
                         if( m_vecN[it_cc].m_FirstN != 0xFFFFFFFF )
                         {
+                            // Add CC edges
                             const Node& first_child( m_vecN[ m_vecN[it_cc].m_FirstN ] );
                             for( uint32_t it_e=first_child.m_FirstE;
-                                 it_e != first_child.m_LastE; //\todo THIS SKIPS VALID EDGE it_e == m_LastE
+                                 it_e != 0xFFFFFFFF;
                                  it_e = m_vecE[it_e].m_SuccE )
                                 vec_cc.back().push_back( it_e );
-                            // next root
-                            it_cc = m_vecN[it_cc].m_SuccR;
                         }
+                        // next root
+                        it_cc = m_vecN[it_cc].m_SuccR;
                     } while( it_cc != first_root );
                     auto end = std::chrono::system_clock::now();
                     std::chrono::duration<float> elapsed = end-start;
