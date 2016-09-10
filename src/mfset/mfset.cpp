@@ -49,7 +49,7 @@ uint32_t Test( uint32_t num_nodes, uint32_t num_edges, bool b_verbose )
     Seed( 666 );
     {
         auto start = std::chrono::system_clock::now();
-        uint32_t num_added_edges;
+        uint32_t num_added_edges(0);
         for( uint32_t it_e=0; it_e<num_edges; it_e++ )
         {
             uint32_t n1( Random(0,num_nodes) );
