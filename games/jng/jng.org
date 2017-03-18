@@ -1,0 +1,90 @@
+* Player
+** DONE Animation as seq of frames
+** DONE Combined {idle,jump} x shoot
+** DONE Jump over a wall we're next to
+   - As in GnG, jump is not controllable, but if you jump right while
+     next to a right wall, you jump past it
+   - basically, the horizontal jump speed needs to reset every frame,
+     and cancelled only when there's a collision
+** TODO Hit/Death
+** TODO Contextual actions (on_ground, on_wall, on_cliff, etc...)
+* Collision detection
+** DONE BP using map tiles as grid
+** DONE CCD with sequential treatment
+* Map
+** Tile flags
+   1: solid
+   2: damage
+** DONE 1 solid block type (flag 0)
+** DONE room change
+** TODO Scroll
+* Projectiles
+** DONE CCD
+** DONE Hit VFX
+** TODO Hit SFX
+* Enemies
+** Simple plans
+   - Periodic: linear vel, stay, go back (ex: saws)
+     - no CD except for player/bullets
+   - Patrol: Forward until collision, then turn (ex: worm)
+     - do not fall off cliffs, do not even go to the border
+   - Charge: Wait until player visible/close, then walk towards it
+   - Fly: Wait until player visible/close, then fly straight and disappear
+   - Fall: fall down on player when below
+   - Fly and Seek: Go towards player, no map collisions
+** Worm
+   - Patrol, no attack
+   - Angry: patrol faster, attack
+** Mouse
+   - Move straight
+** Cthulhu
+   - Charge
+** Bird
+   - Fly
+** Skull
+   - Fly and Seek
+** Skeleton:
+   - Gen skulls periodically
+** Arachno
+   - Patrol, Jump up if hit
+** Grunt
+   - Hit ground shoots wave projectile both ways
+   - Charge punch?
+** Boss: Skull Executioner
+   - Jump over
+   - Open mouth and shoot skulls
+     - Parabolic
+     - Straight
+** Boss: Flame Executioner
+   - Charge
+   - Throw parabolic flames that stick to the ground for a while
+** Boss: Caterpillar nest
+   - Normal caterpillars dig into room from ground, walls, ceiling,
+     convert to angry and attack.
+* FX
+  - Rain/Snow pixels
+  - Lightning/Flashing screen at startup
+  - Screen-shake on impact
+    - Move camera with noise
+  - Death/Evaporate
+    - Gen flashing white pixels that fade up/directionally to impact)
+  - Dark areas using flickering/dither
+* BUGS
+** TODO Shoot repetition if direction pressed
+** TODO Stop idle/run movement while falling
+* FW
+** TODO RLE anims
+   - list of key + repetitions
+** TODO Generic animation system
+    - Allow 1 cycle + 1 optional action
+    - Rename Action to Cycle
+    - Actions end automatically
+    - Cycles repeat automatically
+    - Action/Cycle are Animations and have explicit list of frames {1,2,...}
+    - Transition table/FSA
+      - States x {Inputs + Events}
+      - States: Idle,Run,Jump...
+        - OnEntwr/OnExit
+      - Inputs: LRUDZX
+      - Events: EndAnim,Hit...
+
