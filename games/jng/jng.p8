@@ -332,46 +332,6 @@ function init_archetypes()
 
    --global animation table
    g_anim={}
-   --player move (todo refactor into a_player)
-   g_anim[1]={n="idl",c=true,k={16,16,16,16,16,16,16,16,17,17,17,17,17,17,17,17}}
-   g_anim[2]={n="run",c=true,k={18,18,18,18,18,18,19,19,19,19,20,20,20,20,20,20,21,21,21,21}}--airborne frames get more presence, so looks nicer
-   g_anim[3]={n="jmp",c=false,k={22,22,22,22,23,23,23,23,24,24,24,24,25,25,25,25}}
-   g_anim[4]={n="fall",c=true,k={32,32,32,32,33,33,33,33}}
-   --player shoot (should have same length)
-   -- g_anim[5]={n="shi",c=true,k={26,27,27,27}}
-   -- g_anim[6]={n="shj",c=true,k={28,28,29,29}}
-   -- g_anim[7]={n="shjb",c=true,k={30,30,31,31}} --shoot jump backwards important: must have same #frames as "shj"
-   --g_anim[5]={n="shi",c=true,k={10,10,11,11}}
-   g_anim[5]={n="shi",c=true,k={8,8,9,9,9}}
-   g_anim[6]={n="shj",c=true,k={12,12,13,13}}
-   g_anim[7]={n="shjb",c=true,k={14,14,15,15}} --shoot jump backwards important: must have same #frames as "shj"
-   --hits
-   g_anim[8]={n="hit",c=false,k={ 34,34,34,34,34,
-                          35,35,35,35,35, 35,35,35,35,35, 35,35,35,35,35, 35,35,35,35,35, 35,35,35,35,35, 35,35,35,35,35, 35,35,35,35,35 }}
-   g_anim[9]={n="hitb",c=false,k={36,36,36,36,37,37,37,37,38,38,38,38}}
-   --enm
-   g_anim[10]={n="wrm1",c=true,k={48,48,48,48,48,48,49,49,49,49,49,49}}
-   g_anim[11]={n="wrm2",c=true,k={50,50,50,50,51,51,51,51}}
-   g_anim[12]={n="saw1",c=true,k={52,52,52,52,53,53,53,53}}
-   g_anim[13]={n="saw2",c=true,k={54,54,54,54,55,55,55,55}}
-   g_anim[14]={n="saw3",c=true,k={56,57,58,59}}
-   g_anim[15]={n="saw4",c=true,k={60,61,62,63}}
-   --blast
-   g_anim[16]={n="blast1",c=true,k={1}}--deprecated
-   g_anim[17]={n="blast2",c=true,k={1}}--deprecated
-   g_anim[18]={n="blast3",c=true,k={1,1,1,2,2,2,3,3,3,2,2}}
-   g_anim[19]={n="blast_hit",c=true,k={4,4,5,5,6,6,6,7}}
-   -- proves
-   g_anim[20]={n="grunt_idle",c=true,k={102,102,102,102,102,102,103,103,103,103,103,103}}
-   g_anim[21]={n="grunt_move",c=true,k={102,102,102,102,102,102,103,103,103,103,103,103}}
-   g_anim[22]={n="grunt_attack",c=true,k={105,105,105,105,105,105,105,105,104,104,104,104,104,104,105,105,105,105,105,105,105,105,106,106,106,106,106,106}}
-   g_anim[23]={n="cthulhu_idle",c=true,k={86,86,86,86,87,87,87,87,88,88,88,88,89,89,89,89}}
-   g_anim[24]={n="cthulhu_move",c=true,k={86,86,86,86,87,87,87,87,88,88,88,88,89,89,89,89}}
-   g_anim[25]={n="cthulhu_attack",c=true,k={90,90,91,91}}
-   g_anim[26]={n="mouse_move",c=true,k={118,118,118,118,118,119,119,119,119,119}}
-   g_anim[27]={n="bird_move",c=true,k={120,120,120,120,120,121,121,121,121,121}}
-   g_anim[28]={n="arachno_move",c=true,k={122,122,122,122,122,123,123,123,123,123}}
-   g_anim[29]={n="skull",c=true,k={94,94,94,94,94,95,95,95,95,95}}
 
    --level
    a_level = {}
@@ -383,112 +343,155 @@ function init_archetypes()
 
    --player
    a_player = {}
+   a_player.table_anm = {}
+   a_player.table_anm["idle"] = {n="idl" ,c=true ,k={16,16,16,16,16,16,16,16,17,17,17,17,17,17,17,17}}
+   a_player.table_anm["run"]  = {n="run" ,c=true ,k={18,18,18,18,18,18,19,19,19,19,20,20,20,20,20,20,21,21,21,21}}--airborne frames get more presence, so looks nicer
+   a_player.table_anm["jump"] = {n="jmp" ,c=false,k={22,22,22,22,23,23,23,23,24,24,24,24,25,25,25,25}}
+   a_player.table_anm["fall"] = {n="fall",c=true ,k={32,32,32,32,33,33,33,33}}
+   a_player.table_anm["shi"]  = {n="shi" ,c=true ,k={8,8,9,9,9}}
+   a_player.table_anm["shj"]  = {n="shj" ,c=true ,k={12,12,13,13}}
+   a_player.table_anm["shjb"] = {n="shjb",c=true ,k={14,14,15,15}} --shoot jump backwards important: must have same #frames as "shj"
+   a_player.table_anm["hit"]  = {n="hit" ,c=false,k={34,34,34,34,34,
+                                                     35,35,35,35,35, 35,35,35,35,35, 35,35,35,35,35, 35,35,35,35,35, 35,35,35,35,35, 35,35,35,35,35, 35,35,35,35,35 }}
+   a_player.table_anm["hitb"]  = {n="hitb",c=false,k={36,36,36,36,37,37,37,37,38,38,38,38}}
    a_player.cvisualbox = aabb_init( 0, 0, 8, 8 )
    a_player.cmovebox   = aabb_init( 1, 1, 7, 7 )
    a_player.cdamagebox = aabb_init( 2, 1, 6, 7 )
    a_player.cattackbox = nil
    a_player.cmaxvel = vec2_init( 5, 5 )
+   add( g_anim, a_player.table_anm["idle"] )
+   add( g_anim, a_player.table_anm["run"] )
+   add( g_anim, a_player.table_anm["jump"] )
+   add( g_anim, a_player.table_anm["fall"] )
+   add( g_anim, a_player.table_anm["shi"] )
+   add( g_anim, a_player.table_anm["shj"] )
+   add( g_anim, a_player.table_anm["shjb"] )
+   add( g_anim, a_player.table_anm["hit"] )
+   add( g_anim, a_player.table_anm["hitb"] )
 
    --enemies--
-   --saw
-   a_saw = {}
-   a_saw.table_anm = {}
-   a_saw.table_anm["idle"] = g_anim[15]
-   a_saw.table_anm["move"] = g_anim[15]
-   a_saw.cvisualbox = aabb_init( 0, 0, 8, 8 )
-   a_saw.cmovebox   = aabb_init( 0, 0, 8, 8 )
-   a_saw.cdamagbox  = nil
-   a_saw.cattackbox = aabb_init( 0, 0, 8, 8 )
-   a_saw.cspeed = 1
 
    --caterpillar
    a_caterpillar = {}
    a_caterpillar.table_anm = {}
-   a_caterpillar.table_anm["idle"] = g_anim[10]
-   a_caterpillar.table_anm["move"] = g_anim[10]
+   a_caterpillar.table_anm["idle"] = {n="wrm1",c=true,k={48,48,48,48,48,48,49,49,49,49,49,49}}
+   a_caterpillar.table_anm["move"] = a_caterpillar.table_anm["idle"]
    a_caterpillar.cvisualbox = aabb_init( 0, 0, 8, 8 )
    a_caterpillar.cmovebox   = aabb_init( 0, 0, 8, 8 )
    a_caterpillar.cdamagebox = aabb_init( 1, 4, 7, 8 )
    a_caterpillar.cattackbox = aabb_init( 1, 4, 7, 8 )
    a_caterpillar.cspeed = 0.5
+   add( g_anim, a_caterpillar.table_anm["idle"] )
 
    --caterpillar2 (angry)
    a_caterpillar2 = {}
    a_caterpillar2.table_anm = {}
-   a_caterpillar2.table_anm["idle"] = g_anim[11]
-   a_caterpillar2.table_anm["move"] = g_anim[11]
+   a_caterpillar2.table_anm["idle"] = {n="wrm2",c=true,k={50,50,50,50,51,51,51,51}}
+   a_caterpillar2.table_anm["move"] = a_caterpillar2.table_anm["idle"]
    a_caterpillar2.cvisualbox = aabb_init( 0, 0, 8, 8 )
    a_caterpillar2.cmovebox   = aabb_init( 0, 0, 8, 8 )
    a_caterpillar2.cdamagebox = aabb_init( 0, 2, 8, 8 )
    a_caterpillar2.cattackbox = aabb_init( 0, 0, 8, 8 )
    a_caterpillar2.cspeed = 1
+   add( g_anim, a_caterpillar2.table_anm["idle"] )
+
+   --saw
+   a_saw = {}
+   a_saw.table_anm = {}
+   a_saw.table_anm["idle"] = {n="saw4",c=true,k={60,61,62,63}}
+   a_saw.table_anm["move"] = a_saw.table_anm["idle"]
+   a_saw.cvisualbox = aabb_init( 0, 0, 8, 8 )
+   a_saw.cmovebox   = aabb_init( 0, 0, 8, 8 )
+   a_saw.cdamagbox  = nil
+   a_saw.cattackbox = aabb_init( 0, 0, 8, 8 )
+   a_saw.cspeed = 1
+   add( g_anim, a_saw.table_anm["idle"] )
+   --extra unused by now
+   add( g_anim, {n="saw1",c=true,k={52,52,52,52,53,53,53,53}} )
+   add( g_anim, {n="saw2",c=true,k={54,54,54,54,55,55,55,55}} )
+   add( g_anim, {n="saw3",c=true,k={56,57,58,59}} )
 
    --grunt
    a_grunt = {}
    a_grunt.table_anm = {}
-   a_grunt.table_anm["idle"]   = g_anim[20]
-   a_grunt.table_anm["move"]   = g_anim[21]
-   a_grunt.table_anm["attack"] = g_anim[22]
+   a_grunt.table_anm["idle"]   = {n="grunt_idle",c=true,k={102,102,102,102,102,102,103,103,103,103,103,103}} --==MOVE!
+   a_grunt.table_anm["move"]   = {n="grunt_move",c=true,k={102,102,102,102,102,102,103,103,103,103,103,103}}
+   a_grunt.table_anm["attack"] = {n="grunt_attack",c=true,k={105,105,105,105,105,105,105,105,104,104,104,104,104,104,105,105,105,105,105,105,105,105,106,106,106,106,106,106}}
    a_grunt.cvisualbox = aabb_init( 0, 0, 8, 8 )
    a_grunt.cmovebox   = aabb_init( 0, 0, 8, 8 )
    a_grunt.cdamagebox = aabb_init( 0, 0, 8, 8 )
    a_grunt.cattackbox = aabb_init( 0, 0, 8, 8 )
    a_grunt.cspeed = 0.5
+   add( g_anim, a_grunt.table_anm["idle"] )
+   add( g_anim, a_grunt.table_anm["move"] )
+   add( g_anim, a_grunt.table_anm["attack"] )
 
    --cthulhu
    a_cthulhu = {}
    a_cthulhu.table_anm = {}
-   a_cthulhu.table_anm["idle"]   = g_anim[23]
-   a_cthulhu.table_anm["move"]   = g_anim[24]
-   a_cthulhu.table_anm["attack"] = g_anim[25]
+   a_cthulhu.table_anm["idle"]   = {n="cthulhu_idle",c=true,k={86,86,86,86,87,87,87,87,88,88,88,88,89,89,89,89}} --==MOVE!
+   a_cthulhu.table_anm["move"]   = {n="cthulhu_move",c=true,k={86,86,86,86,87,87,87,87,88,88,88,88,89,89,89,89}}
+   a_cthulhu.table_anm["attack"] = {n="cthulhu_attack",c=true,k={90,90,91,91}}
    a_cthulhu.cvisualbox = aabb_init( 0, 0, 8, 8 )
    a_cthulhu.cmovebox   = aabb_init( 0, 0, 8, 8 )
    a_cthulhu.cdamagebox = aabb_init( 0, 0, 8, 8 )
    a_cthulhu.cattackbox = aabb_init( 1, 3, 7, 8 )
    a_cthulhu.cspeed = 0.4
+   add( g_anim, a_cthulhu.table_anm["idle"] )
+   add( g_anim, a_cthulhu.table_anm["move"] )
+   add( g_anim, a_cthulhu.table_anm["attack"] )
 
    --mouse
    a_mouse = {}
    a_mouse.table_anm = {}
-   a_mouse.table_anm["idle"] = g_anim[26]
-   a_mouse.table_anm["move"] = g_anim[26]
+   a_mouse.table_anm["idle"] = {n="mouse_move",c=true,k={118,118,118,118,118,119,119,119,119,119}}
+   a_mouse.table_anm["move"] = a_mouse.table_anm["idle"]
    a_mouse.cvisualbox = aabb_init( 0, 0, 8, 8 )
    a_mouse.cmovebox   = aabb_init( 2, 0, 6, 8 )
    a_mouse.cdamagebox = nil
    a_mouse.cattackbox = nil
    a_mouse.cspeed = 0.3
+   add( g_anim, a_mouse.table_anm["move"] )
 
    --bird
    a_bird = {}
    a_bird.table_anm = {}
-   a_bird.table_anm["idle"] = g_anim[27]
-   a_bird.table_anm["move"] = g_anim[27]
+   a_bird.table_anm["idle"] = {n="bird_move",c=true,k={120,120,120,120,120,121,121,121,121,121}}
+   a_bird.table_anm["move"] = a_bird.table_anm["idle"]
    a_bird.cvisualbox = aabb_init( 0, 0, 8, 8 )
    a_bird.cmovebox   = aabb_init( 2, 0, 6, 8 )
    a_bird.cdamagebox = aabb_init( 0, 0, 8, 8 )
    a_bird.cattackbox = aabb_init( 0, 0, 8, 8 )
    a_bird.cspeed = 0.6
+   add( g_anim, a_bird.table_anm["move"] )
 
    --arachno
    a_arachno = {}
    a_arachno.table_anm = {}
-   a_arachno.table_anm["idle"] = g_anim[28]
-   a_arachno.table_anm["move"] = g_anim[28]
+   a_arachno.table_anm["idle"] = {n="arachno_move",c=true,k={122,122,122,122,122,123,123,123,123,123}}
+   a_arachno.table_anm["move"] = a_arachno.table_anm["idle"]
    a_arachno.cvisualbox = aabb_init( 0, 0, 8, 8 )
    a_arachno.cmovebox   = aabb_init( 2, 0, 6, 8 )
    a_arachno.cdamagebox = aabb_init( 0, 0, 8, 8 )
    a_arachno.cattackbox = aabb_init( 1, 3, 7, 8 )
    a_arachno.cspeed = 0.75
+   add( g_anim, a_arachno.table_anm["move"] )
 
    --bullets
    a_blast = {}
    a_blast.table_anm = {}
-   a_blast.table_anm["default"] = g_anim[18]
+   a_blast.table_anm["default"] = {n="blast",c=true,k={1,1,1,2,2,2,3,3,3,2,2}}
+   a_blast.table_anm["hit"]     = {n="blast_hit",c=true,k={4,4,5,5,6,6,6,7}}
    a_blast.cvisualbox = aabb_init( 0, 0, 8, 8 )
    a_blast.cmovebox   = nil
    a_blast.cdamagbox  = nil
    a_blast.cattackbox = aabb_init( 4, 3, 7, 4 )
    a_blast.cspeed = 4
+   add( g_anim, a_blast.table_anm["default"] )
+   add( g_anim, a_blast.table_anm["hit"] )
+
+   -- EXTRA
+   add( g_anim, {n="skull",c=true,k={94,94,94,94,94,95,95,95,95,95}} )
 
 end
 
@@ -1147,7 +1150,7 @@ end
 -- vfx
 ----------------------------------------------------------------
 function new_vfx_blast( _p, _s )
-   local v = { anm = g_anim[19],
+   local v = { anm = a_blast.table_anm["hit"],
                t = 0,
                sign = _s,
                p = _p  }
