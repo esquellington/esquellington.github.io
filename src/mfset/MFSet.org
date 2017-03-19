@@ -100,24 +100,7 @@ Explain how this maps to indices of any array<T>
     nodes, but remove when merged-to
 ** DONE Post-process
   - Foreach n == Find(n)
-* TODO Adding Nodes
-- Extend array, O(1) if no realloc, use 2x size FTW
-* TODO Removing Nodes
-- Potential set Split
-- Do NOT contract array<Node> to preserve node ids, instead, mark
-  Node as "empty", and LINK IT into an empty node list using
-  m_Pred/m_Succ list-CC that is not in use for empty nodes.
-* TODO Removing Edges
-- Potentiall set Split
-- MST-edges
-- \todo Search for specific structure (bullet forum mentions it)
-DeleteEdge e = (n1,n2)
-- NOMES afecta a root(n1)
-- Es pot fer rebuild parcial
-- Nomes si e no és MST-edge
-  - MST-edges es podrien guardar en llista incrustada
-Veure paper http://dl.acm.org/citation.cfm?id=545384
-* TODO Storing edges
+* DONE Storing edges
 ** Edges
    - MFSet edge-array 0..E-1
    - Edge = n1,n2,pred_edge_in_cc,succ_edge_in_cc
@@ -133,6 +116,45 @@ Veure paper http://dl.acm.org/citation.cfm?id=545384
      - THEREFORE the non-root node root.m_Next has UNUSED
        m_Pred/m_Succ, which CAN BE USED as first_edge/last_edge
 ** PRIORITY: KEEP Node and Edge <= 128b
+* TODO Removing Edges
+- Potentiall set Split
+- MST-edges
+- \todo Search for specific structure (bullet forum mentions it)
+DeleteEdge e = (n1,n2)
+- NOMES afecta a root(n1)
+- Es pot fer rebuild parcial
+- Nomes si e no és MST-edge
+  - MST-edges es podrien guardar en llista incrustada
+- Una edge s'etiqueta com a MST en ser afegida (Merge), pero POT
+  DEIXAR DE SER-HO quan apareixen noves edges
+  - STATS: Quantes MST hi ha?
+  - UPDATE: Treure flag MST quan s'afegeix una aresta que tambe ho
+    es al mateix CC?
+- Si no s'aplanes la jerarquia de forma agressiva amb
+  PathCompression, es podria intentar fer rebuild local a un sub-CC
+  quan s'esborri una edge.
+- Idea: edges entre sub-CC
+  - Intentar extreure "meta-edges" entre sub-CC grans, mantenir-les
+    naplanades pero separades, tq rebuild es pugui fer localment.
+  - Persistencia de sub-CC s'hauria d'adaptar a com es van
+    creant/destruint...
+- Idea: COMPTAR nombre d'edges entre sub-CC, tq el root d'una sub-CC
+  sapigui quantes edges el linken a la resta del CC. Quan s'esborri
+  una edge entre CC, decrementar-ho i, si arriba a 0, fer dettach, si
+  no, fer rebuild local a la sub-CC.
+- DO NOT contract array<Edge>, instead use pred/succ to store empty
+  list and reuse
+** TODO Bridges https://en.wikipedia.org/wiki/Bridge_%28graph_theory%29
+   - IDEA: actualitzar el set de bridges entre sub CC (mida fitada,
+     total < N-1) tq nomes es faci rebuild quan es trenqui un bridge.
+** TODO Veure http://dl.acm.org/citation.cfm?id=545384
+* TODO Adding Nodes
+- Extend array, O(1) if no realloc, use 2x size FTW
+* TODO Removing Nodes
+- Potential set Split
+- Do NOT contract array<Node> to preserve node ids, instead, mark
+  Node as "empty", and LINK IT into an empty node list using
+  m_Pred/m_Succ list-CC that is not in use for empty nodes.
 * TODO Rebuild single CC
 - Use embedded list of nodes and edges to rebuild it from scratch
 - INSTEAD of rebuild on remove edge/node, we can FLAG root as DIRTY
@@ -140,10 +162,15 @@ Veure paper http://dl.acm.org/citation.cfm?id=545384
   on-access
   - This way, consecutive removals will lead to a SINGLE Rebuild() on
     the next access, not for each one!
-* Demo
-** Basic
-** Path-Compression
-** MS2L
+* TODO Permanent Vs Transient edge
+  - Precalc afegint N permannent edge, CC temporals
+  - CC i transient edges, refer esborrant o fent snapshot
+* TODO Tests
+** TODO Hardcoded examples?
+** TODO Chack against reference correct implementation
+** TODO Check postconditions
+*** TODO All nodes in 1 CC
+*** TODO All edges in same CC as both nodes
 * Benchmarks
 ** Add: Add N nodes, Add E random edges
 ** Add_Enumerate: Add N + Add E + Enumerate
@@ -151,14 +178,16 @@ Veure paper http://dl.acm.org/citation.cfm?id=545384
 ** Add_Remove_Enumerate: Add N + R * (Add E + Remove R) + Enumerate
 ** TODO Enumerate All N=8, E=0..K_8 graphs
    - 8x8 = 64 parells, 2^64 bits representen tots els grafs possibles
+   - Generar fent que 64b representin la matriu d'adjacencia
    - MOLTS menys, en realitat, pq adj-matrix és simetrica i té
      diagonal a 0 forçosament
    - 2^64 continua sent MASSA... veure so es pot generar tots els
      grafs d'N nodes de forma sistematica i sense simetries?
+   - STATS: min,max,avg time per Merge/EnumCC, organitzats per #N i #E
+     tq es pugui veure com evolucionen
 * Plots
 ** Increase N, E and R in Benchmarks
 ** Real cost Vs Theoretical cost
-
 * Profiling & Optimization
   - Use perf
   - Try to improve it

@@ -890,6 +890,12 @@ function new_action_move( target_pos )
             p_target = target_pos }
 end
 
+-- move on ground, stop at target/wall/cliff/border
+function new_action_move_on_ground( target_pos )
+   return { name = "move_on_grouns", anm_id = "move", t = 0, finished = false,
+            p_target = target_pos }
+end
+
 -- patrol in flat area, stop and turn at wall/cliff/border
 function new_action_patrol( start_pos, sign_x )
    return { name = "patrol", anm_id = "move", t = 0, finished = false,
@@ -928,6 +934,8 @@ end
 function update_action( _entity, _action )
    if _action.name == "move" then
       return update_action_move( _entity, _action )
+   elseif _action.name == "move_on_grouns" then
+      return update_action_move_on_ground( _entity, _action )
    elseif _action.name == "patrol" then
       return update_action_patrol( _entity, _action )
    elseif _action.name == "oscillate" then
@@ -957,35 +965,52 @@ function update_action_move( entity, action )
 end
 
 --todo make new action_move_on_ground that accounts for walls/cliffs/border as patro, and reuse it for wait_and_ram
+function update_action_move_on_ground( entity, action )
+   if not action.finished then
+      local movebox = aabb_apply_sign_x( entity.a.cmovebox, entity.sign )
+      local p_forward
+      local p_feet
+      if entity.sign > 0 then
+         p_forward = vec2_add( entity.p1,
+                               vec2_init( movebox.max.x, 0.5*(movebox.max.y-movebox.min.y) ) )
+         p_feet = vec2_add( entity.p1,
+                            vec2_init( movebox.max.x-1, movebox.max.y ) )
+      else
+         p_forward = vec2_add( entity.p1,
+                               vec2_init( movebox.min.x, 0.5*(movebox.max.y-movebox.min.y) ) )
+         p_feet = vec2_add( entity.p1,
+                            vec2_init( movebox.min.x+1, movebox.max.y ) )
+      end
+      local b_hit_wall = is_solid( p_forward )
+      local b_hit_border = is_out( p_forward )
+      local b_hit_cliff = not is_solid( p_feet )
+      local diff = vec2_sub( action.p_target, entity.p1 )
+      local dist = vec2_length( diff )
+      if b_hit_wall
+         or b_hit_border
+         or b_hit_cliff then
+            -- blocked
+         action.finished = true
+      elseif dist < 0.5 then
+            -- success
+         entity.p1 = action.p_target
+         action.finished = true
+      else
+            -- advance
+         local dir = vec2_scale( 1.0/dist, diff )
+         entity.p1 = vec2_add( entity.p0, vec2_scale( min(entity.a.cspeed,dist), dir ) )
+         entity.sign = sgn( dir.x )
+      end
+   end
+   return action
+end
 
 function update_action_patrol( entity, action )
-   local sub = update_action_move( entity, action.sub )
-   local movebox = aabb_apply_sign_x( entity.a.cmovebox, entity.sign )
-   local p_forward
-   local p_feet
-   if entity.sign > 0 then
-      p_forward = vec2_add( entity.p1,
-                            vec2_init( movebox.max.x, 0.5*(movebox.max.y-movebox.min.y) ) )
-      p_feet = vec2_add( entity.p1,
-                         vec2_init( movebox.max.x-1, movebox.max.y ) )
-   else
-      p_forward = vec2_add( entity.p1,
-                            vec2_init( movebox.min.x, 0.5*(movebox.max.y-movebox.min.y) ) )
-      p_feet = vec2_add( entity.p1,
-                         vec2_init( movebox.min.x+1, movebox.max.y ) )
-   end
-   local b_hit_wall = is_solid( p_forward )
-   local b_hit_border = is_out( p_forward )
-   local b_hit_cliff = not is_solid( p_feet )
-   if b_hit_wall
-      or b_hit_border
-      or b_hit_cliff
-   then
+   action.sub = update_action_move_on_ground( entity, action.sub )
+   if action.sub.finished then
       entity.sign = -entity.sign
       -- move along direction hacked as move towards out-of-room target, so that never arrives there
       action.sub = new_action_move( vec2_add( entity.p1, vec2_init( 128*entity.sign, 0 ) ) )
-   else
-      -- keep action, already updated
    end
    return action
 end
@@ -998,7 +1023,7 @@ function update_action_wait_and_ram( entity, action )
       --waiting, ram if player is in same level, in range and accessible
       --if true then --player_on_same_line( ) then
       if flr(player.p1.y) == flr(entity.p1.y) then --todo: use line-of-sight
-         action.sub = new_action_move( player.p1 ) --ram to player --todo use attack anim instead of walk...
+         action.sub = new_action_move_on_ground( player.p1 ) --ram to player --todo use attack anim instead of walk...
       end
    else
       --ramming
@@ -1534,9 +1559,9 @@ __gff__
 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000001010000000000000000000000000000000000000008080008102040800000000000024000020202808080000000000000804040404001010101010000000000000000000040010202010500000000000000000000
 4040000002020202020200000040000040400000020202020202000000000000404000000202020202020000404040404040000002020202020200004040404040404040404040404040400040404040010101010000014040400000404040400101010105000180804000404040404001010101000202020200000040404040
 __map__
-0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000c2c300000000000000
-0000000000000000000000000000000000000000000000000000000000000000000000000000c2c4c4c4c4c3000000000000000000000000000000000000000000635d00000000006300006300000000000000000000000000000000000000000000000000000000000000000000000000000000000000626200000000000000
+00008d00000000008d8d00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+8d008d008d8d00008d008d000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000c2c300000000000000
+008d8d008d008d008d8d8d000000000000000000000000000000000000000000000000000000c2c4c4c4c4c3000000000000000000000000000000000000000000635d00000000006300006300000000000000000000000000000000000000000000000000000000000000000000000000000000000000626200000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000c2c14d00004dc0c30000000000000000000000000000000000000000636363006300000000004d00000000000000000000000000000000000000000000000000000000000000000000000000000000000000626200000000000000
 0000000000000000000000000000000000c2c4c4c4c4c4c4c4c4c4c4c4c4c4c300c2c4c4c4c1000000000000c0c4c4c4c4c4c4c4c300c2c4c4c4c4c30040000000634dc063636300000000000000000000000000000000000000000000000000000000000000000000eeef0000000000000000000000c26262c3000000000000
 0000000000000000adbc00000000000000c4c1004dc0c4c1c0c1c0c4c1c0c1c0c4c10000000000000000000000c0c6c10000004dc0c4c100000000c0c4f0000000630000000000e063000000000063f000000000000000000000000000000000000000000000000000feff00000000000000000000c262626262c30000000000
