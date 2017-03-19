@@ -370,66 +370,69 @@ function init_archetypes()
    add( g_anim, a_player.table_anm["hitb"] )
 
    --enemies--
-
    --caterpillar
    a_caterpillar = {}
    a_caterpillar.table_anm = {}
-   a_caterpillar.table_anm["idle"] = {n="wrm1",c=true,k={48,48,48,48,48,48,49,49,49,49,49,49}}
-   a_caterpillar.table_anm["move"] = a_caterpillar.table_anm["idle"]
+   a_caterpillar.table_anm["idle"] = {n="wrm_idle",c=true,k={48}} --unused
+   a_caterpillar.table_anm["move"] = {n="wrm_move",c=true,k={48,48,48,48,48,48,49,49,49,49,49,49}}
    a_caterpillar.cvisualbox = aabb_init( 0, 0, 8, 8 )
    a_caterpillar.cmovebox   = aabb_init( 0, 0, 8, 8 )
    a_caterpillar.cdamagebox = aabb_init( 1, 4, 7, 8 )
    a_caterpillar.cattackbox = aabb_init( 1, 4, 7, 8 )
    a_caterpillar.cspeed = 0.5
-   add( g_anim, a_caterpillar.table_anm["idle"] )
+   add( g_anim, a_caterpillar.table_anm["move"] )
 
    --caterpillar2 (angry)
    a_caterpillar2 = {}
    a_caterpillar2.table_anm = {}
-   a_caterpillar2.table_anm["idle"] = {n="wrm2",c=true,k={50,50,50,50,51,51,51,51}}
-   a_caterpillar2.table_anm["move"] = a_caterpillar2.table_anm["idle"]
+   a_caterpillar2.table_anm["idle"] = {n="wrm2_idle",c=true,k={50}} --unused
+   a_caterpillar2.table_anm["move"] = {n="wrm2_move",c=true,k={50,50,50,50,51,51,51,51}}
    a_caterpillar2.cvisualbox = aabb_init( 0, 0, 8, 8 )
    a_caterpillar2.cmovebox   = aabb_init( 0, 0, 8, 8 )
    a_caterpillar2.cdamagebox = aabb_init( 0, 2, 8, 8 )
    a_caterpillar2.cattackbox = aabb_init( 0, 0, 8, 8 )
    a_caterpillar2.cspeed = 1
-   add( g_anim, a_caterpillar2.table_anm["idle"] )
+   add( g_anim, a_caterpillar2.table_anm["move"] )
 
    --saw
    a_saw = {}
    a_saw.table_anm = {}
-   a_saw.table_anm["idle"] = {n="saw4",c=true,k={60,61,62,63}}
-   a_saw.table_anm["move"] = a_saw.table_anm["idle"]
+   a_saw.table_anm["idle"] = {n="saw_idle",c=true,k={60}} --unused
+   a_saw.table_anm["move"] = {n="saw_move",c=true,k={60,61,62,63}}
    a_saw.cvisualbox = aabb_init( 0, 0, 8, 8 )
    a_saw.cmovebox   = aabb_init( 0, 0, 8, 8 )
    a_saw.cdamagbox  = nil
    a_saw.cattackbox = aabb_init( 0, 0, 8, 8 )
    a_saw.cspeed = 1
-   add( g_anim, a_saw.table_anm["idle"] )
+   add( g_anim, a_saw.table_anm["move"] )
+
    --extra unused by now
-   add( g_anim, {n="saw1",c=true,k={52,52,52,52,53,53,53,53}} )
-   add( g_anim, {n="saw2",c=true,k={54,54,54,54,55,55,55,55}} )
-   add( g_anim, {n="saw3",c=true,k={56,57,58,59}} )
+   -- add( g_anim, {n="saw1",c=true,k={52,52,52,52,53,53,53,53}} )
+   -- add( g_anim, {n="saw2",c=true,k={54,54,54,54,55,55,55,55}} )
+   -- add( g_anim, {n="saw3",c=true,k={56,57,58,59}} )
 
    --grunt
    a_grunt = {}
    a_grunt.table_anm = {}
-   a_grunt.table_anm["idle"]   = {n="grunt_idle",c=true,k={102,102,102,102,102,102,103,103,103,103,103,103}} --==MOVE!
+   a_grunt.table_anm["idle"]   = {n="grunt_idle",c=true,k={102}}
    a_grunt.table_anm["move"]   = {n="grunt_move",c=true,k={102,102,102,102,102,102,103,103,103,103,103,103}}
-   a_grunt.table_anm["attack"] = {n="grunt_attack",c=true,k={105,105,105,105,105,105,105,105,104,104,104,104,104,104,105,105,105,105,105,105,105,105,106,106,106,106,106,106}}
+   a_grunt.table_anm["attack"] = {n="grunt_attack",c=true,k={105,105,105,105,105,105,105,105,
+                                                             104,104,104,104,104,104,
+                                                             105,105,105,105,105,105,105,105,
+                                                             106,106,106,106,106,106}}
    a_grunt.cvisualbox = aabb_init( 0, 0, 8, 8 )
    a_grunt.cmovebox   = aabb_init( 0, 0, 8, 8 )
    a_grunt.cdamagebox = aabb_init( 0, 0, 8, 8 )
    a_grunt.cattackbox = aabb_init( 0, 0, 8, 8 )
    a_grunt.cspeed = 0.5
-   add( g_anim, a_grunt.table_anm["idle"] )
+   a_grunt.cspeed = 1.5
    add( g_anim, a_grunt.table_anm["move"] )
    add( g_anim, a_grunt.table_anm["attack"] )
 
    --cthulhu
    a_cthulhu = {}
    a_cthulhu.table_anm = {}
-   a_cthulhu.table_anm["idle"]   = {n="cthulhu_idle",c=true,k={86,86,86,86,87,87,87,87,88,88,88,88,89,89,89,89}} --==MOVE!
+   a_cthulhu.table_anm["idle"]   = {n="cthulhu_idle",c=true,k={86}} --unused
    a_cthulhu.table_anm["move"]   = {n="cthulhu_move",c=true,k={86,86,86,86,87,87,87,87,88,88,88,88,89,89,89,89}}
    a_cthulhu.table_anm["attack"] = {n="cthulhu_attack",c=true,k={90,90,91,91}}
    a_cthulhu.cvisualbox = aabb_init( 0, 0, 8, 8 )
@@ -437,15 +440,14 @@ function init_archetypes()
    a_cthulhu.cdamagebox = aabb_init( 0, 0, 8, 8 )
    a_cthulhu.cattackbox = aabb_init( 1, 3, 7, 8 )
    a_cthulhu.cspeed = 0.4
-   add( g_anim, a_cthulhu.table_anm["idle"] )
    add( g_anim, a_cthulhu.table_anm["move"] )
    add( g_anim, a_cthulhu.table_anm["attack"] )
 
    --mouse
    a_mouse = {}
    a_mouse.table_anm = {}
-   a_mouse.table_anm["idle"] = {n="mouse_move",c=true,k={118,118,118,118,118,119,119,119,119,119}}
-   a_mouse.table_anm["move"] = a_mouse.table_anm["idle"]
+   a_mouse.table_anm["idle"] = {n="mouse_idle",c=true,k={118}} --unused
+   a_mouse.table_anm["move"] = {n="mouse_move",c=true,k={118,118,118,118,118,119,119,119,119,119}}
    a_mouse.cvisualbox = aabb_init( 0, 0, 8, 8 )
    a_mouse.cmovebox   = aabb_init( 2, 0, 6, 8 )
    a_mouse.cdamagebox = nil
@@ -456,8 +458,8 @@ function init_archetypes()
    --bird
    a_bird = {}
    a_bird.table_anm = {}
-   a_bird.table_anm["idle"] = {n="bird_move",c=true,k={120,120,120,120,120,121,121,121,121,121}}
-   a_bird.table_anm["move"] = a_bird.table_anm["idle"]
+   a_bird.table_anm["idle"] = {n="bird_idle",c=true,k={120}} --unused
+   a_bird.table_anm["move"] = {n="bird_move",c=true,k={120,120,120,120,120,121,121,121,121,121}}
    a_bird.cvisualbox = aabb_init( 0, 0, 8, 8 )
    a_bird.cmovebox   = aabb_init( 2, 0, 6, 8 )
    a_bird.cdamagebox = aabb_init( 0, 0, 8, 8 )
@@ -468,8 +470,8 @@ function init_archetypes()
    --arachno
    a_arachno = {}
    a_arachno.table_anm = {}
-   a_arachno.table_anm["idle"] = {n="arachno_move",c=true,k={122,122,122,122,122,123,123,123,123,123}}
-   a_arachno.table_anm["move"] = a_arachno.table_anm["idle"]
+   a_arachno.table_anm["idle"] = {n="arachno_idle",c=true,k={122}} --unused
+   a_arachno.table_anm["move"] = {n="arachno_move",c=true,k={122,122,122,122,122,123,123,123,123,123}}
    a_arachno.cvisualbox = aabb_init( 0, 0, 8, 8 )
    a_arachno.cmovebox   = aabb_init( 2, 0, 6, 8 )
    a_arachno.cdamagebox = aabb_init( 0, 0, 8, 8 )
