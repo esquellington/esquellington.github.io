@@ -33,23 +33,25 @@
    - Fall: fall down on player when below
    - Fly and Seek: Go towards player, no map collisions
 ** Worm
-   - Patrol, no attack
+   - Patrol
    - Angry: patrol faster, attack
-** Mouse
-   - Move straight
+** DONE Mouse
+   - Patrol
 ** Cthulhu
    - Charge
 ** Bird
-   - Fly
+   - Fly directly when inside inner radius, stop when outside radius
+     and retarget
 ** Skull
    - Fly and Seek
 ** Skeleton:
    - Gen skulls periodically
 ** Arachno
-   - Patrol, Jump up if hit
+   - Patrol
+   - Jump over projectiles
 ** Grunt
+   - Charge
    - Hit ground shoots wave projectile both ways
-   - Charge punch?
 ** Boss: Skull Executioner
    - Jump over
    - Open mouth and shoot skulls
