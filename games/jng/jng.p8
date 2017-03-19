@@ -425,7 +425,7 @@ function init_archetypes()
    a_grunt.cdamagebox = aabb_init( 0, 0, 8, 8 )
    a_grunt.cattackbox = aabb_init( 0, 0, 8, 8 )
    a_grunt.cspeed = 0.5
-   a_grunt.cspeed = 1.5
+   --a_grunt.cspeed = 1.5
    add( g_anim, a_grunt.table_anm["move"] )
    add( g_anim, a_grunt.table_anm["attack"] )
 
@@ -464,7 +464,7 @@ function init_archetypes()
    a_bird.cmovebox   = aabb_init( 2, 0, 6, 8 )
    a_bird.cdamagebox = aabb_init( 0, 0, 8, 8 )
    a_bird.cattackbox = aabb_init( 0, 0, 8, 8 )
-   a_bird.cspeed = 0.6
+   a_bird.cspeed = 1.25
    add( g_anim, a_bird.table_anm["move"] )
 
    --arachno
@@ -492,7 +492,7 @@ function init_archetypes()
    add( g_anim, a_blast.table_anm["default"] )
    add( g_anim, a_blast.table_anm["hit"] )
 
-   -- EXTRA
+   -- extra
    add( g_anim, {n="skull",c=true,k={94,94,94,94,94,95,95,95,95,95}} )
 
 end
@@ -857,8 +857,8 @@ function new_room_process_map_cell( r, room_j, room_i, map_j, map_i )
    elseif m == 118 then --mouse
       e = new_enemy( a_mouse, pos, new_action_patrol( pos, -1 ) )
    elseif m == 120 then --bird
-      e = new_enemy( a_bird, pos, new_action_idle() )
-  elseif m == 122 then --arachno
+      e = new_enemy( a_bird, pos, new_action_wait_and_fly( pos, -1 ) )
+   elseif m == 122 then --arachno
      e = new_enemy( a_arachno, pos, new_action_patrol( pos, -1 ) )
    elseif m == 60 then --saw
       --todo: consider "finding" amplitude up to closest collision, instead of hardcoding it
@@ -917,15 +917,23 @@ end
 function new_action_patrol( start_pos, sign_x )
    return { name = "patrol", anm_id = "move", t = 0, finished = false,
             p_start = start_pos,
-            dir = vec2_init( sign_x, 0 ),
+            --dir = vec2_init( sign_x, 0 ),
             sub = new_action_move( vec2_add( start_pos, vec2_init( 128*sign_x, 0 ) ) ) }
 end
 
 -- wait on spot, ram to player when on same ground level, accessible and within range
 function new_action_wait_and_ram( start_pos, sign_x )
-   return { name = "wait_and_ram", anm_id = "idle", t = 0, finished = false,
+   return { name = "wait_and_ram", anm_id = "move", t = 0, finished = false,
             p_start = start_pos,
-            dir = vec2_init( sign_x, 0 ),
+            --dir = vec2_init( sign_x, 0 ),
+            sub = new_action_idle() }
+end
+
+-- wait on spot, fly to player when within radius
+function new_action_wait_and_fly( start_pos, sign_x )
+   return { name = "wait_and_fly", anm_id = "move", t = 0, finished = false,
+            p_start = start_pos,
+            --dir = vec2_init( sign_x, 0 ),
             sub = new_action_idle() }
 end
 
@@ -959,6 +967,8 @@ function update_action( _entity, _action )
       return update_action_oscillate( _entity, _action )
    elseif _action.name == "wait_and_ram" then
       return update_action_wait_and_ram( _entity, _action )
+   elseif _action.name == "wait_and_fly" then
+      return update_action_wait_and_fly( _entity, _action )
    else
       --idle do nothing
       return _action
@@ -1008,7 +1018,7 @@ function update_action_move_on_ground( entity, action )
          or b_hit_cliff then
             -- blocked
          action.finished = true
-      elseif dist < 0.5 then
+      elseif dist < 1 then
             -- success
          entity.p1 = action.p_target
          action.finished = true
@@ -1042,10 +1052,31 @@ function update_action_wait_and_ram( entity, action )
       if flr(player.p1.y) == flr(entity.p1.y) then --todo: use line-of-sight
          action.sub = new_action_move_on_ground( player.p1 ) --ram to player --todo use attack anim instead of walk...
       end
+   elseif action.sub.finished then
+      --reached target, back to idle
+      action.sub = new_action_idle()
    else
-      --ramming
-      --todo reuse action_move_on_ground to accounts for walls/cliffs/border
-      --todo rethink if not accessible anymore, after timeout
+      --keep ramming
+   end
+   return action
+end
+
+function update_action_wait_and_fly( entity, action )
+   -- update sub
+   action.sub = update_action( entity, action.sub )
+   -- think
+   if action.sub.name == "idle" then
+      --waiting, fly if player is in range
+      local diff = vec2_sub( player.p1, entity.p1 )
+      local dist = vec2_length( diff )
+      if dist < 64 then
+         action.sub = new_action_move( player.p1 ) --flyto player
+      end
+   elseif action.sub.finished then
+      --reached target, back to idle
+      action.sub = new_action_idle()
+   else
+      --keep flying
    end
    return action
 end
@@ -1582,7 +1613,7 @@ __map__
 00000000000000000000000000000000000000000000000000000000000000000000000000c2c14d00004dc0c30000000000000000000000000000000000000000636363006300000000004d00000000000000000000000000000000000000000000000000000000000000000000000000000000000000626200000000000000
 0000000000000000000000000000000000c2c4c4c4c4c4c4c4c4c4c4c4c4c4c300c2c4c4c4c1000000000000c0c4c4c4c4c4c4c4c300c2c4c4c4c4c30040000000634dc063636300000000000000000000000000000000000000000000000000000000000000000000eeef0000000000000000000000c26262c3000000000000
 0000000000000000adbc00000000000000c4c1004dc0c4c1c0c1c0c4c1c0c1c0c4c10000000000000000000000c0c6c10000004dc0c4c100000000c0c4f0000000630000000000e063000000000063f000000000000000000000000000000000000000000000000000feff00000000000000000000c262626262c30000000000
-00000000ad000000bdac00000000000000c400000000c400000000c400000000c400000000000000000000000000c4000000000000c4000000000000c40000000063000000000000c0630000000063000000000000000000000000000000000000000000000000000000000000cccd0000000000006262c7c862620000000000
+00000000ad000000bdac00000078000000c400000000c400000000c400000000c400000000000000000000000000c4000000000000c4000000000000c40000000063000000000000c0630000000063000000000000000000000000000000000000000000000000000000000000cccd0000000000006262c7c862620000000000
 00000000bdac0000adbc0000000000ac00c400000000c400000000c400000000c400000000000000000000000000c4000000000000c4000000000000c400000000630000000000000000005d6300630000000000000000000000000000000000000000000000000000cecf0000dcdd0000000000006262d7d862620000000000
 0000000000bdacadbc0000ad0000adbc00c400000000c400000000c400000000c4000000000000000000000000636363f000000000c4000000000000c4000000006300000000636363636363c1006300000000000000606070000000000000000000000000cecfcdccdedfcd00000000000000c3c2626262626262c3c2000000
 000000000000bdbe000000bdacadbc0000c400000000c400000000c400000000c4006363630000000000e0f000c0c4c10000000000c4000000000000c4000000006300000063c1000000000000006300000000000060607070600000000078000000000000dedfcecfdddcddcecf0000000000c4c1626262626262c0c4000000
