@@ -43,7 +43,8 @@
    - Fly directly when inside inner radius, stop when outside radius
      and retarget
 ** Skull
-   - Fly and Seek
+   - Fly straight
+   - Fly in sinusoid
 ** Skeleton:
    - Gen skulls periodically
 ** Arachno
@@ -63,6 +64,10 @@
 ** Boss: Caterpillar nest
    - Normal caterpillars dig into room from ground, walls, ceiling,
      convert to angry and attack.
+** Boss: Rocks falling
+   - Rocks fall from ceiling and stack up
+   - Some can be destroyed
+   - Like puzzle platformer
 * FX
   - Rain/Snow pixels
   - Lightning/Flashing screen at startup
