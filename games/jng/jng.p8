@@ -198,88 +198,88 @@ function _draw()
       end
 
       -- testiiiiiing
-      if false then
-         local lambda01 = game.t/1000
-         lambda01 = lambda01 - flr(lambda01) --cast to 0..1
-         local rp = vec2_init( 64 + 64*cos(lambda01),
-                               64 + 64*sin(lambda01) )
-         circfill( rp.x, rp.y, 2, 10 )
-         local bp = vec2_init( 64, 64 )
-         circfill( bp.x, bp.y, 2, 10 )
-         local rd = vec2_sub( bp, rp )
-         local rh = ray_vs_aabb( rp, rd, {min=0,max=1},
-                                 aabb_init_2( vec2_sub(bp,vec2_init(10,10) ), vec2_add(bp,vec2_init(10,10) ) ) )
-         if rh != nil then
-            circfill( rh.point.x, rh.point.y, 3, 10 )
-         end
-      end
+      -- if false then
+      --    local lambda01 = game.t/1000
+      --    lambda01 = lambda01 - flr(lambda01) --cast to 0..1
+      --    local rp = vec2_init( 64 + 64*cos(lambda01),
+      --                          64 + 64*sin(lambda01) )
+      --    circfill( rp.x, rp.y, 2, 10 )
+      --    local bp = vec2_init( 64, 64 )
+      --    circfill( bp.x, bp.y, 2, 10 )
+      --    local rd = vec2_sub( bp, rp )
+      --    local rh = ray_vs_aabb( rp, rd, {min=0,max=1},
+      --                            aabb_init_2( vec2_sub(bp,vec2_init(10,10) ), vec2_add(bp,vec2_init(10,10) ) ) )
+      --    if rh != nil then
+      --       circfill( rh.point.x, rh.point.y, 3, 10 )
+      --    end
+      -- end
 
-      if false then
-         local lambda01 = game.t/1000
-         lambda01 = lambda01 - flr(lambda01) --cast to 0..1 for sin/cos
-         local p0 = { x=64 + 64*cos(lambda01),
-                      y=64 + 64*sin(lambda01) }
-         local p1 = { x=64 + 16*sin(lambda01),
-                      y=64 + 16*cos(lambda01) }
-         -- here we use p,hs cause it's simpler
-         local hs0 = { x=4, y=4 }
-         local hs1 = { x=16, y=16 }
-         rect( p0.x-hs0.x, p0.y-hs0.y, p0.x+hs0.x, p0.y+hs0.y, 8 )
-         rect( p1.x-hs1.x, p1.y-hs1.y, p1.x+hs1.x, p1.y+hs1.y, 8 )
-         -- convert to aabb instead of p,hs
-         local rh = ccd_box_vs_aabb( vec2_sub(p0,hs0), vec2_sub(p1,hs0), aabb_init( 0, 0, 8, 8 ), --cmovebox
-                                     aabb_init_2( vec2_sub(p1,hs1), vec2_add(p1,hs1) ),
-                                     1 ) --flag 0 == is_solid
-         if rh != nil then
-            circfill( rh.point.x, rh.point.y, 2, 8 )
-            rect( rh.point.x-hs0.x, rh.point.y-hs0.y,
-                  rh.point.x+hs0.x, rh.point.y+hs0.y, 9 )
-         end
-      end
+      -- if false then
+      --    local lambda01 = game.t/1000
+      --    lambda01 = lambda01 - flr(lambda01) --cast to 0..1 for sin/cos
+      --    local p0 = { x=64 + 64*cos(lambda01),
+      --                 y=64 + 64*sin(lambda01) }
+      --    local p1 = { x=64 + 16*sin(lambda01),
+      --                 y=64 + 16*cos(lambda01) }
+      --    -- here we use p,hs cause it's simpler
+      --    local hs0 = { x=4, y=4 }
+      --    local hs1 = { x=16, y=16 }
+      --    rect( p0.x-hs0.x, p0.y-hs0.y, p0.x+hs0.x, p0.y+hs0.y, 8 )
+      --    rect( p1.x-hs1.x, p1.y-hs1.y, p1.x+hs1.x, p1.y+hs1.y, 8 )
+      --    -- convert to aabb instead of p,hs
+      --    local rh = ccd_box_vs_aabb( vec2_sub(p0,hs0), vec2_sub(p1,hs0), aabb_init( 0, 0, 8, 8 ), --cmovebox
+      --                                aabb_init_2( vec2_sub(p1,hs1), vec2_add(p1,hs1) ),
+      --                                1 ) --flag 0 == is_solid
+      --    if rh != nil then
+      --       circfill( rh.point.x, rh.point.y, 2, 8 )
+      --       rect( rh.point.x-hs0.x, rh.point.y-hs0.y,
+      --             rh.point.x+hs0.x, rh.point.y+hs0.y, 9 )
+      --    end
+      -- end
 
-      if false then
-         local movebox = player.a.cmovebox
-         local aabb_min = vec2_add( vec2_min( player.p0, player.p1 ), movebox.min )
-         local aabb_max = vec2_add( vec2_max( player.p0, player.p1 ), movebox.max )
-         local overlaps = bp_aabb_vs_map( aabb_init_2( aabb_min, aabb_max ), 0 )
-         if overlaps != nil then
-            for o in all(overlaps) do
-               rect( o.tile_j*8, o.tile_i*8,
-                     (o.tile_j+1)*8, (o.tile_i+1)*8,
-                     11 )
-            end
-         end
-      end
+      -- if false then
+      --    local movebox = player.a.cmovebox
+      --    local aabb_min = vec2_add( vec2_min( player.p0, player.p1 ), movebox.min )
+      --    local aabb_max = vec2_add( vec2_max( player.p0, player.p1 ), movebox.max )
+      --    local overlaps = bp_aabb_vs_map( aabb_init_2( aabb_min, aabb_max ), 0 )
+      --    if overlaps != nil then
+      --       for o in all(overlaps) do
+      --          rect( o.tile_j*8, o.tile_i*8,
+      --                (o.tile_j+1)*8, (o.tile_i+1)*8,
+      --                11 )
+      --       end
+      --    end
+      -- end
 
-      if false then
-         local lambda01 = game.t/1000
-         lambda01 = lambda01 - flr(lambda01) --cast to 0..1 for sin/cos
-         local p0 = vec2_init( 64 + 50*cos(lambda01),
-                               64 + 50*sin(lambda01) )
-         local p1 = vec2_init( 64, 64 )
-         -- draw bp box for debug
-         local rmin = vec2_add( vec2_min( p0, p1 ), player.a.cmovebox.min )
-         local rmax = vec2_add( vec2_max( p0, p1 ), player.a.cmovebox.max )
-         rect( rmin.x, rmin.y, rmax.x, rmax.y, 11 )
-         circfill( p0.x, p0.y, 2, 14 )
-         circfill( p1.x, p1.y, 2, 15 )
-         -- ccd
-         local contacts = ccd_box_vs_map( p0, p1, player.a.cmovebox, 1 ) --flags: 0 is_solid, 1 is_damage
-         if contacts != nil then
-            local c = contacts[1] --first only
-            circfill( c.point.x, c.point.y, 2, 2 )
-            rect( c.point.x, c.point.y, c.point.x + 11*c.normal.x, c.point.y + 11*c.normal.y )
-            --print( "c[1].t="..c.interval.min, c.point.x, c.point.y )
-            --print( c.interval.min, c.point.x, c.point.y )
-         end
-         local it_c = 0
-         for c in all(contacts) do
-            circfill( c.point.x, c.point.y, 1, 3 + it_c%13 )
-            it_c += 1
-            --print( "c["..it_c.."].t="..c.interval.min, c.point.x, c.point.y )
-            --print( c.interval.min, c.point.x, c.point.y )
-         end
-      end
+      -- if false then
+      --    local lambda01 = game.t/1000
+      --    lambda01 = lambda01 - flr(lambda01) --cast to 0..1 for sin/cos
+      --    local p0 = vec2_init( 64 + 50*cos(lambda01),
+      --                          64 + 50*sin(lambda01) )
+      --    local p1 = vec2_init( 64, 64 )
+      --    -- draw bp box for debug
+      --    local rmin = vec2_add( vec2_min( p0, p1 ), player.a.cmovebox.min )
+      --    local rmax = vec2_add( vec2_max( p0, p1 ), player.a.cmovebox.max )
+      --    rect( rmin.x, rmin.y, rmax.x, rmax.y, 11 )
+      --    circfill( p0.x, p0.y, 2, 14 )
+      --    circfill( p1.x, p1.y, 2, 15 )
+      --    -- ccd
+      --    local contacts = ccd_box_vs_map( p0, p1, player.a.cmovebox, 1 ) --flags: 0 is_solid, 1 is_damage
+      --    if contacts != nil then
+      --       local c = contacts[1] --first only
+      --       circfill( c.point.x, c.point.y, 2, 2 )
+      --       rect( c.point.x, c.point.y, c.point.x + 11*c.normal.x, c.point.y + 11*c.normal.y )
+      --       --print( "c[1].t="..c.interval.min, c.point.x, c.point.y )
+      --       --print( c.interval.min, c.point.x, c.point.y )
+      --    end
+      --    local it_c = 0
+      --    for c in all(contacts) do
+      --       circfill( c.point.x, c.point.y, 1, 3 + it_c%13 )
+      --       it_c += 1
+      --       --print( "c["..it_c.."].t="..c.interval.min, c.point.x, c.point.y )
+      --       --print( c.interval.min, c.point.x, c.point.y )
+      --    end
+      -- end
 
       if true then
          -- player collisions
@@ -314,11 +314,13 @@ function init_archetypes()
    --level
    a_level = {}
    a_level.cnumrooms = vec2_init( 8, 3 )
+   a_level.cgravity = vec2_init( 0, 0.5 ) --pixels/frame^2
 
    --rooms
    a_room = {}
    a_room.csizes = vec2_init( 128, 128 )
 
+   ---- entities
    --player
    a_player = {}
    a_player.table_anm = {}
@@ -387,16 +389,10 @@ function init_archetypes()
    a_saw.chealth = 1
    add( g_anim, a_saw.table_anm["move"] )
 
-   --extra unused by now
-   -- add( g_anim, {n="saw1",c=true,k={52,52,52,52,53,53,53,53}} )
-   -- add( g_anim, {n="saw2",c=true,k={54,54,54,54,55,55,55,55}} )
-   -- add( g_anim, {n="saw3",c=true,k={56,57,58,59}} )
-
    --grunt
    a_grunt = {}
    a_grunt.table_anm = {}
    a_grunt.table_anm["idle"]   = {n="grunt_idle",c=true,k={102,102,102,102,102,102,103,103,103,103,103,103}}
-   --a_grunt.table_anm["move"]   = {n="grunt_move",c=true,k={102,102,102,102,102,102,103,103,103,103,103,103}}
    a_grunt.table_anm["move"] = {n="grunt_move",c=true,k={105,105,105,105,104,104,104,104}}
    a_grunt.table_anm["attack"] = {n="grunt_attack",c=true,k={105,105,105,105,105,105,105,105,
                                                              104,104,104,104,104,104,
@@ -444,8 +440,8 @@ function init_archetypes()
    --bird
    a_bird = {}
    a_bird.table_anm = {}
-   a_bird.table_anm["idle"] = {n="bird_idle",c=true,k={120}} --unused
-   a_bird.table_anm["move"] = {n="bird_move",c=true,k={120,120,120,120,120,121,121,121,121,121}}
+   a_bird.table_anm["idle"] = {n="bird_idle",c=true,k={120,120,120,120,121,121,121,121}} --unused
+   a_bird.table_anm["move"] = {n="bird_move",c=true,k={122,122,122,122,122,123,123,123,123,123}}
    a_bird.cvisualbox = aabb_init( 0, 0, 8, 8 )
    a_bird.cmovebox   = aabb_init( 2, 0, 6, 8 )
    a_bird.cdamagebox = aabb_init( 0, 0, 8, 8 )
@@ -457,8 +453,9 @@ function init_archetypes()
    --arachno
    a_arachno = {}
    a_arachno.table_anm = {}
-   a_arachno.table_anm["idle"] = {n="arachno_idle",c=true,k={122}} --unused
-   a_arachno.table_anm["move"] = {n="arachno_move",c=true,k={122,122,122,122,122,123,123,123,123,123}}
+   a_arachno.table_anm["idle"] = {n="arachno_idle",c=true,k={124}} --unused
+   a_arachno.table_anm["move"] = {n="arachno_move",c=true,k={124,124,124,124,124,125,125,125,125,125}}
+   a_arachno.table_anm["attack"] = {n="arachno_attack",c=true,k={126}}
    a_arachno.cvisualbox = aabb_init( 0, 0, 8, 8 )
    a_arachno.cmovebox   = aabb_init( 2, 0, 6, 8 )
    a_arachno.cdamagebox = aabb_init( 0, 0, 8, 8 )
@@ -466,6 +463,7 @@ function init_archetypes()
    a_arachno.cspeed = 0.75
    a_arachno.chealth = 2
    add( g_anim, a_arachno.table_anm["move"] )
+   add( g_anim, a_arachno.table_anm["attack"] )
 
    --bullets
    a_blast = {}
@@ -666,7 +664,7 @@ function update_player()
 
    local movebox = aabb_apply_sign_x(player.a.cmovebox,player.sign)
    local damagebox = aabb_apply_sign_x(player.a.cdamagebox,player.sign)
-   local acc = vec2_init( 0, 0.5 ) --pixels/frame^2
+   local acc = level.a.cgravity
    local pred_vel = vec2_clamp( vec2_add( player.v, acc ),
                                 vec2_scale(-1,player.a.cmaxvel),
                                 player.a.cmaxvel )
@@ -846,8 +844,8 @@ function new_room_process_map_cell( r, room_j, room_i, map_j, map_i )
       e = new_enemy( a_mouse, pos, new_action_patrol( pos, -1 ) )
    elseif m == 120 then --bird
       e = new_enemy( a_bird, pos, new_action_wait_and_fly( pos, -1 ) )
-   elseif m == 122 then --arachno
-     e = new_enemy( a_arachno, pos, new_action_patrol( pos, -1 ) )
+   elseif m == 124 then --arachno
+      e = new_enemy( a_arachno, pos, new_action_patrol_and_jump( pos, -1 ) )
    elseif m == 60 then --saw
       --todo: consider "finding" amplitude up to closest collision, instead of hardcoding it
       e = new_enemy( a_saw, pos, new_action_oscillate( pos, vec2_init(1,0), 32, 300 ) )
@@ -906,6 +904,12 @@ function new_action_move_on_ground( target_pos )
             p_target = target_pos }
 end
 
+-- move on ground, stop at target/wall/cliff/border
+function new_action_jump_on_ground( target_pos )
+   return { name = "jump_on_ground", anm_id = "attack", t = 0, finished = false, first = true,
+            p_target = target_pos }
+end
+
 -- patrol in flat area, stop and turn at wall/cliff/border
 function new_action_patrol( start_pos, sign_x )
    return { name = "patrol", anm_id = "move", t = 0, finished = false,
@@ -928,6 +932,13 @@ function new_action_wait_and_fly( start_pos, sign_x )
             p_start = start_pos,
             --dir = vec2_init( sign_x, 0 ),
             sub = new_action_idle() }
+end
+
+-- wait on spot, fly to player when within radius
+function new_action_patrol_and_jump( start_pos, sign_x )
+   return { name = "patrol_and_jump", anm_id = "move", t = 0, finished = false,
+            p_start = start_pos,
+            sub = new_action_patrol( start_pos, sign_x) }
 end
 
 -- follow nav points todo use list instead of just 2!!
@@ -955,6 +966,8 @@ function update_action( _entity, _action )
       act = update_action_move( _entity, _action )
    elseif _action.name == "move_on_ground" then
       act = update_action_move_on_ground( _entity, _action )
+   elseif _action.name == "jump_on_ground" then
+      act = update_action_jump_on_ground( _entity, _action )
    elseif _action.name == "patrol" then
       act = update_action_patrol( _entity, _action )
    elseif _action.name == "oscillate" then
@@ -963,6 +976,8 @@ function update_action( _entity, _action )
       act = update_action_wait_and_ram( _entity, _action )
    elseif _action.name == "wait_and_fly" then
       act = update_action_wait_and_fly( _entity, _action )
+   elseif _action.name == "patrol_and_jump" then
+      act = update_action_patrol_and_jump( _entity, _action )
    else
       --idle do nothing
       act = _action
@@ -982,6 +997,8 @@ function print_action( _action, _x, _y )
       print("move", _x, _y )
    elseif _action.name == "move_on_ground" then
       print("mog", _x, _y )
+   elseif _action.name == "jump_on_ground" then
+      print("jog", _x, _y )
    elseif _action.name == "patrol" then
       print("ptrl", _x, _y )
    elseif _action.name == "oscillate" then
@@ -990,6 +1007,8 @@ function print_action( _action, _x, _y )
       print("w&r/".._action.sub.name, _x, _y )
    elseif _action.name == "wait_and_fly" then
       print("w&f/".._action.sub.name, _x, _y )
+   elseif _action.name == "patrol_and_jump" then
+      print("p&j/".._action.sub.name, _x, _y )
    end
 end
 
@@ -997,7 +1016,7 @@ function update_action_move( entity, action )
    if not action.finished then
       local diff = vec2_sub( action.p_target, entity.p1 )
       local dist = vec2_length( diff )
-      if dist > 0.5 then
+      if dist > entity.a.cspeed then
          local dir = vec2_scale( 1.0/dist, diff )
          entity.p1 = vec2_add( entity.p0, vec2_scale( min(entity.a.cspeed,dist), dir ) )
          entity.sign = sgn( dir.x )
@@ -1009,7 +1028,6 @@ function update_action_move( entity, action )
    return action
 end
 
---todo make new action_move_on_ground that accounts for walls/cliffs/border as patro, and reuse it for wait_and_ram
 function update_action_move_on_ground( entity, action )
    if not action.finished then
       local movebox = aabb_apply_sign_x( entity.a.cmovebox, entity.sign )
@@ -1045,6 +1063,37 @@ function update_action_move_on_ground( entity, action )
             -- advance
          local dir = vec2_scale( 1.0/dist, diff )
          entity.p1 = vec2_add( entity.p0, vec2_scale( min(entity.a.cspeed,dist), dir ) )
+         entity.sign = sgn( dir.x )
+      end
+   end
+   return action
+end
+
+--todo: now its just move_on_ground
+function update_action_jump_on_ground( entity, action )
+   if action.first then
+      -- solve for projectile |v0| thrown at 45 deg that hits target, no sign considered yet
+      local c45 = cos(0.125) --angle 0..2Pi --> 0..1
+      local a = 0.5 * level.a.cgravity.y
+      local c = entity.p1.x - action.p_target.x
+      local t = sqrt( abs( c / a ) )
+      local speed = abs(c) / (c45*t) --speed to hit target at 45 deg angle
+      -- compute vel vector from magnitude and direction with correct sign
+      action.v = vec2_scale( speed, vec2_init( -sgn(c) * c45, -c45 ) )
+      action.first = false
+   elseif not action.finished then
+      local diff = vec2_sub( action.p_target, entity.p1 )
+      local dist = vec2_length( diff )
+      action.v = vec2_add( action.v, level.a.cgravity )
+      local speed = vec2_length( action.v )
+      if dist < speed then
+         -- success, closer than 1 timestep advance
+         entity.p1 = action.p_target
+         action.finished = true
+      else
+         -- advance
+         local dir = vec2_scale( 1.0/speed, action.v )
+         entity.p1 = vec2_add( entity.p0, vec2_scale( min(speed,dist), dir ) )
          entity.sign = sgn( dir.x )
       end
    end
@@ -1097,6 +1146,25 @@ function update_action_wait_and_fly( entity, action )
       action.sub = new_action_idle()
    else
       --keep flying
+   end
+   return action
+end
+
+function update_action_patrol_and_jump( entity, action )
+   -- update sub
+   action.sub = update_action( entity, action.sub )
+   -- think
+   if action.sub.name == "patrol" then
+      --waiting, ram if player is in same level, in range and accessible
+      --if true then --player_on_same_line( ) then
+      if flr(player.p1.y) == flr(entity.p1.y) then --todo: use line-of-sight
+         action.sub = new_action_jump_on_ground( player.p1 ) --ram to player --todo use attack anim instead of walk...
+      end
+   elseif action.sub.finished then
+      --reached target, back to idle
+      action.sub = new_action_patrol( entity.p1, entity.sign )
+   else
+      --keep ramming
    end
    return action
 end
@@ -1554,14 +1622,14 @@ dddddddd1111111100000000d0c0d0c00c0d0700000c0d0c32323233232323203232000023232320
 242929241d1c1c1d15161615552666254f4f4f4f4f4ff4ff441111444411114401111144011111401111444000007ccd0007ccd0441111444111444000000000
 44299994dd1ccccd5516666555266665f4fff4f4fff44ff44411114401111100d111100001111140511114400007ccdd007ccdd0441111440111144000000000
 44299994dd1ccccd5516666555266665444444444444444400d5550000d55500d115550005551d00551144400ccccdd00cccddd000d5550000555d0000000000
-2222222244f444440000000000000000222222224494444400000000000000000000000000000000000000000000000000000000000000000000000000000000
-4999944444444f4400060000000060004cc7ddd44444494400000000000000000dd0000000022000022220000022220000000000000000000000000000000000
-499994444f44444406050060060050604cccddd449444444000000000000000000dd200000112800000282000000282000000000000000000000000000000000
-499994444444f44f05050050050050504cccddd444449449000000000000000010dd2800011dd220000122000001122000000000000000000000000000000000
-2222222244f44444050500500500505044444444449444440000000000000000011dd22010dd0002001110000011100000000000000000000000000000000000
-444999944444444405560560065065504dddc7744444444400000000000000000000000200dd00000d111dd00dd111d000000000000000000000000000000000
-44499994f44444f456560565565065654dddcc74944444940505a0000005a00000000000000d0000d0d0d00dd00d0d0d00000000000000000000000000000000
-444999944444f44465556556655655564dddccc44444944400566500055665000000000000000000d0000d0000d0000d00000000000000000000000000000000
+2222222244f444440000000000000000222222224494444400000000000000000000000000000000000000000000000000000000000000002200000022000000
+4999944444444f4400060000000060004cc7ddd444444944000000000000000000000000000000000dd000000002200002222000002222000222000002220000
+499994444f44444406050060060050604cccddd4494444440000000000000000000220000022000000dd2000001128000002820000002820d0282000d0282000
+499994444444f44f05050050050050504cccddd4444494490000000000000000000028000002800010dd2800011dd22000012200000112200d122dd00d122dd0
+2222222244f44444050500500500505044444444449444440000000000000000000dd22000dd2200011dd22010dd0002001110000011100000d1d00d00d1d00d
+444999944444444405560560065065504dddc77444444444000000000000000000ddd10200dd10200000000200dd00000d111dd00dd111d0000d0d00000d0d00
+44499994f44444f456560565565065654dddcc74944444940505a0000005a00000dd10000ddd100000000000000d0000d0d0d00dd00d0d0d000d00d0000d00d0
+444999944444f44465556556655655564dddccc44444944400566500055665000dd101000dd101000000000000000000d0000d0000d0000d0000d0000000d000
 adadadadadadadadadadadadadadadadadadadadadadadadadadadadadadad1f2000000880000002000220022000000000000000000000000000002200220000
 00000000000000000000000000000000000000000000000000000000000000002200008778000022000222002200000000002200220000000000002220022000
 adadadadadadadadadadadadadadadadadadadadadadadadadadadadadadad1f0220087887800220000022202220000000002220022000000000000222022200
@@ -1578,22 +1646,22 @@ adadadadadadadadadadadadadadadadadadadadadadadadadadadadadadad1f0102552202552010
 00000000000000000000000000000000000000000000000000000000000000000002d520025d2000000dd10550d10000000dd10550dd1000000dd1550dd13330
 adadadadadadadadadadadadadadadadadadadadadadadadadadadadadadad1f000ddd2002ddd00000d111000011100000d111000011100000d1110001110000
 0000000000000000000000000000000000000000000000000000000000000000002dd002020dd200001111100111110000111110011111000011110001111000
-adadad9cadadadadadadadad9cadadadadadadadadadadadadadadadadadad1f0000000000000000000110011000000000000000000000000000011110000000
-00000000000000000000000000000000000000000000000000000000000000000000000000000000000111001100000000001100110000000000000111100000
-adadadadadadadadadadadadadadadadadadadadadadadadadadadadadadad1f0000000000000000000011101110000000001110011000000000000011110000
-00000000000000000000000000000000000000000000000000000000000000000000000000000000000011111110000000000111011100a00000000111111000
-adadadadadadadadadadadadadadadadadadadadadadadadadadadadadadad1f000000000000000000a01881881000a09000011111110a0008a8001118181000
-000000000000000000000000000000000000000000000000000000000000000000000000000000000a001111111000a009000188188100a0000a99a111110990
-adadadadadadadadadadadadadadadadadadadadadadadadadadadadadadad1f00000000000000000a222111112220a0092221111111228a0000022a99aa989a
-0000000000000000000000000000000000000000000000000000000000000000000000000000000008a23111113322808a222211111228aa00889a88aa8a8a88
-adad1f1fadadadadadadadad1f1fadadadadadadadadadadadadadadadadad1f00000000000000008aa2333323332aa8a882231111132980aa902299889888a8
-0000000000000000000000000000000000000000000000000000000000000000000000000000000098002333233202899a80233323320aa80000988a999aa99a
-ad1fadadadad1fadad1fadadadad1fadadadadadadadadadadadadadadadad1f0000000000000000aa800222522008aa88a0022252200a8800998aa2225008a0
-00000000000000000000000000000000000000000000000000000000000000000000000000000000a880dd5555dd088a8aa0ddd555dd0999088000dd555dd000
-1fadadadadadadadadadad65adadad1f1fadadadadadadadadadadadadadad1f0000000000000000999ddd0555dd09999980ddd555ddd00000011ddd550dd000
-00000000000000000000000000000000000000000000000000000000000000000000000000000000000dd10550d10000000dd10550dd100000011d0550dd1000
-1f1f2f3f1f2f3f3f3f3f2f2f1f3f2f3f1f1f2f3f1f2f3f3f3f3f2f2f1f3f2f3f000000000000000000d111000011100000d11100001110000011100001111000
-00000000000000000000000000000000000000000000000000000000000000000000000000000000001111100111110000111110011111000010000000011100
+adadad9cadadadadadadadad9cadadadadadadadadadadadadadadadadadad1f2000000880000002000110011000000000000000000000000000011110000000
+00000000000000000000000000000000000000000000000000000000000000002200008778000022000111001100000000001100110000000000000111100000
+adadadadadadadadadadadadadadadadadadadadadadadadadadadadadadad1f0220087887800220000011101110000000001110011000000000000011110000
+00000000000000000000000000000000000000000000000000000000000000000222008778002220000011111110000000000111011100a00000000111111000
+adadadadadadadadadadadadadadadadadadadadadadadadadadadadadadad1f022222877822222000a01881881000a09000011111110a0008a8001118181000
+000000000000000000000000000000000000000000000000000000000000000000221118811122000a001111111000a009000188188100a0000a99a111110990
+adadadadadadadadadadadadadadadadadadadadadadadadadadadadadadad1f00211dd88dd112000a222111112220a0092221111111228a0000022a99aa989a
+000000000000000000000000000000000000000000000000000000000000000000111ddd1dd1110008a23111113322808a222211111228aa00889a88aa8a8a88
+adad1f1fadadadadadadadad1f1fadadadadadadadadadadadadadadadadad1f011121d1dd1211108aa2333323332aa8a882231111132980aa902299889888a8
+0000000000000000000000000000000000000000000000000000000000000000111022111122011198002333233202899a80233323320aa80000988a999aa99a
+ad1fadadadad1fadad1fadadadad1fadadadadadadadadadadadadadadadad1f1010255115520101aa800222522008aa88a0022252200a8800998aa2225008a0
+00000000000000000000000000000000000000000000000000000000000000001000255225520001a880dd5555dd088a8aa0ddd555dd0999088000dd555dd000
+1fadadadadadadadadadad65adadad1f1fadadadadadadadadadadadadadad1f0102552202552010999ddd0555dd09999980ddd555ddd00000011ddd550dd000
+00000000000000000000000000000000000000000000000000000000000000000002d520025d2000000dd10550d10000000dd10550dd100000011d0550dd1000
+1f1f2f3f1f2f3f3f3f3f2f2f1f3f2f3f1f1f2f3f1f2f3f3f3f3f2f2f1f3f2f3f000ddd2002ddd00000d111000011100000d11100001110000011100001111000
+0000000000000000000000000000000000000000000000000000000000000000002dd002020dd200001111100111110000111110011111000010000000011100
 22525252252525220000000220000000400000000000000465255556111115555551166100000080080000000000000000000000000000000000000000000000
 00252525525252000000000220000000400000000000000456655665661555cb8855516108000090090000800000000000000000011111100000000111000000
 00025255552520000000002222000000440000000000004f56866c6561555cb88aa6551189000890098000980000000000000000000000110000000001111110
@@ -1637,7 +1705,7 @@ __map__
 00000000000000000000000000000000000000000000000000000000000000000000000000c2c14d00004dc0c30000000000000000000000000000000000000000636363006300000000004d00000000000000000000000000000000000000000000000000000000000000000000000000000000000000626200000000000000
 0000000000000000000000000000000000c2f4f4f4f4f4f4f4f4f4f4f4f4f4c300c2f4f4f4c1000000000000c0f4f4f4f4f4f4f4c300c2f4f4f4f4c30040000000634dc063636300000000000000000000000000000000000000000000000000000000000000000000eeef0000000000000000000000c26262c3000000000000
 0000000000000000c5d400000000000000f4c1004dc0f4c1c0c1c0f4c1c0c1c0f4c10000000000000000000000c0c6c10000004dc0f4c100000000c0f4f0000000630000000000e063000000000063f000000000000000000000000000000000000000000000000000feff00000000000000000000c262626262c30000000000
-00000000c5000000d5c400000078000000f400000000f400000000f400000000f400000000000000000000000000f4000000000000f4000000000000f40000000063000000000000c0630000000063000000000000000000000000000000000000000000000000000000000000cccd0000000000006262c7c862620000000000
+00000000c5000000d5c400000000000000f400000000f400000000f400000000f400000000000000000000000000f4000000000000f4000000000000f40000000063000000000000c0630000000063000000000000000000000000000000000000000000000000000000000000cccd0000000000006262c7c862620000000000
 00000000d5c40000c5d40000000000c400f400000000f400000000f400000000f400000000000000000000000000f4000000000000f4000000000000f400000000630000000000000000005d6300630000000000000000000000000000000000000000000000000000cecf0000dcdd0000000000006262d7d862620000000000
 0000000000d5c4c5d40000c50000c5d400f400000000f400000000f400000000f4000000000000000000000000636363f000000000f4000000000000f4000000006300000000636363636363c1006300000000000000606070000000000000000000000000cecfcdccdedfcd00000000000000c3c2626262626262c3c2000000
 000000000000d5e5000000d5c4c5d40000f400000000f400000000f400000000f4006363630000000000e0f000c0f4c10000000000f4000000000000f4000000006300000063c1000000000000006300000000000060607070600000000078000000000000dedfcecfdddcddcecf0000000000f4c1626262626262c0f4000000
@@ -1645,7 +1713,7 @@ __map__
 5c0000d5d4d5c4e5d400000000d5e5d400f400000000f40063006363636363636363d10000000000000000000000f400000000e06363000000000000000000000063635c00760063636363000000630000000000007074607470c10000000000000000dcdd000000000000000000cecf00c3c2636363c66363c6636363c3c200
 5c5c00000000d5e5000000000000e50000f400000000f400636363636363636371d1000000000000000000000000f4000000000000f46300000000000000000000c06363636363c1000000000063c100000000006360707060700000000000000000000000000000000000630000dedf00f4c163636363c1c063636363c0f400
 ebe40000000000e5000000000000e50000f4000000636363636363637575757575000000000000e0f00000000000f4000000000000f4006300000000000000630000c0f4000000000000000063c1000000630000c07060607060000000000000000000000000006363cecf000000630000f40063c663c18a8bc063c66300f400
-ebe4e82b2ce8e8e53072d60030e8e500c2f4c363757575757575757575757575755c000063000000005c006300c2f4c300000066c2f4c3750000000000566363000000f400000000006663757500006363636300006070e460700000000000f2f2000000007a6363c1dedf000000c063c2f4c3636363009a9b00636363c2f4c3
+ebe4e82b2ce8e8e53072d60030e8e57cc2f4c363757575757575757575757575755c000063000000005c006300c2f4c300000066c2f4c3750000000000566363000000f400000000006663757500006363636300006070e460700000000000f2f2000000007c6363c1dedf000000c063c2f4c3636363009a9b00636363c2f4c3
 ebe6717171e6e6e671e6e65ce6e671e6636363636363636363717171717171717171717163737372727373636363636362626262626275757562626262626262626262626262626262757575757575626262626262626262626250f3505050506262626262626262505050505050506262626262626262626262626262626262
 eb00d071717171717171717171717171717171717171717171717171717171717171717163636363636363636363636363637171717171717171717171717171626262626271717171717171717171717171717171717171715151515151515151f3f3f3f3f3f371717171717171717171717171717171717171717171717171
 eb0000d071d1d07171717171717171717171717171717171717171717171d0d1d07171d100f4c10000c0f40000000000000000000000000000000000d071d1000000000000d0d100000000004d00d071d100000000d07171715151515151515151f3f3f3f3f3f37171717171f3717171717171717171d1d0d1d071d1d0717171
@@ -1654,13 +1722,13 @@ d0000000000000d0717171717171d1d071d1d0717171d14dd071d14d71d100000000000000f40043
 0000d0000000000000007171d1000000000000000071000000d100000000000000000000f2f2e9e9e9e9f2f20000000000e3c1e9e9e9e9e9e9e9c0e30000000000e3c1e9e9e9e9e9e9e9c0e300000000000000c0f1000000005553535353540000000000000000000000000000d07171f6d100000000000000000000000000f5
 00000000000000000000d071000000000000000000d000000000000000000000000000f2f2e9e9e9e9e9e9f2f200000000e3e9e9e9e9c9e9e9e9e9e9e9e3e3e3e3e3e9e9e9e9c9e9e9e9e9e9e9e9e3e3e3720000c0f100000055535353535400000000000000000000000000000000d0f60000000000000000000000000000f5
 00000000d10000000000007100000000000000000000000000000000000000000000f2f2e9e9e9e9e9e9e9e9f2e3000000e3e9e9e9e9e9e9e9e9e9e9e3c1e9e9e9e9e9e9e9e9e9e9e9e9e9e9e3e300e3e3c1000000c0f156005540545353540000000000000000000000000000780000f600000000000000000000000000c3f5
-000000d1000000000000007100000000000000000000000000000000000000000072f2e9e9e9e9e9e9e9e9e9e9e3e3005ce3e9e9e97ae9e9e9e9e9e9e9e9e9e9e9e9e9e9e97ae9e9e9e9e9e3000000e3e300000000004df1f1f1f1545353540000000000000000000000000000c20000f6c20000000000000000c20000c2c1f5
+000000d1000000000000007100000000000000000000000000000000000000000072f2e9e9e9e9e9e9e9e9e9e9e3e3005ce3e9e9e97ce9e9e9e9e9e9e9e9e9e9e9e9e9e9e97ce9e9e9e9e9e3000000e3e300000000004df1f1f1f1545353540000000000000000000000000000c20000f6c20000000000000000c20000c2c1f5
 0000d10000000000000000d0000000000000000000000000000000000000000072f2e9e9e9c9e9e9e9e9c9e9e9e9e37272e3e9e3e3e3e3e3e3e3e9e9e9e9e9e9e9e3e9e9e3e3e3e3e3e3e3e340000000000000000000000000555554f153545600000000000000000078000000c0c300f6c0c30000c300000000c0c3c2c100f5
 00d1000000000000000000000000000000000000000000d0d300006600000000f2e9e9e9e9e9e9e9e9e9e9e9e9e9e9e3e3c1e9e9e9e9e9e9e9e9e9e9e3e3e3e3e3c1e9e3c1e9e9e9e9e9e9c0e30000000000000000000000005555545555f1f1000000000000000000c300000000c0c30000c0c3c2c100c2c30000c0f40000f5
 00000000000000000000000000000000000000000000d071d1d0717171d10000f4e9e9e9e9e9e9e9e9e9e9e9e9e9e9f4f4e9e9e9e9e9c9e9e9e9e9e3c1e9e9e9e9e9e9e9e9e9c9e9e9e9e9e9e9e9e3e3e3f000000000000000555554f1f154000000000000000000c2c100000000c2f4000000f4c100c2f4f4c30000f40000f5
 71d100000000000000000000000000000000000000d071d10000d0717171d100f4c3e9e9e9e9e9e9e9e9e9e9e9e9c2f4f4c3e9e9e9e9e9e9e9e9e3c1e9e9e9e9e9e9e9e9e9e9e93ce9e9e9e9e95dc0e3e3000000000056000055f154555554000000000000000000c0c300c20000c1f40000c2c100c2c10000c0c300c0c300f5
 7171d10000000000000000000000000000000000d071d10000000000d071d3f3f3f3f2f2f2f2f2f2f2f2f2f2f2e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e9e9e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e30000000000f1f10055555455545400000000000000000000f400c0c30000f40000f40000f400000000f40000f400f5
-f17171d1000000000000000000000000000000d071d10000007a00000075e2e2e30000000000f200000000003c00000000000000000000000000000000c0f100000000000000000000000000000000e3e300000000000000f1f1555455545400000000000000000000f40000f40000f40000f40000f400aaab00f40000f400f5
+f17171d1000000000000000000000000000000d071d10000007c00000075e2e2e30000000000f200000000003c00000000000000000000000000000000c0f100000000000000000000000000000000e3e300000000000000f1f1555455545400000000000000000000f40000f40000f40000f40000f400aaab00f40000f400f5
 f1f1d10032000000f2720000000032f1f100d071d100f240f2f20000007575755d770000005600003c00e300000000f10000003c0000000000000000000000000000003c0000000000000000000000000000000000000000005555f15050f10000e7e8e8e7e74e0056f2f7f7f2f7f7f100c2f400f7f400babb00f4f700f4c3f5
 f1f1f2daf1f2f3f3f3f3f2f2f1f3f2f3f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f17171e6e6e6e6e6e6e6e6e6e6e6e6e6e6e671f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1
 __sfx__
