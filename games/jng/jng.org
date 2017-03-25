@@ -32,42 +32,61 @@
    - Fly: Wait until player visible/close, then fly straight and disappear
    - Fall: fall down on player when below
    - Fly and Seek: Go towards player, no map collisions
-** Worm
+** DONE Worm
    - Patrol
-   - Angry: patrol faster, attack
+** DONE Angry worm
+   - Patrol faster
 ** DONE Mouse
    - Patrol
-** Cthulhu
+** DONE Grunt
    - Charge
-** Bird
+   - Fixed timeout between attacks can be any time, no need to be
+     exact idle duration
+   - Hit ground shoots wave projectile both ways
+** TODO Cthulhu
+   - Patrol
+   - Shoot periodically if player at same level
+** DONE Bird
    - Fly directly when inside inner radius, stop when outside radius
      and retarget
-** Skull
+** DONE Arachno
+   - Patrol
+   - Jump on player at fixed angle
+     - 45 deg trivial solution
+   - Low grav to reduce jump speed
+** TODO Skeleton:
+   - Gen skulls periodically
+** TODO Skull
    - Fly straight
    - Fly in sinusoid
-** Skeleton:
-   - Gen skulls periodically
-** Arachno
-   - Patrol
-   - Jump over projectiles
-** Grunt
-   - Charge
-   - Hit ground shoots wave projectile both ways
-** Boss: Skull Executioner
+** TODO Boss: Skull Executioner
    - Jump over
    - Open mouth and shoot skulls
      - Parabolic
      - Straight
-** Boss: Flame Executioner
+** TODO Boss: Flame Executioner
    - Charge
    - Throw parabolic flames that stick to the ground for a while
-** Boss: Caterpillar nest
+** TODO Boss: UnderKing
+   - Fly around
+     - Player must shoot when at accessible height
+   - Directed bullets
+     - Player must avoid
+   - Global bullet rain
+     - Player must cover under rocks patrolled by indestructible enemies
+   - Slam ground and create shockwaves (the ones originally for the
+     Grunt)
+     - Player Must jump over
+** TODO Boss: Caterpillar nest
    - Normal caterpillars dig into room from ground, walls, ceiling,
      convert to angry and attack.
-** Boss: Rocks falling
+** TODO Boss: Rocks falling
    - Rocks fall from ceiling and stack up
    - Some can be destroyed
    - Like puzzle platformer
+** TODO Boss: Spider room
+   - Spiders patrol on walls and jump on player randomly
+   - Extend jump_on_ground to accept work with different heights
 * FX
   - Rain/Snow pixels
   - Lightning/Flashing screen at startup
@@ -80,6 +99,8 @@
 ** TODO Shoot repetition if direction pressed
 ** TODO Stop idle/run movement while falling
 * FW
+** TODO RLE map
+   - Save in code-string or in map-memory
 ** TODO RLE anims
    - list of key + repetitions
 ** TODO Generic animation system
@@ -95,3 +116,11 @@
       - Inputs: LRUDZX
       - Events: EndAnim,Hit...
 
+* Post JnG
+** BringMeTheLargestSwordYouCanFind
+   - Pico8 prototype
+   - Reuse block-based platformer code
+   - Add vertical stairs
+   - Add sword parabolic throw
+   - Reuse on-ground enemy AI
+   - Add vertical scroll
