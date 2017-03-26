@@ -43,9 +43,12 @@
    - Fixed timeout between attacks can be any time, no need to be
      exact idle duration
    - Hit ground shoots wave projectile both ways
-** TODO Cthulhu
-   - Patrol
-   - Shoot periodically if player at same level
+** DONE Cthulhu
+*** DONE Patrol
+*** DONE Shoot periodically if player at same level
+** TODO Spit
+   - It's a projectile implemented as an enemy
+   - Should hit walls
 ** DONE Bird
    - Fly directly when inside inner radius, stop when outside radius
      and retarget
@@ -54,11 +57,24 @@
    - Jump on player at fixed angle
      - 45 deg trivial solution
    - Low grav to reduce jump speed
+** DONE Teeth
+   - Patrol fast
+   - Indestructible
 ** TODO Skeleton:
    - Gen skulls periodically
 ** TODO Skull
    - Fly straight
    - Fly in sinusoid
+** DONE Saw
+   - place properly acc to range
+   - hitbox less unforgiving
+   - inverse version
+** DONE Stalactite
+   - fall when player below
+   - Just let it disappear out of room, no need to CD
+   - remove from map permanently
+     - FLAG enemies as "persistent" and if true, remember map cell
+       they were created from and overwrite it with contents from cell above
 ** TODO Boss: Skull Executioner
    - Jump over
    - Open mouth and shoot skulls
