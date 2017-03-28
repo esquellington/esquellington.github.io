@@ -46,7 +46,7 @@
 ** DONE Cthulhu
 *** DONE Patrol
 *** DONE Shoot periodically if player at same level
-** TODO Spit
+** TODO Spit projectile
    - It's a projectile implemented as an enemy
    - Should hit walls
 ** DONE Bird
@@ -60,11 +60,11 @@
 ** DONE Teeth
    - Patrol fast
    - Indestructible
-** TODO Skeleton:
-   - Gen skulls periodically
-** TODO Skull
-   - Fly straight
-   - Fly in sinusoid
+** TODO Angry skeleton
+** TODO Skull projectile
+** TODO Flame projectile
+   - Stick to solid tiles
+   - Burn for a while and disappear
 ** DONE Saw
    - place properly acc to range
    - hitbox less unforgiving
@@ -78,8 +78,9 @@
 ** TODO Boss: Skull Executioner
    - Jump over
    - Open mouth and shoot skulls
-     - Parabolic
      - Straight
+     - Sinusoid
+     - Parabolic
 ** TODO Boss: Flame Executioner
    - Charge
    - Throw parabolic flames that stick to the ground for a while
@@ -96,13 +97,13 @@
 ** TODO Boss: Caterpillar nest
    - Normal caterpillars dig into room from ground, walls, ceiling,
      convert to angry and attack.
+** TODO Boss: Spider room
+   - Spiders patrol on walls and jump on player randomly
+   - Extend jump_on_ground to accept work with different heights
 ** TODO Boss: Rocks falling
    - Rocks fall from ceiling and stack up
    - Some can be destroyed
    - Like puzzle platformer
-** TODO Boss: Spider room
-   - Spiders patrol on walls and jump on player randomly
-   - Extend jump_on_ground to accept work with different heights
 * FX
   - Rain/Snow pixels
   - Lightning/Flashing screen at startup
