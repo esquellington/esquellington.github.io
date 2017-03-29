@@ -60,13 +60,6 @@
 ** DONE Teeth
    - Patrol fast
    - Indestructible
-** TODO Angry skeleton
-   - NOT sure what should it do... maybe ignore it by now, but keep
-     sprite
-** TODO Skull projectile
-** TODO Flame projectile
-   - Stick to solid tiles
-   - Burn for a while and disappear (timeout)
 ** DONE Saw
    - place properly acc to range
    - hitbox less unforgiving
@@ -77,6 +70,9 @@
    - remove from map permanently
      - FLAG enemies as "persistent" and if true, remember map cell
        they were created from and overwrite it with contents from cell above
+** TODO Angry skeleton
+   - NOT sure what should it do... maybe ignore it by now, but keep
+     sprite
 ** TODO Boss: Skull Executioner
    - Jump on player spot
      - Player must move fast when SE is in the air
@@ -84,11 +80,15 @@
      - Player must be at reasonable distance and jump over or duck
        below skulls
      - NO double-jump available
+** TODO Skull projectile
 ** TODO Boss: Flame Executioner
    - Charge
      - Player must double-jump over it
    - Throw parabolic flames that stick to the ground for a while
      - Player must avoid projectiles and ground and wall flames
+** TODO Flame projectile
+   - Stick to solid tiles
+   - Burn for a while and disappear (timeout)
 ** TODO Boss: UnderKing
    - Fly around
      - Player must shoot when at accessible height
