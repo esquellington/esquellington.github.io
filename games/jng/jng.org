@@ -46,7 +46,7 @@
 ** DONE Cthulhu
 *** DONE Patrol
 *** DONE Shoot periodically if player at same level
-** TODO Spit projectile
+** DONE Spit projectile
    - It's a projectile implemented as an enemy
    - Should hit walls
 ** DONE Bird
@@ -65,11 +65,13 @@
    - hitbox less unforgiving
    - inverse version
 ** TODO Stalactite
-   - fall when player DIRECTLY below
-   - Just let it disappear out of room, no need to CD
-   - remove from map permanently
+*** TODO fall when player DIRECTLY below
+*** TODO remove from map permanently
      - FLAG enemies as "persistent" and if true, remember map cell
-       they were created from and overwrite it with contents from cell above
+       they were created from and overwrite it with contents from cell
+       above
+     - could be a difficulty option, undead mode would regen
+       everything, including bosses
 ** TODO Angry skeleton
    - NOT sure what should it do... maybe ignore it by now, but keep
      sprite
@@ -109,6 +111,11 @@
    - Rocks fall from ceiling and stack up
    - Some can be destroyed
    - Like puzzle platformer
+* Main menu
+  - Difficulty:
+    - Unborn: 3-hit death, all enemies persistent
+    - Alive: 3-hit death, persistent env traps, regenerate enemies
+    - Undead: 2-hit death, regenerate all env and enemies, GnG-style
 * FX
   - Rain/Snow pixels
   - Lightning/Flashing screen at startup

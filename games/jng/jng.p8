@@ -60,17 +60,27 @@ function _draw()
    for e in all(room.enemies) do
       if e.hit_timeout % 2 == 0 then
          local act = e.action
+         while act.sub != nil do
+            act = act.sub
+         end
          local anm = e.a.table_anm[act.anm_id]
-         if anm.c then
+         if e.a == a_skullboss then
             spr( anm.k[ 1 + act.t % #anm.k ],
                  e.p1.x, e.p1.y,
-                 1,1,
+                 2,2,
                  e.sign<0 )
          else
-            spr( anm.k[ min(1+act.t,#anm.k) ],
-                 e.p1.x, e.p1.y,
-                 1,1,
-                 e.sign<0 )
+            if anm.c then
+               spr( anm.k[ 1 + act.t % #anm.k ],
+                    e.p1.x, e.p1.y,
+                    1,1,
+                    e.sign<0 )
+            else
+               spr( anm.k[ min(1+act.t,#anm.k) ],
+                    e.p1.x, e.p1.y,
+                    1,1,
+                    e.sign<0 )
+            end
          end
       end
       if debug.mode > 0 then
@@ -197,97 +207,9 @@ function _draw()
          end
       end
 
-      -- testiiiiiing
-      -- if false then
-      --    local lambda01 = game.t/1000
-      --    lambda01 = lambda01 - flr(lambda01) --cast to 0..1
-      --    local rp = vec2_init( 64 + 64*cos(lambda01),
-      --                          64 + 64*sin(lambda01) )
-      --    circfill( rp.x, rp.y, 2, 10 )
-      --    local bp = vec2_init( 64, 64 )
-      --    circfill( bp.x, bp.y, 2, 10 )
-      --    local rd = vec2_sub( bp, rp )
-      --    local rh = ray_vs_aabb( rp, rd, {min=0,max=1},
-      --                            aabb_init_2( vec2_sub(bp,vec2_init(10,10) ), vec2_add(bp,vec2_init(10,10) ) ) )
-      --    if rh != nil then
-      --       circfill( rh.point.x, rh.point.y, 3, 10 )
-      --    end
-      -- end
-
-      -- if false then
-      --    local lambda01 = game.t/1000
-      --    lambda01 = lambda01 - flr(lambda01) --cast to 0..1 for sin/cos
-      --    local p0 = { x=64 + 64*cos(lambda01),
-      --                 y=64 + 64*sin(lambda01) }
-      --    local p1 = { x=64 + 16*sin(lambda01),
-      --                 y=64 + 16*cos(lambda01) }
-      --    -- here we use p,hs cause it's simpler
-      --    local hs0 = { x=4, y=4 }
-      --    local hs1 = { x=16, y=16 }
-      --    rect( p0.x-hs0.x, p0.y-hs0.y, p0.x+hs0.x, p0.y+hs0.y, 8 )
-      --    rect( p1.x-hs1.x, p1.y-hs1.y, p1.x+hs1.x, p1.y+hs1.y, 8 )
-      --    -- convert to aabb instead of p,hs
-      --    local rh = ccd_box_vs_aabb( vec2_sub(p0,hs0), vec2_sub(p1,hs0), aabb_init( 0, 0, 8, 8 ), --cmovebox
-      --                                aabb_init_2( vec2_sub(p1,hs1), vec2_add(p1,hs1) ),
-      --                                1 ) --flag 0 == is_solid
-      --    if rh != nil then
-      --       circfill( rh.point.x, rh.point.y, 2, 8 )
-      --       rect( rh.point.x-hs0.x, rh.point.y-hs0.y,
-      --             rh.point.x+hs0.x, rh.point.y+hs0.y, 9 )
-      --    end
-      -- end
-
-      -- if false then
-      --    local movebox = player.a.cmovebox
-      --    local aabb_min = vec2_add( vec2_min( player.p0, player.p1 ), movebox.min )
-      --    local aabb_max = vec2_add( vec2_max( player.p0, player.p1 ), movebox.max )
-      --    local overlaps = bp_aabb_vs_map( aabb_init_2( aabb_min, aabb_max ), 0 )
-      --    if overlaps != nil then
-      --       for o in all(overlaps) do
-      --          rect( o.tile_j*8, o.tile_i*8,
-      --                (o.tile_j+1)*8, (o.tile_i+1)*8,
-      --                11 )
-      --       end
-      --    end
-      -- end
-
-      -- if false then
-      --    local lambda01 = game.t/1000
-      --    lambda01 = lambda01 - flr(lambda01) --cast to 0..1 for sin/cos
-      --    local p0 = vec2_init( 64 + 50*cos(lambda01),
-      --                          64 + 50*sin(lambda01) )
-      --    local p1 = vec2_init( 64, 64 )
-      --    -- draw bp box for debug
-      --    local rmin = vec2_add( vec2_min( p0, p1 ), player.a.cmovebox.min )
-      --    local rmax = vec2_add( vec2_max( p0, p1 ), player.a.cmovebox.max )
-      --    rect( rmin.x, rmin.y, rmax.x, rmax.y, 11 )
-      --    circfill( p0.x, p0.y, 2, 14 )
-      --    circfill( p1.x, p1.y, 2, 15 )
-      --    -- ccd
-      --    local contacts = ccd_box_vs_map( p0, p1, player.a.cmovebox, 1 ) --flags: 0 is_solid, 1 is_damage
-      --    if contacts != nil then
-      --       local c = contacts[1] --first only
-      --       circfill( c.point.x, c.point.y, 2, 2 )
-      --       rect( c.point.x, c.point.y, c.point.x + 11*c.normal.x, c.point.y + 11*c.normal.y )
-      --       --print( "c[1].t="..c.interval.min, c.point.x, c.point.y )
-      --       --print( c.interval.min, c.point.x, c.point.y )
-      --    end
-      --    local it_c = 0
-      --    for c in all(contacts) do
-      --       circfill( c.point.x, c.point.y, 1, 3 + it_c%13 )
-      --       it_c += 1
-      --       --print( "c["..it_c.."].t="..c.interval.min, c.point.x, c.point.y )
-      --       --print( c.interval.min, c.point.x, c.point.y )
-      --    end
-      -- end
-
       if true then
-         -- player collisions
---         for c in all(player.handled_collisions) do
          for c in all(player.ground_ccd_1) do
             rect( c.point.x, c.point.y, c.point.x + 11*c.normal.x, c.point.y + 11*c.normal.y )
-            -- print( "c["..it_c.."].t="..c.interval.min, c.point.x, c.point.y )
-            -- print( c.interval.min, c.point.x, c.point.y )
          end
 
          for b in all(room.bullets) do
@@ -325,12 +247,12 @@ function init_archetypes()
    a_player = {}
    a_player.table_anm = {}
    a_player.table_anm["idle"] = {n="idl" ,c=true ,k={16,16,16,16,16,16,16,16,17,17,17,17,17,17,17,17}}
-   a_player.table_anm["run"]  = {n="run" ,c=true ,k={18,18,18,18,18,18,19,19,19,19,20,20,20,20,20,20,21,21,21,21}}--airborne frames get more presence, so looks nicer
+   a_player.table_anm["run"]  = {n="run" ,c=true ,k={18,18,18,18,18,18,19,19,19,19,20,20,20,20,20,20,21,21,21,21}}
    a_player.table_anm["jump"] = {n="jmp" ,c=false,k={22,22,22,22,23,23,23,23,24,24,24,24,25,25,25,25}}
    a_player.table_anm["fall"] = {n="fall",c=true ,k={32,32,32,32,33,33,33,33}}
    a_player.table_anm["shi"]  = {n="shi" ,c=true ,k={8,8,9,9,9}}
    a_player.table_anm["shj"]  = {n="shj" ,c=true ,k={12,12,13,13}}
-   a_player.table_anm["shjb"] = {n="shjb",c=true ,k={14,14,15,15}} --shoot jump backwards important: must have same #frames as "shj"
+   a_player.table_anm["shjb"] = {n="shjb",c=true ,k={14,14,15,15}} --same #frames as "shj"
    a_player.table_anm["hit"]  = {n="hit" ,c=false,k={34,34,34,34,34,
                                                      35,35,35,35,35, 35,35,35,35,35, 35,35,35,35,35, 35,35,35,35,35, 35,35,35,35,35, 35,35,35,35,35, 35,35,35,35,35 }}
    a_player.table_anm["hitb"]  = {n="hitb",c=false,k={36,36,36,36,37,37,37,37,38,38,38,38}}
@@ -511,7 +433,7 @@ function init_archetypes()
    a_spit = {}
    a_spit.table_anm = {}
    a_spit.table_anm["move"] = {n="spit_move",c=true,k={66}}
-   a_spit.table_anm["hit"]  = {n="spit_hit",c=true,k={67,67,67}}
+   a_spit.table_anm["hit"]  = {n="spit_hit",c=false,k={67,67,67}}
    a_spit.cvisualbox = aabb_init( 0, 0, 8, 8 )
    a_spit.cmovebox   = aabb_init( 4, 3, 7, 4 )
    a_spit.cdamagbox  = nil
@@ -524,7 +446,12 @@ function init_archetypes()
    a_flame.table_anm = {}
    a_flame.table_anm["idle"] = {n="flame_idle",c=true,k={247,247,247,248,248,248}}
    a_flame.table_anm["move"] = {n="flame_move",c=true,k={249,249,249,250,250,250}}
-   a_flame.table_anm["hit"] = {n="flame_hit",c=true,k={234,234,234,235,235,235}}
+   a_flame.table_anm["hit"] = {n="flame_hit",c=false,k={234,234,234,235,235,235, --hit
+                                                        247,247,247,248,248,248, --remain 30 frames (1 sec)
+                                                        247,247,247,248,248,248,
+                                                        247,247,247,248,248,248,
+                                                        247,247,247,248,248,248,
+                                                        247,247,247,248,248,248 }}
    a_flame.cvisualbox = aabb_init( 0, 0, 8, 8 )
    a_flame.cmovebox   = aabb_init( 0, 0, 8, 8 )
    a_flame.cdamagbox  = nil
@@ -533,6 +460,18 @@ function init_archetypes()
    add( g_anim, a_flame.table_anm["idle"] )
    add( g_anim, a_flame.table_anm["move"] )
    add( g_anim, a_flame.table_anm["hit"] )
+
+   a_skull = {}
+   a_skull.table_anm = {}
+   a_skull.table_anm["move"] = {n="skull_move",c=true,k={94,94,94,94,94,95,95,95,95,95}}
+   a_skull.table_anm["hit"]  = {n="skull_hit",c=false,k={67,67,67}}
+   a_skull.cvisualbox = aabb_init( 0, 0, 8, 8 )
+   a_skull.cmovebox   = aabb_init( 4, 3, 7, 4 )
+   a_skull.cdamagbox  = nil
+   a_skull.cattackbox = aabb_init( 4, 3, 7, 4 )
+   a_skull.cspeed = 3
+   add( g_anim, a_skull.table_anm["move"] )
+   add( g_anim, a_skull.table_anm["hit"] )
 
    -- collectables
    a_orb = {}
@@ -556,9 +495,20 @@ function init_archetypes()
    a_torch.cspeed = 0
    add( g_anim, a_torch.table_anm["idle"] )
 
-   -- extra
-   add( g_anim, {n="skull",c=true,k={94,94,94,94,94,95,95,95,95,95}} )
-
+   --bosses
+   a_skullboss = {}
+   a_skullboss.table_anm = {}
+   a_skullboss.table_anm["idle"] = {n="skullboss_idle",c=true,k={138,138,138,140,140,140}}
+   a_skullboss.table_anm["move"] = {n="skullboss_move",c=true,k={138}}
+   a_skullboss.table_anm["attack"] = {n="skullboss_attack",c=true,k={142}}
+   a_skullboss.cvisualbox = aabb_init( 0, 0, 16, 16 )
+   a_skullboss.cmovebox   = aabb_init( 0, 0, 16, 16 )
+   a_skullboss.cdamagebox = aabb_init( 0, 0, 16, 16 )
+   a_skullboss.cattackbox = aabb_init( 0, 0, 16, 16 )
+   a_skullboss.cspeed = 1
+   a_skullboss.chealth = 10
+   add( g_anim, a_skullboss.table_anm["idle"] )
+   add( g_anim, a_skullboss.table_anm["attack"] )
 end
 
 ----------------------------------------------------------------
@@ -935,12 +885,14 @@ function new_room_process_map_cell( r, room_j, room_i, map_j, map_i )
    elseif m == 77 then
       e = new_enemy( a_stalactite, pos, new_action_wait_and_drop( pos ) )
    elseif m == 247 then
-      e = new_enemy( a_flame, pos, new_action_idle() )
+      e = new_enemy( a_flame, pos, new_action_wait_and_drop( pos ) )
       --these are not enemies but entities
    elseif m == 201 then
       e = new_enemy( a_torch, pos, new_action_idle() )
    elseif m == 64 then
       e = new_enemy( a_orb, pos, new_action_idle() )
+   elseif m == 138 then
+      e = new_enemy( a_skullboss, pos, new_action_idle() )
    end
 
    -- init common part and add enemy
@@ -1036,15 +988,13 @@ end
 function new_action_patrol( start_pos, sign_x )
    return { name = "patrol", anm_id = "move", t = 0, finished = false,
             p_start = start_pos,
-            --dir = vec2_init( sign_x, 0 ),
-            sub = new_action_move( vec2_add( start_pos, vec2_init( 128*sign_x, 0 ) ) ) }
+            sub = new_action_move_on_ground( vec2_add( start_pos, vec2_init( 128*sign_x, 0 ) ) ) }
 end
 
 -- wait on spot, ram to player when on same ground level, accessible and within range
 function new_action_wait_and_ram( start_pos, sign_x )
    return { name = "wait_and_ram", anm_id = "idle", t = 0, finished = false,
             p_start = start_pos,
-            --dir = vec2_init( sign_x, 0 ),
             sub = new_action_idle() }
 end
 
@@ -1052,7 +1002,6 @@ end
 function new_action_wait_and_fly( start_pos, sign_x )
    return { name = "wait_and_fly", anm_id = "idle", t = 0, finished = false,
             p_start = start_pos,
-            --dir = vec2_init( sign_x, 0 ),
             sub = new_action_idle() }
 end
 
@@ -1067,7 +1016,7 @@ end
 function new_action_patrol_and_jump( start_pos, sign_x )
    return { name = "patrol_and_jump", anm_id = "move", t = 0, finished = false,
             p_start = start_pos,
-            sub = new_action_patrol( start_pos, sign_x) }
+            sub = new_action_patrol( start_pos, sign_x ) }
 end
 
 -- follow nav points todo use list instead of just 2!!
@@ -1220,7 +1169,7 @@ function update_action_shoot( entity, action )
    -- local dist = vec2_length( diff )
    -- entity.sign = sgn( diff.x )
    if action.t > action.timeout then
-      local e = new_enemy( a_spit,
+      local e = new_enemy( a_skull,--a_spit,
                            entity.p1,
                            new_action_particle( vec2_init( entity.sign*a_spit.cspeed, 0 ), vec2_init(0,0) ) )
       e.health = 1000--todo
@@ -1315,11 +1264,12 @@ function update_action_jump_on_ground( entity, action )
 end
 
 function update_action_patrol( entity, action )
-   action.sub = update_action_move_on_ground( entity, action.sub )
+   --action.sub = update_action_move_on_ground( entity, action.sub )
+   action.sub = update_action( entity, action.sub )
    if action.sub.finished then
       entity.sign = -entity.sign
       -- move along direction hacked as move towards out-of-room target, so that never arrives there
-      action.sub = new_action_move( vec2_add( entity.p1, vec2_init( 128*entity.sign, 0 ) ) )
+      action.sub = new_action_move_on_ground( vec2_add( entity.p1, vec2_init( 128*entity.sign, 0 ) ) )
    end
    return action
 end
@@ -1376,10 +1326,9 @@ function update_action_wait_and_drop( entity, action )
       return nil
    end
 
-   -- think
    if action.sub.name == "idle" then
-      local diff_x = player.p1.x - entity.p1.x
-      if abs(diff_x) < 8 then
+      --fall if below
+      if abs(player.p1.x - entity.p1.x) < 8 and player.p1.y > entity.p1.y then
          --action.sub = new_action_fall( a_level.cgravity_y )
          action.sub = new_action_particle( vec2_zero(), vec2_init(0,a_level.cgravity_y) )
       end
@@ -1557,13 +1506,22 @@ function aabb_init_2( _pmin, _pmax )
             max = _pmax }
 end
 
--- invert l/r an aabb (assuming sprite size 8... this is ugly)
+-- invert l/r an aabb (assuming sprite size 8 or 16... this is ugly)
 function aabb_apply_sign_x( aabb, sign_x )
-   if sign_x < 0 then
-      return { min = vec2_init( 7 - aabb.max.x, aabb.min.y ),
-               max = vec2_init( 7 - aabb.min.x, aabb.max.y ) }
+   if aabb.max.x - aabb.min.y > 8 then
+      if sign_x < 0 then
+         return { min = vec2_init( 15 - aabb.max.x, aabb.min.y ),
+                  max = vec2_init( 15 - aabb.min.x, aabb.max.y ) }
+      else
+         return aabb
+      end
    else
-      return aabb
+      if sign_x < 0 then
+         return { min = vec2_init( 7 - aabb.max.x, aabb.min.y ),
+                  max = vec2_init( 7 - aabb.min.x, aabb.max.y ) }
+      else
+         return aabb
+      end
    end
 end
 
@@ -1928,7 +1886,7 @@ ad1fadadadad1fadad1fadadadad1fadadadadadadadadadadadadadadadad1f8080255115520808
 00025255566666565666566556666665505050504ff4f4ff4343433b030b30300300300000101000000980000800090000000000000000000067776676677600
 0000252566655566566566656665656560505050f4f4ff4ff4444344030300b00303b03000010000080a90800080080000000000000000000677667777777760
 0000025256565666666556566655566666555555ffff4f4f4444f4440b0300300b00303000001000800980080080980000000000000000000777777777777770
-00000022566666655565665665666665605050504f4f4fff4f444444300303b0030030b00001010089a9aa9898a99a8900000000000000006777666777767776
+00000022566666655565665665666665605050504f4f4fff4f444444300303b0030030b00001010089a9aa9808a99a8000000000000000006777666777767776
 00000002656655565656665566566656505050504f4ff4f4444444f44b33b4340b30300300100010899aa9988a9a9a9800000000000000007766777677776677
 0000000256556656666665666556556550505050f4f4f4f44444f444b43b4343434b33b4110000010889998089a8898900000000000000007777667777777777
 22222222055556500655555005565560525252520000889aa9998000000000000000000000090000000090000400400478787777877777787777777777777776
@@ -1942,15 +1900,15 @@ ad1fadadadad1fadad1fadadadad1fadadadadadadadadadadadadadadadad1f8080255115520808
 
 __gff__
 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000001010000000000000000000000000000000000000008080000000000080808000000000000020208808080000000000000804040404001010101010000000000000000000040010202010500000000000000000000
-0202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020240404040404040404040400040404040010101014040014040404040404040400101010101400140404000000000404001010101400202000000004000004040
+0202020202020202020200000000000002020202020202020202000000000000020202020202020202020000000000000202020202020202020200000000000040404040404040404040400040404040010101014040014040404040404040400101010101400140404000000000404001010101400202000000004000004040
 __map__
 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000c2c300000000000000
 0000000000000000000000000000000000000000000000000000000000000000000000000000c2f4f4f4f4c3000000000000000000000000000000000000000000635d00000000006300006300000000000000000000000000000000000000000000000000000000000000000000000000000000000000626200000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000c2c14d00004dc0c30000000000000000000000000000000000000000636363006300000000004d00000000000000000000000000000000000000000000000000000000000000000000000000000000000000626200000000000000
 0000000000000000000000000000000000c2f4f4f4f4f4f4f4f4f4f4f4f4f4c300c2f4f4f4c1000000000000c0f4f4f4f4f4f4f4c300c2f4f4f4f4c30040000000634dc063636300000000000000000000000000000000000000000000000000000000000000000000eeef0000000000000000000000c26262c3000000000000
-0000000000000000c5d400000000000000f4c1004dc0f4c1c0c1c0f4c1c0c1c0f4c10000000000000000000000c0f4c10000004dc0f4c100000000c0f4f0000000630000000000e063000000000063f000000000000000000000000000000000000000000000000000feff00000000000000000000c262626262c30000000000
-00000000c5000000d5c400000000000000f400000000f400000000f400000000f400000000000000000000000000f4000000000000f4000000000000f40000000063000000000000c0630000000063000000000000000000000000000000000000000000000000000000000000cccd0000000000006262c7c862620000000000
+0000000000000000c5d400008a00000000f4c1004dc0f4c1c0c1c0f4c1c0c1c0f4c10000000000000000000000c0f4c10000004dc0f4c100000000c0f4f0000000630000000000e063000000000063f000000000000000000000000000000000000000000000000000feff00000000000000000000c262626262c30000000000
+00000000c5000000d5c400000000000000f4f7000000f400000000f400000000f400000000000000000000000000f4000000000000f4000000000000f40000000063000000000000c0630000000063000000000000000000000000000000000000000000000000000000000000cccd0000000000006262c7c862620000000000
 00000000d5c40000c5d40000000000c400f400000000f400000000f400000000f400000000000000000000000000f4000000000000f4000000000000f400000000630000000000000000005d6300630000000000000070607800000000000000000000000000000000cecf0000dcdd0000000000006262d7d862620000000000
 0000000000d5c4c5d40000c50000c5d400f400000000f400000000f400000000f40000f7000000000000000000636363f000000000f4000000000000f4000000006300000000636363636363c1006300000000000070607070000000000000000000000000cecfcdccdedfcd00000000000000c3c2626262626262c3c2000000
 000000000000d5e5000000d5c4c5d40000f400000000f400000000f400000000f4006363630000000000e0f000c0f4c10000000000f4000000000000f4000000006300000063c1000000000000006300000000006070706070600000000078000000000000dedfcecfdddcddcecf0000000000f4c1626262626262c0f4000000
