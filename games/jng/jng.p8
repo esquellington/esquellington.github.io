@@ -49,12 +49,11 @@ function _draw()
 
    cls()
 
-   -- map background
+   --bckgnd
    map(level.room_coords.x * 16,
        level.room_coords.y * 16,
        0,0,16,16,
        0x7f )
-   -- rect(0,0,127,127,1)
 
    --enemies
    for e in all(room.enemies) do
@@ -64,7 +63,7 @@ function _draw()
             act = act.sub
          end
          local anm = e.a.table_anm[act.anm_id]
-         if e.a == a_skullboss then
+         if e.a == a_skullboss or e.a == a_flameboss then
             spr( anm.k[ 1 + act.t % #anm.k ],
                  e.p1.x, e.p1.y,
                  2,2,
@@ -113,20 +112,13 @@ function _draw()
    end
    pal()
 
-   --bullets
+   --player bullets
    for b in all(room.bullets) do
-      local anm = b.a.table_anm[b.s]
-      if anm.c then
-         spr( anm.k[1+b.t%#anm.k],
-              b.p1.x, b.p1.y,
-              1,1,
-              player.sign<0 )
-      else
-         spr( anm.k[ min(1+b.t,#anm.k) ],
-              b.p1.x, b.p1.y,
-              1,1,
-              player.sign<0 )
-      end
+      local anm = b.a.table_anm[b.anm_id]
+      spr( anm.k[1+b.t%#anm.k],
+           b.p1.x, b.p1.y,
+           1,1,
+           player.sign<0 )
    end
 
    --vfx
@@ -144,7 +136,6 @@ function _draw()
        0x80 )
 
    if debug.mode > 0 then
-
       --entity boxes
       for e in all(room.entities) do
          if debug.mode == 1 and e.a.cmovebox != nil then
@@ -236,7 +227,7 @@ function init_archetypes()
    --level
    a_level = {}
    a_level.cnumrooms = vec2_init( 8, 3 )
-   a_level.cgravity_y = 0.5 --pixels/frame^2
+   a_level.cgravity_y = 0.5
 
    --rooms
    a_room = {}
@@ -275,8 +266,7 @@ function init_archetypes()
    --caterpillar
    a_caterpillar = {}
    a_caterpillar.table_anm = {}
-   a_caterpillar.table_anm["idle"] = {n="wrm_idle",c=true,k={48}} --unused
-   a_caterpillar.table_anm["move"] = {n="wrm_move",c=true,k={48,48,48,48,48,48,49,49,49,49,49,49}}
+   a_caterpillar.table_anm["move"] = {c=true,k={48,48,48,48,48,48,49,49,49,49,49,49}}
    a_caterpillar.cvisualbox = aabb_init( 0, 0, 8, 8 )
    a_caterpillar.cmovebox   = aabb_init( 0, 0, 8, 8 )
    a_caterpillar.cdamagebox = aabb_init( 1, 4, 7, 8 )
@@ -288,8 +278,7 @@ function init_archetypes()
    --caterpillar2 (angry)
    a_caterpillar2 = {}
    a_caterpillar2.table_anm = {}
-   a_caterpillar2.table_anm["idle"] = {n="wrm2_idle",c=true,k={50}} --unused
-   a_caterpillar2.table_anm["move"] = {n="wrm2_move",c=true,k={50,50,50,50,51,51,51,51}}
+   a_caterpillar2.table_anm["move"] = {c=true,k={50,50,50,50,51,51,51,51}}
    a_caterpillar2.cvisualbox = aabb_init( 0, 0, 8, 8 )
    a_caterpillar2.cmovebox   = aabb_init( 0, 0, 8, 8 )
    a_caterpillar2.cdamagebox = aabb_init( 0, 2, 8, 8 )
@@ -301,8 +290,7 @@ function init_archetypes()
    --saw
    a_saw = {}
    a_saw.table_anm = {}
-   a_saw.table_anm["idle"] = {n="saw_idle",c=true,k={60}} --unused
-   a_saw.table_anm["move"] = {n="saw_move",c=true,k={60,61,62,63}}
+   a_saw.table_anm["move"] = {c=true,k={60,61,62,63}}
    a_saw.cvisualbox = aabb_init( 0, 0, 8, 8 )
    a_saw.cmovebox   = aabb_init( 0, 0, 8, 8 )
    a_saw.cdamagbox  = nil
@@ -314,9 +302,9 @@ function init_archetypes()
    --stalactite
    a_stalactite = {}
    a_stalactite.table_anm = {}
-   a_stalactite.table_anm["idle"] = {n="stalactite_idle",c=true,k={77}}
+   a_stalactite.table_anm["idle"] = {c=true,k={77}}
    a_stalactite.table_anm["move"] = a_stalactite.table_anm["idle"]
-   a_stalactite.table_anm["hit"]  = {n="stalactite_hit",c=true,k={78,78,78}}
+   a_stalactite.table_anm["hit"]  = {c=true,k={78,78,78}}
    a_stalactite.cvisualbox = aabb_init( 0, 0, 8, 8 )
    a_stalactite.cmovebox   = aabb_init( 1, 1, 7, 7 )
    a_stalactite.cdamagbox  = nil
@@ -329,12 +317,12 @@ function init_archetypes()
    --grunt
    a_grunt = {}
    a_grunt.table_anm = {}
-   a_grunt.table_anm["idle"]   = {n="grunt_idle",c=true,k={102,102,102,102,102,102,103,103,103,103,103,103}}
-   a_grunt.table_anm["move"] = {n="grunt_move",c=true,k={105,105,105,105,104,104,104,104}}
-   a_grunt.table_anm["attack"] = {n="grunt_attack",c=true,k={105,105,105,105,105,105,105,105,
-                                                             104,104,104,104,104,104,
-                                                             105,105,105,105,105,105,105,105,
-                                                             106,106,106,106,106,106}}
+   a_grunt.table_anm["idle"] = {c=true,k={102,102,102,102,102,102,103,103,103,103,103,103}}
+   a_grunt.table_anm["move"] = {c=true,k={105,105,105,105,104,104,104,104}}
+   a_grunt.table_anm["attack"] = {c=true,k={105,105,105,105,105,105,105,105,
+                                            104,104,104,104,104,104,
+                                            105,105,105,105,105,105,105,105,
+                                            106,106,106,106,106,106}}
    a_grunt.cvisualbox = aabb_init( 0, 0, 8, 8 )
    a_grunt.cmovebox   = aabb_init( 0, 0, 8, 8 )
    a_grunt.cdamagebox = aabb_init( 0, 0, 8, 8 )
@@ -349,9 +337,8 @@ function init_archetypes()
    --cthulhu
    a_cthulhu = {}
    a_cthulhu.table_anm = {}
-   a_cthulhu.table_anm["idle"]   = {n="cthulhu_idle",c=true,k={86}} --unused
-   a_cthulhu.table_anm["move"]   = {n="cthulhu_move",c=true,k={86,86,86,86,87,87,87,87,88,88,88,88,89,89,89,89}}
-   a_cthulhu.table_anm["attack"] = {n="cthulhu_attack",c=false,k={90,90,91,91}}
+   a_cthulhu.table_anm["move"]   = {c=true,k={86,86,86,86,87,87,87,87,88,88,88,88,89,89,89,89}}
+   a_cthulhu.table_anm["attack"] = {c=false,k={90,90,91,91}}
    a_cthulhu.cvisualbox = aabb_init( 0, 0, 8, 8 )
    a_cthulhu.cmovebox   = aabb_init( 0, 0, 8, 8 )
    a_cthulhu.cdamagebox = aabb_init( 0, 0, 8, 8 )
@@ -364,8 +351,7 @@ function init_archetypes()
    --mouse
    a_mouse = {}
    a_mouse.table_anm = {}
-   a_mouse.table_anm["idle"] = {n="mouse_idle",c=true,k={118}} --unused
-   a_mouse.table_anm["move"] = {n="mouse_move",c=true,k={118,118,118,118,118,119,119,119,119,119}}
+   a_mouse.table_anm["move"] = {c=true,k={118,118,118,118,118,119,119,119,119,119}}
    a_mouse.cvisualbox = aabb_init( 0, 0, 8, 8 )
    a_mouse.cmovebox   = aabb_init( 2, 0, 6, 8 )
    a_mouse.cdamagebox = nil
@@ -377,23 +363,23 @@ function init_archetypes()
    --bird
    a_bird = {}
    a_bird.table_anm = {}
-   a_bird.table_anm["idle"] = {n="bird_idle",c=true,k={120,120,120,120,121,121,121,121}} --unused
-   a_bird.table_anm["move"] = {n="bird_move",c=true,k={122,122,122,122,122,123,123,123,123,123}}
+   a_bird.table_anm["idle"] = {c=true,k={120,120,120,120,121,121,121,121}}
+   a_bird.table_anm["move"] = {c=true,k={122,122,122,122,122,123,123,123,123,123}}
    a_bird.cvisualbox = aabb_init( 0, 0, 8, 8 )
    a_bird.cmovebox   = aabb_init( 2, 0, 6, 8 )
    a_bird.cdamagebox = aabb_init( 0, 0, 8, 8 )
    a_bird.cattackbox = aabb_init( 0, 0, 8, 8 )
    a_bird.cspeed = 1.25
    a_bird.chealth = 1
+   add( g_anim, a_bird.table_anm["idle"] )
    add( g_anim, a_bird.table_anm["move"] )
 
    --arachno
    a_arachno = {}
    a_arachno.table_anm = {}
-   a_arachno.table_anm["idle"] = {n="arachno_idle",c=true,k={124}} --unused
-   a_arachno.table_anm["move"] = {n="arachno_move",c=true,k={124,124,124,124,124,125,125,125,125,125}}
-   a_arachno.table_anm["jump_up"] = {n="arachno_jup",c=true,k={126}} --up
-   a_arachno.table_anm["jump_down"] = {n="arachno_jdn",c=true,k={127}} --down
+   a_arachno.table_anm["move"] = {c=true,k={124,124,124,124,124,125,125,125,125,125}}
+   a_arachno.table_anm["jump_up"] = {c=true,k={126}} --up
+   a_arachno.table_anm["jump_down"] = {c=true,k={127}} --down
    a_arachno.cvisualbox = aabb_init( 0, 0, 8, 8 )
    a_arachno.cmovebox   = aabb_init( 2, 0, 6, 8 )
    a_arachno.cdamagebox = aabb_init( 0, 0, 8, 8 )
@@ -401,13 +387,11 @@ function init_archetypes()
    a_arachno.cspeed = 0.75
    a_arachno.chealth = 2
    add( g_anim, a_arachno.table_anm["move"] )
-   add( g_anim, a_arachno.table_anm["attack"] )
 
    --teeth
    a_teeth = {}
    a_teeth.table_anm = {}
-   a_teeth.table_anm["idle"] = {n="teeth_idle",c=true,k={68}} --unused
-   a_teeth.table_anm["move"] = {n="teeth_move",c=true,k={68,68,68,69,69,69,69,69,69,69,69,70,70,70}}
+   a_teeth.table_anm["move"] = {c=true,k={68,68,68,69,69,69,69,69,69,69,69,70,70,70}}
    a_teeth.cvisualbox = aabb_init( 0, 0, 8, 8 )
    a_teeth.cmovebox   = aabb_init( 0, 0, 8, 8 )
    a_teeth.cdamagbox  = nil
@@ -419,21 +403,21 @@ function init_archetypes()
    --bullets
    a_blast = {}
    a_blast.table_anm = {}
-   a_blast.table_anm["default"] = {n="blast",c=true,k={1,1,1,2,2,2,3,3,3,2,2}}
-   a_blast.table_anm["hit"]     = {n="blast_hit",c=true,k={4,4,5,5,6,6,6,7}}
+   a_blast.table_anm["move"] = {c=true,k={1,1,1,2,2,2,3,3,3,2,2}}
+   a_blast.table_anm["hit"]     = {c=true,k={4,4,5,5,6,6,6,7}}
    a_blast.cvisualbox = aabb_init( 0, 0, 8, 8 )
    a_blast.cmovebox   = nil
    a_blast.cdamagbox  = nil
    a_blast.cattackbox = aabb_init( 4, 3, 7, 4 )
    a_blast.cspeed = 4
-   add( g_anim, a_blast.table_anm["default"] )
+   add( g_anim, a_blast.table_anm["move"] )
    add( g_anim, a_blast.table_anm["hit"] )
 
    --enemy bullets
    a_spit = {}
    a_spit.table_anm = {}
-   a_spit.table_anm["move"] = {n="spit_move",c=true,k={66}}
-   a_spit.table_anm["hit"]  = {n="spit_hit",c=false,k={67,67,67}}
+   a_spit.table_anm["move"] = {c=true,k={66}}
+   a_spit.table_anm["hit"]  = {c=false,k={67,67,67}}
    a_spit.cvisualbox = aabb_init( 0, 0, 8, 8 )
    a_spit.cmovebox   = aabb_init( 4, 3, 7, 4 )
    a_spit.cdamagbox  = nil
@@ -444,14 +428,14 @@ function init_archetypes()
 
    a_flame = {}
    a_flame.table_anm = {}
-   a_flame.table_anm["idle"] = {n="flame_idle",c=true,k={247,247,247,248,248,248}}
-   a_flame.table_anm["move"] = {n="flame_move",c=true,k={249,249,249,250,250,250}}
-   a_flame.table_anm["hit"] = {n="flame_hit",c=false,k={234,234,234,235,235,235, --hit
-                                                        247,247,247,248,248,248, --remain 30 frames (1 sec)
-                                                        247,247,247,248,248,248,
-                                                        247,247,247,248,248,248,
-                                                        247,247,247,248,248,248,
-                                                        247,247,247,248,248,248 }}
+   a_flame.table_anm["idle"] = {c=true,k={247,247,247,248,248,248}}
+   a_flame.table_anm["move"] = {c=true,k={249,249,249,250,250,250}}
+   a_flame.table_anm["hit"] = {c=false,k={234,234,234,235,235,235, --hit
+                                          247,247,247,248,248,248, --remain 30 frames (1 sec)
+                                          247,247,247,248,248,248,
+                                          247,247,247,248,248,248,
+                                          247,247,247,248,248,248,
+                                          247,247,247,248,248,248 }}
    a_flame.cvisualbox = aabb_init( 0, 0, 8, 8 )
    a_flame.cmovebox   = aabb_init( 0, 0, 8, 8 )
    a_flame.cdamagbox  = nil
@@ -463,8 +447,8 @@ function init_archetypes()
 
    a_skull = {}
    a_skull.table_anm = {}
-   a_skull.table_anm["move"] = {n="skull_move",c=true,k={94,94,94,94,94,95,95,95,95,95}}
-   a_skull.table_anm["hit"]  = {n="skull_hit",c=false,k={67,67,67}}
+   a_skull.table_anm["move"] = {c=true,k={94,94,94,94,94,95,95,95,95,95}}
+   a_skull.table_anm["hit"]  = {c=false,k={67,67,67}}
    a_skull.cvisualbox = aabb_init( 0, 0, 8, 8 )
    a_skull.cmovebox   = aabb_init( 4, 3, 7, 4 )
    a_skull.cdamagbox  = nil
@@ -476,7 +460,7 @@ function init_archetypes()
    -- collectables
    a_orb = {}
    a_orb.table_anm = {}
-   a_orb.table_anm["idle"] = {n="orb_idle",c=true,k={64,64,64,65,65,65}}
+   a_orb.table_anm["idle"] = {c=true,k={64,64,64,65,65,65}}
    a_orb.cvisualbox = aabb_init( 0, 0, 8, 8 )
    a_orb.cmovebox   = aabb_init( 0, 0, 8, 8 )
    a_orb.cdamagbox  = nil
@@ -487,7 +471,7 @@ function init_archetypes()
    --env entities
    a_torch = {}
    a_torch.table_anm = {}
-   a_torch.table_anm["idle"] = {n="torch_idle",c=true,k={201,201,201,202,202,202}}
+   a_torch.table_anm["idle"] = {c=true,k={201,201,201,202,202,202}}
    a_torch.cvisualbox = aabb_init( 0, 0, 8, 8 )
    a_torch.cmovebox   = nil
    a_torch.cdamagbox  = nil
@@ -498,17 +482,31 @@ function init_archetypes()
    --bosses
    a_skullboss = {}
    a_skullboss.table_anm = {}
-   a_skullboss.table_anm["idle"] = {n="skullboss_idle",c=true,k={138,138,138,140,140,140}}
-   a_skullboss.table_anm["move"] = {n="skullboss_move",c=true,k={138}}
-   a_skullboss.table_anm["attack"] = {n="skullboss_attack",c=true,k={142}}
+   a_skullboss.table_anm["idle"] = {c=true,k={138,138,138,140,140,140}}
+   a_skullboss.table_anm["move"] = {c=true,k={138}}
+   a_skullboss.table_anm["attack"] = {c=true,k={142}}
    a_skullboss.cvisualbox = aabb_init( 0, 0, 16, 16 )
    a_skullboss.cmovebox   = aabb_init( 0, 0, 16, 16 )
-   a_skullboss.cdamagebox = aabb_init( 0, 0, 16, 16 )
+   a_skullboss.cdamagebox = aabb_init( 4, 0, 13, 9 )
    a_skullboss.cattackbox = aabb_init( 0, 0, 16, 16 )
    a_skullboss.cspeed = 1
    a_skullboss.chealth = 10
    add( g_anim, a_skullboss.table_anm["idle"] )
    add( g_anim, a_skullboss.table_anm["attack"] )
+
+   a_flameboss = {}
+   a_flameboss.table_anm = {}
+   a_flameboss.table_anm["idle"] = {c=true,k={170,170,170,172,172,172}}
+   a_flameboss.table_anm["move"] = {c=true,k={170}}
+   a_flameboss.table_anm["attack"] = {c=true,k={174}}
+   a_flameboss.cvisualbox = aabb_init( 0, 0, 16, 16 )
+   a_flameboss.cmovebox   = aabb_init( 0, 0, 16, 16 )
+   a_flameboss.cdamagebox = aabb_init( 0, 0, 16, 16 )
+   a_flameboss.cattackbox = aabb_init( 0, 0, 16, 16 )
+   a_flameboss.cspeed = 1
+   a_flameboss.chealth = 10
+   add( g_anim, a_flameboss.table_anm["idle"] )
+   add( g_anim, a_flameboss.table_anm["attack"] )
 end
 
 ----------------------------------------------------------------
@@ -893,6 +891,8 @@ function new_room_process_map_cell( r, room_j, room_i, map_j, map_i )
       e = new_enemy( a_orb, pos, new_action_idle() )
    elseif m == 138 then
       e = new_enemy( a_skullboss, pos, new_action_idle() )
+   elseif m == 170 then
+      e = new_enemy( a_flameboss, pos, new_action_idle() )
    end
 
    -- init common part and add enemy
@@ -1390,7 +1390,7 @@ end
 function new_bullet_blast( _p, _s )
 --   debug.paused = true
    local b = { a = a_blast,
-               s = "default",
+               anm_id = "move",
                t = 0,
                p0 = _p,
                p1 = _p,
@@ -1817,14 +1817,14 @@ cdcddcdcd1dd1d1d566666650d0c0d0cd0c0d00000c0d0c023383200000232020023202002320020
 dcdccdcc1d1dd1d156666665d0d0d0700d07000000070d0d0233320000232000023200000023200023200002232000207770070777700707000a8706009a8777
 cdcddcdd1111111155666655070c0c0dc0c0c0000000c07023222320023232002323000002323200323200003230000270770606787706060000006000000000
 dddddddd1111111155555555d0c0d0c00c0d0700000c0d0c32323233232323203232000023232320232320002323000067706565677065650000000000000000
-22222222111111111111111122222222444444444444444400066600000666000006660000666000000006600000000000000000000666000000666000000000
-42929242d1c1c1d151616151526662554ff44fff4f4fffef00688860006888600068886006888600000068860000000000000000006888600006888600000000
-49999244dcccc1dd5666615556666255ff4ff4f4f4f4fef4004668600446686004446860446686000441448600000c000000c000004668600014468600000000
-49999244dcccc1dd566661555666625544444444444ee4440444160044411640044444444441600041114486000007c000007c00044416000414416000000000
-222222221111111111111111222222224444444444ee44440441114044111144011444444411110011114460000007cd00007cd0044111404114410000000000
-242929241d1c1c1d15161615552666254f4f4f4f4eeff4ff441111444411114401111144011111401111444000007ccd0007ccd0441111444111444000000000
-44299994dd1ccccd5516666555266665f4fff4f4fef44ff44411114401111100d111100001111140511114400007ccdd007ccdd0441111440111144000000000
-44299994dd1ccccd5516666555266665444444444444444400d5550000d55500d115550005551d00551144400ccccdd00cccddd000d5550000555d0000000000
+22222222111111111111111122222222444444442222222200066600000666000006660000666000000006600000000000000000000666000000666000000000
+42929242d1c1c1d151616151526662554ff44fff5266625500688860006888600068886006888600000068860000000000000000006888600006888600000000
+49999244dcccc1dd5666615556666255ff4ff4f456666255004668600446686004446860446686000441448600000c000000c000004668600014468600000000
+49999244dcccc1dd566661555666625544444444566665550444160044411640044444444441600041114486000007c000007c00044416000414416000000000
+2222222211111111111111112222222244444444222222220441114044111144011444444411110011114460000007cd00007cd0044111404114410000000000
+242929241d1c1c1d15161615552666254f4f4f4f55266625441111444411114401111144011111401111444000007ccd0007ccd0441111444111444000000000
+44299994dd1ccccd5516666555266665f4fff4f4552666654411114401111100d111100001111140511114400007ccdd007ccdd0441111440111144000000000
+44299994dd1ccccd5516666555266665444444445566666500d5550000d55500d115550005551d00551144400ccccdd00cccddd000d5550000555d0000000000
 2222222244f444440000000000000000222222224494444400000000000000000000000000000000000000000000000000000000000000000000222222000000
 4999944444444f4400060000000060004cc7ddd444444944000000000000000000000000000000000dd000000002200002222000002222000002028202220000
 499994444f44444406050060060050604cccddd4494444440000000000000000000220000022000000dd200000112800000282000000282000001120d0282000
@@ -1899,24 +1899,24 @@ ad1fadadadad1fadad1fadadadad1fadadadadadadadadadadadadadadadad1f8080255115520808
 20000000065565500555555005655550525252520008999aa9880000a99aa99a9a8a9a890089a0000009a8004004004000000777766000000000077776600000
 
 __gff__
-0000000000000000000000000000000000000000000000000000000000000000000000000000000000000001010000000000000000000000000000000000000008080000000000080808000000000000020208808080000000000000804040404001010101010000000000000000000040010202010500000000000000000000
+0000000000000000000000000000000000000000000000000000000000000000000000000000000000000001010000000000000000000000000000000000000008080000000000080808000000000000020208808080000000000000804040404001010101400000000000000000000040010202010500000000000000000000
 0202020202020202020200000000000002020202020202020202000000000000020202020202020202020000000000000202020202020202020200000000000040404040404040404040400040404040010101014040014040404040404040400101010101400140404000000000404001010101400202000000004000004040
 __map__
 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000c2c300000000000000
 0000000000000000000000000000000000000000000000000000000000000000000000000000c2f4f4f4f4c3000000000000000000000000000000000000000000635d00000000006300006300000000000000000000000000000000000000000000000000000000000000000000000000000000000000626200000000000000
-00000000000000000000000000000000000000000000000000000000000000000000000000c2c14d00004dc0c30000000000000000000000000000000000000000636363006300000000004d00000000000000000000000000000000000000000000000000000000000000000000000000000000000000626200000000000000
+000000000000aa000000000000000000000000000000000000000000000000000000000000c2c14d00004dc0c30000000000000000000000000000000000000000636363006300000000004d00000000000000000000000000000000000000000000000000000000000000000000000000000000000000626200000000000000
 0000000000000000000000000000000000c2f4f4f4f4f4f4f4f4f4f4f4f4f4c300c2f4f4f4c1000000000000c0f4f4f4f4f4f4f4c300c2f4f4f4f4c30040000000634dc063636300000000000000000000000000000000000000000000000000000000000000000000eeef0000000000000000000000c26262c3000000000000
 0000000000000000c5d400008a00000000f4c1004dc0f4c1c0c1c0f4c1c0c1c0f4c10000000000000000000000c0f4c10000004dc0f4c100000000c0f4f0000000630000000000e063000000000063f000000000000000000000000000000000000000000000000000feff00000000000000000000c262626262c30000000000
 00000000c5000000d5c400000000000000f4f7000000f400000000f400000000f400000000000000000000000000f4000000000000f4000000000000f40000000063000000000000c0630000000063000000000000000000000000000000000000000000000000000000000000cccd0000000000006262c7c862620000000000
 00000000d5c40000c5d40000000000c400f400000000f400000000f400000000f400000000000000000000000000f4000000000000f4000000000000f400000000630000000000000000005d6300630000000000000070607800000000000000000000000000000000cecf0000dcdd0000000000006262d7d862620000000000
 0000000000d5c4c5d40000c50000c5d400f400000000f400000000f400000000f40000f7000000000000000000636363f000000000f4000000000000f4000000006300000000636363636363c1006300000000000070607070000000000000000000000000cecfcdccdedfcd00000000000000c3c2626262626262c3c2000000
 000000000000d5e5000000d5c4c5d40000f400000000f400000000f400000000f4006363630000000000e0f000c0f4c10000000000f4000000000000f4000000006300000063c1000000000000006300000000006070706070600000000078000000000000dedfcecfdddcddcecf0000000000f4c1626262626262c0f4000000
-00000000c5c400e5c5d40000d5e5c4c500f400000000f400000000f4006600636363634d0000e0f0000000000000f4000000000000f4000000000056f40000000063000063c10000000000000000630000000000706070707070646464646400000000cccd0000dedd000000decccc00000000f40063636363636340f4000000
-5c0000d5d4d5c4e5d400000000d5e5d400f400000000f40000566363636363636363d10000000000000000000000f400000000e06363000000000063c10000000063635c00760063636363000000630000000000707470607460000000000000000000dcdd000000000000ce0000cecf00c3c2636363c66363c6636363c3c200
-5c5c00000000d5e5000000000000e50000f400000000f400636363636363636371d1000000000000000000000000f4000000000000f46300000000000000000000c06363636363c1000000000063c1000000006360707070607000000000000000000000000000000000630000dedf0000f4c163636363c1c063636363c0f400
-fbe40000000000e5000000000000e50000f4000000636363636363637575757575000000000000e0f00000000000f4000000000000f4006300000000000000000000c0f4000000000000000063c10063630000c07060e5e570600000000000000000000000000063cecf00cf0063000000f40063c663c18a8bc063c66300f400
-fbe4e82b2ce8e8e53072d60030e8e500c2f4c363757575757575757575757575755c000063000000005c006300c2f4c300000066c2f4c3750000000000660063630000f4000000000066637575006363636300006070e5e560700000000000f2f2000000007c63c1dedf000000c06300c2f4c3636363009a9b00636363c2f4c3
+00000000c5c400e5c5d40000d5e5c4c500f400000000f400000000f4006600636363634d0000e0f0000000000000f4000000000000f4000000000056f40000000063000063c10000000000000000630000000000706070707070646464646400000000cccd0000dedd000000decccc00000000f40065656565656540f4000000
+5c0000d5d4d5c4e5d400000000d5e5d400f400000000f40000566363636363636363d10000000000000000000000f400000000e06363000000000063c10000000063635c00760063636363000000630000000000707470607460000000000000000000dcdd000000000000ce0000cecf00c3c2656565c66565c6656565c3c200
+5c5c00000000d5e5000000000000e50000f400000000f400636363636363636371d1000000000000000000000000f4000000000000f46300000000000000000000c06363636363c1000000000063c1000000006360707070607000000000000000000000000000000000630000dedf0000f4c165656565c1c065656565c0f400
+fbe40000000000e5000000000000e50000f4000000636363636363637575757575000000000000e0f00000000000f4000000000000f4006300000000000000000000c0f4000000000000000063c10063630000c07060e5e570600000000000000000000000000063cecf00cf0063000000f40065c665c18a8bc065c66500f400
+fbe4e82b2ce8e8e53072d60030e8e500c2f4c363757575757575757575757575755c000063000000005c006300c2f4c300000066c2f4c3750000000000660063630000f4000000000066637575006363636300006070e5e560700000000000f2f2000000007c63c1dedf000000c06300c2f4c3656565009a9b00656565c2f4c3
 fbe6717171e6e6e671e6e65ce6e671e6636363636363636363717171717171717171717163737372727373636363636362626262626275757562626262626262626262626262626262757575757575626262626262626262626250f3505050506262626262626250505050505050626262626262626262626262626262626262
 fb00d071717171717171717171717171717171717171717171717171717171717171717163636363636363636363636363637171717171717171717171717171626262626271717171717171717171717171717171717171715151515151515151f3f3f3f3f3f371717171717171717171717171717171717171717171717171
 fb0000d071d1d07171717171717171717171717171717171717171717171d0d1d07171d100f4c10000c0f40000000000000000000000000000000000d071d1000000000000d0d10000000000004d00000000000000d07171715151515151515151f3f3f3f3f3f37171717171f3717171717171717171d1d0d1d071d1d0717171

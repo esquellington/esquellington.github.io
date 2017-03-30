@@ -125,6 +125,7 @@
     - Gen flashing white pixels that fade up/directionally to impact)
   - Dark areas using flickering/dither
 * BUGS
+** TODO AABB sizes are a bit wrong when inverted (seem to drift left)
 ** TODO ground collision bugs when hit
 ** TODO miissing or late wall/ceiling collision when changing rooms
    - make room change more robust by placing char strictly at the
