@@ -409,7 +409,7 @@ function init_archetypes()
    a_blast.cvisualbox = aabb_init( 0, 0, 8, 8 )
    a_blast.cmovebox   = nil
    a_blast.cdamagbox  = nil
-   a_blast.cattackbox = aabb_init( 4, 3, 7, 4 )
+   a_blast.cattackbox = aabb_init( 4, 3, 8, 4 )
    a_blast.cspeed = 4
    add( g_anim, a_blast.table_anm["move"] )
    add( g_anim, a_blast.table_anm["hit"] )
@@ -422,7 +422,7 @@ function init_archetypes()
    a_spit.cvisualbox = aabb_init( 0, 0, 8, 8 )
    a_spit.cmovebox   = aabb_init( 4, 3, 7, 4 )
    a_spit.cdamagbox  = nil
-   a_spit.cattackbox = aabb_init( 4, 3, 7, 4 )
+   a_spit.cattackbox = aabb_init( 3, 3, 6, 4 )
    a_spit.cspeed = 3
 
    add( g_anim, a_spit.table_anm["move"] )
@@ -450,7 +450,7 @@ function init_archetypes()
    a_skull = {}
    a_skull.table_anm = {}
    a_skull.table_anm["move"] = {c=true,k={94,94,94,94,94,95,95,95,95,95}}
-   a_skull.table_anm["hit"]  = a_skull.table_anm["move"] --TODO
+   a_skull.table_anm["hit"]  = a_skull.table_anm["move"] --todo
    a_skull.cvisualbox = aabb_init( 0, 0, 8, 8 )
    a_skull.cmovebox   = aabb_init( 4, 3, 7, 4 )
    a_skull.cdamagbox  = nil
@@ -488,7 +488,7 @@ function init_archetypes()
    a_skullboss.table_anm["attack"] = {c=true,k={142}}
    a_skullboss.cvisualbox = aabb_init( 0, 0, 16, 16 )
    a_skullboss.cmovebox   = aabb_init( 0, 0, 16, 16 )
-   a_skullboss.cdamagebox = aabb_init( 4, 0, 13, 9 )
+   a_skullboss.cdamagebox = aabb_init( 4, -1, 13, 9 )
    a_skullboss.cattackbox = aabb_init( 0, 0, 16, 16 )
    a_skullboss.cspeed = 1
    a_skullboss.chealth = 10
@@ -896,8 +896,9 @@ function new_room_process_map_cell( r, room_j, room_i, map_j, map_i )
       e = new_enemy( a_torch, pos, new_action_idle() )
    elseif m == 64 then
       e = new_enemy( a_orb, pos, new_action_idle() )
+      --bosses
    elseif m == 138 then
-      e = new_enemy( a_skullboss, pos, new_action_shoot( 30 ) ) --new_action_idle() )
+      e = new_enemy( a_skullboss, pos, new_action_skullboss() )
    elseif m == 170 then
       e = new_enemy( a_flameboss, pos, new_action_idle() )
    end
@@ -975,7 +976,7 @@ end
 
 -- shoot with cooldown timeout
 function new_action_shoot( _timeout )
-   return { name = "shoot", anm_id = "attack", t = 0, finished = false,
+   return { name = "shoot", anm_id = "attack", t = _timeout-1, finished = false,
             timeout = _timeout }
 end
 
@@ -1044,6 +1045,11 @@ function new_action_oscillate( mid_pos, _dir, _amplitude, _period )
             period = _period }
 end
 
+function new_action_skullboss()
+   return { name = "skullboss", anm_id = "idle", t = 0, finished = false,
+            sub = new_action_idle() }
+end
+
 ----------------------------------------------------------------
 function update_action( _entity, _action )
    local act = _action
@@ -1076,6 +1082,8 @@ function update_action( _entity, _action )
       act = update_action_wait_and_drop( _entity, _action )
    elseif _action.name == "patrol_and_jump" then
       act = update_action_patrol_and_jump( _entity, _action )
+   elseif _action.name == "skullboss" then
+      act = update_action_skullboss( _entity, _action )
    end
 
    if act != nil and act.sub != nil then
@@ -1114,6 +1122,8 @@ function print_action( _action, _x, _y )
       print("w&d/".._action.sub.name, _x, _y )
    elseif _action.name == "patrol_and_jump" then
       print("p&j/".._action.sub.name, _x, _y )
+   elseif _action.name == "skullboss" then
+      print("sboss/".._action.sub.name, _x, _y )
    end
 end
 
@@ -1171,24 +1181,27 @@ function update_action_hit( entity, action )
    end
 end
 
-function projectile_apply_sign_x_8( v, sign_x ) if sign_x < 0 then return vec2_init(-v.x,v.y) else return v end end
+function projectile_apply_sign_x( p, sign_x, size_x )
+   if sign_x < 0 then
+      return vec2_init(size_x-p.x-8,p.y)
+   else
+      return v
+   end
+end
 
 function update_action_shoot( entity, action )
-   -- local diff = vec2_sub( player.p1, entity.p1 )
-   -- local dist = vec2_length( diff )
-   -- entity.sign = sgn( diff.x )
-   if action.t > action.timeout then
-      local st = entity.a.cshoottype
+   if action.t % action.timeout == 0 then
+      local a = entity.a
+      local st = a.cshoottype
       local e = new_enemy( st,
-                           vec2_add( entity.p1, projectile_apply_sign_x_8( entity.a.cshootpos, entity.sign ) ),
+                           vec2_add( entity.p1, projectile_apply_sign_x( a.cshootpos, entity.sign, a.cvisualbox.max.x - a.cvisualbox.min.x ) ),
                            new_action_particle( vec2_init( entity.sign*st.cspeed, 0 ), vec2_init(0,0) ) )
-      e.health = 1000--todo
+      --e.health = 1000
       e.hit_timeout = 0
       e.sign = entity.sign
-
       add( room.enemies, e )
       add( room.entities, e )
-      action.t = 0
+      --debug.paused = true
    end
    return action
 end
@@ -1274,7 +1287,6 @@ function update_action_jump_on_ground( entity, action )
 end
 
 function update_action_patrol( entity, action )
-   --action.sub = update_action_move_on_ground( entity, action.sub )
    action.sub = update_action( entity, action.sub )
    if action.sub.finished then
       entity.sign = -entity.sign
@@ -1391,6 +1403,21 @@ end
 
 function update_action_oscillate( entity, action )
    entity.p1 = vec2_add( action.p_mid, vec2_scale( action.amplitude * sin( action.t/action.period ), action.dir ) )
+   return action
+end
+
+function update_action_skullboss( entity, action )
+   action.sub = update_action( entity, action.sub )
+   -- idle intro phase
+   if action.sub.name == "idle" then
+      if action.sub.t > 30 then --1s
+         action.sub = new_action_shoot(30)
+      end
+   elseif action.sub.name == "shoot" then
+      if action.sub.t > 120 then
+         action.sub = new_action_idle()
+      end
+   end
    return action
 end
 
@@ -1813,9 +1840,9 @@ __gfx__
 022eee0002e2eee0022eee0002e2eee0000000000000000000000000000000006000677007077760000007700700766670077770070066600000000006007777
 0000000000000000000000000000800000000000000000000000000000000000252555252525552502002002002002000002000205555aa0000000000000bb00
 000000000000000000000000000000e00000000000000000000000000000000025cccc2525666625000000002002200202020000055aa550000a000000bbb904
-00cccc0000cccc00000028e0000e00000000000000008e700000000000bb00005c6996c2565566622022220002022020000e020000a555000a000a00bbb45444
-0c6996c00c6aa6c00022228e00000200000000000008e70000000000003b00005c9aa9c556566565022ee220002ee200202e200200555000050500050b405500
-0c9aa9c00ca99ac0000028e00002000070000000008e7000000000000003b0002c9aa9c22666656202eeee20202ee200002e20200005a00050500a00b0055000
+00cccc0000cccc000028e000000e00000000000000008e700000000000bb00005c6996c2565566622022220002022020000e020000a555000a000a00bbb45444
+0c6996c00c6aa6c022228e0000000200000000000008e70000000000003b00005c9aa9c556566565022ee220002ee200202e200200555000050500050b405500
+0c9aa9c00ca99ac00028e0000002000070000000008e7000000000000003b0002c9aa9c22666656202eeee20202ee200002e20200005a00050500a00b0055000
 0c9aa9c00ca99ac00000000000000080e70000000827000000028e800003b0005c6996c556655565022ee220002ee202002e2000000a000000a0500500553330
 0c6996c00c6aa6c0000000000000e0008e70000082e70000008e77780000b00052cccc25526666250022220002022000020e020000050000a055550055000003
 00cccc0000cccc000000000000000000082720002e28700002e7000700003b005255255252552552200000020020002000020002000a0000055a5aa000000000
@@ -1926,7 +1953,7 @@ __map__
 5c0000d5d4d5c4e5d400000000d5e5d400f400000000f40000566363636363636363d10000000000000000000000f400000000e06363000000000063c10000000063635c00760063636363000000630000000000707470607460000000000000000000dcdd000000000000ce0000cecf00c3c2656565c66565c6656565c3c200
 5c5c00000000d5e5000000000000e50000f400000000f400636363636363636371d1000000000000000000000000f4000000000000f46300000000000000000000c06363636363c1000000000063c1000000006360707070607000000000000000000000000000000000630000dedf0000f4c165656565c1c065656565c0f400
 fbe40000000000e5000000000000e50000f4000000636363636363637575757575000000000000e0f00000000000f4000000000000f4006300000000000000000000c0f4000000000000000063c10063630000c07060e5e570600000000000000000000000000063cecf00cf0063000000f40065c665c18a8bc065c66500f400
-fbe4e82b2ce8e8e53072d60030e8e500c2f4c363757575757575757575757575755c000063000000005c006300c2f4c300000066c2f4c3750000000000660063630000f4000000000066637575006363636300006070e5e560700000000000f2f2000000007c63c1dedf000000c06300c2f4c3656565009a9b00656565c2f4c3
+fbe4e82b2ce8e8e53072d60030e8e500c2f4c363757575757575757575757575755c000063000000005c006300c2f4c300000066c2f4c3750000000000660063630000f4000000000066637575006363636300006070e5e560700000000000f2f2000000007c63c1dedf000000c06300c2f4c3656565569a9b00656565c2f4c3
 fbe6717171e6e6e671e6e65ce6e671e6636363636363636363717171717171717171717163737372727373636363636362626262626275757562626262626262626262626262626262757575757575626262626262626262626250f3505050506262626262626250505050505050626262626262626262626262626262626262
 fb00d071717171717171717171717171717171717171717171717171717171717171717163636363636363636363636363637171717171717171717171717171626262626271717171717171717171717171717171717171715151515151515151f3f3f3f3f3f371717171717171717171717171717171717171717171717171
 fb0000d071d1d07171717171717171717171717171717171717171717171d0d1d07171d100f4c10000c0f40000000000000000000000000000000000d071d1000000000000d0d10000000000004d00000000000000d07171715151515151515151f3f3f3f3f3f37171717171f3717171717171717171d1d0d1d071d1d0717171
