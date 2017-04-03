@@ -486,6 +486,8 @@ function init_archetypes()
    a_skullboss.table_anm["idle"] = {c=true,k={138,138,138,140,140,140}}
    a_skullboss.table_anm["move"] = {c=true,k={138}}
    a_skullboss.table_anm["attack"] = {c=true,k={142}}
+   a_skullboss.table_anm["jump_up"] = {c=true,k={142}}
+   a_skullboss.table_anm["jump_down"] = {c=true,k={138}}
    a_skullboss.cvisualbox = aabb_init( 0, 0, 16, 16 )
    a_skullboss.cmovebox   = aabb_init( 0, 0, 16, 16 )
    a_skullboss.cdamagebox = aabb_init( 4, -1, 13, 9 )
@@ -959,10 +961,10 @@ function new_action_move( target_pos )
             p_target = target_pos }
 end
 
-function new_action_fall( _gravity_y )
-   return { name = "fall", anm_id = "move", t = 0, finished = false,
-            v_y = 0, gravity_y = _gravity_y }
-end
+-- function new_action_fall( _gravity_y )
+--    return { name = "fall", anm_id = "move", t = 0, finished = false,
+--             v_y = 0, gravity_y = _gravity_y }
+-- end
 
 -- ballistic projectile, play "hit" and disappear on impact. supersedes "fall"
 function new_action_particle( _v, _a )
@@ -1028,13 +1030,13 @@ function new_action_patrol_and_jump( start_pos, sign_x )
 end
 
 -- follow nav points todo use list instead of just 2!!
-function new_action_path( start_pos, end_pos )
-   return { name = "path", anm_id = "move", t = 0, finished = false,
-            p_start = start_pos,
-            p_end = end_pos,
-            sub = new_action_move( end_pos ),
-            phase = 1 }
-end
+-- function new_action_path( start_pos, end_pos )
+--    return { name = "path", anm_id = "move", t = 0, finished = false,
+--             p_start = start_pos,
+--             p_end = end_pos,
+--             sub = new_action_move( end_pos ),
+--             phase = 1 }
+-- end
 
 -- oscillate from midpos along dir with sinusoid of given amplitude (in pixels) and period (in frames)
 function new_action_oscillate( mid_pos, _dir, _amplitude, _period )
@@ -1070,8 +1072,8 @@ function update_action( _entity, _action )
       --idle do nothing
    elseif _action.name == "move" then
       act = update_action_move( _entity, _action )
-   elseif _action.name == "fall" then
-      act = update_action_fall( _entity, _action )
+   -- elseif _action.name == "fall" then
+   --    act = update_action_fall( _entity, _action )
    elseif _action.name == "part" then
       act = update_action_particle( _entity, _action )
    elseif _action.name == "hit" then
@@ -1131,14 +1133,14 @@ function update_action_move( entity, action )
    return action
 end
 
-function update_action_fall( entity, action )
-   if not action.finished then
-      action.v_y += action.gravity_y
-      entity.p1.y += action.v_y
-      --todo finish if hit ground??
-   end
-   return action
-end
+-- function update_action_fall( entity, action )
+--    if not action.finished then
+--       action.v_y += action.gravity_y
+--       entity.p1.y += action.v_y
+--       --todo finish if hit ground??
+--    end
+--    return action
+-- end
 
 function update_action_particle( entity, action )
    action.vel = vec2_add( action.vel, action.acc )
@@ -1171,7 +1173,7 @@ function projectile_apply_sign_x( p, sign_x, size_x )
    if sign_x < 0 then
       return vec2_init(size_x-p.x-8,p.y)
    else
-      return v
+      return p
    end
 end
 
@@ -1184,9 +1186,9 @@ function update_action_shoot( entity, action )
       if (action.t / action.timeout) % 2 > 0 then phase = 0.5 end
       local e = new_enemy( st,
                            pos,
+                           new_action_particle( vec2_init( entity.sign*st.cspeed, -4 ), vec2_init(0,0.5) ) )
                            --new_action_particle( vec2_init( entity.sign*st.cspeed, 0 ), vec2_init(0,0) ) )
-                           new_action_sinusoid( pos, vec2_init( entity.sign, 0 ), st.cspeed, 10, 30, phase ) )
-      --e.health = 1000
+                           --new_action_sinusoid( pos, vec2_init( entity.sign, 0 ), st.cspeed, 10, 30, phase ) )
       e.hit_timeout = 0
       e.sign = entity.sign
       add( room.enemies, e )
@@ -1258,7 +1260,7 @@ function update_action_jump_on_ground( entity, action )
       action.v.y += slowdown_factor * level.a.cgravity_y
       local speed = vec2_length( action.v )
       if dist < speed then
-                        -- success, closer than 1 timestep advance
+         -- success, closer than 1 timestep advance
          entity.p1 = action.p_target
          action.finished = true
       else
@@ -1341,7 +1343,6 @@ function update_action_wait_and_drop( entity, action )
    if action.sub.name == "idle" then
       --fall if below
       if abs(player.p1.x - entity.p1.x) < 8 and player.p1.y > entity.p1.y then
-         --action.sub = new_action_fall( a_level.cgravity_y )
          action.sub = new_action_particle( vec2_zero(), vec2_init(0,a_level.cgravity_y) )
       end
    else
@@ -1375,21 +1376,21 @@ function update_action_patrol_and_jump( entity, action )
    return action
 end
 
-function update_action_path( entity, action )
-   local sub = update_action_move( entity, action.sub )
-   if sub.finished then
-      if action.phase == 1 then
-         action.sub = new_action_move( action.p_start )
-         action.phase = 2
-      else
-         action.sub = new_action_move( action.p_end )
-         action.phase = 1
-      end
-   else
-      -- keep action, already updated
-   end
-   return action
-end
+-- function update_action_path( entity, action )
+--    local sub = update_action_move( entity, action.sub )
+--    if sub.finished then
+--       if action.phase == 1 then
+--          action.sub = new_action_move( action.p_start )
+--          action.phase = 2
+--       else
+--          action.sub = new_action_move( action.p_end )
+--          action.phase = 1
+--       end
+--    else
+--       -- keep action, already updated
+--    end
+--    return action
+-- end
 
 function update_action_oscillate( entity, action )
    entity.p1 = vec2_add( action.p_mid, vec2_scale( action.amplitude * sin( action.t/action.period ), action.dir ) )
@@ -1412,6 +1413,11 @@ function update_action_skullboss( entity, action )
       end
    elseif action.sub.name == "shoot" then
       if action.sub.t > 120 then
+         --action.sub = new_action_idle()
+         action.sub = new_action_jump_on_ground( vec2_add( player.p1, vec2_init(0,-8) ) )
+      end
+   elseif action.sub.name == "jong" then
+      if action.sub.finished then
          action.sub = new_action_idle()
       end
    end
@@ -1567,7 +1573,6 @@ end
 
 function apply_borders( p, box )
    return vec2_init( clamp( p.x, 0-box.min.x, room.a.csizes.x-box.max.x ),
-                     --clamp( p.y, 0-box.min.y, room.a.csizes.y-box.max.y ) )
                      clamp( p.y, 0-box.min.y-8, room.a.csizes.y-box.max.y ) )
 end
 
@@ -1800,8 +1805,6 @@ function ccd_sort_collisions( collisions, b_first_only )
 
    return collisions
 end
-
-
 ----------------------------------------------------------------
 
 __gfx__
@@ -1953,7 +1956,7 @@ __map__
 5c5c00000000d5e5000000000000e50000f400000000f400636363636363636371d1000000000000000000000000f4000000000000f46300000000000000000000c06363636363c1000000000063c1000000006360707070607000000000000000000000000000000000630000dedf0000000000000065c1c065656565c0f400
 fbe40000000000e5000000000000e50000f4000000636363636363637575757575000000000000e0f00000000000f4000000000000f4006300000000000000000000c0f4000000000000000063c10063630000c07060e5e570600000000000000000000000000063cecf00cf0063000000e200000000c18a8bc065c66500f400
 fbe4e82b2ce8e8e53072d60030e8e500c2f4c363757575757575757575757575755c000063000000005c006300c2f4c300000066c2f4c3750000000000660063630000f4000000000066637575006363636300006070e5e560700000000000f1f1000000007c63c1dedf000000c06300c2f4e20000e2009a9b00656565c2f4c3
-fbe6717171e6e6e671e6e65ce6e671e6636363636363636363717171717171717171717163737372727373636363636362626262626275757562626262626262626262626262626262757575757575626262626262626262626250f1505050506262626262626250505050505050626262626262e1e162626262626262626262
+fbe6717171e6e6e671e6e65ce6e671e6636363636363636363717171717171717171717163737372727373636363636362626262626275757562626262626262626262626262626262757575757575626262626262626262626250f150505050626262626262625050505050505062626262e1e1e1e1e1626262626262626262
 fb00d071717171717171717171717171717171717171717171717171717171717171717163636363636363636363636363637171717171717171717171717171626262626271717171717171717171717171717171717171715151515151515151f1f1f1f1f1f171717171717171717171717171717171717171717171717171
 fb0000d071d1d07171717171717171717171717171717171717171717171d0d1d07171d100f4c10000c0f40000000000000000000000000000000000d071d1000000000000d0d10000000000004d00000000000000d07171715151515151515151f1f1f1f1f1f17171717171f3717171717171717171d1d0d1d071d1d0717171
 d0000000fb0000d0717171717171d1d071d1d0717171d14dd071d14d71d100000000000000f400470000f40000000000000000660000000000000000004d00000000006600000000000000000000000000000000000000d0715151f151515171f1f1f1f1f1f1717171f3717171717171717171d071d10000000071000071d171
@@ -1968,7 +1971,7 @@ fb0000000000000000000000000000000000000000d071717171717171d10000f4e9e9e9e9e9e9e9
 71d1000000000000000000000000000000000000d071d100000000d07171d100f4c3e9e9e9e9e9e9e9e9e9e9e9e9c2f4f4c3e9e9e9e9e9e9e9e9e1c1e9e9e9e9e9e9e9e9e9e9e93ce9e9e9e9e95dc0e1e1000000000059000055f154555554000000000000000000c0c300c20000c1f40000c2c100c2c10000c0c300c0c300f5
 7171d100000000000000000000000000000000d071d1000000000000d071d3f1f1f1f1f1f1f1f1f1f1f1f1f1f1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e9e9e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e10000000000f1f10055555455545400000000000000000000f400c0c30000f40000f40000f400000000f40000f400f5
 f17171d10000000000000000000000000000d071d1000000000000000075f1f1f10000000000f1000000003c00000000000000000000000000000000c0f10000000000000000000000000000000000e1e100000000000000f1f1555455545400000000000000000000f40000f40000f40000f40000f400aaab00f40000f400f5
-f1f1d10032000000f1720000000032f1f1d071d10040f10000440000007575755d770000003c00000000e100000000f1f1000000003c00000000003c00000000000000003c0000000000003f000000000000000000000000005555f15050f10000e7e8e8e7e74e0056f2f7f7f2f7f7f100c2f400f74900babb0049f700f4c3f5
+f1f1d10032000000f1720000000032f1f1d071d10040f10000440000007575755d770000003c00000000e100000000f1f1000000003c00000000003c00000000000000003c0000000000003f000000000000000000000000005555f15050f10000e7e8e8e7e74e0056f1f7f7f1f7f7f100c2f400f74900babb0049f700f4c3f5
 f1f1f100f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f17171e6e6e6e6e6e6e6e6e6e6e6e6e6e6e671f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1
 __sfx__
 01040000350703507030070330702b070300702b070300603505027040270402b030290202b020300103001027050250501f0501c0501d0502105024050210501e0501d0501c05039050370501e050170500f050
