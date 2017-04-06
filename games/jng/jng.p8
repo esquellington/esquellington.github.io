@@ -49,6 +49,20 @@ function _draw()
 
    cls()
 
+   --Lightning TODO use prob distrib with given expectation period
+   --(start time) and random duration (alternate white/blue during
+   --interval)
+   if game.t % 60 == 0 then
+      pal(0,7)
+      palt(0,false)
+   elseif game.t % 59 == 0 then
+      pal(0,12)
+      palt(0,false)
+   else
+      pal()
+      palt(0,true)
+   end
+
    --bckgnd
    map(level.room_coords.x * 16,
        level.room_coords.y * 16,
@@ -226,12 +240,12 @@ function init_archetypes()
 
    --level
    a_level = {}
-   a_level.cnumrooms = vec2_init( 8, 3 )
+   a_level.cnumrooms = v2init( 8, 3 )
    a_level.cgravity_y = 0.5
 
    --rooms
    a_room = {}
-   a_room.csizes = vec2_init( 128, 128 )
+   a_room.csizes = v2init( 128, 128 )
 
    ---- entities
    --player
@@ -251,7 +265,7 @@ function init_archetypes()
    a_player.cmovebox   = aabb_init( 1, 1, 7, 7 )
    a_player.cdamagebox = aabb_init( 2, 1, 6, 7 )
    a_player.cattackbox = nil
-   a_player.cmaxvel = vec2_init( 5, 5 )
+   a_player.cmaxvel = v2init( 5, 5 )
    add( g_anim, a_player.table_anm["idle"] )
    add( g_anim, a_player.table_anm["run"] )
    add( g_anim, a_player.table_anm["jump"] )
@@ -345,7 +359,7 @@ function init_archetypes()
    a_cthulhu.cattackbox = aabb_init( 1, 3, 7, 8 )
    a_cthulhu.cspeed = 0.4
    a_cthulhu.chealth = 2
-   a_cthulhu.cshootpos = vec2_init( 7, 0 )
+   a_cthulhu.cshootpos = v2init( 7, 0 )
    add( g_anim, a_cthulhu.table_anm["move"] )
    add( g_anim, a_cthulhu.table_anm["attack"] )
 
@@ -494,7 +508,7 @@ function init_archetypes()
    a_skullboss.cattackbox = aabb_init( 0, 0, 16, 16 )
    a_skullboss.cspeed = 1
    a_skullboss.chealth = 10
-   a_skullboss.cshootpos = vec2_init( 10, 6 )
+   a_skullboss.cshootpos = v2init( 10, 6 )
    add( g_anim, a_skullboss.table_anm["idle"] )
    add( g_anim, a_skullboss.table_anm["attack"] )
 
@@ -530,10 +544,10 @@ function init_game()
    player = { a = a_player,
               state = 1,
               t = 0,
-              p0 = vec2_init( 3.5*8, 3*8 ),
-              p1 = vec2_init( 3.5*8, 3*8 ),
+              p0 = v2init( 3.5*8, 3*8 ),
+              p1 = v2init( 3.5*8, 3*8 ),
               sign = 1,
-              v = vec2_zero(),
+              v = v2zero(),
               on_ground = false,
               is_mutated = true,
               jump_s = 0,  --original jump direction
@@ -542,7 +556,7 @@ function init_game()
    --level
    level = {}
    level.a = a_level
-   level.room_coords = vec2_init( 7, 0 )
+   level.room_coords = v2init( 7, 0 )
    --room
    room = new_room( a_room, level.room_coords )
 end
@@ -576,7 +590,7 @@ function update_player()
       then
          player.t = 0
          player.state = 1
-         player.v = vec2_zero()
+         player.v = v2zero()
       end
 
       -- idle/run
@@ -587,18 +601,18 @@ function update_player()
             player.t = 0
             player.state = 2
             player.sign = -1
-            player.v = vec2_init(-1.25,0)
+            player.v = v2init(-1.25,0)
          elseif btn(1) then
             player.t = 0
             player.state = 2
             player.sign = 1
-            player.v = vec2_init(1.25,0)
+            player.v = v2init(1.25,0)
          end
       elseif player.state==2 then --run
          if not (btn(0) or btn(1)) then
             player.t = 0
             player.state = 1
-            player.v = vec2_zero()
+            player.v = v2zero()
          elseif
             (player.sign>0
                 and (btn(0)
@@ -611,7 +625,7 @@ function update_player()
             player.sign = -player.sign
             player.v.x = -player.v.x
          else --reset run speed, otherwise sometimes gets stuck in corners when revesing direction
-            player.v = vec2_init(player.sign*1.25,0)
+            player.v = v2init(player.sign*1.25,0)
          end
       end
 
@@ -699,16 +713,16 @@ function update_player()
 
    local movebox = aabb_apply_sign_x(player.a.cmovebox,player.sign)
    local damagebox = aabb_apply_sign_x(player.a.cdamagebox,player.sign)
-   local acc = vec2_init( 0, level.a.cgravity_y )
-   local pred_vel = vec2_clamp( vec2_add( player.v, acc ),
-                                vec2_scale(-1,player.a.cmaxvel),
+   local acc = v2init( 0, level.a.cgravity_y )
+   local pred_vel = v2clamp( v2add( player.v, acc ),
+                                v2scale(-1,player.a.cmaxvel),
                                 player.a.cmaxvel )
 
    -- ccd-advance
    local p1
    local num_hits_map
    -- first handle collisions with solid map
-   p1, num_hits_map, player.handled_collisions = advance_ccd_box_vs_map( player.p0, vec2_add( player.p0, pred_vel ), movebox, 1, false )
+   p1, num_hits_map, player.handled_collisions = advance_ccd_box_vs_map( player.p0, v2add( player.p0, pred_vel ), movebox, 1, false )
    -- then handle collisions with damage map2 important: we do it in a
    -- second pass to allow non-damage tiles to prevent the player from
    -- hitting damage tiles if already supported/deflected by
@@ -722,8 +736,8 @@ function update_player()
    for e in all(room.enemies) do
       if e.a.cattackbox != nil  then
          local attackbox = aabb_apply_sign_x(e.a.cattackbox,e.sign)
-         local attack_aabb = aabb_init_2( vec2_add( attackbox.min, e.p1 ),
-                                          vec2_add( attackbox.max, e.p1 ) )
+         local attack_aabb = aabb_init_2( v2add( attackbox.min, e.p1 ),
+                                          v2add( attackbox.max, e.p1 ) )
          if ccd_box_vs_aabb( player.p0, p2, damagebox, attack_aabb ) != nil then
             hit_enemy = true
          end
@@ -732,7 +746,7 @@ function update_player()
 
    -- advance
    player.p1 = p2
-   player.v = vec2_sub( player.p1, player.p0 )
+   player.v = v2sub( player.p1, player.p0 )
 
    -- process hits if not invulnerable
    if (hit_enemy or num_hits_map != 0)
@@ -741,11 +755,11 @@ function update_player()
       player.state = 8 --hit todo decide hit/hitb
       player.invulnerability_t = 60
       player.sign = -player.sign
-      player.v = vec2_init( player.sign * 1.5, -3 )
+      player.v = v2init( player.sign * 1.5, -3 )
    end
 
    -- check on ground for next frame
-   player.ground_ccd_1 = ccd_box_vs_map( player.p0, vec2_add( player.p1, vec2_init(0,1) ),
+   player.ground_ccd_1 = ccd_box_vs_map( player.p0, v2add( player.p1, v2init(0,1) ),
                                          movebox,
                                          1+2, --flags: 0 is_solid, 1 is_damage
                                          false ) --all collisions
@@ -795,7 +809,7 @@ end
 
 function advance_ccd_box_vs_map( p0, p1, box, flags, b_first_only )
 
-   local d = vec2_sub( p1, p0 )
+   local d = v2sub( p1, p0 )
    local remaining_time = 1 --1 step remaining
    local collisions_ccd = ccd_box_vs_map( p0, p1,
                                           box,
@@ -812,18 +826,18 @@ function advance_ccd_box_vs_map( p0, p1, box, flags, b_first_only )
          then
             add( handled_collisions, c )
             -- move up to toi
-            p0 = vec2_add( p0, vec2_scale( 0.99*c.interval.min, d ) )
+            p0 = v2add( p0, v2scale( 0.99*c.interval.min, d ) )
             -- clip interval
             local remaining_fraction = (1-c.interval.min) --interval [min..1] becomes new [0..1]
             remaining_time *= remaining_fraction
             -- correct displacement
-            local dn = vec2_dot( d, c.normal )
+            local dn = v2dot( d, c.normal )
             if dn < 0 then
-               d = vec2_sub( d, vec2_scale( dn, c.normal ) )
+               d = v2sub( d, v2scale( dn, c.normal ) )
                num_hits += 1
             end
             -- predict during remaining fraction along corrected displacement
-            p1 = vec2_add( p0, vec2_scale( remaining_fraction, d ) )
+            p1 = v2add( p0, v2scale( remaining_fraction, d ) )
             b_retest = true
          end
       end
@@ -866,7 +880,7 @@ end
 function new_room_process_map_cell( r, room_j, room_i, map_j, map_i )
    local m = mget( map_j, map_i )
    local e = nil
-   local pos = vec2_init( room_j*8, room_i*8 )
+   local pos = v2init( room_j*8, room_i*8 )
    if m == 48 then
       e = new_enemy( a_caterpillar, pos, new_action_patrol( pos, -1 ) )
    elseif m == 50 then
@@ -884,9 +898,9 @@ function new_room_process_map_cell( r, room_j, room_i, map_j, map_i )
    elseif m == 124 then
       e = new_enemy( a_arachno, pos, new_action_patrol_and_jump( pos, -1 ) )
    elseif m == 60 then --saw l2r
-      e = new_enemy( a_saw, pos, new_action_oscillate( pos, vec2_init(1,0), 4*8, 300 ) )
+      e = new_enemy( a_saw, pos, new_action_oscillate( pos, v2init(1,0), 4*8, 300 ) )
    elseif m == 63 then --saw r2l
-      e = new_enemy( a_saw, pos, new_action_oscillate( pos, vec2_init(-1,0), 4*8, 300 ) )
+      e = new_enemy( a_saw, pos, new_action_oscillate( pos, v2init(-1,0), 4*8, 300 ) )
    elseif m == 68 then
       e = new_enemy( a_teeth, pos, new_action_patrol( pos, -1 ) )
    elseif m == 77 then
@@ -998,7 +1012,7 @@ end
 function new_action_patrol( start_pos, sign_x )
    return { name = "ptrl", anm_id = "move", t = 0, finished = false,
             p_start = start_pos,
-            sub = new_action_move_on_ground( vec2_add( start_pos, vec2_init( 128*sign_x, 0 ) ) ) }
+            sub = new_action_move_on_ground( v2add( start_pos, v2init( 128*sign_x, 0 ) ) ) }
 end
 
 -- wait on spot, ram to player when on same ground level, accessible and within range
@@ -1052,7 +1066,7 @@ function new_action_sinusoid( _pos, _dir, _speed, _amplitude, _period, _phase )
    return { name = "sinu", anm_id = "move", t = 0, finished = false,
             start_pos = _pos,
             dir = _dir,
-            normal = vec2_perp( _dir ),
+            normal = v2perp( _dir ),
             speed = _speed,
             amplitude = _amplitude,
             period = _period,
@@ -1119,11 +1133,11 @@ end
 
 function update_action_move( entity, action )
    if not action.finished then
-      local diff = vec2_sub( action.p_target, entity.p1 )
-      local dist = vec2_length( diff )
+      local diff = v2sub( action.p_target, entity.p1 )
+      local dist = v2length( diff )
       if dist > entity.a.cspeed then
-         local dir = vec2_scale( 1.0/dist, diff )
-         entity.p1 = vec2_add( entity.p0, vec2_scale( min(entity.a.cspeed,dist), dir ) )
+         local dir = v2scale( 1.0/dist, diff )
+         entity.p1 = v2add( entity.p0, v2scale( min(entity.a.cspeed,dist), dir ) )
          entity.sign = sgn( dir.x )
       else
          entity.p1 = action.p_target
@@ -1143,8 +1157,8 @@ end
 -- end
 
 function update_action_particle( entity, action )
-   action.vel = vec2_add( action.vel, action.acc )
-   entity.p1 = vec2_add( entity.p0, action.vel )
+   action.vel = v2add( action.vel, action.acc )
+   entity.p1 = v2add( entity.p0, action.vel )
    --todo if collision, change to "action_impact" and die afterwards
    local movebox = aabb_apply_sign_x( entity.a.cmovebox, entity.sign )
    local map_collisions = ccd_box_vs_map( entity.p0,
@@ -1154,7 +1168,7 @@ function update_action_particle( entity, action )
                                           true ) --first-only
    if #map_collisions > 0 then
       local map_c = map_collisions[1]
-      entity.p1 = vec2_add( entity.p0, vec2_scale( 0.99*map_c.interval.min, action.vel ) )
+      entity.p1 = v2add( entity.p0, v2scale( 0.99*map_c.interval.min, action.vel ) )
       return new_action_hit()
    else
       return action
@@ -1171,7 +1185,7 @@ end
 
 function projectile_apply_sign_x( p, sign_x, size_x )
    if sign_x < 0 then
-      return vec2_init(size_x-p.x-8,p.y)
+      return v2init(size_x-p.x-8,p.y)
    else
       return p
    end
@@ -1181,14 +1195,14 @@ function update_action_shoot( entity, action )
    if action.t % action.timeout == 0 then
       local a = entity.a
       local st = a.cshoottype
-      local pos = vec2_add( entity.p1, projectile_apply_sign_x( a.cshootpos, entity.sign, a.cvisualbox.max.x - a.cvisualbox.min.x ) )
+      local pos = v2add( entity.p1, projectile_apply_sign_x( a.cshootpos, entity.sign, a.cvisualbox.max.x - a.cvisualbox.min.x ) )
       local phase = 0
       if (action.t / action.timeout) % 2 > 0 then phase = 0.5 end
       local e = new_enemy( st,
                            pos,
-                           new_action_particle( vec2_init( entity.sign*st.cspeed, -4 ), vec2_init(0,0.5) ) )
-                           --new_action_particle( vec2_init( entity.sign*st.cspeed, 0 ), vec2_init(0,0) ) )
-                           --new_action_sinusoid( pos, vec2_init( entity.sign, 0 ), st.cspeed, 10, 30, phase ) )
+                           new_action_particle( v2init( entity.sign*st.cspeed, -4 ), v2init(0,0.5) ) )
+                           --new_action_particle( v2init( entity.sign*st.cspeed, 0 ), v2init(0,0) ) )
+                           --new_action_sinusoid( pos, v2init( entity.sign, 0 ), st.cspeed, 10, 30, phase ) )
       e.hit_timeout = 0
       e.sign = entity.sign
       add( room.enemies, e )
@@ -1204,21 +1218,21 @@ function update_action_move_on_ground( entity, action )
       local p_forward
       local p_feet
       if entity.sign > 0 then
-         p_forward = vec2_add( entity.p1,
-                               vec2_init( movebox.max.x, 0.5*(movebox.max.y-movebox.min.y) ) )
-         p_feet = vec2_add( entity.p1,
-                            vec2_init( movebox.max.x-1, movebox.max.y ) )
+         p_forward = v2add( entity.p1,
+                               v2init( movebox.max.x, 0.5*(movebox.max.y-movebox.min.y) ) )
+         p_feet = v2add( entity.p1,
+                            v2init( movebox.max.x-1, movebox.max.y ) )
       else
-         p_forward = vec2_add( entity.p1,
-                               vec2_init( movebox.min.x, 0.5*(movebox.max.y-movebox.min.y) ) )
-         p_feet = vec2_add( entity.p1,
-                            vec2_init( movebox.min.x+1, movebox.max.y ) )
+         p_forward = v2add( entity.p1,
+                               v2init( movebox.min.x, 0.5*(movebox.max.y-movebox.min.y) ) )
+         p_feet = v2add( entity.p1,
+                            v2init( movebox.min.x+1, movebox.max.y ) )
       end
       local b_hit_wall = is_solid( p_forward )
       local b_hit_border = is_out( p_forward )
       local b_hit_cliff = not is_solid( p_feet )
-      local diff = vec2_sub( action.p_target, entity.p1 )
-      local dist = vec2_length( diff )
+      local diff = v2sub( action.p_target, entity.p1 )
+      local dist = v2length( diff )
       if b_hit_wall
          or b_hit_border
          or b_hit_cliff then
@@ -1231,8 +1245,8 @@ function update_action_move_on_ground( entity, action )
          action.finished = true
       else
             -- advance
-         local dir = vec2_scale( 1.0/dist, diff )
-         entity.p1 = vec2_add( entity.p0, vec2_scale( min(entity.a.cspeed,dist), dir ) )
+         local dir = v2scale( 1.0/dist, diff )
+         entity.p1 = v2add( entity.p0, v2scale( min(entity.a.cspeed,dist), dir ) )
          entity.sign = sgn( dir.x )
       end
    end
@@ -1252,13 +1266,13 @@ function update_action_jump_on_ground( entity, action )
       local t = sqrt( abs( 2 * (dy-dx) / a ) )
       local speed = abs(dx) / (c45*t) --speed to hit target at 45 deg angle
       -- compute vel vector from magnitude and direction with correct sign
-      action.v = vec2_scale( speed, vec2_init( sgn(dx) * c45, -c45 ) )
+      action.v = v2scale( speed, v2init( sgn(dx) * c45, -c45 ) )
       action.first = false
    elseif not action.finished then
-      local diff = vec2_sub( action.p_target, entity.p1 )
-      local dist = vec2_length( diff )
+      local diff = v2sub( action.p_target, entity.p1 )
+      local dist = v2length( diff )
       action.v.y += slowdown_factor * level.a.cgravity_y
-      local speed = vec2_length( action.v )
+      local speed = v2length( action.v )
       if dist < speed then
          -- success, closer than 1 timestep advance
          entity.p1 = action.p_target
@@ -1267,8 +1281,8 @@ function update_action_jump_on_ground( entity, action )
          -- todo this seems to easily overshoot so dist < speed is never fulfilled and action never ends...
          -- it would be better to just detect target ground level and jump there or use it's height at least
          -- advance
-         local dir = vec2_scale( 1.0/speed, action.v )
-         entity.p1 = vec2_add( entity.p0, vec2_scale( min(speed,dist), dir ) )
+         local dir = v2scale( 1.0/speed, action.v )
+         entity.p1 = v2add( entity.p0, v2scale( min(speed,dist), dir ) )
          entity.sign = sgn( dir.x )
       end
       if action.v.y > 0 then
@@ -1283,7 +1297,7 @@ function update_action_patrol( entity, action )
    if action.sub.finished then
       entity.sign = -entity.sign
       -- move along direction hacked as move towards out-of-room target, so that never arrives there
-      action.sub = new_action_move_on_ground( vec2_add( entity.p1, vec2_init( 128*entity.sign, 0 ) ) )
+      action.sub = new_action_move_on_ground( v2add( entity.p1, v2init( 128*entity.sign, 0 ) ) )
    end
    return action
 end
@@ -1318,8 +1332,8 @@ function update_action_wait_and_fly( entity, action )
       action.sub.t > #entity.a.table_anm[action.sub.anm_id].k --only replan after whole cycle
    -- todo check range
    then
-      local diff = vec2_sub( player.p1, entity.p1 )
-      local dist = vec2_length( diff )
+      local diff = v2sub( player.p1, entity.p1 )
+      local dist = v2length( diff )
       if dist < 64 then
          action.sub = new_action_move( player.p1 ) --flyto player
       end
@@ -1343,7 +1357,7 @@ function update_action_wait_and_drop( entity, action )
    if action.sub.name == "idle" then
       --fall if below
       if abs(player.p1.x - entity.p1.x) < 8 and player.p1.y > entity.p1.y then
-         action.sub = new_action_particle( vec2_zero(), vec2_init(0,a_level.cgravity_y) )
+         action.sub = new_action_particle( v2zero(), v2init(0,a_level.cgravity_y) )
       end
    else
       --keep flying
@@ -1360,8 +1374,8 @@ function update_action_patrol_and_jump( entity, action )
       action.sub.t > #entity.a.table_anm[action.sub.anm_id].k --only replan after whole cycle
    -- todo check range
    then
-      local diff = vec2_sub( player.p1, entity.p1 )
-      local dist = vec2_length( diff )
+      local diff = v2sub( player.p1, entity.p1 )
+      local dist = v2length( diff )
       if dist < 64
          and
       flr(player.p1.y) == flr(entity.p1.y) then
@@ -1393,14 +1407,14 @@ end
 -- end
 
 function update_action_oscillate( entity, action )
-   entity.p1 = vec2_add( action.p_mid, vec2_scale( action.amplitude * sin( action.t/action.period ), action.dir ) )
+   entity.p1 = v2add( action.p_mid, v2scale( action.amplitude * sin( action.t/action.period ), action.dir ) )
    return action
 end
 
 function update_action_sinusoid( entity, action )
-   entity.p1 = vec2_add( action.start_pos,
-                         vec2_add( vec2_scale( action.t * action.speed, action.dir ),
-                                   vec2_scale( action.amplitude * sin( action.t/action.period + action.phase ), action.normal ) ) )
+   entity.p1 = v2add( action.start_pos,
+                         v2add( v2scale( action.t * action.speed, action.dir ),
+                                   v2scale( action.amplitude * sin( action.t/action.period + action.phase ), action.normal ) ) )
    return action
 end
 
@@ -1414,7 +1428,7 @@ function update_action_skullboss( entity, action )
    elseif action.sub.name == "shoot" then
       if action.sub.t > 120 then
          --action.sub = new_action_idle()
-         action.sub = new_action_jump_on_ground( vec2_add( player.p1, vec2_init(0,-8) ) )
+         action.sub = new_action_jump_on_ground( v2add( player.p1, v2init(0,-8) ) )
       end
    elseif action.sub.name == "jong" then
       if action.sub.finished then
@@ -1435,7 +1449,7 @@ function new_bullet_blast( _p, _s )
                p0 = _p,
                p1 = _p,
                sign = _s,
-               v = vec2_init( _s*a_blast.cspeed, 0 ) }
+               v = v2init( _s*a_blast.cspeed, 0 ) }
    add(room.bullets,b)
    add(room.entities,b)
 end
@@ -1445,7 +1459,7 @@ function update_bullets()
    for b in all(room.bullets) do
       b.t += 1
       b.p0 = b.p1
-      b.p1 = vec2_add( b.p0, b.v )
+      b.p1 = v2add( b.p0, b.v )
 
       -- test against map
       local map_collisions = ccd_box_vs_map( b.p0,
@@ -1456,8 +1470,8 @@ function update_bullets()
       -- if map collision, save it and shorten predicted trajectory
       if #map_collisions > 0 then
          local map_c = map_collisions[1]
-         b.p1 = vec2_add( b.p0, vec2_scale( 0.99*map_c.interval.min, b.v ) )
-         b.v = vec2_zero()
+         b.p1 = v2add( b.p0, v2scale( 0.99*map_c.interval.min, b.v ) )
+         b.v = v2zero()
       end
 
       -- test against enemies
@@ -1474,8 +1488,8 @@ function update_bullets()
       -- todo: vfx could be different for map/enemies
       if #enm_collisions > 0 then
          local enm_c = enm_collisions[1]
-         b.p1 = vec2_add( b.p0, vec2_scale( 0.99*enm_c.interval.min, b.v ) )
-         b.v = vec2_zero()
+         b.p1 = v2add( b.p0, v2scale( 0.99*enm_c.interval.min, b.v ) )
+         b.v = v2zero()
          new_vfx_blast( b.p1, b.sign )
          del( room.bullets, b )
          del( room.entities, b )
@@ -1537,8 +1551,8 @@ function is_out(p)
 end
 
 function aabb_init( _x0, _y0, _x1, _y1 )
-   return { min = vec2_init( _x0, _y0 ),
-            max = vec2_init( _x1, _y1 ) }
+   return { min = v2init( _x0, _y0 ),
+            max = v2init( _x1, _y1 ) }
 end
 
 function aabb_init_2( _pmin, _pmax )
@@ -1550,15 +1564,15 @@ end
 function aabb_apply_sign_x( aabb, sign_x )
    if aabb.max.x - aabb.min.y > 8 then
       if sign_x < 0 then
-         return { min = vec2_init( 15 - aabb.max.x, aabb.min.y ),
-                  max = vec2_init( 15 - aabb.min.x, aabb.max.y ) }
+         return { min = v2init( 15 - aabb.max.x, aabb.min.y ),
+                  max = v2init( 15 - aabb.min.x, aabb.max.y ) }
       else
          return aabb
       end
    else
       if sign_x < 0 then
-         return { min = vec2_init( 7 - aabb.max.x, aabb.min.y ),
-                  max = vec2_init( 7 - aabb.min.x, aabb.max.y ) }
+         return { min = v2init( 7 - aabb.max.x, aabb.min.y ),
+                  max = v2init( 7 - aabb.min.x, aabb.max.y ) }
       else
          return aabb
       end
@@ -1572,7 +1586,7 @@ function is_solid( p )
 end
 
 function apply_borders( p, box )
-   return vec2_init( clamp( p.x, 0-box.min.x, room.a.csizes.x-box.max.x ),
+   return v2init( clamp( p.x, 0-box.min.x, room.a.csizes.x-box.max.x ),
                      clamp( p.y, 0-box.min.y-8, room.a.csizes.y-box.max.y ) )
 end
 
@@ -1595,21 +1609,21 @@ end
 ----------------------------------------------------------------
 -- vec2 functions
 ----------------------------------------------------------------
-function vec2_init( _x, _y ) return { x = _x, y = _y } end
-function vec2_zero() return { x = 0, y = 0 } end
-function vec2_get( v, i ) if i==0 then return v.x else return v.y end end
-function vec2_set( v, i, s ) if i==0 then v.x = s else v.y = s end end
-function vec2_add( v1, v2 ) return { x = v1.x + v2.x, y = v1.y + v2.y } end
-function vec2_sub( v1, v2 ) return { x = v1.x - v2.x, y = v1.y - v2.y } end
-function vec2_dot( v1, v2 ) return v1.x*v2.x + v1.y*v2.y end
-function vec2_scale( s, v ) return { x = s*v.x, y = s*v.y } end
-function vec2_min( v1, v2 ) return { x = min(v1.x,v2.x), y = min(v1.y,v2.y) } end
-function vec2_max( v1, v2 ) return { x = max(v1.x,v2.x), y = max(v1.y,v2.y) } end
-function vec2_flr( v ) return { x = flr(v.x), y = flr(v.y) } end
-function vec2_length2( v ) return vec2_dot( v, v )  end
-function vec2_length( v ) return sqrt( vec2_length2( v ) ) end
-function vec2_perp( v ) return { x = -v.y, y = v.x } end
-function vec2_clamp( v, l, u ) return { x = min( max( v.x, l.x ), u.x ),
+function v2init( _x, _y ) return { x = _x, y = _y } end
+function v2zero() return { x = 0, y = 0 } end
+function v2get( v, i ) if i==0 then return v.x else return v.y end end
+function v2set( v, i, s ) if i==0 then v.x = s else v.y = s end end
+function v2add( v1, v2 ) return { x = v1.x + v2.x, y = v1.y + v2.y } end
+function v2sub( v1, v2 ) return { x = v1.x - v2.x, y = v1.y - v2.y } end
+function v2dot( v1, v2 ) return v1.x*v2.x + v1.y*v2.y end
+function v2scale( s, v ) return { x = s*v.x, y = s*v.y } end
+function v2min( v1, v2 ) return { x = min(v1.x,v2.x), y = min(v1.y,v2.y) } end
+function v2max( v1, v2 ) return { x = max(v1.x,v2.x), y = max(v1.y,v2.y) } end
+function v2flr( v ) return { x = flr(v.x), y = flr(v.y) } end
+function v2length2( v ) return v2dot( v, v )  end
+function v2length( v ) return sqrt( v2length2( v ) ) end
+function v2perp( v ) return { x = -v.y, y = v.x } end
+function v2clamp( v, l, u ) return { x = min( max( v.x, l.x ), u.x ),
                                         y = min( max( v.y, l.y ), u.y ) } end
 
 
@@ -1625,17 +1639,17 @@ function ray_vs_centered_aabb( ray_pos, ray_dir, ray_interval,
    local first_hit_axis = 0
    for it_axis = 0,1 do
       -- if parallel to slab, either overlaps for any lambda or for none.
-      if abs( vec2_get( ray_dir, it_axis ) ) < 0.001 then --g_pdefaultcontext->m_epsilon_dir )
-         if abs( vec2_get( ray_pos, it_axis ) ) > vec2_get( aabb_hs, it_axis ) then
+      if abs( v2get( ray_dir, it_axis ) ) < 0.001 then --g_pdefaultcontext->m_epsilon_dir )
+         if abs( v2get( ray_pos, it_axis ) ) > v2get( aabb_hs, it_axis ) then
             -- no hit
             return nil
          end
          -- otherwise, current axis does not clip the interval, and
          -- other axis must be checked as usual.
       else
-         local inv_divisor = 1.0 / vec2_get( ray_dir, it_axis )
-         local lambda0 = ( -vec2_get( aabb_hs, it_axis ) - vec2_get( ray_pos, it_axis ) ) * inv_divisor
-         local lambda1 = (  vec2_get( aabb_hs, it_axis ) - vec2_get( ray_pos, it_axis ) ) * inv_divisor
+         local inv_divisor = 1.0 / v2get( ray_dir, it_axis )
+         local lambda0 = ( -v2get( aabb_hs, it_axis ) - v2get( ray_pos, it_axis ) ) * inv_divisor
+         local lambda1 = (  v2get( aabb_hs, it_axis ) - v2get( ray_pos, it_axis ) ) * inv_divisor
          if lambda1 < lambda0 then
             local tmp = lambda0
             lambda0 = lambda1
@@ -1655,12 +1669,12 @@ function ray_vs_centered_aabb( ray_pos, ray_dir, ray_interval,
       end
    end
    -- compute point and normal
-   rh.point  = vec2_add( ray_pos, vec2_scale( rh.interval.min, ray_dir ) )
+   rh.point  = v2add( ray_pos, v2scale( rh.interval.min, ray_dir ) )
    rh.normal = {x=0,y=0}
-   if vec2_get( ray_pos, first_hit_axis ) < 0 then
-      vec2_set( rh.normal, first_hit_axis, -1 )
+   if v2get( ray_pos, first_hit_axis ) < 0 then
+      v2set( rh.normal, first_hit_axis, -1 )
    else
-      vec2_set( rh.normal, first_hit_axis, 1 )
+      v2set( rh.normal, first_hit_axis, 1 )
    end
    return rh
 end
@@ -1671,13 +1685,13 @@ end
 --]]
 function ray_vs_aabb( ray_pos, ray_dir, interval,
                       aabb )
-   local aabb_mid = vec2_scale( 0.5, vec2_add( aabb.min, aabb.max ) )
-   local aabb_hs = vec2_scale( 0.5, vec2_sub( aabb.max, aabb.min ) )
-   local rp = vec2_sub( ray_pos, aabb_mid )
+   local aabb_mid = v2scale( 0.5, v2add( aabb.min, aabb.max ) )
+   local aabb_hs = v2scale( 0.5, v2sub( aabb.max, aabb.min ) )
+   local rp = v2sub( ray_pos, aabb_mid )
    local rh = ray_vs_centered_aabb( rp, ray_dir, interval,
                                     aabb_hs ) --hs try to use full aabb instead
    if rh != nil then
-      rh.point = vec2_add( rh.point, aabb_mid ) --just translate
+      rh.point = v2add( rh.point, aabb_mid ) --just translate
    end
    return rh
 end
@@ -1688,11 +1702,11 @@ end
 --]]
 function ccd_box_vs_aabb( box_pos0, box_pos1, box_aabb,
                           aabb )
-   local box_aabb_mid = vec2_scale( 0.5, vec2_add( box_aabb.min, box_aabb.max ) )
-   local box_aabb_hs = vec2_scale( 0.5, vec2_sub( box_aabb.max, box_aabb.min ) )
-   local box_mid = vec2_add( box_pos0, box_aabb_mid )
-   local ray_dir = vec2_sub( box_pos1, box_pos0 )
-   local fat_aabb = aabb_init_2( vec2_sub( aabb.min, box_aabb_hs ), vec2_add( aabb.max, box_aabb_hs ) )
+   local box_aabb_mid = v2scale( 0.5, v2add( box_aabb.min, box_aabb.max ) )
+   local box_aabb_hs = v2scale( 0.5, v2sub( box_aabb.max, box_aabb.min ) )
+   local box_mid = v2add( box_pos0, box_aabb_mid )
+   local ray_dir = v2sub( box_pos1, box_pos0 )
+   local fat_aabb = aabb_init_2( v2sub( aabb.min, box_aabb_hs ), v2add( aabb.max, box_aabb_hs ) )
    return ray_vs_aabb( box_mid, ray_dir, {min=0,max=1},
                        fat_aabb )
 end
@@ -1703,8 +1717,8 @@ end
 --]]
 function bp_aabb_vs_map( aabb, flag_mask )
    local overlaps = {}
-   local tile_min = vec2_flr( vec2_scale( 0.125, aabb.min ) ) --1/8
-   local tile_max = vec2_flr( vec2_scale( 0.125, aabb.max ) ) --1/8
+   local tile_min = v2flr( v2scale( 0.125, aabb.min ) ) --1/8
+   local tile_max = v2flr( v2scale( 0.125, aabb.max ) ) --1/8
    --todo avoid accessing out of bounds, revisit rounding
    for j=tile_min.x, tile_max.x do
       for i=tile_min.y, tile_max.y do
@@ -1723,8 +1737,8 @@ end
 --]]
 function ccd_box_vs_map( box_pos0, box_pos1, box_aabb, flag_mask, b_first_only )
    -- swept aabb
-   local swept_aabb = aabb_init_2( vec2_add( vec2_min( box_pos0, box_pos1 ), box_aabb.min ),
-                                  vec2_add( vec2_max( box_pos0, box_pos1 ), box_aabb.max ) )
+   local swept_aabb = aabb_init_2( v2add( v2min( box_pos0, box_pos1 ), box_aabb.min ),
+                                  v2add( v2max( box_pos0, box_pos1 ), box_aabb.max ) )
    local overlaps = bp_aabb_vs_map( swept_aabb, flag_mask )
    local collisions = {}
    for o in all(overlaps) do
@@ -1734,8 +1748,8 @@ function ccd_box_vs_map( box_pos0, box_pos1, box_aabb, flag_mask, b_first_only )
             (o.tile_j+1)*8, (o.tile_i+1)*8,
             7 )
 
-      local tile_aabb_min = vec2_init( o.tile_j*8, o.tile_i*8 )
-      local tile_aabb_max = vec2_add( tile_aabb_min, vec2_init(8,8) ) --8,8 are the sizes of map tile, but could be sub-box
+      local tile_aabb_min = v2init( o.tile_j*8, o.tile_i*8 )
+      local tile_aabb_max = v2add( tile_aabb_min, v2init(8,8) ) --8,8 are the sizes of map tile, but could be sub-box
 
       --todo: consider instead geting only up to the first non-0 hit, and clipping interval incrementally to reduce tested pairs
       local c = ccd_box_vs_aabb( box_pos0, box_pos1, box_aabb,
@@ -1761,7 +1775,7 @@ function ccd_box_vs_entities( box_pos0, box_pos1, box_aabb, table_entities, enti
       local local_aabb = e.a["cdamagebox"]
       if local_aabb != nil then
          local c = ccd_box_vs_aabb( box_pos0, box_pos1, box_aabb,
-                                    aabb_init_2( vec2_add( e.p1, local_aabb.min ), vec2_add( e.p1, local_aabb.max ) ) )
+                                    aabb_init_2( v2add( e.p1, local_aabb.min ), v2add( e.p1, local_aabb.max ) ) )
          if c != nil then
             c.entity = e
             add( collisions, c )
@@ -1826,9 +1840,9 @@ __gfx__
 00d0055000d005500000000000d05000000000000050d00000d0000000d0000000d0005000dd000500d005500d000500d0005000d0000500000500d0000500d0
 808088800804880000088000000808080088000080880000008088000002200000011000000000000000000000000dd894389000000000000000000000000000
 08488904088489040088880000888880088980000889800400088880002290000011900000000000000000000008355883d88d00000000000000000000000000
-088445400884454008845900084598880845500088855440088845900224d0000114d000000000000000000000d89345534d5440000000000000000000000000
-00885500008855000845540004554800884554000884550000845540024dd000014dd00000000000000000000d43d3d44d355450000000000000000000000000
-00055000000550000845440040554080808450400808440000405440224544001145440000000000000000000d3435888d534435000000000000000000000000
+088445400884454008845900084598880845500088855440088845900224d0000114d000000066660000000000d89345534d5440000000000000000000000000
+00885500008855000845540004554800884554000884550000845540024dd000014dd00000066606000000000d43d3d44d355450000000000000000000000000
+00055000000550000845440040554080808450400808440000405440224544001145440000066666000000000d3435888d534435000000000000000000000000
 000d5500000d5500008550000054000008d500008000d5000800550002055d0001055d00000000000000000089354d895d345398000000000000000000000000
 000d0500000d050000d050000d05000000d0500000dd0500000d0500000d0500000d050000000000000000008834355355344388000000000000000000000000
 00d0500000d050000d005000d00550000d0050000000500000d0055000d005d000d005d000000000000000004343b4b343b3434b000000000000000000000000
@@ -1920,42 +1934,42 @@ ad1fadadadad1fadad1fadadadad1fadadadadadadadadadadadadadadadad1f8080255115520808
 000000444400000000044f4444f44000f40000000000004456556665000000008bc5551600101000000101000010100001111110000000001100000000000000
 00000004400000000044f444444f440040000000000000045666666000005cc8bc55516611000100001000111100010000000011100000000111111000000000
 000000000000000044f444f44f444f44400000000000000436336363000005555551111100000011110000000000001100000000000000000000000000000000
-2222222256556556000000006566556550505050f4f4f4f43b3b43b4000003000030000010000011000090000000000000000000000000000000067777600000
-0222222265666565000000006555ee56555555554ff4f4f433b33b4b000300300030000001000100000800000000009000000000000000000006777777776000
-0002525556666656000000005eeeeee5505050504ff4f4ff4343433b030b30300300300000101000000980000800090000000000000000000067776676677600
-000025256665556600000050eee5e5e560505050f4f4ff4ff4444344030300b00303b03000010000080a90800080080000000000000000000677667777777760
-000002525656566650000656ee555eee66555555ffff4f4f4444f4440b0300300b00303000001000800980080080980000000000000000000777777777777770
-000000225666666555665556e5eeeee5605050504f4f4fff4f444444300303b0030030b00001010089a9aa9808a99a8000000000000000006777666777767776
-000000026566555666555656ee5eee56505050504f4ff4f4444444f44b33b4340b30300300100010899aa9988a9a9a9800000000000000007766777677776677
-000000025655665656656555e55e556550505050f4f4f4f44444f444b43b4343434b33b4110000010889998089a8898900000000000000007777667777777777
-222222220555565006555550055655e0525252520000889aa9998000000000000000000000090000000090000400400478787777877777787777777777777776
-2222222065666565556666e655656e552552525200000089aa8800000000000000000000000980000009a0000400400478787787877687787776777777767776
-552520005666665556665ee55666e66525525255000088aa980000000000000000000000008980000008a8004004004067877687877687766777766777767776
-52520000566565655665e665566ee565525255250008999aaa88000000080000000000000089a8000089a8004004004007877787776887700777777777677770
-2520000056565665566ee65656e6566555552525000088aaa99980000008808000009000009a9a00009a99000400400406776887767687600677677776767760
-220000005666666565ee66655e6666652525255500000089aa880000808990899008980008aaa9000089aa900400400400677877777876000067777777777600
-200000005566565556e66655ee56665625255252000088aa9800000098a9a8a9980a9808089a9800008a9a804004004000067877777660000006777777776000
-20000000065565500555555005655550525252520008999aa9880000a99aa99a9a8a9a890089a0000009a8004004004000000777766000000000077776600000
+2222222256556556000000006566556550505050f4f4f4f43b3b43b4000003000030000010000011000090000000000000000677776000000000000000000000
+0222222265666565000000006555ee56555555554ff4f4f433b33b4b000300300030000001000100000800000000009000067777777760000000000000000000
+0002525556666656000000005eeeeee5505050504ff4f4ff4343433b030b30300300300000101000000980000800090000677766766776000000000000000000
+000025256665556600000050eee5e5e560505050f4f4ff4ff4444344030300b00303b03000010000080a90800080080006776677777777600000000000000000
+000002525656566650000656ee555eee66555555ffff4f4f4444f4440b0300300b00303000001000800980080080980007777777777777700000000000000000
+000000225666666555665556e5eeeee5605050504f4f4fff4f444444300303b0030030b00001010089a9aa9808a99a8067776667777677760000000000000000
+000000026566555666555656ee5eee56505050504f4ff4f4444444f44b33b4340b30300300100010899aa9988a9a9a9877667776777766770000000000000000
+000000025655665656656555e55e556550505050f4f4f4f44444f444b43b4343434b33b4110000010889998089a8898977776677777777770000000000000000
+222222220555565006555550055655e0525252520000889aa9998000000000000000000000090000000090000400400477777777777777760000000000000000
+2222222065666565556666e655656e552552525200000089aa8800000000000000000000000980000009a0000400400477767777777677760000000000000000
+552520005666665556665ee55666e66525525255000088aa980000000000000000000000008980000008a8004004004067777667777677760000000000000000
+52520000566565655665e665566ee565525255250008999aaa88000000080000000000000089a8000089a8004004004007777777776777700000000000000000
+2520000056565665566ee65656e6566555552525000088aaa99980000008808000009000009a9a00009a99000400400406776777767677600000000000000000
+220000005666666565ee66655e6666652525255500000089aa880000808990899008980008aaa9000089aa900400400400677777777776000000000000000000
+200000005566565556e66655ee56665625255252000088aa9800000098a9a8a9980a9808089a9800008a9a804004004000067777777760000000000000000000
+20000000065565500555555005655550525252520008999aa9880000a99aa99a9a8a9a890089a0000009a8004004004000000777766000000000000000000000
 
 __gff__
-0000000000000000000000000000000000000000000000000000000000000000000000000000000000000001010000000000000000000000000000000000000008080000000000080808000000000000020208808080000000000000804000004001010101400000000000000000000040010202010500000000000000000000
-0202020202020202020200000000000002020202020202020202000000000000020202020202020202020000000000000202020202020202020200000000000040404040404040404040400040404040010101014040014040404040404040400101400101400140404000000000404001010101400202000000004000004040
+0000000000000000000000000000000000000000000000000000000000000000000000000000000000400001010000000000000000000000000000000000000008080000000000080808000000000000020208808080000000000000804000004001010101400000000000000000000040010202010500000000000000000000
+0202020202020202020200000000000002020202020202020202000000000000020202020202020202020000000000000202020202020202020200000000000040404040404040404040400040404040010101014040014040404040404040400101400101400140404000004040404001010101400202000000004040404040
 __map__
-0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000e200000000000000
-0000000000000000000000000000000000000000000000000000000000000000000000000000c2f4f4f4f4c3000000000000000000000000000000000000000000635d00000000006300006300000000000000000000000000000000000000000000000000000000000000000000000000000000000000006200000000000000
-000000000000aa000000000000000000000000000000000000000000000000000000000000c2c14d00004dc0c30000000000000000000000000000000000000000636363006300000000004d00000000000000000000000000000000000000000000000000000000000000000000000000000000000000e26200000000000000
-0000000000000000000000000000000000c2f4f4f4f4f4f4f4f4f4f4f4f4f4c300c2f4f4f4c1000000000000c0f4f4f4f4f4f4f4c300c2f4f4f4f4c30040000000634dc063636300000000000000000000000000000000000000000000000000000000000000000000eeef0000000000000000000000006262c3000000000000
-0000000000000000c5d400008a00000000f4c1004dc0f4c1c0c1c0f4c1c0c1c0f4c10000000000000000000000c0f4c10000004dc0f4c100000000c0f4f0000000630000000000e063000000000063f000000000000000000000000000000000000000000000000000feff000000000000000000000000626262c30000000000
-00000000c5000000d5c400000000000000f4f7000000f400000000f400000000f400000000000000000000000000f4000000000000f4000000000000f40000000063000000000000c0630000000063000000000000000000000000000000000000000000000000000000000000cccd0000000000000000c7c862620000000000
-00000000d5c40000c5d40000000000c400f400000000f400000000f400000000f400000000000000000000000000f4000000000000f4000000000000f400000000630000000000000000005d6300630000000000000070607800000000000000000000000000000000cecf0000dcdd0000000000000000d7d862620000000000
-0000000000d5c4c5d40000c50000c5d400f400000000f400000000f400000000f4000000000000000000000000636363f000000000f4000000000000f4000000006300000000636363636363c1006300000000000070607070000000000000000000000000cecfcdccdedfcd000000000000000000000000626262c3c2000000
-000000000000d5e5000000d5c4c5d40000f400000000f400000000f400000000f4006363630000000000e0f000c0f4c10000000000f4000000000000f4000000006300000063c1000000000000006300000000006070706070600000000078000000000000dedfcecfdddcddcecf000000000000000000e2626262c0f4000000
-00000000c5c400e5c5d40000d5e5c4c500f400000000f400000000f4006600636363634d0000e0f0000000000000f4000000000000f4000000000056f40000000063000063c10000000000000000630000000000706070707070646464646400000000cccd0000dedd000000decccc00000000000000006565656540f4000000
-5c0000d5d4d5c4e5d400000000d5e5d400f400000000f40000566363636363636363d10000000000000000000000f400000000e06363000000000063c10000000063635c00760063636363000000630000000000707470607460000000000000000000dcdd000000000000ce0000cecf000000000000e26565c6656565c3c200
-5c5c00000000d5e5000000000000e50000f400000000f400636363636363636371d1000000000000000000000000f4000000000000f46300000000000000000000c06363636363c1000000000063c1000000006360707070607000000000000000000000000000000000630000dedf0000000000000065c1c065656565c0f400
-fbe40000000000e5000000000000e50000f4000000636363636363637575757575000000000000e0f00000000000f4000000000000f4006300000000000000000000c0f4000000000000000063c10063630000c07060e5e570600000000000000000000000000063cecf00cf0063000000e200000000c18a8bc065c66500f400
-fbe4e82b2ce8e8e53072d60030e8e500c2f4c363757575757575757575757575755c000063000000005c006300c2f4c300000066c2f4c3750000000000660063630000f4000000000066637575006363636300006070e5e560700000000000f1f1000000007c63c1dedf000000c06300c2f4e20000e2009a9b00656565c2f4c3
+0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000ffffffffffffffffffffffffffffffffffff
+0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000ffffffffffffffffffffe2ffffffffffffff
+0000000000000000000000000000000000000000000000000000000000000000000000000000c2f4f4f4f4c3000000000000000000000000000000000000000000635d00000000006300006300000000000000000000000000000000000000000000000000000000000000000000ffffffffffffffffffff62ffffffffffffff
+000000000000aa000000000000000000000000000000000000000000000000000000000000c2c14d00004dc0c30000000000000000000000000000000000000000636363006300000000004d00000000000000000000000000000000000000000000000000000000000000000000ffffffffffffffffffe262c3ffffffffffff
+0000000000000000000000000000000000c2f4f4f4f4f4f4f4f4f4f4f4f4f4c300c2f4f4f4c1000000000000c0f4f4f4f4f4f4f4c300c2f4f4f4f4c30040000000634dc0636363000000000000000000000000000000000000000000000000000000000000000000000000000000ffffffffffffffffff626262c3ffffffffff
+0000000000000000c5d400008a00000000f4c1004dc0f4c1c0c1c0f4c1c0c1c0f4c10000000000000000000000c0f4c10000004dc0f4c100000000c0f4f0000000630000000000e063000000000063f000000000000000000000000000000000000000000000000000feff000000ffffffffffffffffff62626262ffffffffff
+00000000c5000000d5c400000000000000f4f7000000f400000000f400000000f400000000000000000000000000f4000000000000f4000000000000f40000000063000000000000c063000000006300000000000000000000000000000000000000000000000000000000ecedcccdffffffffffffffffc7c86262c3c2ffffff
+00000000d5c40000c5d40000000000c400f400000000f400000000f400000000f400000000000000000000000000f4000000000000f4000000000000f400000000630000000000000000005d6300630000000000000070607800000000000000000000000000000000cecffcfddcddffffffffffffffffd7d86262c0f4ffffff
+0000000000d5c4c5d40000c50000c5d400f400000000f400000000f400000000f4000000000000000000000000636363f000000000f4000000000000f4000000006300000000636363636363c1006300000000000070607070000000000000000000000000cecfcdccdedfcd0000ffffffffffffffffffff626262fff4ffffff
+000000000000d5e5000000d5c4c5d40000f400000000f400000000f400000000f4006363630000000000e0f000c0f4c10000000000f4000000000000f4000000006300000063c1000000000000006300000000006070706070600000000078000000000000dedfcecfdddcddcecfffffffffffffffffffe262626262f4ffffff
+00000000c5c400e5c5d40000d5e5c4c500f400000000f400000000f4006600636363634d0000e0f0000000000000f4000000000000f4000000000056f40000000063000063c10000000000000000630000000000706070707070646464646400000000cccd0000dedd000000deccccffffffffffffffe2656565656565c3c2ff
+5c0000d5d4d5c4e5d400000000d5e5d400f400000000f40000566363636363636363d10000000000000000000000f400000000e06363000000000063c10000000063635c00760063636363000000630000000000707470607460000000000000000000dcdd000000000000ce0000cecfffffffffffffc66565c6c1c065c0f4ff
+5c5c00000000d5e5000000000000e50000f400000000f400636363636363636371d1000000000000000000000000f4000000000000f46300000000000000000000c06363636363c1000000000063c1000000006360707070607000000000000000000000000000000000630000dedfffffffffffffff65c1c065c3c265fff4ff
+fbe40000000000e5000000000000e50000f4000000636363636363637575757575000000000000e0f00000000000f4000000000000f4006300000000000000000000c0f4000000000000000063c10063630000c07060e5e570600000000000000000000000000063cecf00cf0063ffffffe2ffffffffc18a8bc0656565fff4ff
+fbe4e82b2ce8e8e53072d60030e8e500c2f4c363757575757575757575757575755c000063000000005c006300c2f4c300000066c2f4c3750000000000660063630000f4000000000066637575006363636300006070e5e560700000000000f1f1000000007c63c1dedf000000c063ffc2f4e2ffffe2ff9a9bff656565c2f4c3
 fbe6717171e6e6e671e6e65ce6e671e6636363636363636363717171717171717171717163737372727373636363636362626262626275757562626262626262626262626262626262757575757575626262626262626262626250f150505050626262626262625050505050505062626262e1e1e1e1e1626262626262626262
 fb00d071717171717171717171717171717171717171717171717171717171717171717163636363636363636363636363637171717171717171717171717171626262626271717171717171717171717171717171717171715151515151515151f1f1f1f1f1f171717171717171717171717171717171717171717171717171
 fb0000d071d1d07171717171717171717171717171717171717171717171d0d1d07171d100f4c10000c0f40000000000000000000000000000000000d071d1000000000000d0d10000000000004d00000000000000d07171715151515151515151f1f1f1f1f1f17171717171f3717171717171717171d1d0d1d071d1d0717171
