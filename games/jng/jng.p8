@@ -10,6 +10,7 @@ __lua__
 -- init
 ----------------------------------------------------------------
 function _init()
+   caabb_0088 = aabb_init(0,0,8,8)
    init_archetypes()
    init_game()
    --debug options
@@ -55,12 +56,16 @@ function _draw()
    --(start time) and random duration (alternate white/blue during
    --interval)
    if level.room_coords.x == 7 and level.room_coords.y == 0 then
-      if game.t % 60 == 0 then
-         pal(0,7)
-         palt(0,false)
-      elseif game.t % 59 == 0 then
-         pal(0,12)
-         palt(0,false)
+      if game.t % 30 == 0 then
+         if flr(rnd(100)) < 25 then
+            pal(0,7)
+            palt(0,false)
+         end
+      elseif game.t % 29 == 0 then
+         if flr(rnd(100)) < 25 then
+            pal(0,12)
+            palt(0,false)
+         end
       else
          pal()
          palt(0,true)
@@ -265,7 +270,7 @@ function init_archetypes()
    a_player.table_anm["hit"]  = {n="hit" ,c=false,k={34,34,34,34,34,
                                                      35,35,35,35,35, 35,35,35,35,35, 35,35,35,35,35, 35,35,35,35,35, 35,35,35,35,35, 35,35,35,35,35, 35,35,35,35,35 }}
    a_player.table_anm["hitb"]  = {n="hitb",c=false,k={36,36,36,36,37,37,37,37,38,38,38,38}}
-   a_player.cvisualbox = aabb_init( 0, 0, 8, 8 )
+   a_player.cvisualbox = caabb_0088
    a_player.cmovebox   = aabb_init( 1, 1, 7, 7 )
    a_player.cdamagebox = aabb_init( 2, 1, 6, 7 )
    a_player.cattackbox = nil
@@ -285,8 +290,8 @@ function init_archetypes()
    a_caterpillar = {}
    a_caterpillar.table_anm = {}
    a_caterpillar.table_anm["move"] = {c=true,k={48,48,48,48,48,48,49,49,49,49,49,49}}
-   a_caterpillar.cvisualbox = aabb_init( 0, 0, 8, 8 )
-   a_caterpillar.cmovebox   = aabb_init( 0, 0, 8, 8 )
+   a_caterpillar.cvisualbox = caabb_0088
+   a_caterpillar.cmovebox   = caabb_0088
    a_caterpillar.cdamagebox = aabb_init( 1, 4, 7, 8 )
    a_caterpillar.cattackbox = aabb_init( 1, 4, 7, 8 )
    a_caterpillar.cspeed = 0.5
@@ -297,10 +302,10 @@ function init_archetypes()
    a_caterpillar2 = {}
    a_caterpillar2.table_anm = {}
    a_caterpillar2.table_anm["move"] = {c=true,k={50,50,50,50,51,51,51,51}}
-   a_caterpillar2.cvisualbox = aabb_init( 0, 0, 8, 8 )
-   a_caterpillar2.cmovebox   = aabb_init( 0, 0, 8, 8 )
+   a_caterpillar2.cvisualbox = caabb_0088
+   a_caterpillar2.cmovebox   = caabb_0088
    a_caterpillar2.cdamagebox = aabb_init( 0, 2, 8, 8 )
-   a_caterpillar2.cattackbox = aabb_init( 0, 0, 8, 8 )
+   a_caterpillar2.cattackbox = caabb_0088
    a_caterpillar2.cspeed = 1
    a_caterpillar2.chealth = 2
    add( g_anim, a_caterpillar2.table_anm["move"] )
@@ -309,8 +314,8 @@ function init_archetypes()
    a_saw = {}
    a_saw.table_anm = {}
    a_saw.table_anm["move"] = {c=true,k={60,61,62,63}}
-   a_saw.cvisualbox = aabb_init( 0, 0, 8, 8 )
-   a_saw.cmovebox   = aabb_init( 0, 0, 8, 8 )
+   a_saw.cvisualbox = caabb_0088
+   a_saw.cmovebox   = caabb_0088
    a_saw.cdamagbox  = nil
    a_saw.cattackbox = aabb_init( 2, 2, 6, 6 )
    a_saw.cspeed = 1
@@ -323,10 +328,10 @@ function init_archetypes()
    a_stalactite.table_anm["idle"] = {c=true,k={77}}
    a_stalactite.table_anm["move"] = a_stalactite.table_anm["idle"]
    a_stalactite.table_anm["hit"]  = {c=true,k={78,78,78}}
-   a_stalactite.cvisualbox = aabb_init( 0, 0, 8, 8 )
+   a_stalactite.cvisualbox = caabb_0088
    a_stalactite.cmovebox   = aabb_init( 1, 1, 7, 7 )
    a_stalactite.cdamagbox  = nil
-   a_stalactite.cattackbox = aabb_init( 0, 0, 8, 8 )
+   a_stalactite.cattackbox = caabb_0088
    a_stalactite.cspeed = 5
    a_stalactite.chealth = 1
    add( g_anim, a_stalactite.table_anm["move"] )
@@ -341,10 +346,10 @@ function init_archetypes()
                                             104,104,104,104,104,104,
                                             105,105,105,105,105,105,105,105,
                                             106,106,106,106,106,106}}
-   a_grunt.cvisualbox = aabb_init( 0, 0, 8, 8 )
-   a_grunt.cmovebox   = aabb_init( 0, 0, 8, 8 )
-   a_grunt.cdamagebox = aabb_init( 0, 0, 8, 8 )
-   a_grunt.cattackbox = aabb_init( 0, 0, 8, 8 )
+   a_grunt.cvisualbox = caabb_0088
+   a_grunt.cmovebox   = caabb_0088
+   a_grunt.cdamagebox = caabb_0088
+   a_grunt.cattackbox = caabb_0088
 --   a_grunt.cspeed = 0.5
    a_grunt.cspeed = 1
    a_grunt.chealth = 4
@@ -357,9 +362,9 @@ function init_archetypes()
    a_cthulhu.table_anm = {}
    a_cthulhu.table_anm["move"]   = {c=true,k={86,86,86,86,87,87,87,87,88,88,88,88,89,89,89,89}}
    a_cthulhu.table_anm["attack"] = {c=false,k={90,90,91,91}}
-   a_cthulhu.cvisualbox = aabb_init( 0, 0, 8, 8 )
-   a_cthulhu.cmovebox   = aabb_init( 0, 0, 8, 8 )
-   a_cthulhu.cdamagebox = aabb_init( 0, 0, 8, 8 )
+   a_cthulhu.cvisualbox = caabb_0088
+   a_cthulhu.cmovebox   = caabb_0088
+   a_cthulhu.cdamagebox = caabb_0088
    a_cthulhu.cattackbox = aabb_init( 1, 3, 7, 8 )
    a_cthulhu.cspeed = 0.4
    a_cthulhu.chealth = 2
@@ -371,7 +376,7 @@ function init_archetypes()
    a_mouse = {}
    a_mouse.table_anm = {}
    a_mouse.table_anm["move"] = {c=true,k={118,118,118,118,118,119,119,119,119,119}}
-   a_mouse.cvisualbox = aabb_init( 0, 0, 8, 8 )
+   a_mouse.cvisualbox = caabb_0088
    a_mouse.cmovebox   = aabb_init( 2, 0, 6, 8 )
    a_mouse.cdamagebox = nil
    a_mouse.cattackbox = nil
@@ -384,10 +389,10 @@ function init_archetypes()
    a_bird.table_anm = {}
    a_bird.table_anm["idle"] = {c=true,k={120,120,120,120,121,121,121,121}}
    a_bird.table_anm["move"] = {c=true,k={122,122,122,122,122,123,123,123,123,123}}
-   a_bird.cvisualbox = aabb_init( 0, 0, 8, 8 )
+   a_bird.cvisualbox = caabb_0088
    a_bird.cmovebox   = aabb_init( 2, 0, 6, 8 )
-   a_bird.cdamagebox = aabb_init( 0, 0, 8, 8 )
-   a_bird.cattackbox = aabb_init( 0, 0, 8, 8 )
+   a_bird.cdamagebox = caabb_0088
+   a_bird.cattackbox = caabb_0088
    a_bird.cspeed = 1.25
    a_bird.chealth = 1
    add( g_anim, a_bird.table_anm["idle"] )
@@ -399,9 +404,9 @@ function init_archetypes()
    a_arachno.table_anm["move"] = {c=true,k={124,124,124,124,124,125,125,125,125,125}}
    a_arachno.table_anm["jump_up"] = {c=true,k={126}} --up
    a_arachno.table_anm["jump_down"] = {c=true,k={127}} --down
-   a_arachno.cvisualbox = aabb_init( 0, 0, 8, 8 )
+   a_arachno.cvisualbox = caabb_0088
    a_arachno.cmovebox   = aabb_init( 2, 0, 6, 8 )
-   a_arachno.cdamagebox = aabb_init( 0, 0, 8, 8 )
+   a_arachno.cdamagebox = caabb_0088
    a_arachno.cattackbox = aabb_init( 1, 3, 7, 8 )
    a_arachno.cspeed = 0.75
    a_arachno.chealth = 2
@@ -411,8 +416,8 @@ function init_archetypes()
    a_teeth = {}
    a_teeth.table_anm = {}
    a_teeth.table_anm["move"] = {c=true,k={68,68,68,69,69,69,69,69,69,69,69,70,70,70}}
-   a_teeth.cvisualbox = aabb_init( 0, 0, 8, 8 )
-   a_teeth.cmovebox   = aabb_init( 0, 0, 8, 8 )
+   a_teeth.cvisualbox = caabb_0088
+   a_teeth.cmovebox   = caabb_0088
    a_teeth.cdamagbox  = nil
    a_teeth.cattackbox = aabb_init( 1, 2, 6, 8 )
    a_teeth.cspeed = 1.5
@@ -424,7 +429,7 @@ function init_archetypes()
    a_blast.table_anm = {}
    a_blast.table_anm["move"] = {c=true,k={1,1,1,2,2,2,3,3,3,2,2}}
    a_blast.table_anm["hit"]     = {c=true,k={4,4,5,5,6,6,6,7}}
-   a_blast.cvisualbox = aabb_init( 0, 0, 8, 8 )
+   a_blast.cvisualbox = caabb_0088
    a_blast.cmovebox   = nil
    a_blast.cdamagbox  = nil
    a_blast.cattackbox = aabb_init( 4, 3, 8, 4 )
@@ -437,7 +442,7 @@ function init_archetypes()
    a_spit.table_anm = {}
    a_spit.table_anm["move"] = {c=true,k={66}}
    a_spit.table_anm["hit"]  = {c=false,k={67,67,67}}
-   a_spit.cvisualbox = aabb_init( 0, 0, 8, 8 )
+   a_spit.cvisualbox = caabb_0088
    a_spit.cmovebox   = aabb_init( 4, 3, 7, 4 )
    a_spit.cdamagbox  = nil
    a_spit.cattackbox = aabb_init( 3, 3, 6, 4 )
@@ -456,8 +461,8 @@ function init_archetypes()
                                           247,247,247,248,248,248,
                                           247,247,247,248,248,248,
                                           247,247,247,248,248,248 }}
-   a_flame.cvisualbox = aabb_init( 0, 0, 8, 8 )
-   a_flame.cmovebox   = aabb_init( 0, 0, 8, 8 )
+   a_flame.cvisualbox = caabb_0088
+   a_flame.cmovebox   = caabb_0088
    a_flame.cdamagbox  = nil
    a_flame.cattackbox = aabb_init( 2, 4, 7, 8 )
    a_flame.cspeed = 1
@@ -469,7 +474,7 @@ function init_archetypes()
    a_skull.table_anm = {}
    a_skull.table_anm["move"] = {c=true,k={94,94,94,94,94,95,95,95,95,95}}
    a_skull.table_anm["hit"]  = a_skull.table_anm["move"] --todo
-   a_skull.cvisualbox = aabb_init( 0, 0, 8, 8 )
+   a_skull.cvisualbox = caabb_0088
    a_skull.cmovebox   = aabb_init( 4, 3, 7, 4 )
    a_skull.cdamagbox  = nil
    a_skull.cattackbox = aabb_init( 4, 3, 7, 4 )
@@ -480,8 +485,8 @@ function init_archetypes()
    a_orb = {}
    a_orb.table_anm = {}
    a_orb.table_anm["idle"] = {c=true,k={64,64,64,65,65,65}}
-   a_orb.cvisualbox = aabb_init( 0, 0, 8, 8 )
-   a_orb.cmovebox   = aabb_init( 0, 0, 8, 8 )
+   a_orb.cvisualbox = caabb_0088
+   a_orb.cmovebox   = caabb_0088
    a_orb.cdamagbox  = nil
    a_orb.cattackbox = nil
    a_orb.cspeed = 0
@@ -491,7 +496,7 @@ function init_archetypes()
    a_torch = {}
    a_torch.table_anm = {}
    a_torch.table_anm["idle"] = {c=true,k={201,201,201,202,202,202}}
-   a_torch.cvisualbox = aabb_init( 0, 0, 8, 8 )
+   a_torch.cvisualbox = caabb_0088
    a_torch.cmovebox   = nil
    a_torch.cdamagbox  = nil
    a_torch.cattackbox = nil
@@ -700,7 +705,6 @@ function update_player()
             end
          end
       end
-
    end
 
    --shoot
@@ -719,8 +723,8 @@ function update_player()
    local damagebox = aabb_apply_sign_x(player.a.cdamagebox,player.sign)
    local acc = v2init( 0, level.a.cgravity_y )
    local pred_vel = v2clamp( v2add( player.v, acc ),
-                                v2scale(-1,player.a.cmaxvel),
-                                player.a.cmaxvel )
+                             v2scale(-1,player.a.cmaxvel),
+                             player.a.cmaxvel )
 
    -- ccd-advance
    local p1
@@ -765,7 +769,7 @@ function update_player()
    -- check on ground for next frame
    player.ground_ccd_1 = ccd_box_vs_map( player.p0, v2add( player.p1, v2init(0,1) ),
                                          movebox,
-                                         1+2, --flags: 0 is_solid, 1 is_damage
+                                         3, --flags: 0 is_solid, 1 is_damage
                                          false ) --all collisions
    player.on_ground = false
    for c in all(player.ground_ccd_1) do
@@ -890,7 +894,7 @@ function new_room_process_map_cell( r, room_j, room_i, map_j, map_i )
    elseif m == 50 then
       e = new_enemy( a_caterpillar2, pos, new_action_patrol( pos, -1 ) )
    elseif m == 86 then --cthulhu_shooter
-      e = new_enemy( a_cthulhu, pos, new_action_shoot( 30 ) )
+      e = new_enemy( a_cthulhu, pos, new_action_shoot( 30, "straight" ) )
    elseif m == 89 then --cthulhu_patroller
       e = new_enemy( a_cthulhu, pos, new_action_patrol( pos, -1 ) )
    elseif m == 102 then
@@ -979,11 +983,6 @@ function new_action_move( target_pos )
             p_target = target_pos }
 end
 
--- function new_action_fall( _gravity_y )
---    return { name = "fall", anm_id = "move", t = 0, finished = false,
---             v_y = 0, gravity_y = _gravity_y }
--- end
-
 -- ballistic projectile, play "hit" and disappear on impact. supersedes "fall"
 function new_action_particle( _v, _a )
    return { name = "part", anm_id = "move", t = 0, finished = false,
@@ -995,9 +994,10 @@ function new_action_hit()
 end
 
 -- shoot with cooldown timeout
-function new_action_shoot( _timeout )
+function new_action_shoot( _timeout, _type )
    return { name = "shoot", anm_id = "attack", t = _timeout-1, finished = false,
-            timeout = _timeout }
+            timeout = _timeout,
+            type = _type }
 end
 
 -- move on ground, stop at target/wall/cliff/border
@@ -1079,7 +1079,8 @@ end
 
 function new_action_skullboss()
    return { name = "skub", anm_id = "idle", t = 0, finished = false,
-            sub = new_action_idle() }
+            sub = new_action_idle(),
+            phase = 1 }
 end
 
 ----------------------------------------------------------------
@@ -1090,8 +1091,6 @@ function update_action( _entity, _action )
       --idle do nothing
    elseif _action.name == "move" then
       act = update_action_move( _entity, _action )
-   -- elseif _action.name == "fall" then
-   --    act = update_action_fall( _entity, _action )
    elseif _action.name == "part" then
       act = update_action_particle( _entity, _action )
    elseif _action.name == "hit" then
@@ -1140,9 +1139,8 @@ function update_action_move( entity, action )
       local diff = v2sub( action.p_target, entity.p1 )
       local dist = v2length( diff )
       if dist > entity.a.cspeed then
-         local dir = v2scale( 1.0/dist, diff )
-         entity.p1 = v2add( entity.p0, v2scale( min(entity.a.cspeed,dist), dir ) )
-         entity.sign = sgn( dir.x )
+         entity.p1 = v2add( entity.p0, v2scale( min(entity.a.cspeed,dist)/dist, diff ) )
+         entity.sign = sgn( diff.x )
       else
          entity.p1 = action.p_target
          action.finished = true
@@ -1150,15 +1148,6 @@ function update_action_move( entity, action )
    end
    return action
 end
-
--- function update_action_fall( entity, action )
---    if not action.finished then
---       action.v_y += action.gravity_y
---       entity.p1.y += action.v_y
---       --todo finish if hit ground??
---    end
---    return action
--- end
 
 function update_action_particle( entity, action )
    action.vel = v2add( action.vel, action.acc )
@@ -1168,11 +1157,10 @@ function update_action_particle( entity, action )
    local map_collisions = ccd_box_vs_map( entity.p0,
                                           entity.p1,
                                           movebox,
-                                          1+4,   --flags: 1 is_solid, 2 is_damage, 4 is destructible
+                                          5,   --flags: 1 is_solid, 2 is_damage, 4 is destructible
                                           true ) --first-only
    if #map_collisions > 0 then
-      local map_c = map_collisions[1]
-      entity.p1 = v2add( entity.p0, v2scale( 0.99*map_c.interval.min, action.vel ) )
+      entity.p1 = v2add( entity.p0, v2scale( 0.99*map_collisions[1].interval.min, action.vel ) )
       return new_action_hit()
    else
       return action
@@ -1200,13 +1188,22 @@ function update_action_shoot( entity, action )
       local a = entity.a
       local st = a.cshoottype
       local pos = v2add( entity.p1, projectile_apply_sign_x( a.cshootpos, entity.sign, a.cvisualbox.max.x - a.cvisualbox.min.x ) )
-      local phase = 0
-      if (action.t / action.timeout) % 2 > 0 then phase = 0.5 end
-      local e = new_enemy( st,
-                           pos,
-                           new_action_particle( v2init( entity.sign*st.cspeed, -4 ), v2init(0,0.5) ) )
-                           --new_action_particle( v2init( entity.sign*st.cspeed, 0 ), v2init(0,0) ) )
-                           --new_action_sinusoid( pos, v2init( entity.sign, 0 ), st.cspeed, 10, 30, phase ) )
+      local e = nil
+      if action.type == "straight" then
+         e = new_enemy( st,
+                        pos,
+                        new_action_particle( v2init( entity.sign*st.cspeed, 0 ), v2init(0,0) ) )
+      elseif action.type == "parabolic" then
+         e = new_enemy( st,
+                        pos,
+                        new_action_particle( v2init( entity.sign*st.cspeed, -4 ), v2init(0,0.5) ) )
+      else --"sinusoid"
+         local phase = 0
+         if (action.t / action.timeout) % 2 > 0 then phase = 0.5 end
+         e = new_enemy( st,
+                        pos,
+                        new_action_sinusoid( pos, v2init( entity.sign, 0 ), st.cspeed, 10, 30, phase ) )
+      end
       e.hit_timeout = 0
       e.sign = entity.sign
       add( room.enemies, e )
@@ -1240,18 +1237,17 @@ function update_action_move_on_ground( entity, action )
       if b_hit_wall
          or b_hit_border
          or b_hit_cliff then
-            -- blocked
+         -- blocked
          entity.p1.x -= entity.sign
          action.finished = true
       elseif dist < entity.a.cspeed then
-            -- success, closer than 1 timestep advance
+         -- success, closer than 1 timestep advance
          entity.p1 = action.p_target
          action.finished = true
       else
-            -- advance
-         local dir = v2scale( 1.0/dist, diff )
-         entity.p1 = v2add( entity.p0, v2scale( min(entity.a.cspeed,dist), dir ) )
-         entity.sign = sgn( dir.x )
+         -- advance
+         entity.p1 = v2add( entity.p0, v2scale( min(entity.a.cspeed,dist)/dist, diff ) )
+         entity.sign = sgn( diff.x )
       end
    end
    return action
@@ -1336,9 +1332,7 @@ function update_action_wait_and_fly( entity, action )
       action.sub.t > #entity.a.table_anm[action.sub.anm_id].k --only replan after whole cycle
    -- todo check range
    then
-      local diff = v2sub( player.p1, entity.p1 )
-      local dist = v2length( diff )
-      if dist < 64 then
+      if v2length( v2sub( player.p1, entity.p1 ) ) < 64 then
          action.sub = new_action_move( player.p1 ) --flyto player
       end
    elseif action.sub.finished then
@@ -1378,9 +1372,7 @@ function update_action_patrol_and_jump( entity, action )
       action.sub.t > #entity.a.table_anm[action.sub.anm_id].k --only replan after whole cycle
    -- todo check range
    then
-      local diff = v2sub( player.p1, entity.p1 )
-      local dist = v2length( diff )
-      if dist < 64
+      if v2length( v2sub( player.p1, entity.p1 ) ) < 64
          and
       flr(player.p1.y) == flr(entity.p1.y) then
          action.sub = new_action_jump_on_ground( player.p1 )
@@ -1423,23 +1415,31 @@ function update_action_sinusoid( entity, action )
 end
 
 function update_action_skullboss( entity, action )
-   action.sub = update_action( entity, action.sub )
-   -- idle intro phase
-   if action.sub.name == "idle" then
-      if action.sub.t > 30 then --1s
-         entity.sign = sgn( player.p1.x - entity.p1.x )
-         action.sub = new_action_shoot(30)
+   local sub = update_action( entity, action.sub )
+   entity.sign = sgn( player.p1.x - entity.p1.x )
+   -- intro/combat/outtro phases
+   if action.phase == 1 then --intro
+      if action.t > 60 then
+         action.phase = 2
       end
-   elseif action.sub.name == "shoot" then
-      if action.sub.t > 120 then
-         --action.sub = new_action_idle()
-         action.sub = new_action_jump_on_ground( v2add( v2init(player.p1.x,128-16), v2init(0,-8) ) )
+   elseif action.phase == 2 then --combat
+      if sub.name == "idle" and sub.t > 30 then --1s
+         sub = new_action_shoot(30,"sinusoid")
+      elseif sub.name == "shoot" and sub.t > 120 then
+         --jump to player pos projected on ground (y=bottom-16) vertical offset (-8) on ground
+         --sub = new_action_jump_on_ground( v2init(player.p1.x,128-24) )
+         if entity.p1.x > 100 then
+            sub = new_action_jump_on_ground( v2init(0,104) )
+         else
+            sub = new_action_jump_on_ground( v2init(112,104) )
+         end
+      elseif sub.name == "jong" and sub.finished then
+         sub = new_action_idle()
       end
-   elseif action.sub.name == "jong" then
-      if action.sub.finished then
-         action.sub = new_action_idle()
-      end
+   else --outtro
+      --todo
    end
+   action.sub = sub
    return action
 end
 
@@ -1470,7 +1470,7 @@ function update_bullets()
       local map_collisions = ccd_box_vs_map( b.p0,
                                              b.p1,
                                              aabb_apply_sign_x( b.a.cattackbox, b.sign ),
-                                             1+4,   --flags: 1 is_solid, 2 is_damage, 4 is destructible
+                                             5,   --flags: 1 is_solid, 2 is_damage, 4 is destructible
                                              true ) --first-only
       -- if map collision, save it and shorten predicted trajectory
       if #map_collisions > 0 then
@@ -1971,15 +1971,15 @@ __map__
 0000000000d5c4c5d40000c50000c5d400f400000000f400000000f400000000f4000000000000000000000000636363f000000000f4000000000000f4000000006300000000636363636363c1006300000000000070607070000000000000000000000000cecfcdccdedfcd0000ffffffffffffffffffff6262e2fff4ffffff
 000000000000d5e5000000d5c4c5d40000f400000000f400000000f400000000f4006363630000000000e0f000c0f4c10000000000f4000000000000f4000000006300000063c1000000000000006300000000006070706070600000000078000000000000dedfcecfdddcddcecfffffffffffffffffffe262626262f4ffffff
 00000000c5c400e5c5d40000d5e5c4c500f400000000f400000000f4006600636363634d0000e0f0000000000000f4000000000000f4000000000056f40000000063000063c10000000000000000630000000000706070707070646464646400000000cccd0000dedd000000deccccffffffffffffffe2656565656565c3c2ff
-5c0000d5d4d5c4e5d400000000d5e5d400f400000000f40000566363636363636363d10000000000000000000000f400000000e06363000000000063c10000000063635c00760063636363000000630000000000707470607460000000000000000000dcdd000000000000ce0000cecfffffffffffff65c6c665c1c065c0f4ff
-5c5c00000000d5e5000000000000e50000f400000000f400636363636363636371d1000000000000000000000000f4000000000000f46300000000000000000000c06363636363c1000000000063c1000000006360707070607000000000000000000000000000000000630000dedfffffffffffffffc6c1c0c6c3c265fff4ff
+5c0000d5d4d5c4e5d400000000d5e5d400f400000000f40000566363636363636363d10000000000000000000000f400000000e06363000000000063c10000000063635c00760063636363000000630000000000707470607460000000000000000000dcdd000000000000ce0000cecfffffffffffff6565656565c665c0f4ff
+5c5c00000000d5e5000000000000e50000f400000000f400636363636363636371d1000000000000000000000000f4000000000000f46300000000000000000000c06363636363c1000000000063c1000000006360707070607000000000000000000000000000000000630000dedfffffffffffffff65c1c065c66565fff4ff
 fbe40000000000e5000000000000e50000f4000000636363636363637575757575000000000000e0f00000000000f4000000000000f4006300000000000000000000c0f4000000000000000063c10063630000c07060e5e570600000000000000000000000000063cecf00cf0063ffffffe2ffffffffc18a8bc0656565fff4ff
 fbe4e82b2ce8e8e53072d60030e8e500c2f4c363757575757575757575757575755c000063000000005c006300c2f4c300000066c2f4c3750000000000660063630000f4000000000066637575006363636300006070e5e560700000000000f1f1000000007c63c1dedf000000c063ffc2f4e2ffffe2ff9a9bff656565c2f4c3
 fbe6717171e6e6e671e6e65ce6e671e6636363636363636363717171717171717171717163737372727373636363636362626262626275757562626262626262626262626262626262757575757575626262626262626262626250f150505050626262626262625050505050505062626262e1e1e1e1e1626262626262626262
 fb00d071717171717171717171717171717171717171717171717171717171717171717163636363636363636363636363637171717171717171717171717171626262626271717171717171717171717171717171717171715151515151515151f1f1f1f1f1f171717171717171717171717171717171717171717171717171
-fb0000d071d1d07171717171717171717171717171717171717171717171d0d1d07171d100f4c10000c0f40000000000000000000000000000000000d071d1000000000000d0d10000000000004d00000000000000d07171715151515151515151f1f1f1f1f1f17171717171f3717171717171717171d1d0d1d071d1d0717171
-d0000000fb0000d0717171717171d1d071d1d0717171d14dd071d14d71d100000000000000f400470000f40000000000000000660000000000000000004d00000000006600000000000000000000000000000000000000d0715151f151515171f1f1f1f1f1f1717171f3717171717171717171d071d10000000071000071d171
-00d00000fb0000004dd0717171d10000d100004dd071000000710000d10000000000000000f1f1f1f1f1f100000000000072e1e1e1e1e1e1e1e1e100000000000072e1e1e1e1e1e1e1e1e10000000000000000f100000000d0715371535371717171717171717171717171d1d071f371f671d100d10000000000d00000d000f5
+fb0000d071d1d07171717171717171717171717171717171717171717171d0d1d07171d100f4c10000c0f40000000000000000000000000000000000d071d1000000000000d0d10000000000004d00000000000000d07171715151515151515151f1f1f1f1f1f17171717171f1717171717171717171d1d0d1d071d1d0717171
+d0000000fb0000d0717171717171d1d071d1d0717171d14dd071d14d71d100000000000000f400470000f40000000000000000660000000000000000004d00000000006600000000000000000000000000000000000000d0715151f151515171f1f1f1f1f1f1717171f1717171717171717171d071d10000000071000071d171
+00d00000fb0000004dd0717171d10000d100004dd071000000710000d10000000000000000f1f1f1f1f1f100000000000072e1e1e1e1e1e1e1e1e100000000000072e1e1e1e1e1e1e1e1e10000000000000000f100000000d0715371535371717171717171717171717171d1d071f171f671d100d10000000000d00000d000f5
 0000d000fb00000000007171d1000000000000000071000000d100000000000000000000f1f1e9e9e9e9f1f10000000000e1c1e9e9e9e9e9e9e9c0e10000000000e1c1e9e9e9e9e9e9e9c0e100000000000000c0f1000000005553535353540000000000000000000000000000d07171f6d100000000000000000000000000f5
 00000000fb0000000000d071000000000000000000d000000000000000000000000000f1f1e9e9e9e9e9e9f1f100000000e1e9e9e9e9c9e9e9e9e9e9e9e1e1e1e1e1e9e9e9e9c9e9e9e9e9e9e9e9e1e1e1720000c0f100000055535353535400000000000000000000000000000000d0f60000000000000000000000000000f5
 00000000d10000000000007100000000000000000000000000000000000000000000f1f1e9e9e9e9e9e9e9e9f1e1000000e1e9e9e9e9e9e9e9e9e9e9e1c1e9e9e9e9e9e9e9e9e9e9e9e9e9e9e1e100e1e1c1000000c0f159005540545353540000000000000000000000000000780000f600000000000000000000000000c3f5
