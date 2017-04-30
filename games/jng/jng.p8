@@ -567,6 +567,9 @@ end
 function init_game()
    game = {}
    game.t = 0
+   game.is_skub_alive = true
+   game.is_flab_alive = true
+   game.is_finb_alive = true
 
    player = { a = a_player,
               state = 1,
@@ -981,11 +984,11 @@ function new_room_process_map_cell( r, room_j, room_i, map_j, map_i )
    elseif m == 248 then --resting flame
       e = new_entity( a_flame, pos, new_action_idle() )
       --bosses
-   elseif m == 138 then
+   elseif m == 138 and game.is_skub_alive then
       e = new_entity( a_skullboss, pos, new_action_skullboss() )
-   elseif m == 170 and player.num_orbs == 4 then
+   elseif m == 170 and game.is_flab_alive and player.num_orbs == 4 then
       e = new_entity( a_flameboss, pos, new_action_flameboss() )
-   elseif m == 136 then
+   elseif m == 136 and game.is_finb_alive then
       e = new_entity( a_finalboss, pos, new_action_skullboss() )
       --these should be entities but not enemies, but by now are handled as enemies to avoid extra code.
    elseif m == 201 then
@@ -1035,6 +1038,14 @@ function kill_entity( e )
    del(room.enemies,e)
    del(room.entities,e)
    add(room.zombies,e)
+   -- kill bosses permanently
+   if e.a == a_skullboss then
+      game.is_skub_alive = false
+   elseif e.a == a_flameboss then
+      game.is_flab_alive = false
+   elseif e.a == a_finalboss then
+      game.is_finb_alive = false
+   end
 end
 
 function update_enemies()
@@ -2237,4 +2248,3 @@ __music__
 00 41414141
 00 41414141
 00 41414141
-
