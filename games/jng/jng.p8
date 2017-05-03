@@ -12,6 +12,7 @@ __lua__
 function _init()
    caabb_88 = aabb_init(0,0,8,8)
    caabb_1616 = aabb_init(0,0,16,16)
+   cv2_44 = v2init(4,4)
    cinitial_room_coords = v2init( 0, 0 )
 
    --debug options
@@ -56,41 +57,28 @@ function _draw()
    cls()
 
    --lightning
-   -- todo: do it only on boss room, use sprite 255, not 0!
    -- todo use prob distrib with given expectation period
    --(start time) and random duration (alternate white/blue during
    --interval)
-   if level.room_coords.x == 7 and level.room_coords.y == 0 then
-      if game.t % 30 == 0 then
-         if flr(rnd(100)) < 25 then
-            pal(0,7)
-            palt(0,false)
-         end
-      elseif game.t % 29 == 0 then
-         if flr(rnd(100)) < 25 then
-            pal(0,12)
-            palt(0,false)
-         end
-      else
-         pal()
-         palt(0,true)
-      end
-   -- elseif level.room_coords.x == 7 and level.room_coords.y == 1 then
-   --    if game.t % 10 == 0 then
-   --       pal(9,10)
-   --    else
-   --       pal()
-   --    end
+   local room_coords = level.room_coords
+   local dice = flr(rnd(100))
+   if (room_coords.x == 0 or room_coords.x == 7)
+   and room_coords.y == 0
+   and (game.t % 30) * (game.t % 29) == 0
+   and dice < 25 then
+      pal(0,7+5*(dice%2)) --7 (white) or 12 (blue)
+      palt(0,false)
    end
 
    --bckgnd
-   map(level.room_coords.x * 16,
-       level.room_coords.y * 16,
+   map(room_coords.x * 16,
+       room_coords.y * 16,
        0,0,16,16,
        0x7f )
 
    --enemies
    for e in all(room.enemies) do
+      local e_p1 = e.p1
       if e.hit_timeout % 2 == 0 then
          local act = e.action
          while act.sub != nil do
@@ -101,7 +89,7 @@ function _draw()
             or e.a == a_flameboss
             or e.a == a_finalboss then
             spr( anm.k[ 1 + act.t % #anm.k ],
-                 e.p1.x, e.p1.y,
+                 e_p1.x, e_p1.y,
                  2,2,
                  e.sign<0 )
          else
@@ -112,13 +100,13 @@ function _draw()
                anm_t = 1+act.t%#anm.k
             end
             spr( anm.k[ anm_t ],
-                 e.p1.x, e.p1.y,
+                 e_p1.x, e_p1.y,
                  1,1,
                  e.sign<0 )
          end
       end
       if debug.mode > 0 then
-         print_action( e.action, e.p1.x-4, e.p1.y-4  )
+         print_action( e.action, e_p1.x-4, e_p1.y-4  )
       end
    end
 
@@ -163,8 +151,8 @@ function _draw()
    end
 
    -- map overlay
-   map(level.room_coords.x * 16,
-       level.room_coords.y * 16,
+   map(room_coords.x * 16,
+       room_coords.y * 16,
        0,0,16,16,
        0x80 )
 
@@ -181,14 +169,15 @@ function _draw()
       local colors = {10,11,8,12}
       for e in all(room.entities) do
          local a = e.a
+         local e_p1 = e.p1
          local boxes = {a.cvisualbox,a.cmovebox,a.cdamagebox,a.cattackbox}
          local box = boxes[debug.mode]
          if box != nil then
             box = aabb_apply_sign_x(box,e.sign)
-            rect( e.p1.x + box.min.x,
-                  e.p1.y + box.min.y,
-                  e.p1.x + box.max.x-1,
-                  e.p1.y + box.max.y-1,
+            rect( e_p1.x + box.min.x,
+                  e_p1.y + box.min.y,
+                  e_p1.x + box.max.x-1,
+                  e_p1.y + box.max.y-1,
                   colors[debug.mode] )
          end
       end
@@ -271,8 +260,9 @@ function init_archetypes()
    a_player.table_anm["shi"]  = {n="shi"  ,k={ 8,8,9,9,9 }}
    a_player.table_anm["shj"]  = {n="shj"  ,k={ 12,12,13,13  }}
    a_player.table_anm["shjb"] = {n="shjb" ,k={ 14,14,15,15 }} --same #frames as "shj"
-   a_player.table_anm["hit"]  = {n="hit" ,no_cycle=true,k={ {34,5}, {35,5*7} }}
+   a_player.table_anm["hit"]  = {n="hit" ,no_cycle=true,k={ {34,10}, {35,5*6} }}
    a_player.table_anm["hitb"]  = {n="hitb",no_cycle=true,k={ {36,4}, {37,4}, {38,4} }}
+   -- a_player.table_anm["win"]  = {n="win",k={ 39 }}
    uncompress_anim( a_player )
    a_player.cvisualbox = caabb_88
    a_player.cmovebox   = aabb_init( 1, 1, 7, 7 )
@@ -965,7 +955,7 @@ function new_room_process_map_cell( r, room_j, room_i, map_j, map_i )
       e = new_entity( a_caterpillar, pos, new_action_patrol( pos, -1 ) )
    elseif m == 50 then
       e = new_entity( a_caterpillar2, pos, new_action_patrol( pos, -1 ) )
-   elseif m == 86 then --cthulhu_patroler
+   elseif m == 86 then --cthulhu_patroller
       e = new_entity( a_cthulhu, pos, new_action_patrol( pos, -1 ) )
    elseif m == 90 then --cthulhu_shooter
       e = new_entity( a_cthulhu, pos, new_action_shoot( 30, "straight" ) )
@@ -989,7 +979,7 @@ function new_room_process_map_cell( r, room_j, room_i, map_j, map_i )
       e = new_entity( a_flame, pos, new_action_idle() )
    elseif m == 247 then --suspended flame
       e = new_entity( a_flame, pos, new_action_idle() )
-      e.action.anm_id = "burn" --HACK
+      e.action.anm_id = "burn" --hack
       --bosses
    elseif m == 138 and game.is_skub_alive then
       e = new_entity( a_skullboss, pos, new_action_skullboss() )
@@ -1148,15 +1138,6 @@ function new_action_patrol_and_jump( start_pos, sign_x )
             p_start = start_pos,
             sub = new_action_patrol( start_pos, sign_x ) }
 end
-
--- follow nav points todo use list instead of just 2!!
--- function new_action_path( start_pos, end_pos )
---    return { name = "path", anm_id = "move", t = 0, finished = false,
---             p_start = start_pos,
---             p_end = end_pos,
---             sub = new_action_move( end_pos ),
---             phase = 1 }
--- end
 
 -- oscillate from midpos along dir with sinusoid of given amplitude (in pixels) and period (in frames)
 function new_action_oscillate( mid_pos, _dir, _amplitude, _period )
@@ -1331,12 +1312,12 @@ function update_action_move_on_ground( entity, action )
       local p_feet
       if entity.sign > 0 then
          p_forward = v2add( entity.p1,
-                               v2init( movebox.max.x, 0.5*(movebox.max.y-movebox.min.y) ) )
+                            v2init( movebox.max.x, 0.5*(movebox.max.y-movebox.min.y) ) )
          p_feet = v2add( entity.p1,
                             v2init( movebox.max.x-1, movebox.max.y ) )
       else
          p_forward = v2add( entity.p1,
-                               v2init( movebox.min.x, 0.5*(movebox.max.y-movebox.min.y) ) )
+                            v2init( movebox.min.x, 0.5*(movebox.max.y-movebox.min.y) ) )
          p_feet = v2add( entity.p1,
                             v2init( movebox.min.x+1, movebox.max.y ) )
       end
@@ -1439,7 +1420,7 @@ function update_action_wait_and_ram( entity, action )
       and
       action.sub.t > #entity.a.table_anm[action.sub.anm_id].k --only replan after whole cycle
    then
-      if has_line_of_sight_horizontal( v2add(entity.p1,v2init(4,4)), v2add(player.p1,v2init(4,4)) ) then
+      if has_line_of_sight_horizontal( v2add(entity.p1,cv2_44), v2add(player.p1,cv2_44) ) then
          action.sub = new_action_move_on_ground( player.p1 )
       end
    elseif action.sub.finished then
@@ -1481,7 +1462,7 @@ function update_action_wait_and_drop( entity, action )
 
    if action.sub.name == "idle" then
       --fall if below
-      if has_line_of_sight_downwards( v2add(entity.p1,v2init(4,4)), v2add(player.p1,v2init(4,4)) ) then
+      if has_line_of_sight_downwards( v2add(entity.p1,cv2_44), v2add(player.p1,cv2_44) ) then
          action.sub = new_action_particle( v2zero(), v2init(0,a_level.cgravity_y) )
       end
    else
@@ -1501,7 +1482,7 @@ function update_action_patrol_and_jump( entity, action )
    then
       if abs(player.p1.x-entity.p1.x) < 64
          and
-         has_line_of_sight_horizontal( v2add(entity.p1,v2init(4,4)), v2add(player.p1,v2init(4,4)) ) then
+         has_line_of_sight_horizontal( v2add(entity.p1,cv2_44), v2add(player.p1,cv2_44) ) then
          action.sub = new_action_jump_on_ground( player.p1 )
       end
    elseif action.sub.finished then
@@ -1515,7 +1496,7 @@ end
 
 function update_action_oscillate( entity, action )
    entity.p1 = v2add( action.p_mid, v2scale( action.amplitude * sin( action.t/action.period ), action.dir ) )
-                                                   return action
+   return action
 end
 
 function update_action_sinusoid( entity, action )
@@ -1981,14 +1962,14 @@ __gfx__
 08055500008d55400055ddd0000d5000000d55500005d0000000d0050000d0050000555500005550e8e555eee855eeee8e5555ee8e555eeee85d8eeee85d8eee
 000d0500000d05005500000d000d50000dd000050005d000000d0050000d0050000dd0050000d005eeede5eeeede5eeeeddee5eeeddee5eeee5eddeeee5eddee
 00d0055000d005500000000000d05000000000000050d00000d0000000d0000000d0005000dd0005eedee55eedeee5eedeee5eeedeeee5eeeee5eedeeee5eede
-80808880080488000008800000080808008800008088000000808800eee22eeeeee11eee002e0000eeeebbee00000dd89438900000000000eeeeeeeeeeeeeeee
-08488904088489040088880000888880088980000889800400088880ee229eeeee119eee0028e800eebbb9e40008355883d88d0000000000eeeeeeeeeeeeeeee
-08844540088445400884590008459888084550008885544008884590e224deeee114deee08828e80bbb4544400d89345534d54400000bb00eeeeeeeeeeeeeeee
-00885500008855000845540004554800884554000884550000845540e24ddeeee14ddeee02828e80eb4e55ee0d43d3d44d3554500000b300eeeeeeeeeeeeeeee
-00055000000550000845440040554080808450400808440000405440224544ee114544ee082e2e20bee55eee0d3435888d534435000b3000eeeeeeeeeeeeeeee
-000d5500000d5500008550000054000008d500008000d50008005500e2e55deee1e55dee00e88200ee55333e89354d895d345398000b3000eeeeeeeeeeeeeeee
-000d0500000d050000d050000d05000000d0500000dd0500000d0500eeede5eeeeede5ee0002800055eeeee38834355355344388000b0000eeeeeeeeeeeeeeee
-00d0500000d050000d005000d00550000d0050000000500000d00550eedee5deeedee5de00000000eeeeeeee4343b4b343b3434b00b30000eeeeeeeeeeeeeeee
+8080888008048800000880000008080800880000808800000080880004088804eee11eee002e0000eeeebbee00000dd89438900000000000eee11eeeeee22eee
+0848890408848904008888000088888008898000088980040008888004889884ee119eee0028e800eebbb9e40008355883d88d0000000000ee119eeeee229eee
+0884454008844540088459000845988808455000888554400888459008455540e114deee08828e80bbb4544400d89345534d54400000bb00e114deeee224deee
+0088550000885500084554000455480088455400088455000084554080855588e14ddeee02828e80eb4e55ee0d43d3d44d3554500000b300e14ddeeee24ddeee
+0005500000055000084544004055408080845040080844000040544000805080114544ee082e2e20bee55eee0d3435888d534435000b3000114544ee224544ee
+000d5500000d5500008550000054000008d500008000d5000800550008055d08e1e55dee00e88200ee55333e89354d895d345398000b3000e1e55deee2e55dee
+000d0500000d050000d050000d05000000d0500000dd0500000d050000050d00eeede5ee0002800055eeeee38834355355344388000b0000eeede5eeeeede5ee
+00d0500000d050000d005000d00550000d0050000000500000d00550005000d0eedee5de00000000eeeeeeee4343b4b343b3434b00b30000eedee5deeedee5de
 00000000000000000000000000000000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee77eeeee6667ee7ee776eee6e6777e7e00000000777700600777700706660070
 00000000000000000000000000000000ee7eeeeeeeee7eeeeee6eeeeeeeee7ee7e666ee6ee7667e77e666ee6eee667e766666006007770607006770700066007
 00000000000000000000000000000000ee77677eee7677eeee7677eee66777eee76666e7ee666667e7666676ee66666700666606077666600066677700666607

@@ -6,8 +6,10 @@
      next to a right wall, you jump past it
    - basically, the horizontal jump speed needs to reset every frame,
      and cancelled only when there's a collision
-** TODO Hit/Death
-** TODO Contextual actions (on_ground, on_wall, on_cliff, etc...)
+** DONE Hit/Death
+** DONE (WON'T DO) Contextual actions (on_ground, on_wall, on_cliff, etc...)
+** TODO Appear as reborn (arms up!)
+** TODO Drown/single hit death
 * Collision detection
 ** DONE BP using map tiles as grid
 ** DONE CCD with sequential treatment
@@ -17,7 +19,6 @@
    2: damage
 ** DONE 1 solid block type (flag 0)
 ** DONE room change
-** TODO Scroll
 * Projectiles
 ** DONE CCD
 ** DONE Hit VFX
@@ -64,7 +65,7 @@
    - place properly acc to range
    - hitbox less unforgiving
    - inverse version
-** TODO Stalactite
+** DONE Stalactite
 *** TODO fall when player DIRECTLY below
 *** TODO remove from map permanently
      - FLAG enemies as "persistent" and if true, remember map cell
@@ -72,26 +73,26 @@
        above
      - could be a difficulty option, undead mode would regen
        everything, including bosses
-** TODO Angry skeleton
-   - NOT sure what should it do... maybe ignore it by now, but keep
-     sprite
-** TODO Boss: Skull Executioner
+** DONE Boss: Skull Executioner
    - Jump on player spot
      - Player must move fast when SE is in the air
    - Open mouth and shoot skulls Straight/Sinusoid
      - Player must be at reasonable distance and jump over or duck
        below skulls
      - NO double-jump available
-** TODO Skull projectile
-** TODO Boss: Flame Executioner
+** DONE Skull projectile
+** DONE Boss: Flame Executioner
    - Charge
      - Player must double-jump over it
    - Throw parabolic flames that stick to the ground for a while
      - Player must avoid projectiles and ground and wall flames
-** TODO Flame projectile
+** DONE Flame projectile
    - Stick to solid tiles
    - Burn for a while and disappear (timeout)
-** TODO Boss: UnderKing
+** TODO Angry skeleton
+   - NOT sure what should it do... maybe ignore it by now, but keep
+     sprite
+** TODO Boss: Final Boss
    - Fly around
      - Player must shoot when at accessible height
    - Directed bullets
@@ -112,18 +113,23 @@
    - Some can be destroyed
    - Like puzzle platformer
 * Main menu
-  - Difficulty:
+  - Title screen
+  - Difficulty
     - Unborn: 3-hit death, all enemies persistent
     - Alive: 3-hit death, persistent env traps, regenerate enemies
     - Undead: 2-hit death, regenerate all env and enemies, GnG-style
 * FX
-  - Rain/Snow pixels
-  - Lightning/Flashing screen at startup
-  - Screen-shake on impact
-    - Move camera with noise
-  - Death/Evaporate
+** DONE Death/Evaporate
     - Gen flashing white pixels that fade up/directionally to impact)
-  - Dark areas using flickering/dither
+** DONE Flashing
+   - startup
+   - cathedral ruins
+** TODO Lightning
+   - Player appeareance
+** DONE Rain/Snow pixels
+** DONE (WON'T DO) Screen-shake on impact
+    - Move camera with noise
+** DONE (WON'T DO) Dark areas using flickering/dither
 * BUGS
 ** TODO AABB sizes are a bit wrong when inverted (seem to drift left)
 ** TODO ground collision bugs when hit
@@ -131,10 +137,10 @@
    - make room change more robust by placing char strictly at the
      border regardless of speed
 * FW
+** DONE RLE anims
+   - list of key + repetitions
 ** TODO RLE map
    - Save in code-string or in map-memory
-** TODO RLE anims
-   - list of key + repetitions
 ** TODO Generic animation system
     - Allow 1 cycle + 1 optional action
     - Rename Action to Cycle
