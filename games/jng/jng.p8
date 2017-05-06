@@ -16,12 +16,11 @@ function _init()
    cinitial_room_coords = v2init( 0, 0 )
 
    --debug options
-   debug = {}
-   debug.cnummodes = 6
-   debug.mode = 0
-   debug.paused = false
-   debug.log = {}
-   debug.can_die = false
+   debug = { cnummodes = 6,
+             mode = 0,
+             paused = false,
+             log = {},
+             can_die = false }
 
    init_archetypes()
    init_game()
@@ -33,7 +32,7 @@ end
 function _update()
    if not debug.paused then
       --game
-      game.t = game.t+1
+      game.t += 1
       --entities
       update_player()
       update_enemies()
@@ -71,8 +70,10 @@ function _draw()
    end
 
    --bckgnd
-   map(room_coords.x * 16,
-       room_coords.y * 16,
+   local room_tile_x = room_coords.x * 16
+   local room_tile_y = room_coords.y * 16
+   map(room_tile_x,
+       room_tile_y,
        0,0,16,16,
        0x7f )
 
@@ -84,26 +85,23 @@ function _draw()
          while act.sub != nil do
             act = act.sub
          end
-         local anm = e.a.table_anm[act.anm_id]
+         local size_x = 1
+         local size_y = 1
          if e.a == a_skullboss
             or e.a == a_flameboss
             or e.a == a_finalboss then
-            spr( anm.k[ 1 + act.t % #anm.k ],
-                 e_p1.x, e_p1.y,
-                 2,2,
-                 e.sign<0 )
-         else
-            local anm_t
-            if anm.no_cycle then
-               anm_t = min(1+act.t,#anm.k)
-            else
-               anm_t = 1+act.t%#anm.k
-            end
-            spr( anm.k[ anm_t ],
-                 e_p1.x, e_p1.y,
-                 1,1,
-                 e.sign<0 )
+               size_x = 2
+               size_y = 2
          end
+         local anm = e.a.table_anm[act.anm_id]
+         local anm_t = 1+act.t%#anm.k
+         if anm.no_cycle then
+            anm_t = min(1+act.t,#anm.k)
+         end
+         spr( anm.k[ anm_t ],
+              e_p1.x, e_p1.y,
+              size_x,size_y,
+              e.sign<0 )
       end
       if debug.mode > 0 then
          print_action( e.action, e_p1.x-4, e_p1.y-4  )
@@ -120,11 +118,9 @@ function _draw()
       if player.state == 6 and player.sign*player.v.x < 0 then
          anm = g_anim[7]
       end --hack: draw backwards jump shoot
-      local anm_t
+      local anm_t = 1+player.t%#anm.k
       if anm.no_cycle then
          anm_t = min(1+player.t,#anm.k)
-      else
-         anm_t = 1+player.t%#anm.k
       end
       spr( anm.k[anm_t],
            player.p1.x, player.p1.y,
@@ -151,8 +147,8 @@ function _draw()
    end
 
    -- map overlay
-   map(room_coords.x * 16,
-       room_coords.y * 16,
+   map(room_tile_x,
+       room_tile_y,
        0,0,16,16,
        0x80 )
 
@@ -184,10 +180,10 @@ function _draw()
 
       -- debug info
       -- if debug.mode == 1 then
-      --    print("t:"..game.t/10,1,1,14)
-      --    print("a:"..g_anim[player.state].n,108,1,14)
-      --    print("mem:"..stat(0),1,122,14)
-      --    print("cpu:"..stat(1),84,122,14)
+      --    print("t:"..game.t/10,1,1)
+      --    --print("a:"..g_anim[player.state].n,108,1,14)
+      --    print("mem:"..stat(0),1,122)
+      --    print("cpu:"..stat(1),84,122)
       -- elseif debug.mode == 2 then
       --    color(14)
       --    cursor(0,0)
@@ -253,16 +249,16 @@ function init_archetypes()
    --player
    a_player = {}
    a_player.table_anm = {}
-   a_player.table_anm["idle"] = {n="idl" ,k={ {16,8}, {17,8} }}
-   a_player.table_anm["run"]  = {n="run" ,k={ {18,6}, {19,4}, {20,6}, {21,4} }}
-   a_player.table_anm["jump"] = {n="jmp" ,no_cycle=true,k={ {22,4}, {23,4}, {24,4}, {25,4} }}
-   a_player.table_anm["fall"] = {n="fall" ,k={ {32,4}, {33,4} }}
-   a_player.table_anm["shi"]  = {n="shi"  ,k={ 8,8,9,9,9 }}
-   a_player.table_anm["shj"]  = {n="shj"  ,k={ 12,12,13,13  }}
-   a_player.table_anm["shjb"] = {n="shjb" ,k={ 14,14,15,15 }} --same #frames as "shj"
-   a_player.table_anm["hit"]  = {n="hit" ,no_cycle=true,k={ {34,10}, {35,5*6} }}
-   a_player.table_anm["hitb"]  = {n="hitb",no_cycle=true,k={ {36,4}, {37,4}, {38,4} }}
-   -- a_player.table_anm["win"]  = {n="win",k={ 39 }}
+   a_player.table_anm["idle"] = {k={ {16,8}, {17,8} }}
+   a_player.table_anm["run"]  = {k={ {18,6}, {19,4}, {20,6}, {21,4} }}
+   a_player.table_anm["jump"] = {no_cycle=true,k={ {22,4}, {23,4}, {24,4}, {25,4} }}
+   a_player.table_anm["fall"] = {k={ {32,4}, {33,4} }}
+   a_player.table_anm["shi"]  = {k={ 8,8,9,9,9 }}
+   a_player.table_anm["shj"]  = {k={ 12,12,13,13  }}
+   a_player.table_anm["shjb"] = {k={ 14,14,15,15 }} --same #frames as "shj"
+   a_player.table_anm["hit"]  = {no_cycle=true,k={ {34,10}, {35,5*6} }}
+   a_player.table_anm["hitb"]  = {no_cycle=true,k={ {36,4}, {37,4}, {38,4} }}
+   a_player.table_anm["alive"]  = {k={ 39 }}
    uncompress_anim( a_player )
    a_player.cvisualbox = caabb_88
    a_player.cmovebox   = aabb_init( 1, 1, 7, 7 )
@@ -442,10 +438,10 @@ function init_archetypes()
    a_flame.table_anm = {}
    a_flame.table_anm["idle"] = {k={ {245,3}, {246,3} }}
    a_flame.table_anm["move"] = {k={ {247,3}, {248,3} }}
-   a_flame.table_anm["hit"] = {no_cycle=true,k={ {249,3}, {250,3}, --hit
-                                                 {245,5}, {246,5},
-                                                 {245,5}, {246,5},
-                                                 {245,5}, {246,5} }} --remain 30 frames (1 sec)
+   a_flame.table_anm["hit"] = {k={ {249,3}, {250,3}, --hit
+                                   {245,5}, {246,5},
+                                   {245,5}, {246,5},
+                                   {245,5}, {246,5} }} --remain 30 frames (1 sec)
    a_flame.table_anm["burn"] = {k={ {249,3}, {250,3}, {247,3} }}
    uncompress_anim( a_flame )
    a_flame.cvisualbox = caabb_88
@@ -1259,7 +1255,7 @@ function update_action_particle( entity, action )
 end
 
 function update_action_hit( entity, action )
-   if action.t > #entity.a.table_anm[action.anm_id].k then
+   if action.t == #entity.a.table_anm[action.anm_id].k then
       return nil
    else
       return action
