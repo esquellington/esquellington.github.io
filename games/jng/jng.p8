@@ -35,6 +35,7 @@ function _update()
       game.t += 1
       --entities
       update_player()
+      --update_map()
       update_enemies()
       update_bullets()
       update_vfx()
@@ -48,25 +49,44 @@ function _update()
    end
 end
 
+function draw_lighting( length )
+   local frames = {206,222,238}
+   for y=16,length,8 do
+      spr( frames[1+y%3], 24, y )
+   end
+   -- for y=y0,y1,8 do
+   --    --spr( frames[flr(rnd(3))], x0, y )
+   --    spr( frames[1+y%3], x0, y )
+   -- end
+end
+
+-- function draw_lighting( x0, y0, y1 )
+--    local frames = {206,222,238}
+--    for y=y0,y1,8 do
+--       --spr( frames[flr(rnd(3))], x0, y )
+--       spr( frames[1+y%3], x0, y )
+--    end
+-- end
+
 ----------------------------------------------------------------
 -- draw
 ----------------------------------------------------------------
 function _draw()
 
    cls()
+   pal()
 
    --lightning
-   -- todo use prob distrib with given expectation period
-   --(start time) and random duration (alternate white/blue during
-   --interval)
    local room_coords = level.room_coords
    local dice = flr(rnd(100))
+   local b_lighting = false
    if (room_coords.x == 0 or room_coords.x == 7)
    and room_coords.y == 0
-   and (game.t % 30) * (game.t % 29) == 0
-   and dice < 25 then
+   and (game.t % 17) * (game.t % 13) == 0
+   and dice < 50 then
       pal(0,7+5*(dice%2)) --7 (white) or 12 (blue)
       palt(0,false)
+      b_lighting = true
    end
 
    --bckgnd
@@ -76,6 +96,13 @@ function _draw()
        room_tile_y,
        0,0,16,16,
        0x7f )
+
+   --lightning
+   if game.t < 8 then
+      draw_lighting(14*game.t)
+   elseif game.t < 16 then
+      draw_lighting( 165 - 14*game.t )
+   end
 
    --enemies
    for e in all(room.enemies) do
@@ -103,9 +130,9 @@ function _draw()
               size_x,size_y,
               e.sign<0 )
       end
-      if debug.mode > 0 then
-         print_action( e.action, e_p1.x-4, e_p1.y-4  )
-      end
+      -- if debug.mode > 0 then
+      --    print_action( e.action, e_p1.x-4, e_p1.y-4  )
+      -- end
    end
 
    --player
@@ -127,7 +154,9 @@ function _draw()
            1,1,
            player.sign<0 )
    end
-   pal()
+   if player.is_mutated then
+      pal()
+   end
 
    --player bullets
    for b in all(room.bullets) do
@@ -339,7 +368,7 @@ function init_archetypes()
    a_grunt.cdamagebox = caabb_88
    a_grunt.cattackbox = caabb_88
    a_grunt.cspeed = 1
-   a_grunt.chealth = 4
+   a_grunt.chealth = 3
    a_grunt.replacetileoffset = v2init(0,-1)
 
    --cthulhu
@@ -527,7 +556,7 @@ function init_archetypes()
    a_flameboss.cattackbox = caabb_1616
    a_flameboss.cspeed = 2.5
    a_flameboss.chealth = 10
-   a_flameboss.cshootpos = v2init( 10, 6 )
+   a_flameboss.cshootpos = v2init( 10, 0 )
    a_flameboss.replacetileoffset = v2init(1,0)
 
    a_finalboss = {}
@@ -566,8 +595,8 @@ function init_game()
    player = { a = a_player,
               state = 1,
               t = 0,
-              p0 = v2init( 28, 24 ),
-              p1 = v2init( 28, 24 ),
+              p0 = v2init( 24, 102 ),
+              p1 = v2init( 24, 102 ),
               sign = 1,
               v = v2zero(),
               on_ground = false,
@@ -582,7 +611,7 @@ function init_game()
    level.a = a_level
    level.room_coords = cinitial_room_coords
 
-   room = new_room( a_room, level.room_coords )
+   room = new_room( level.room_coords )
 end
 
 ----------------------------------------------------------------
@@ -826,35 +855,42 @@ function update_player()
       end
    end
 
-   -- change room
-   -- todo: access room-specific archetypes a_room[j][i] from map
-   local offset = 16*8
-   if player.v.x > 0
-      and player.p1.x > offset - movebox.max.x
-      and level.room_coords.x < level.a.cnumrooms.x-1 then
-      level.room_coords.x += 1
-      room = new_room( a_room, level.room_coords )
-      player.p1.x = movebox.min.x
-      --add( debug.log, "room_x "..level.room_coords.x )
-   elseif player.v.x < 0
-      and player.p1.x < movebox.min.x
-      and level.room_coords.x > 0 then
-      level.room_coords.x -= 1
-      room = new_room( a_room, level.room_coords )
-      player.p1.x = offset - movebox.max.x
-      --add( debug.log, "room_x "..level.room_coords.x )
-   elseif player.v.y > 0
-      and player.p1.y > offset - movebox.max.y
-      and level.room_coords.y < level.a.cnumrooms.y-1 then
-      level.room_coords.y += 1
-      room = new_room( a_room, level.room_coords )
-      player.p1.y = movebox.min.y
-   elseif player.v.y < 0
-      and player.p1.y < movebox.min.y
-      and level.room_coords.y > 0 then
-      level.room_coords.y -= 1
-      room = new_room( a_room, level.room_coords )
-      player.p1.y = offset - movebox.max.y
+   local room_coords = level.room_coords
+   -- cannot leave room if boss is alive
+   local b_cannot_leave_room = room_coords.x == 7
+                               and ( ( room_coords.y == 0 and game.is_skub_alive )
+                                     or
+                                     ( room_coords.y == 1 and game.is_flab_alive and player.num_orbs_placed == 4 ) )
+
+   -- update-map
+   if not b_cannot_leave_room then
+      local offset = 16*8
+      if player.v.x > 0
+         and player.p1.x > offset - movebox.max.x
+      and room_coords.x < level.a.cnumrooms.x-1 then
+         room_coords.x += 1
+         room = new_room( room_coords )
+         player.p1.x = movebox.min.x
+      elseif player.v.x < 0
+         and player.p1.x < movebox.min.x
+      and room_coords.x > 0 then
+         room_coords.x -= 1
+         room = new_room( room_coords )
+         player.p1.x = offset - movebox.max.x
+      elseif player.v.y > 0
+         and player.p1.y > offset - movebox.max.y
+      and room_coords.y < level.a.cnumrooms.y-1 then
+         room_coords.y += 1
+         room = new_room( room_coords )
+         player.p1.y = movebox.min.y
+      elseif player.v.y < 0
+         and player.p1.y < movebox.min.y
+      and room_coords.y > 0 then
+         room_coords.y -= 1
+         room = new_room( room_coords )
+         player.p1.y = offset - movebox.max.y
+      end
+      level.room_coords = room_coords
    end
 
    --borders todo these should be also treated as ccd contacts,
@@ -913,11 +949,11 @@ end
 ----------------------------------------------------------------
 -- rooms
 ----------------------------------------------------------------
-function new_room( archetype, coords )
+function new_room( coords )
    kill_room()
    local r = {}
    --init
-   r.a = archetype
+   --r.a = archetype
    r.enemies = {}
    r.entities = {}
    r.zombies = {}
@@ -976,6 +1012,7 @@ function new_room_process_map_cell( r, room_j, room_i, map_j, map_i )
    elseif m == 247 then --suspended flame
       e = new_entity( a_flame, pos, new_action_idle() )
       e.action.anm_id = "burn" --hack
+      e.action.t = flr(rnd(17))
       --bosses
    elseif m == 138 and game.is_skub_alive then
       e = new_entity( a_skullboss, pos, new_action_skullboss() )
@@ -1247,7 +1284,8 @@ function update_action_particle( entity, action )
                                           5,   --flags: 1 is_solid, 2 is_damage, 4 is destructible
                                           true ) --first-only
    if #map_collisions > 0 then
-      entity.p1 = v2add( entity.p0, v2scale( 0.99*map_collisions[1].interval.min, action.vel ) )
+      --bug: floating flames, workaround using 1.01
+      entity.p1 = v2add( entity.p0, v2scale( 1.01*map_collisions[1].interval.min, action.vel ) )
       return new_action_hit()
    else
       return action
@@ -1317,14 +1355,12 @@ function update_action_move_on_ground( entity, action )
          p_feet = v2add( entity.p1,
                             v2init( movebox.min.x+1, movebox.max.y ) )
       end
-      local b_hit_wall = is_solid( p_forward )
-      local b_hit_border = is_out( p_forward )
-      local b_hit_cliff = not is_solid( p_feet )
       local diff = v2sub( action.p_target, entity.p1 )
       local dist = v2length( diff )
-      if b_hit_wall
-         or b_hit_border
-         or b_hit_cliff then
+      if is_solid( p_forward ) --hit wall
+         or is_out( p_forward ) --hit border
+         or not is_solid( p_feet ) --hit cliff
+      then
          -- blocked
          entity.p1.x -= entity.sign
          action.finished = true
@@ -1531,27 +1567,28 @@ end
 
 function update_action_flameboss( entity, action )
    local sub = update_action( entity, action.sub )
-   entity.sign = sgn( player.p1.x - entity.p1.x )
    -- intro/combat/outtro phases
    if action.phase == 1 then --intro
       if action.t > 60 then
          action.phase = 2
-         sub = new_action_jump_on_ground( v2init(112,104) )
+         sub = new_action_jump_on_ground( v2init(104,104) )
       end
    elseif action.phase == 2 then --combat
       if sub.name == "idle" and sub.t > 30 then --1s
          sub = new_action_shoot(30,"parabolic")
       elseif sub.name == "shoot" and sub.t > 90 then --3x shots
-         if entity.p1.x > 100 then
-            --sub = new_action_jump_on_ground( v2init(0,104) )
+         if entity.p1.x > 90 then --100 then
             sub = new_action_move_on_ground( v2init(0,104) )
          else
-            sub = new_action_jump_on_ground( v2init(112,104) )
+            sub = new_action_jump_on_ground( v2init(104,104) )
          end
       elseif sub.name == "jong" and sub.finished then
          sub = new_action_idle()
       elseif sub.name == "mong" and sub.finished then
          sub = new_action_idle()
+      end
+      if sub.name != "mong" then
+         entity.sign = sgn( player.p1.x - entity.p1.x )
       end
    else --outtro
       --todo
@@ -1708,8 +1745,8 @@ function is_solid( p )
 end
 
 function apply_borders( p, box )
-   return v2init( clamp( p.x, 0-box.min.x, room.a.csizes.x-box.max.x ),
-                  clamp( p.y, 0-box.min.y-8, room.a.csizes.y-box.max.y ) )
+   return v2init( clamp( p.x, 0-box.min.x, a_room.csizes.x-box.max.x ),
+                  clamp( p.y, 0-box.min.y-8, a_room.csizes.y-box.max.y ) )
 end
 
 function contains_collision_with_normal( collisions, n )
@@ -2038,74 +2075,74 @@ dddddddd1111111155555555d0c0d0c00c0d0700000c0d0c32323233232323203232000023232320
 00000000000000000000000000000000000000000000000000000000000000000002d520025d2000000cc10550c10000000cc10550cc100000011c0550cc1000
 1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f000ddd2002ddd00000c111000011100000c11100001110000011100001111000
 0000000000000000000000000000000000000000000000000000000000000000002dd020020dd200001111100111110000111110011111000010000000011100
-22d2d2d22d2d2d22000000022000000000000000000000006d2dddd62222255555522dd20000008008000000eeeeeeee0000000000000000eeeeeeeeeeeeeeee
-002d2d2dd2d2d20000000002200000004000000000000004d66dd66ddd2555cc885552d20800009009000080eeeeeeee0000000001111110eeeeeeeeeeeeeeee
-0002d2dddd2d20000000002222000000f40000000000004fd6866c6dd255000c8aad552d8900089009800098eeeeeeee0000000000000011eeeeeeeeeeeeeeee
-00002d2dd2d20000000002d22d2000004f400000000004f4dd6d26dd25550000abbb55529a90099aa99009a9eeeeeeee0000000000000000eeeeeeeeeeeeeeee
-000002d22d20000000002d2dd2d20000f4f4000000004f4f2d6dd6d225005000ab5555524440044444400444eeeeeeee0000011000000000eeeeeeeeeeeeeeee
-00000022220000000002d2dddd2d200044ff40000004ff4fd6b6696d55a00500b55ccc554440044444400444eeeeeeee0001100111000000eeeeeeeeeeeeeeee
-0000000220000000002d2d2dd2d2d200ff44f400004f44ffd66dd66d5a00005c55cbbbc50400004004000040eeeeeeee0110000000000000eeeeeeeeeeeeeeee
-000000022000000022d2d2d22d2d2d224fff4f4004f4f4f46dddd2d65b0000055cb888b50400004004000040eeeeeeee0000000000000000eeeeeeeeeeeeeeee
-04f444f44f444f4000000004400000004f4f4f4004f4fff400555000500000c555baa88500000011eeeeeeeeeeeeeeee0000000000000000eeeeeeeeeeeeeeee
-0044f444444f44000000000440000000ff44f400004f44ff0566650000000050c55bba8511000100eeeeeeeeeeeeeeee0000000011000001eeeeeeeeeeeeeeee
-00004f4444f400000000004444000000f4ff40000004ff440566665000000500bc55ba5500101000eeeeeeeeeeeeeeee0000000000111110eeeeeeeeeeeeeeee
-0000044444400000000004f44f400000f4f4000000004f4f06555665000000008bc5bd5200010000eeeeeeeeeeeeeeee0000000000000000eeeeeeeeeeeeeeee
-000000f44f00000000004444444400004f400000000004f456666565000000008bc5555210001000eeeeeeeeeeeeeeee0000000000000000eeeeeeeeeeeeeeee
-000000444400000000044f4444f44000f40000000000004f56556665000000008bc5552d00010100eeeeeeeeeeeeeeee0111110000000000eeeeeeeeeeeeeeee
-00000004400000000044f444444f440040000000000000045666666000005cc8bc5552dd00100011eeeeeeeeeeeeeeee0000001100000000eeeeeeeeeeeeeeee
-000000000000000044f444f44f444f44000000000000000036336363000005555552dddd11000000eeeeeeeeeeeeeeee0000000000000000eeeeeeeeeeeeeeee
-2222222256556556000000005050505050505050f4f4ff4f3b3b43b4000003000030000010000011eeeeeeeeeeeeeeee0000067777600000eeee9eee00000000
-02222222656665650000000055555555555555554f4ff4f433b33b4b000300300030000001000100eeeeeeeeeeeeeeee0006777777776000e9eeeeee40000040
-0002d2dd566666560000000050505050505050504f4f4ff44343433b030b30300300300000101000eeeeeeeeeeeeeeee0067776676677600eeeeeeee00000000
-00002d2d666555660000002050505050605050504ff4f4fff4444344030300b00303b03000010000eeeeeeeeeeeeeeee0677667777777760eee9eee900004000
-000002d25656566620000d2d5555555566555555f4ff4f444444f4440b0300300b00303000001000eeeeeeeeeeeeeeee0777777777777770eeeeeeee00000000
-0000002256666665d2dd22dd50505050605050504f4f4ff44f444444300303b0030030b000010100eeeeeeeeeeeeeeee6777666777767776eeeeeeee00000000
-0000000265665556dd22dd2d50505050505050504f4f4f4f444444f44b33b4340b30300300100010eeeeeeeeeeeeeeee77667776777766779eeeee9e04000000
-00000002565566562dd2d2d25050505050505050f4f4f4f44444f444b43b4343434b33b411000001eeeeeeeeeeeeeeee7777667777777777eee9eeee00000400
-2222222205555650000000002dd2d2d2d2d2d2d2000000000000000000090000000090000000900000000000e4ee4ee47777777777777776eeee4efe00000100
-2222222065666565000000002dddd2d22dd2d2d20000000000000000000980000009a0000008000000000090e4ee4ee47776777777767776efeeeefe01000000
-dd2d200056666655200000022dd2dd202dd2d2dd0000000000000000008980000008a80000098000080009004ee4ee4e6777766777767776efe4ee4e00000000
-d2d2000056656565d222222d02d2dd20d2d2dd2d00080000000000000089a8000089a800080a9080008008004ee4ee4e0777777777677770eee4fe4e00000000
-2d200000565656652dddddd202dd2d20dddd2d2d0009800000009000009a9a00009a99008009800800809800e4ee4ee40677677776767760e4eefeee00001000
-2200000056666665d2dddd2d02dd2d202d2d2ddd008a90800808980008aaa9000089aa9089a9aa9808a99a80e4ee4ee40067777777777600eefe4ee400000000
-20000000556656552d2dd2d22d2ddd202d2dd2d208a9a8a009a99800089a9800008a9a80899aa9988a9a9a984ee4ee4e00067777777760004efeeeee10000010
-2000000006556550ddd22ddd22d2d2d2d2d2d2d2a99aa99a9a8a9a890089a0000009a8000889998089a889894ee4ee4e00000777766000004ee4efee00000000
+22d2d2d22d2d2d22000000022000000000000000000000006d2dddd62222255555522dd20000008008000000eeeeeeee00000000000000000000c000eeeeeeee
+002d2d2dd2d2d20000000002200000004000000000000004d66dd66ddd2555cc885552d20800009009000080eeeeeeee0000000001111110100c1100eeeeeeee
+0002d2dddd2d20000000002222000000f40000000000004fd6866c6dd255000c8aad552d8900089009800098eeeeeeee0000000000000011001c1000eeeeeeee
+00002d2dd2d20000000002d22d2000004f400000000004f4dd6d26dd25550000abbb55529a90099aa99009a9eeeeeeee00000000000000000011c000eeeeeeee
+000002d22d20000000002d2dd2d20000f4f4000000004f4f2d6dd6d225005000ab5555524440044444400444eeeeeeee000001100000000000011c01eeeeeeee
+00000022220000000002d2dddd2d200044ff40000004ff4fd6b6696d55a00500b55ccc554440044444400444eeeeeeee00011001110000000001c100eeeeeeee
+0000000220000000002d2d2dd2d2d200ff44f400004f44ffd66dd66d5a00005c55cbbbc50400004004000040eeeeeeee0110000000000000100c1000eeeeeeee
+000000022000000022d2d2d22d2d2d224fff4f4004f4f4f46dddd2d65b0000055cb888b50400004004000040eeeeeeee00000000000000000010c010eeeeeeee
+04f444f44f444f4000000004400000004f4f4f4004f4fff400555000500000c555baa88500000011eeeeeeeeeeeeeeee000000000000000000000c00eeeeeeee
+0044f444444f44000000000440000000ff44f400004f44ff0566650000000050c55bba8511000100eeeeeeeeeeeeeeee00000000110000011000c001eeeeeeee
+00004f4444f400000000004444000000f4ff40000004ff440566665000000500bc55ba5500101000eeeeeeeeeeeeeeee00000000001111100000c000eeeeeeee
+0000044444400000000004f44f400000f4f4000000004f4f06555665000000008bc5bd5200010000eeeeeeeeeeeeeeee0000000000000000000c0c00eeeeeeee
+000000f44f00000000004444444400004f400000000004f456666565000000008bc5555210001000eeeeeeeeeeeeeeee0000000000000000010c0010eeeeeeee
+000000444400000000044f4444f44000f40000000000004f56556665000000008bc5552d00010100eeeeeeeeeeeeeeee011111000000000000c0c000eeeeeeee
+00000004400000000044f444444f440040000000000000045666666000005cc8bc5552dd00100011eeeeeeeeeeeeeeee000000110000000010c00c00eeeeeeee
+000000000000000044f444f44f444f44000000000000000036336363000005555552dddd11000000eeeeeeeeeeeeeeee00000000000000000c00c0c0eeeeeeee
+2222222256556556000000005050505050505050f4f4ff4f3b3b43b4000003000030000010000011eeeeeeeeeeeeeeee00000677776000000000c00000000000
+02222222656665650000000055555555555555554f4ff4f433b33b4b000300300030000001000100eeeeeeeeeeeeeeee00067777777760001000c00040000040
+0002d2dd566666560000000050505050505050504f4f4ff44343433b030b30300300300000101000eeeeeeeeeeeeeeee0067776676677600001c0c0100000000
+00002d2d666555660000002050505050605050504ff4f4fff4444344030300b00303b03000010000eeeeeeeeeeeeeeee0677667777777760000c0c0000004000
+000002d25656566620000d2d5555555566555555f4ff4f444444f4440b0300300b00303000001000eeeeeeeeeeeeeeee077777777777777000c0c0c000000000
+0000002256666665d2dd22dd50505050605050504f4f4ff44f444444300303b0030030b000010100eeeeeeeeeeeeeeee67776667777677761c00c00c00000000
+0000000265665556dd22dd2d50505050505050504f4f4f4f444444f44b33b4340b30300300100010eeeeeeeeeeeeeeee7766777677776677000c001c04000000
+00000002565566562dd2d2d25050505050505050f4f4f4f44444f444b43b4343434b33b411000001eeeeeeeeeeeeeeee77776677777777770100c00000000400
+2222222205555650000000002dd2d2d2d2d2d2d2000000000000000000090000000090000000900000000000e4ee4ee47777777777777776eeeeceee00000100
+2222222065666565000000002dddd2d22dd2d2d20000000000000000000980000009a0000008000000000090e4ee4ee47776777777767776eeeeceee01000000
+dd2d200056666655200000022dd2dd202dd2d2dd0000000000000000008980000008a80000098000080009004ee4ee4e6777766777767776eeecceee00000000
+d2d2000056656565d222222d02d2dd20d2d2dd2d00080000000000000089a8000089a800080a9080008008004ee4ee4e0777777777677770eeeceeee00000000
+2d200000565656652dddddd202dd2d20dddd2d2d0009800000009000009a9a00009a99008009800800809800e4ee4ee40677677776767760eecceeee00001000
+2200000056666665d2dddd2d02dd2d202d2d2ddd008a90800808980008aaa9000089aa9089a9aa9808a99a80e4ee4ee40067777777777600eececeee00000000
+20000000556656552d2dd2d22d2ddd202d2dd2d208a9a8a009a99800089a9800008a9a80899aa9988a9a9a984ee4ee4e0006777777776000eeceecee10000010
+2000000006556550ddd22ddd22d2d2d2d2d2d2d2a99aa99a9a8a9a890089a0000009a8000889998089a889894ee4ee4e0000077776600000eceeceee00000000
 
 __gff__
 0000000000000000000000000000000000000000000000000000000000000000000000000000000000400001010800000000000000000000000000000000000008080000000000000808000000000000020208808080000000000000804000004001010101400000000000000000000040010202010500000000000000000000
-0202020202020202000000000000000002020202020202020000000000000000020202020202020200000000000000000202020202020202000000000000000040404040404040404040400040400000010101014040014040400000404040400101404001400140404000004040404001014040400000020000024040404040
+0202020202020202000000000000000002020202020202020000000000000000020202020202020200000000000000000202020202020202000000000000000040404040404040404040400040404000010101014040014040400000404040400101404001400140404000004040404001014040400000020000024040400040
 __map__
-ffffffffffffffffffffffffffffffffffffffccffffffffffffffffffffffffffdcffffffffffffffdcffffffffffffffffccffffffffffffffffffffffffffffffffffffffccffffffcdffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-ffffffffffffffffffffffffffffffffffffffffffffffffccffffdcffffffffffffffccddcdffffffffffffffffffccffffffffffffcdffccffffffffffffddffffffccffffffffffffffffffddffffffffffcdffffffffddffffffffffffcdfffffffffffffffffffffffffffffffffffffffffffffffff2ffffffffffffdd
-ffffffffffffffffffffffffffffffffffddffdcffccffffffffffffcdffffffccffffffffffc2f2f2f2f2f2c3ffcdffffdcffffccffffffffcdffffddccffffff635dffffffffff63ffff63ffffffffffffffffffffccffffffcccdffffffffffffffffffffffddffffffffffffdcffffdddcffffffffff65ffffffdccdffff
-f7ffffffffffffffffcccccdffffffffffffffffffffffffffffffffffffffffffffffffffc2c14e0000004ec0c3ffffffffffffffffffffffffffffffffffffff636363ff63ffffffffff4effffffffddffccffffffffffffffffffffccffffffffffccffffffffffdcffffddffffffffccffffffffffe265c3ffffdcdddccd
+ccffddcdccffffffffffffffffffffffffffffccffffffffffffffffffffffffffdcffffffffffffffdcffffffffffffffffccffffffffffffffffffffffffffffffffffffffccffffffcdffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+ffccddcdcdddccffffffffffffffffffffffffffffffffffccffffdcffffffffffffffccddcdffffffffffffffffffccffffffffffffcdffccffffffffffffddffffffccffffffffffffffffffddffffffffffcdffffffffddffffffffffffcdfffffffffffffffffffffffffffffffffffffffffffffffff2ffffffffffffdd
+ccffcdffddccffffffffffffffffffffffddffdcffccffffffffffffcdffffffccffffffffffc2f2f2f2f2f2c3ffcdffffdcffffccffffffffcdffffddccffffff635dffffffffff63ffff63ffffffffffffffffffffccffffffcccdffffffffffffffffffffffddffffffffffffdcffffdddcffffffffff65ffffffdccdffff
+ffffffffffffffffffcccccdffffffffffffffffffffffffffffffffffffffffffffffffffc2c14e0000004ec0c3ffffffffffffffffffffffffffffffffffffff636363ff63ffffffffff4effffffffddffccffffffffffffffffffffccffffffffffccffffffffffdcffffddffffffffccffffffffffe265c3ffffdcdddccd
 ffddcdffffffffffffffffffffffffffffffc2f2f2f2f2f2f2f2f2f2f2f2f2c3ffc2f2f2f2c100000000000000c0f2f2f2f2f2f2c3ffc2f2f2f2f2c3ff40ffffff634ec0636363ffffffffffffffffffffffffffffddffffffccffffffffffffffffffffffffffffffffffffffffffffdddcddffffffff656565c3ffffffffff
 ffffffffffffffffc5d4ffffffcccdffffc2c1c0c1c0f4c1c0c1c0f4c1c0c1c0f4c100c0f4000000000000000000f4c100000000c0f4c100000000c0f2f0ffffff630000000000e063ffccddffcd63f0ffddffdcffffffffffffcdffffffddffffffffffffccffdcffffdddcffdddcffccffccffffffff65656565ffffffffff
 ffffffffc5ffcdffd5c4fffffffffffffff300000000f300000000f300000000f3000000f3000000000000000000f3000000000000f3000000000000f3ffffffff63000000000000c0630000000063ffffffffffffff78ffffffffffffffffffffffccffffffffffffddffecedccffffdcffffdcffffffc7c86565c3c2ffffff
 ffffffffd5c4ffffc5d4ffcdfffffffffff300000000f300000000f300000000f3000000f3000000000000000000f3000000000000f3000000000000f3ffffffff630000000000000000005d630063ffffcdffffffff7060ffffffddffccffffffffffffffffffffddccddfcfddcddffffccffffffddffd7d865ffc0f4ffffff
 ffffccffffd5c4c5d4ffffffffffd5c4fff300000000f300000000f300000000f3000000f30000000000000000636363f000000000f3000000000000f3ffffffff6300000000636363636363c10063ffffffffffff7060707078ffffffffddffddffffffffdccdffffcddccdffffccffffffdccdffffffff6565e2fff3ffffff
-ffccffddffffd5e5ffffffc5ffffc5d4fff300000000f300000000f300000000f3006363630000000000e0f000c0f4c10000000000f3000000000000f3dcffffcd6300000063c10000000000000063ffffffffff607070607060ffffffffffffffffffffffdcdddccddcffddccffffdcccdcdcdddccdffe2656565e2f3ffffff
-ffffffffc5c4ffe5c5d4ffd5c4c5d4fffff300000000f300000000f3006600636363634ef300e0f0000000000000f3000000000000f300000000005af30000000063000063c1000000000000000063ffffffffff7060707070706464646464ffffffffcccdffffdcddffffffddccffffffcdffffffffe2656565656565c3ffff
-5cffffd5d4d5c4e5d4ffccffd5e5c5c4fff300000000f300005a6363636363636363c100f3000000000000000000f300000000e06363630000000063c10000000063635c0076006363636300000063ffffffffff70747060746000c5d4ffffffffcdffdcddffffffffffffddffffcdffdccdffffffffc66565c6656565c0ffff
-5c5cffffffffd5e5ffffffffffe5d4fffff300000000f300636363636363636363c10000f3000000000000000000f3000000000000f3c063000000000000000000c06363636363c1000000000063c1ffffffff63607070706070c5d40000ffffffffffffffffffffffff63ffffdccdffffffffffffe265c1c065656565ffffff
+ffccffffffffd5e5ffffffc5ffffc5d4fff300000000f300000000f300000000f3006363630000000000e0f000c0f4c10000000000f3000000000000f3dcffffcd6300000063c10000000000000063ffffffffff607070607060ffffffffffffffffffffffdcdddccddcffddccffffdcccdcdcdddccdffe2656565e2f3ffffff
+ffffffffffffffe5c5d4ffd5c4c5d4fffff300000000f300000000f3006600636363634ef300e0f0000000000000f3000000000000f300000000005af30000000063000063c1000000000000000063ffffffffff7060707070706464646464ffffffffcccdffffdcddffffffddccffffffcdffffffffe2656565656565c3ffff
+5cfffffff7c5c4e5d4ffccffd5e5c5c4fff300000000f300005a6363636363636363c100f3000000000000000000f300000000e06363630000000063c10000000063635c0076006363636300000063ffffffffff70747060746000c5d4ffffffffcdffdcddffffffffffffddffffcdffdccdffffffffc66565c6656565c0ffff
+5c5cffffd5d4d5e5ffffffffffe5d4fffff300000000f300636363636363636363c10000f3000000000000000000f3000000000000f3c063000000000000000000c06363636363c1000000000063c1ffffffff63607070706070c5d40000ffffffffffffffffffffffff63ffffdccdffffffffffffe265c1c065656565ffffff
 efe4ffffffffffe5ffffffffffe5fffffff3000000636363636363637575757575000000f30000e0f00000000000f3000000000000f300c063000000000000000000f300000000000000000063c1006363e2e2c07060e3e37060d400000000ffffffffffffffff63dd0000dcff63ffffffffffffff65c18affc0656565ffffff
-efe4e82b2ce8e8e53072d6ff30e5ffffc2f4c363757575757575757575757575755c000063000000005c0063e2c2f4c300000066c2f4c30075000000006600636300f300000000000066637575006363636363ff6070e3e360700000000000f1f1ffffffff7c63c10000000000c063ffffe2ffffe265ffffffff656565ffe2c3
+efe4e82b2ce8e8e53072d6ff30e5ffffc2f4c363757575757575757575757575755c000063000000005c0063e2c2f4c300000066c2f4c30075000000000066636300f300000000000066637575006363636363ff6070e3e360700000000000f1f1ffffffff7c63c10000000000c063ffffe2ffffe265ffffffff656565ffe2c3
 efe6717171e6e6e671e6e65ce6e671e66363636363636363637171717171717171e6e6e663737372727373636363636362626262626262757575626262626262626262626262626262757575757575626262626262626262626250f1505050626262626262626250505050505050626262626262626262626262626262626262
 efefd07171717171717171717171717171717171717171717171717171717171717171716363636363636363636363636363717171717171717171717171717162626262627171717171717171717171717171717171717171515151515151f1f1f1f1f1f1f1f171717171717171717171717171717171717171717171717171
 efefefd071d1d07171717171717171717171717171717171717171717171d0d1d07171d1eff4c1ffffc0f4efefefefefefefefefefefefefefefefefd071d1efefefefefefd075d1efefefefef4eefefefefefefefd071717151515151515151f1f1f1f1f1f1f17171717171f1717171717171717171d1d0d1d071d1d0717171
 e0efefefefefefd0717171717171d1d071d1d0717171d14ed071d14e71d1efefefefefefeff3ff2dfffff3efefefefefefefefefefefefefefefefefef4eefefefefef7cefef75efefefefefefefefefefefefefefefefd0717151f151515171f1f1f1f1f1f1717171f1717171717171717171d071d1ffffffff71ffffffd071
-efe0efefefefefef4ed0717171d1efefd1efefefd071efefef71efefd1efefefefefefefeff1f1f1f1f1f1efefefefefef72e1e1e1e1e1e1e1e1e1efefefefefef72e1e1e1e1e1e1e1e1e1efefefefefefefeff1efefefefd0715371535371717171717171717171717171d1d071f1717171d1ffd1ffffffffffd0fffffffff7
-efefe0efefefefefefef7171d1efefefefefefefef71efefefd1efefefefefefefefefeff1f1e9e9e9e9f1f1efefefefefe1c1e9e9e9e9e9e9e9c0e1efefefefefe1c1e9e9e1e9e9e9e9c0e1efefefefefefefc0f1efefefef555353535354717171717171717171d1ffffffffd071717171fffffffffffffffffffffffffff7
-efefefefefefefefefefd071efefefefefefefefefd0efefefefefefefefefefefefeff1f1e9e9e9e9e9e9f1f1efefefefe1e9e9e9e9c9e9e9e9e9e9e9e1e1e1e1e1e9e9e9e9e9e9c9e9e9e9e9e9e1e1e172efefc0f1efefef555353535354d07171717171d1d0d1ffffffffffffffd071d1fffffffffffffffffffffffffff7
-efefefeff0efefefefefef71efefefefefefefefefefefefefefefefefefefefefeff1f1e9e9e9e9e9e9e9e9f1e1efefefe1e9e9e9e9e9e9e9e9e9e9e1c1e9e9e9e9e9e9e9e9e9e9e9e9e9e9e1e1e1e1e1c1efefefc0f156ef555353535354efd0717171d1fffffffffffffffffffffff7ffffffffffffffffffffffffffc3f7
-efefeff0efefefefefefefd0efefefefefefefefefefefefefefefefefefefefef72f1e9e9e9e988e9e9e9e9e9e1e1ef5ce140e9e966e9e9e9e9e1e9e9e9c9e9e9e9e9e9e9e1e966e9e9e9e1e9e9e9e9e9efefefefefc0f1f1f1f153535354efffd071d1ffffffffffffffffff78fffff7c2ffffffffffffffffc2ffffc2c1f7
-efeff0efefefefefefefefefefefefefefefefefefefefefefefefefefefefef72f1e9e9e9c9e9e9e9e9c9e9e9e9e17272e1e1e1e1e1e1e1e1e1c1e9e9e9e9e9e9e1e9e9e1e1e1e1e1e1e1e140e9e9c9e9efefefefefefef4e555554f1535456ffffffffffffff78ffffffffc2c1fffff7c0c3ffffc3ffffffffc0c3c2c1fff7
-eff0efefefefefefefefefefefefefefefefefefefefefefefefefefefefefeff1e9e9e9e9e9e9e9e9e9e9e9e9e9e9e1e1c1e9e9e9e9e9e9e9e9e9e9e1e1e1e1e1c1e9e1c1e9e9e9e9e9e9c0e1e9e9e9e9efefefefefefefef5555545555f1f1ffffffffffffffc0c3ffffffc0c3fffff7ffc0c3c2c1ffc2c3ffffc049fffff7
-efefefefefefefefefefefefefefefefefefefefefd071d1efefef7cefefefeff4e9e9e9e9e9e9e9e9e9e9e9e9e9e9f4f4e9e9e9e9e9c9e9e9e9e9e1c1e9e9e9e9e9e9e9e9e9c9e9e9e9e9e9e9e9e1e1e1f0efefefefefefef555554f1f154efffffffffffffffc2c1ffffffc2f4c1fff7ffff49c1ffc24949c3fffff3fffff7
-71d1efefefefefefefefefefefefefefefefefefd071d1d0717171717171d1eff4c3e9e9e9e9e9e9e9e9e9e9e9e9c2f4f4c3e9e9e9e9e9e9e9e9e1c1e9e9e9e9e9e9e9e9e9e9e93ce9e9e9e9e95dc0e1e1efefefefef56efef55f154555554efffffffffffffffc0c3ffffffc1c0c3fff7ffc2c1ffc2c1ffffc0c3ffc0c3fff7
-7171d1efefefefefefefefefefefefefefefefd071d1000000000000d071d3f1f1f1f1f1f1f1f1f1f1f1f1f1f1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e9e9e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1efefefefeff1f1ef555554555454effffffffffffffffff3fffffffffff3fff7fff3fffff3fffffffff3fffff3fff7
-f17171d1efefefefefefefefefefefefefefd071d1000000000000000075f1f1f10000000000f1000000003c00000000000000000000000000000000c0f10000000000000000000000000000000000e1e1efefefefefefeff1f15554555454efffffffffffffff5af3fffffffffff3fffffff3fffff3ffaafffff3fffff3fff7
-f1f1d1ef32efefeff172efefefef32f1f1d071d10040f15c00440000007575755d770000003c00000000e100000000f1f1000000003c00000000003c00000000000000003c0000000000003f0000000000efefefefefefefef5555f15050f1efffe7e8e8e7e8f1f1f1f5f5f1f5f5f1f1f1c2c1ffc2c1ffffffffc0c3ffc0c3f7
+efe0efefefefefef4ed0717171d1efefd1efefefd071efefef71efefd1efefefefefefefeff1f1f1f1f1f1efefefefefef72e1e1e1e1e1e1e1e1e1efefefefefef72e1e1e1e1e1e1e1e1e1efefefefefefefeff1efefefefd0715371535371717171717171717171717171d1d071f1717171d1ffd1ffffffffffd0ffffffffd0
+efefe0efefefefefefef7171d1efefefefefefefef71efefefd1efefefefefefefefefeff1f1e9e9e9e9f1f1efefefefefe1c1e9e9e9e9e9e9e9c0e1efefefefefe1c1e9e9e1e9e9e9e9c0e1efefefefefefefc0f1efefefef555353535354717171717171717171d1ffffffffd071717171ffffffffffffffffffffffffffff
+efefefefefefefefefefd071efefefefefefefefefd0efefefefefefefefefefefefeff1f1e9e9e9e9e9e9f1f1efefefefe1e9e9e9e9c9e9e9e9e9e9e9e1e1e1e1e1e9e9e9e9e9e9c9e9e9e9e9e9e1e1e172efefc0f1efefef555353535354d07171717171d1d0d1ffffffffffffffd071d1ffffffffffffffffffffffffffff
+efefefeff0efefefefefef71efefefefefefefefefefefefefefefefefefefefefeff1f1e9e9e9e9e9e9e9e9f1e1efefefe1e9e9e9e9e9e9e9e9e9e9e1c1e9e9e9e9e9e9e9e9e9e9e9e9e9e9e1e1e1e1e1c1efefefc0f156ef555353535354efd0717171d1ffffffffffffffffffffffffffffffffffffffffffffffffffffff
+efefeff0efefefefefefefd0efefefefefefefefefefefefefefefefefefefefef72f1e9e9e9e988e9e9e9e9e9e1e1ef5ce140e9e966e9e9e9e9e1e9e9e9c9e9e9e9e9e9e9e1e966e9e9e9e1e9e9e9e9e9efefefefefc0f1f1f1f153535354efffd071d1ffffffffffffffffff78fffffffffffffffffff7f7ffc2ffffffc3ff
+efeff0efefefefefefefefefefefefefefefefefefefefefefefefefefefefef72f1e9e9e9c9e9e9e9e9c9e9e9e9e17272e1e1e1e1e1e1e1e1e1c1e9e9e9e9e9e9e1e9e9e1e1e1e1e1e1e1e140e9e9c9e9efefefefefefef4e555554f1535456ffffffffffffff78ffffffffc2c1ffffffc2ffffffc3ffc0c1ffc0c3f7c2c1ff
+eff0efefefefefefefefefefefefefefefefefefefefefefefefefefefefefeff1e9e9e9e9e9e9e9e9e9e9e9e9e9e9e1e1c1e9e9e9e9e9e9e9e9e9e9e1e1e1e1e1c1e9e1c1e9e9e9e9e9e9c0e1e9e9e9e9efefefefefefefef5555545555f1f1ffffffffffffffc0c3ffffffc0c3ffffffc0c3f7c2c1ffc2c3ffffc049c1ffff
+efefefefefefefefefefefefefefefefefefefefefd071d1efefef7cefefefeff4e9e9e9e9e9e9e9e9e9e9e9e9e9e9f4f4e9e9e9e9e9c9e9e9e9e9e1c1e9e9e9e9e9e9e9e9e9c9e9e9e9e9e9e9e9e1e1e1f0efefefefefefef555554f1f154efffffffffffffffc2c1ffffffc2f4c1ffffffc049c1ffc24949c3fffff3ffffff
+71d1efefefefefefefefefefefefefefefefefefd071d1d0717171717171d1eff4c3e9e9e9e9e9e9e9e9e9e9e9e9c2f4f4c3e9e9e9e9e9e9e9e9e1c1e9e9e9e9e9e9e9e9e9e9e93ce9e9e9e9e95dc0e1e1efefefefef56efef55f154555554efffffffffffffffc0c3ffffffc1c0c3fffffffff3ffc2c1ffffc0c3ffc0c3ffff
+7171d1efefefefefefefefefefefefefefefefd071d1000000000000d071d3f1f1f1f1f1f1f1f1f1f1f1f1f1f1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e9e9e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1efefefefeff1f1ef555554555454effffffffffffffffff3fffffffffff3ffffffc2c1fff3fffffffff3fffff3ffff
+f17171d1efefefefefefefefefefefefefefd071d1000000000000000075f1f1f10000000000f1000000003c00000000000000000000000000000000c0f10000000000000000000000000000000000e1e1efefefefefefeff1f15554555454efffffffffffffff5af3fffffffffff3fffffff3fffff3ffaafffff3fffff3ffff
+f1f1d1ef32efefeff172efefefef32f1f1d071d10040f15c00440000007575755d770000003c00000000e100000000f1f1000000003c00000000003c00000000000000003c0000000000003f0000000000efefefefefefefef5555f15050f1efffe7e8e8e7e8f1f1f1f5f5f1f5f5f1f1f1fff3ffc2c1ffffffffc0c3fff3fff1
 f1f1f1eff1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f17171e6e6e6e6e6e6e6e6e6e6e6e6e6e6f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1
 __sfx__
 01040000350703507030070330702b070300702b070300603505027040270402b030290202b020300103001027050250501f0501c0501d0502105024050210501e0501d0501c05039050370501e050170500f050
