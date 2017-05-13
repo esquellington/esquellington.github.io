@@ -543,90 +543,109 @@ function init_archetypes()
       }
    uncompress_anim( a_skull )
 
+   -- TODOOOOOOOOOOOOOOOOOOOOOOOOO simplify following ents like previous ones
    -- vfx
    a_death = {}
    a_death.table_anm = {}
    a_death.table_anm["hit"] = {k={74,74,75,75,76,76,77}}--,77,76,75,76,77}}
 
    -- collectables
-   a_orb = {}
-   a_orb.table_anm = {}
-   a_orb.table_anm["idle"] = {k={64,64,64,65,65,65}}
-   a_orb.cvisualbox = caabb_88
-   a_orb.cmovebox   = caabb_88
-   a_orb.cdamagbox  = nil
-   a_orb.cattackbox = nil
-   a_orb.cspeed = 0
-   a_orb.replacetileoffset = v2init(0,-1)
+   _table_anm = {}
+   _table_anm["idle"] = {k={64,64,64,65,65,65}}
+   a_orb =
+      {
+         table_anm = _table_anm,
+         cvisualbox = caabb_88,
+         cmovebox   = caabb_88,
+         cdamagbox  = nil,
+         cattackbox = nil,
+         cspeed = 0,
+         replacetileoffset = v2init(0,-1)
+      }
 
-   a_mutator = {}
-   a_mutator.table_anm = {}
-   a_mutator.table_anm["idle"] = {k={45}}
-   a_mutator.cvisualbox = caabb_88
-   a_mutator.cmovebox   = caabb_88
-   a_mutator.cdamagbox  = nil
-   a_mutator.cattackbox = nil
-   a_mutator.cspeed = 0
-   a_mutator.replacetileoffset = v2init(1,0)
+   _table_anm = {}
+   _table_anm["idle"] = {k={45}}
+   a_mutator =
+      {
+         table_anm = _table_anm,
+         cvisualbox = caabb_88,
+         cmovebox   = caabb_88,
+         cdamagbox  = nil,
+         cattackbox = nil,
+         cspeed = 0,
+         replacetileoffset = v2init(1,0)
+      }
 
    --env entities
-   a_torch = {}
-   a_torch.table_anm = {}
-   a_torch.table_anm["idle"] = {k={201,201,201,202,202,202}}
-   a_torch.cvisualbox = caabb_88
-   a_torch.cmovebox   = nil
-   a_torch.cdamagbox  = nil
-   a_torch.cattackbox = nil
-   a_torch.cspeed = 0
+   _table_anm = {}
+   _table_anm["idle"] = {k={201,201,201,202,202,202}}
+   a_torch =
+      {
+         table_anm = _table_anm,
+         cvisualbox = caabb_88,
+         cmovebox   = nil,
+         cdamagbox  = nil,
+         cattackbox = nil,
+         cspeed = 0
+      }
 
    --bosses
-   a_skullboss = {}
-   a_skullboss.table_anm = {}
-   a_skullboss.table_anm["idle"] = {k={138,138,138,140,140,140}}
-   a_skullboss.table_anm["move"] = {k={138}}
-   a_skullboss.table_anm["attack"] = {k={142}}
-   a_skullboss.table_anm["jump_up"] = {k={142}}
-   a_skullboss.table_anm["jump_down"] = {k={138}}
-   a_skullboss.cvisualbox = caabb_1616
-   a_skullboss.cmovebox   = caabb_1616
-   a_skullboss.cdamagebox = aabb_init( 4, -1, 13, 9 )
-   a_skullboss.cattackbox = caabb_1616
-   a_skullboss.cspeed = 1
-   a_skullboss.chealth = 10
-   a_skullboss.cshootpos = v2init( 10, 6 )
-   a_skullboss.replacetileoffset = v2init(1,0)
+   _table_anm = {}
+   _table_anm["idle"] = {k={138,138,138,140,140,140}}
+   _table_anm["move"] = {k={138}}
+   _table_anm["attack"] = {k={142}}
+   _table_anm["jump_up"] = {k={142}}
+   _table_anm["jump_down"] = {k={138}}
+   a_skullboss =
+      {
+         table_anm = _table_anm,
+         cvisualbox = caabb_1616,
+         cmovebox   = caabb_1616,
+         cdamagebox = aabb_init( 4, -1, 13, 9 ),
+         cattackbox = caabb_1616,
+         cspeed = 1,
+         chealth = 10,
+         cshootpos = v2init( 10, 6 ),
+         replacetileoffset = v2init(1,0)
+      }
 
-   a_flameboss = {}
-   a_flameboss.table_anm = {}
-   a_flameboss.table_anm["idle"] = {k={170,170,170,172,172,172}}
-   a_flameboss.table_anm["move"] = {k={174}}
-   a_flameboss.table_anm["attack"] = {k={170}}
-   a_flameboss.table_anm["jump_up"] = {k={172}}
-   a_flameboss.table_anm["jump_down"] = {k={170}}
-   a_flameboss.cvisualbox = caabb_1616
-   a_flameboss.cmovebox   = caabb_1616
-   a_flameboss.cdamagebox = aabb_init( 4, -1, 13, 9 )
-   a_flameboss.cattackbox = caabb_1616
-   a_flameboss.cspeed = 2.5
-   a_flameboss.chealth = 10
-   a_flameboss.cshootpos = v2init( 10, 0 )
-   a_flameboss.replacetileoffset = v2init(1,0)
+   _table_anm = {}
+   _table_anm["idle"] = {k={170,170,170,172,172,172}}
+   _table_anm["move"] = {k={174}}
+   _table_anm["attack"] = {k={170}}
+   _table_anm["jump_up"] = {k={172}}
+   _table_anm["jump_down"] = {k={170}}
+   a_flameboss =
+      {
+         table_anm = _table_anm,
+         cvisualbox = caabb_1616,
+         cmovebox   = caabb_1616,
+         cdamagebox = aabb_init( 4, -1, 13, 9 ),
+         cattackbox = caabb_1616,
+         cspeed = 2.5,
+         chealth = 10,
+         cshootpos = v2init( 10, 0 ),
+         replacetileoffset = v2init(1,0)
+      }
 
-   a_finalboss = {}
-   a_finalboss.table_anm = {}
-   a_finalboss.table_anm["idle"] = {k={136,136,136,168,168,168}}
-   a_finalboss.table_anm["move"] = {k={136}}
-   a_finalboss.table_anm["attack"] = {k={136}}
-   a_finalboss.table_anm["jump_up"] = {k={168}}
-   a_finalboss.table_anm["jump_down"] = {k={136}}
-   a_finalboss.cvisualbox = caabb_1616
-   a_finalboss.cmovebox   = caabb_1616
-   a_finalboss.cdamagebox = aabb_init( 4, -1, 13, 9 )
-   a_finalboss.cattackbox = caabb_1616
-   a_finalboss.cspeed = 2.5
-   a_finalboss.chealth = 20
-   a_finalboss.cshootpos = v2init( 10, 6 )
-   a_finalboss.replacetileoffset = v2init(1,0)
+   _table_anm = {}
+   _table_anm["idle"] = {k={136,136,136,168,168,168}}
+   _table_anm["move"] = {k={136}}
+   _table_anm["attack"] = {k={136}}
+   _table_anm["jump_up"] = {k={168}}
+   _table_anm["jump_down"] = {k={136}}
+   a_finalboss =
+      {
+         table_anm = _table_anm,
+         cvisualbox = caabb_1616,
+         cmovebox   = caabb_1616,
+         cdamagebox = aabb_init( 4, -1, 13, 9 ),
+         cattackbox = caabb_1616,
+         cspeed = 2.5,
+         chealth = 20,
+         cshootpos = v2init( 10, 6 ),
+         replacetileoffset = v2init(1,0)
+      }
 
    a_cthulhu.cshoottype = a_spit
    a_skullboss.cshoottype = a_skull
