@@ -82,8 +82,8 @@ function _draw()
    local b_lighting = false
    if (room_coords.x == 0 or room_coords.x == 7)
    and room_coords.y == 0
-   and (game.t % 17) * (game.t % 13) == 0
-   and dice < 50 then
+   and (game.t % 17) == 0 --* (game.t % 13) == 0
+   and dice < 30 then
       pal(0,7+5*(dice%2)) --7 (white) or 12 (blue)
       palt(0,false)
       b_lighting = true
@@ -190,22 +190,27 @@ function _draw()
    end
 
    if debug.mode > 0 then
+
+      -- for id,anm in pairs(a_player.table_anm) do
+      --    print( id )
+      -- end
+
       --entity boxes
-      local colors = {10,11,8,12}
-      for e in all(room.entities) do
-         local a = e.a
-         local e_p1 = e.p1
-         local boxes = {a.cvisualbox,a.cmovebox,a.cdamagebox,a.cattackbox}
-         local box = boxes[debug.mode]
-         if box != nil then
-            box = aabb_apply_sign_x(box,e.sign)
-            rect( e_p1.x + box.min.x,
-                  e_p1.y + box.min.y,
-                  e_p1.x + box.max.x-1,
-                  e_p1.y + box.max.y-1,
-                  colors[debug.mode] )
-         end
-      end
+      -- local colors = {10,11,8,12}
+      -- for e in all(room.entities) do
+      --    local a = e.a
+      --    local e_p1 = e.p1
+      --    local boxes = {a.cvisualbox,a.cmovebox,a.cdamagebox,a.cattackbox}
+      --    local box = boxes[debug.mode]
+      --    if box != nil then
+      --       box = aabb_apply_sign_x(box,e.sign)
+      --       rect( e_p1.x + box.min.x,
+      --             e_p1.y + box.min.y,
+      --             e_p1.x + box.max.x-1,
+      --             e_p1.y + box.max.y-1,
+      --             colors[debug.mode] )
+      --    end
+      -- end
 
       -- debug info
       -- if debug.mode == 1 then
@@ -276,219 +281,267 @@ function init_archetypes()
    ---- entities
    g_archetypes = {}
    --player
-   a_player = {}
-   a_player.table_anm = {}
-   a_player.table_anm["idle"] = {k={ {16,8}, {17,8} }}
-   a_player.table_anm["run"]  = {k={ {18,6}, {19,4}, {20,6}, {21,4} }}
-   a_player.table_anm["jump"] = {no_cycle=true,k={ {22,4}, {23,4}, {24,4}, {25,4} }}
-   a_player.table_anm["fall"] = {k={ {32,4}, {33,4} }}
-   a_player.table_anm["shi"]  = {k={ 8,8,9,9,9 }}
-   a_player.table_anm["shj"]  = {k={ 12,12,13,13  }}
-   a_player.table_anm["shjb"] = {k={ 14,14,15,15 }} --same #frames as "shj"
-   a_player.table_anm["hit"]  = {no_cycle=true,k={ {34,10}, {35,5*6} }}
-   a_player.table_anm["hitb"]  = {no_cycle=true,k={ {36,4}, {37,4}, {38,4} }}
-   a_player.table_anm["alive"]  = {k={ 39 }}
+   local _table_anm =
+      {
+         idle  = {k={ {16,8}, {17,8} }},
+         run   = {k={ {18,6}, {19,4}, {20,6}, {21,4} }},
+         jump  = {no_cycle=true,k={ {22,4}, {23,4}, {24,4}, {25,4} }},
+         fall  = {k={ {32,4}, {33,4} }},
+         shi   = {k={ 8,8,9,9,9 }},
+         shj   = {k={ 12,12,13,13  }},
+         shjb  = {k={ 14,14,15,15 }}, --same #frames as "shj",
+         hit   = {no_cycle=true,k={ {34,10}, {35,5*6} }},
+         hitb  = {no_cycle=true,k={ {36,4}, {37,4}, {38,4} }},
+         alive = {k={ 39 }}
+      }
+   a_player =
+      {
+         table_anm = _table_anm,
+         cvisualbox = caabb_88,
+         cmovebox   = aabb_init( 1, 1, 7, 7 ),
+         cdamagebox = aabb_init( 2, 1, 6, 7 ),
+         cattackbox = nil,
+         cmaxvel = v2init( 5, 5 )
+      }
    uncompress_anim( a_player )
-   a_player.cvisualbox = caabb_88
-   a_player.cmovebox   = aabb_init( 1, 1, 7, 7 )
-   a_player.cdamagebox = aabb_init( 2, 1, 6, 7 )
-   a_player.cattackbox = nil
-   a_player.cmaxvel = v2init( 5, 5 )
-   g_anim={}
-   add( g_anim, a_player.table_anm["idle"] )
-   add( g_anim, a_player.table_anm["run"] )
-   add( g_anim, a_player.table_anm["jump"] )
-   add( g_anim, a_player.table_anm["fall"] )
-   add( g_anim, a_player.table_anm["shi"] )
-   add( g_anim, a_player.table_anm["shj"] )
-   add( g_anim, a_player.table_anm["shjb"] )
-   add( g_anim, a_player.table_anm["hit"] )
-   add( g_anim, a_player.table_anm["hitb"] )
+   -- save indexed player anims (FUCK this could be a loop if tables kept order!)
+   g_anim = {}
+   add( g_anim, _table_anm["idle"] )
+   add( g_anim, _table_anm["run"] )
+   add( g_anim, _table_anm["jump"] )
+   add( g_anim, _table_anm["fall"] )
+   add( g_anim, _table_anm["shi"] )
+   add( g_anim, _table_anm["shj"] )
+   add( g_anim, _table_anm["shjb"] )
+   add( g_anim, _table_anm["hit"] )
+   add( g_anim, _table_anm["hitb"] )
 
    --caterpillar
-   a_caterpillar = {}
-   a_caterpillar.table_anm = {}
-   a_caterpillar.table_anm["move"] = {k={ {48,6}, {49,6} }}
+   _table_anm = {}
+   _table_anm["move"] = {k={ {48,6}, {49,6} }}
+   a_caterpillar =
+      {
+         table_anm = _table_anm,
+         cvisualbox = caabb_88,
+         cmovebox   = caabb_88,
+         cdamagebox = aabb_init( 1, 4, 7, 8 ),
+         cattackbox = aabb_init( 1, 4, 7, 8 ),
+         cspeed = 0.5,
+         chealth = 1,
+         replacetileoffset = v2init(0,-1)
+      }
    uncompress_anim( a_caterpillar )
-   a_caterpillar.cvisualbox = caabb_88
-   a_caterpillar.cmovebox   = caabb_88
-   a_caterpillar.cdamagebox = aabb_init( 1, 4, 7, 8 )
-   a_caterpillar.cattackbox = aabb_init( 1, 4, 7, 8 )
-   a_caterpillar.cspeed = 0.5
-   a_caterpillar.chealth = 1
-   a_caterpillar.replacetileoffset = v2init(0,-1)
 
    --caterpillar2
-   a_caterpillar2 = {}
-   a_caterpillar2.table_anm = {}
-   a_caterpillar2.table_anm["move"] = {k={50,50,50,50,51,51,51,51}}
-   a_caterpillar2.cvisualbox = caabb_88
-   a_caterpillar2.cmovebox   = caabb_88
-   a_caterpillar2.cdamagebox = aabb_init( 0, 2, 8, 8 )
-   a_caterpillar2.cattackbox = caabb_88
-   a_caterpillar2.cspeed = 1
-   a_caterpillar2.chealth = 2
-   a_caterpillar2.replacetileoffset = v2init(0,-1)
+   _table_anm = {}
+   _table_anm["move"] = {k={50,50,50,50,51,51,51,51}}
+   a_caterpillar2 =
+      {
+         table_anm = _table_anm,
+         cvisualbox = caabb_88,
+         cmovebox   = caabb_88,
+         cdamagebox = aabb_init( 0, 2, 8, 8 ),
+         cattackbox = caabb_88,
+         cspeed = 1,
+         chealth = 2,
+         replacetileoffset = v2init(0,-1)
+      }
 
    --saw
-   a_saw = {}
-   a_saw.table_anm = {}
-   a_saw.table_anm["move"] = {k={60,61,62,63}}
-   a_saw.cvisualbox = caabb_88
-   a_saw.cmovebox   = caabb_88
-   a_saw.cdamagbox  = nil
-   a_saw.cattackbox = aabb_init( 2, 2, 6, 6 )
-   a_saw.cspeed = 1
-   a_saw.chealth = 1
-   a_saw.replacetileoffset = v2init(1,0)
+   _table_anm = {}
+   _table_anm["move"] = {k={60,61,62,63}}
+   a_saw =
+      {
+         table_anm = _table_anm,
+         cvisualbox = caabb_88,
+         cmovebox   = caabb_88,
+         cdamagbox  = nil,
+         cattackbox = aabb_init( 2, 2, 6, 6 ),
+         cspeed = 1,
+         chealth = 1,
+         replacetileoffset = v2init(1,0)
+      }
 
    --stalactite
-   a_stalactite = {}
-   a_stalactite.table_anm = {}
-   a_stalactite.table_anm["idle"] = {k={78}}
-   a_stalactite.table_anm["move"] = a_stalactite.table_anm["idle"]
-   a_stalactite.table_anm["hit"]  = {k={79,79,79}}
-   a_stalactite.cvisualbox = caabb_88
-   a_stalactite.cmovebox   = aabb_init( 1, 1, 7, 7 )
-   a_stalactite.cdamagbox  = nil
-   a_stalactite.cattackbox = caabb_88
-   a_stalactite.cspeed = 5
-   a_stalactite.chealth = 1
-   a_stalactite.replacetileoffset = v2init(0,1)
+   _table_anm = {}
+   _table_anm["idle"] = {k={78}}
+   _table_anm["move"] = _table_anm["idle"]
+   _table_anm["hit"]  = {k={79,79,79}}
+   a_stalactite =
+      {
+         table_anm = _table_anm,
+         cvisualbox = caabb_88,
+         cmovebox   = aabb_init( 1, 1, 7, 7 ),
+         cdamagbox  = nil,
+         cattackbox = caabb_88,
+         cspeed = 5,
+         chealth = 1,
+         replacetileoffset = v2init(0,1)
+      }
 
    --grunt
-   a_grunt = {}
-   a_grunt.table_anm = {}
-   a_grunt.table_anm["idle"] = {k={ {102,6}, {103,6} }}
-   a_grunt.table_anm["move"] = {k={ {105,4}, {104,4} }}
-   a_grunt.table_anm["attack"] = {k={ {105,8}, {106,6} }}
+   _table_anm = {}
+   _table_anm["idle"] = {k={ {102,6}, {103,6} }}
+   _table_anm["move"] = {k={ {105,4}, {104,4} }}
+   _table_anm["attack"] = {k={ {105,8}, {106,6} }}
+   a_grunt =
+      {
+         table_anm = _table_anm,
+         cvisualbox = caabb_88,
+         cmovebox   = caabb_88,
+         cdamagebox = caabb_88,
+         cattackbox = caabb_88,
+         cspeed = 1,
+         chealth = 3,
+         replacetileoffset = v2init(0,-1)
+      }
    uncompress_anim( a_grunt )
-   a_grunt.cvisualbox = caabb_88
-   a_grunt.cmovebox   = caabb_88
-   a_grunt.cdamagebox = caabb_88
-   a_grunt.cattackbox = caabb_88
-   a_grunt.cspeed = 1
-   a_grunt.chealth = 3
-   a_grunt.replacetileoffset = v2init(0,-1)
 
    --cthulhu
-   a_cthulhu = {}
-   a_cthulhu.table_anm = {}
-   a_cthulhu.table_anm["move"]   = {k={ {86,4}, {87,4}, {88,4}, {89,4} }}
-   a_cthulhu.table_anm["attack"] = {k={ {90,4}, {91,4} }}
+   _table_anm = {}
+   _table_anm["move"]   = {k={ {86,4}, {87,4}, {88,4}, {89,4} }}
+   _table_anm["attack"] = {k={ {90,4}, {91,4} }}
+   a_cthulhu =
+      {
+         table_anm = _table_anm,
+         cvisualbox = caabb_88,
+         cmovebox   = caabb_88,
+         cdamagebox = caabb_88,
+         cattackbox = aabb_init( 1, 3, 7, 8 ),
+         cspeed = 0.4,
+         chealth = 2,
+         cshootpos = v2init( 7, 0 ),
+         replacetileoffset = v2init(0,-1)
+      }
    uncompress_anim( a_cthulhu )
-   a_cthulhu.cvisualbox = caabb_88
-   a_cthulhu.cmovebox   = caabb_88
-   a_cthulhu.cdamagebox = caabb_88
-   a_cthulhu.cattackbox = aabb_init( 1, 3, 7, 8 )
-   a_cthulhu.cspeed = 0.4
-   a_cthulhu.chealth = 2
-   a_cthulhu.cshootpos = v2init( 7, 0 )
-   a_cthulhu.replacetileoffset = v2init(0,-1)
 
    --mouse
-   a_mouse = {}
-   a_mouse.table_anm = {}
-   a_mouse.table_anm["move"] = {k={ {118,5}, {119,5} }}
+   _table_anm = {}
+   _table_anm["move"] = {k={ {118,5}, {119,5} }}
+   a_mouse =
+      {
+         table_anm = _table_anm,
+         cvisualbox = caabb_88,
+         cmovebox   = aabb_init( 2, 0, 6, 8 ),
+         cdamagebox = nil,
+         cattackbox = nil,
+         cspeed = 0.3,
+         chealth = 1,
+         replacetileoffset = v2init(-1,0)
+      }
    uncompress_anim( a_mouse )
-   a_mouse.cvisualbox = caabb_88
-   a_mouse.cmovebox   = aabb_init( 2, 0, 6, 8 )
-   a_mouse.cdamagebox = nil
-   a_mouse.cattackbox = nil
-   a_mouse.cspeed = 0.3
-   a_mouse.chealth = 1
-   a_mouse.replacetileoffset = v2init(-1,0)
 
    --bird
-   a_bird = {}
-   a_bird.table_anm = {}
-   a_bird.table_anm["idle"] = {k={ {120,4}, {121,4} }}
-   a_bird.table_anm["move"] = {k={ {122,5}, {123,5} }}
+   _table_anm = {}
+   _table_anm["idle"] = {k={ {120,4}, {121,4} }}
+   _table_anm["move"] = {k={ {122,5}, {123,5} }}
+   a_bird =
+      {
+         table_anm = _table_anm,
+         cvisualbox = caabb_88,
+         cmovebox   = aabb_init( 2, 0, 6, 8 ),
+         cdamagebox = caabb_88,
+         cattackbox = caabb_88,
+         cspeed = 1.25,
+         chealth = 1,
+         replacetileoffset = v2init(0,-1)
+      }
    uncompress_anim( a_bird )
-   a_bird.cvisualbox = caabb_88
-   a_bird.cmovebox   = aabb_init( 2, 0, 6, 8 )
-   a_bird.cdamagebox = caabb_88
-   a_bird.cattackbox = caabb_88
-   a_bird.cspeed = 1.25
-   a_bird.chealth = 1
-   a_bird.replacetileoffset = v2init(0,-1)
 
    --arachno
-   a_arachno = {}
-   a_arachno.table_anm = {}
-   a_arachno.table_anm["move"] = {k={ {124,5}, {125,5} }}
-   a_arachno.table_anm["jump_up"] = {k={126}} --up
-   a_arachno.table_anm["jump_down"] = {k={127}} --down
+   _table_anm = {}
+   _table_anm["move"] = {k={ {124,5}, {125,5} }}
+   _table_anm["jump_up"] = {k={126}} --up
+   _table_anm["jump_down"] = {k={127}} --down
+   a_arachno =
+      {
+         table_anm = _table_anm,
+         cvisualbox = caabb_88,
+         cmovebox   = aabb_init( 2, 0, 6, 8 ),
+         cdamagebox = caabb_88,
+         cattackbox = aabb_init( 1, 3, 7, 8 ),
+         cspeed = 0.75,
+         chealth = 2,
+         replacetileoffset = v2init(0,-1)
+      }
    uncompress_anim( a_arachno )
-   a_arachno.cvisualbox = caabb_88
-   a_arachno.cmovebox   = aabb_init( 2, 0, 6, 8 )
-   a_arachno.cdamagebox = caabb_88
-   a_arachno.cattackbox = aabb_init( 1, 3, 7, 8 )
-   a_arachno.cspeed = 0.75
-   a_arachno.chealth = 2
-   a_arachno.replacetileoffset = v2init(0,-1)
 
    --teeth
-   a_teeth = {}
-   a_teeth.table_anm = {}
-   a_teeth.table_anm["move"] = {k={ {68,3}, {69,8}, {70,3} }}
+   _table_anm = {}
+   _table_anm["move"] = {k={ {68,3}, {69,8}, {70,3} }}
+   a_teeth =
+      {
+         table_anm = _table_anm,
+         cvisualbox = caabb_88,
+         cmovebox   = caabb_88,
+         cdamagbox  = nil,
+         cattackbox = aabb_init( 1, 2, 6, 8 ),
+         cspeed = 1.5,
+         chealth = 1,
+         replacetileoffset = v2init(0,-1)
+      }
    uncompress_anim( a_teeth )
-   a_teeth.cvisualbox = caabb_88
-   a_teeth.cmovebox   = caabb_88
-   a_teeth.cdamagbox  = nil
-   a_teeth.cattackbox = aabb_init( 1, 2, 6, 8 )
-   a_teeth.cspeed = 1.5
-   a_teeth.chealth = 1
-   a_teeth.replacetileoffset = v2init(0,-1)
 
    --bullets
-   a_blast = {}
-   a_blast.table_anm = {}
-   a_blast.table_anm["move"] = {k={1,1,1,2,2,2,3,3,3,2,2}}
-   a_blast.table_anm["hit"] = {k={4,4,5,5,6,6,6,7}}
-   a_blast.cvisualbox = caabb_88
-   a_blast.cmovebox   = nil
-   a_blast.cdamagbox  = nil
-   a_blast.cattackbox = aabb_init( 4, 3, 8, 4 )
-   a_blast.cspeed = 4
+   _table_anm = {}
+   _table_anm["move"] = {k={1,1,1,2,2,2,3,3,3,2,2}}
+   _table_anm["hit"] = {k={4,4,5,5,6,6,6,7}}
+   a_blast =
+      {
+         table_anm = _table_anm,
+         cvisualbox = caabb_88,
+         cmovebox   = nil,
+         cdamagbox  = nil,
+         cattackbox = aabb_init( 4, 3, 8, 4 ),
+         cspeed = 4
+      }
 
    --enemy bullets
-   a_spit = {}
-   a_spit.table_anm = {}
-   a_spit.table_anm["move"] = {k={66}}
-   a_spit.table_anm["hit"] = {k={67,67,67}}
-   a_spit.cvisualbox = caabb_88
-   a_spit.cmovebox   = aabb_init( 4, 3, 7, 4 )
-   a_spit.cdamagbox  = nil
-   a_spit.cattackbox = aabb_init( 3, 3, 6, 4 )
-   a_spit.cspeed = 3
+   _table_anm = {}
+   _table_anm["move"] = {k={66}}
+   _table_anm["hit"] = {k={67,67,67}}
+   a_spit =
+      {
+         table_anm = _table_anm,
+         cvisualbox = caabb_88,
+         cmovebox   = aabb_init( 4, 3, 7, 4 ),
+         cdamagbox  = nil,
+         cattackbox = aabb_init( 3, 3, 6, 4 ),
+         cspeed = 3
+      }
 
-   a_flame = {}
-   a_flame.table_anm = {}
-   a_flame.table_anm["idle"] = {k={ {245,3}, {246,3} }}
-   a_flame.table_anm["move"] = {k={ {247,3}, {248,3} }}
-   a_flame.table_anm["hit"] = {k={ {249,3}, {250,3}, --hit
-                                   {245,5}, {246,5},
-                                   {245,5}, {246,5},
-                                   {245,5}, {246,5} }} --remain 30 frames (1 sec)
-   a_flame.table_anm["burn"] = {k={ {249,3}, {250,3}, {247,3} }}
+   _table_anm = {}
+   _table_anm["idle"] = {k={ {245,3}, {246,3} }}
+   _table_anm["move"] = {k={ {247,3}, {248,3} }}
+   _table_anm["hit"] = {k={ {249,3}, {250,3}, --hit
+                           {245,5}, {246,5},
+                           {245,5}, {246,5},
+                           {245,5}, {246,5} }} --remain 30 frames (1 sec)
+   _table_anm["burn"] = {k={ {249,3}, {250,3}, {247,3} }}
+   a_flame =
+      {
+         table_anm = _table_anm,
+         cvisualbox = caabb_88,
+         cmovebox   = caabb_88,
+         cdamagbox  = nil,
+         cattackbox = aabb_init( 2, 4, 6, 8 ),
+         cspeed = 1
+      }
    uncompress_anim( a_flame )
-   a_flame.cvisualbox = caabb_88
-   a_flame.cmovebox   = caabb_88
-   a_flame.cdamagbox  = nil
-   a_flame.cattackbox = aabb_init( 2, 4, 6, 8 )
-   a_flame.cspeed = 1
 
-   a_skull = {}
-   a_skull.table_anm = {}
-   a_skull.table_anm["move"] = {k={ {94,5}, {95,5} }}
-   a_skull.table_anm["hit"]  = a_skull.table_anm["move"] --todo
+   _table_anm = {}
+   _table_anm["move"] = {k={ {94,5}, {95,5} }}
+   _table_anm["hit"]  = _table_anm["move"] --todo
+   a_skull =
+      {
+         table_anm = _table_anm,
+         cvisualbox = caabb_88,
+         cmovebox   = aabb_init( 4, 3, 7, 4 ),
+         cdamagbox  = nil,
+         cattackbox = aabb_init( 4, 0, 7, 3 ),
+         cspeed = 2
+      }
    uncompress_anim( a_skull )
-   a_skull.cvisualbox = caabb_88
-   a_skull.cmovebox   = aabb_init( 4, 3, 7, 4 )
-   a_skull.cdamagbox  = nil
-   a_skull.cattackbox = aabb_init( 4, 0, 7, 3 )
-   a_skull.cspeed = 2
 
    -- vfx
    a_death = {}
