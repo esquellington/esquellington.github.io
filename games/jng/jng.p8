@@ -2,13 +2,10 @@ pico-8 cartridge // http://www.pico-8.com
 version 8
 __lua__
 
-----------------------------------------------------------------
 -- run with: ./pico-8/pico8 -run ./jng.p8 -desktop . -windowed 1
-----------------------------------------------------------------
 
 ----------------------------------------------------------------
 -- init
-----------------------------------------------------------------
 function _init()
    caabb_88 = aabb_init(0,0,8,8)
    caabb_1616 = aabb_init(0,0,16,16)
@@ -19,8 +16,7 @@ function _init()
    debug = { cnummodes = 6,
              mode = 0,
              paused = false,
-             log = {},
-             can_die = false }
+             log = {} }
 
    init_archetypes()
    init_game()
@@ -28,24 +24,39 @@ end
 
 ----------------------------------------------------------------
 -- update
-----------------------------------------------------------------
 function _update()
-   if not debug.paused then
-      --game
-      game.t += 1
-      --entities
-      update_player()
-      --update_map()
-      update_enemies()
-      update_bullets()
-      update_vfx()
-   end
-   --debug
-   if btnp(2) then --up
-      debug.mode = (debug.mode+1) % debug.cnummodes
-   end
-   if btnp(3) then --down
-      debug.paused = not debug.paused
+
+   if game.state == "splash" then
+      --todo
+   elseif game.state == "menu" then
+      --todo process inputs
+      if btnp(4) then
+         game.state = "play"
+         player.health = a_player.table_health[game.diff_val+1]
+      elseif btnp(3) then --up
+         game.diff_val = (game.diff_val+1) % #game.diff_ids
+      end
+   elseif game.state == "play" then
+      --debug
+      if btnp(2) then --up
+         debug.mode = (debug.mode+1) % debug.cnummodes
+      end
+      if btnp(3) then --down
+         debug.paused = not debug.paused
+      end
+      if not debug.paused then
+         --game
+         game.t += 1
+         update_player()
+         --update_map()
+         update_enemies()
+         update_bullets()
+         update_vfx()
+      end
+   elseif game.state == "win" then
+      --todo
+   elseif game.state == "death" then
+      --todo
    end
 end
 
@@ -54,27 +65,34 @@ function draw_lighting( length )
    for y=16,length,8 do
       spr( frames[1+y%3], 24, y )
    end
-   -- for y=y0,y1,8 do
-   --    --spr( frames[flr(rnd(3))], x0, y )
-   --    spr( frames[1+y%3], x0, y )
-   -- end
 end
-
--- function draw_lighting( x0, y0, y1 )
---    local frames = {206,222,238}
---    for y=y0,y1,8 do
---       --spr( frames[flr(rnd(3))], x0, y )
---       spr( frames[1+y%3], x0, y )
---    end
--- end
 
 ----------------------------------------------------------------
 -- draw
-----------------------------------------------------------------
 function _draw()
-
    cls()
    pal()
+   if game.state == "splash" then
+      --todo
+   elseif game.state == "menu" then
+   --bckgnd
+      map(16,32, 0,0,16,16, 0x7f )
+      local row = 64 + 12*game.diff_val
+      spr( 66, 32, row )
+      --print(game.diff_ids[game.diff_val+1],40,row)
+      print(game.diff_ids[1],50,64)
+      print(game.diff_ids[2],50,78)
+      print(game.diff_ids[3],50,90)
+   elseif game.state == "play" then
+      draw_game()
+   elseif game.state == "win" then
+      --todo
+   elseif game.state == "death" then
+      --todo
+   end
+end
+
+function draw_game()
 
    --lightning
    local room_coords = level.room_coords
@@ -130,9 +148,6 @@ function _draw()
               size_x,size_y,
               e.sign<0 )
       end
-      -- if debug.mode > 0 then
-      --    print_action( e.action, e_p1.x-4, e_p1.y-4  )
-      -- end
    end
 
    --player
@@ -140,7 +155,7 @@ function _draw()
       pal(8,11)
       pal(13,3)
    end
-   if player.invulnerability_t % 2 == 0 then
+   if player.inv_t % 2 == 0 then
       local anm = g_anim[player.state]
       if player.state == 6 and player.sign*player.v.x < 0 then
          anm = g_anim[7]
@@ -158,7 +173,7 @@ function _draw()
       pal()
    end
 
-   --player bullets
+   --bullets
    for b in all(room.bullets) do
       local anm = b.a.table_anm[b.anm_id]
       spr( anm.k[1+b.t%#anm.k],
@@ -175,7 +190,7 @@ function _draw()
            v.sign<0 )
    end
 
-   -- map overlay
+   --overlay
    map(room_tile_x,
        room_tile_y,
        0,0,16,16,
@@ -190,11 +205,6 @@ function _draw()
    end
 
    if debug.mode > 0 then
-
-      -- for id,anm in pairs(a_player.table_anm) do
-      --    print( id )
-      -- end
-
       --entity boxes
       -- local colors = {10,11,8,12}
       -- for e in all(room.entities) do
@@ -225,32 +235,11 @@ function _draw()
       --       print( s )
       --    end
       -- end
-
-      -- -- animations
-      -- -- if debug.mode == 5 then
-      -- --    local n=0
-      -- --    for a in all(g_anim) do
-      -- --       local i = flr(n/6)
-      -- --       local j = flr(n%6)
-      -- --       spr( a.k[1+game.t%#a.k],
-      -- --            10+20*j,
-      -- --            10+10*i )
-      -- --       n+=1
-      -- --    end
-      -- -- end
-
-      -- -- ground-cast
-      -- -- if true then
-      -- --    for c in all(player.ground_ccd_1) do
-      -- --       rect( c.point.x, c.point.y, c.point.x + 11*c.normal.x, c.point.y + 11*c.normal.y )
-      -- --    end
-      -- -- end
    end
 end
 
 ----------------------------------------------------------------
 -- archetypes
-----------------------------------------------------------------
 
 function uncompress_anim( archetype )
    for id,anm in pairs(archetype.table_anm) do
@@ -262,7 +251,6 @@ function uncompress_anim( archetype )
                add( anm.k, span[1] )
             end
          end
-         -- add( debug.log, "anm has "..#anm.k.." compressed frames" )
       end
    end
 end
@@ -278,8 +266,6 @@ function init_archetypes()
    a_room = {}
    a_room.csizes = v2init( 128, 128 )
 
-   ---- entities
-   g_archetypes = {}
    --player
    local _table_anm =
       {
@@ -301,10 +287,11 @@ function init_archetypes()
          cmovebox   = aabb_init( 1, 1, 7, 7 ),
          cdamagebox = aabb_init( 2, 1, 6, 7 ),
          cattackbox = nil,
-         cmaxvel = v2init( 5, 5 )
+         cmaxvel = v2init( 5, 5 ),
+         table_health = {0,4,2}
       }
    uncompress_anim( a_player )
-   -- save indexed player anims (FUCK this could be a loop if tables kept order!)
+   -- save indexed player anims (fuck this could be a loop if tables kept order!)
    g_anim = {}
    add( g_anim, _table_anm["idle"] )
    add( g_anim, _table_anm["run"] )
@@ -328,7 +315,7 @@ function init_archetypes()
          cattackbox = aabb_init( 1, 4, 7, 8 ),
          cspeed = 0.5,
          chealth = 1,
-         replacetileoffset = v2init(0,-1)
+         rtoff = v2init(0,-1)
       }
    uncompress_anim( a_caterpillar )
 
@@ -344,7 +331,7 @@ function init_archetypes()
          cattackbox = caabb_88,
          cspeed = 1,
          chealth = 2,
-         replacetileoffset = v2init(0,-1)
+         rtoff = v2init(0,-1)
       }
 
    --saw
@@ -359,7 +346,7 @@ function init_archetypes()
          cattackbox = aabb_init( 2, 2, 6, 6 ),
          cspeed = 1,
          chealth = 1,
-         replacetileoffset = v2init(1,0)
+         rtoff = v2init(1,0)
       }
 
    --stalactite
@@ -376,7 +363,7 @@ function init_archetypes()
          cattackbox = caabb_88,
          cspeed = 5,
          chealth = 1,
-         replacetileoffset = v2init(0,1)
+         rtoff = v2init(0,1)
       }
 
    --grunt
@@ -393,7 +380,7 @@ function init_archetypes()
          cattackbox = caabb_88,
          cspeed = 1,
          chealth = 3,
-         replacetileoffset = v2init(0,-1)
+         rtoff = v2init(0,-1)
       }
    uncompress_anim( a_grunt )
 
@@ -411,7 +398,7 @@ function init_archetypes()
          cspeed = 0.4,
          chealth = 2,
          cshootpos = v2init( 7, 0 ),
-         replacetileoffset = v2init(0,-1)
+         rtoff = v2init(0,-1)
       }
    uncompress_anim( a_cthulhu )
 
@@ -427,7 +414,7 @@ function init_archetypes()
          cattackbox = nil,
          cspeed = 0.3,
          chealth = 1,
-         replacetileoffset = v2init(-1,0)
+         rtoff = v2init(-1,0)
       }
    uncompress_anim( a_mouse )
 
@@ -444,7 +431,7 @@ function init_archetypes()
          cattackbox = caabb_88,
          cspeed = 1.25,
          chealth = 1,
-         replacetileoffset = v2init(0,-1)
+         rtoff = v2init(0,-1)
       }
    uncompress_anim( a_bird )
 
@@ -462,7 +449,7 @@ function init_archetypes()
          cattackbox = aabb_init( 1, 3, 7, 8 ),
          cspeed = 0.75,
          chealth = 2,
-         replacetileoffset = v2init(0,-1)
+         rtoff = v2init(0,-1)
       }
    uncompress_anim( a_arachno )
 
@@ -478,7 +465,7 @@ function init_archetypes()
          cattackbox = aabb_init( 1, 2, 6, 8 ),
          cspeed = 1.5,
          chealth = 1,
-         replacetileoffset = v2init(0,-1)
+         rtoff = v2init(0,-1)
       }
    uncompress_anim( a_teeth )
 
@@ -543,11 +530,10 @@ function init_archetypes()
       }
    uncompress_anim( a_skull )
 
-   -- TODOOOOOOOOOOOOOOOOOOOOOOOOO simplify following ents like previous ones
    -- vfx
    a_death = {}
    a_death.table_anm = {}
-   a_death.table_anm["hit"] = {k={74,74,75,75,76,76,77}}--,77,76,75,76,77}}
+   a_death.table_anm["hit"] = {k={74,74,75,75,76,76,77}}
 
    -- collectables
    _table_anm = {}
@@ -560,7 +546,7 @@ function init_archetypes()
          cdamagbox  = nil,
          cattackbox = nil,
          cspeed = 0,
-         replacetileoffset = v2init(0,-1)
+         rtoff = v2init(0,-1)
       }
 
    _table_anm = {}
@@ -573,7 +559,7 @@ function init_archetypes()
          cdamagbox  = nil,
          cattackbox = nil,
          cspeed = 0,
-         replacetileoffset = v2init(1,0)
+         rtoff = v2init(1,0)
       }
 
    --env entities
@@ -606,7 +592,7 @@ function init_archetypes()
          cspeed = 1,
          chealth = 10,
          cshootpos = v2init( 10, 6 ),
-         replacetileoffset = v2init(1,0)
+         rtoff = v2init(1,0)
       }
 
    _table_anm = {}
@@ -625,7 +611,7 @@ function init_archetypes()
          cspeed = 2.5,
          chealth = 10,
          cshootpos = v2init( 10, 0 ),
-         replacetileoffset = v2init(1,0)
+         rtoff = v2init(1,0)
       }
 
    _table_anm = {}
@@ -644,7 +630,7 @@ function init_archetypes()
          cspeed = 2.5,
          chealth = 20,
          cshootpos = v2init( 10, 6 ),
-         replacetileoffset = v2init(1,0)
+         rtoff = v2init(1,0)
       }
 
    a_cthulhu.cshoottype = a_spit
@@ -656,13 +642,19 @@ end
 
 ----------------------------------------------------------------
 -- game
-----------------------------------------------------------------
 function init_game()
-   game = {}
-   game.t = 0
-   game.is_skub_alive = true
-   game.is_flab_alive = true
-   game.is_finb_alive = true
+   game =
+      {
+         t = 0,
+         is_skub_alive = true,
+         is_flab_alive = true,
+         is_finb_alive = true,
+         state = "menu",
+         diff_ids = { "unborn",-- (inf lives)",
+                      "alive",--  (  4 lives)",
+                      "undead" },-- (  2 lives)" },
+         diff_val = 0
+      }
 
    player = { a = a_player,
               state = 1,
@@ -673,8 +665,8 @@ function init_game()
               v = v2zero(),
               on_ground = false,
               jump_s = 0,  --original jump direction
-              invulnerability_t = 0, --frames remaining
-              health = 3,
+              inv_t = 0,
+              health = 0,
               num_orbs = 4,
               num_orbs_placed = 0,
               is_mutated = false }
@@ -688,14 +680,13 @@ end
 
 ----------------------------------------------------------------
 -- player
-----------------------------------------------------------------
 --- ccd movement with strong non-penetration guarantee on static map tiles
 function update_player()
 
    -- debug.log = {}
    player.t += 1
-   if player.invulnerability_t > 0 then
-      player.invulnerability_t -= 1
+   if player.inv_t > 0 then
+      player.inv_t -= 1
    end
    player.p0 = player.p1
    local anm = g_anim[player.state]
@@ -877,7 +868,7 @@ function update_player()
    for c in all(hits_ccd) do
       if mget(c.tile_j,c.tile_i) == 64 then
          player.num_orbs += 1
-         mset( c.tile_j, c.tile_i, mget( c.tile_j+a_orb.replacetileoffset.x, c.tile_i+a_orb.replacetileoffset.y ) )
+         mset( c.tile_j, c.tile_i, mget( c.tile_j+a_orb.rtoff.x, c.tile_i+a_orb.rtoff.y ) )
          for e in all(room.entities) do
             if e.a == a_orb then
                kill_entity( e )
@@ -885,7 +876,7 @@ function update_player()
          end
       elseif mget(c.tile_j,c.tile_i) == 45 then
          player.is_mutated = true
-         mset( c.tile_j, c.tile_i, mget( c.tile_j+a_mutator.replacetileoffset.x, c.tile_i+a_mutator.replacetileoffset.y ) )
+         mset( c.tile_j, c.tile_i, mget( c.tile_j+a_mutator.rtoff.x, c.tile_i+a_mutator.rtoff.y ) )
          for e in all(room.entities) do
             if e.a == a_mutator then
                kill_entity( e )
@@ -900,15 +891,13 @@ function update_player()
 
    -- process hits if not invulnerable
    if (hit_enemy or num_hits_map != 0)
-      and player.invulnerability_t == 0 then
+      and player.inv_t == 0 then
       player.t = 0
       player.state = 8 --hit todo decide hit/hitb
-      player.invulnerability_t = 60
+      player.inv_t = 60
       player.sign = -player.sign
       player.v = v2init( player.sign * 1.5, -3 )
-      if debug.can_die then
-         player.health -= 1
-      end
+      player.health -= 1
       if player.health == 0 then
          init_game()
       end
@@ -1020,7 +1009,6 @@ end
 
 ----------------------------------------------------------------
 -- rooms
-----------------------------------------------------------------
 function new_room( coords )
    kill_room()
    local r = {}
@@ -1110,23 +1098,22 @@ function new_room_process_map_cell( r, room_j, room_i, map_j, map_i )
       e.hit_timeout = 0
       add( r.enemies, e )
       add( r.entities, e )
-      --remember spawn pos and replace background with tile at e.a.replacetileoffset
+      --remember spawn pos and replace background with tile at e.a.rtoff
       local a = e.a
-      if a.replacetileoffset != nil
+      if a.rtoff != nil
          and a != a_orb
          and a != a_mutator
       then
          e.spawn_tile_i = map_i
          e.spawn_tile_j = map_j
          e.spawn_tile_value = m
-         mset( map_j, map_i, mget( map_j+a.replacetileoffset.x, map_i+a.replacetileoffset.y ) )
+         mset( map_j, map_i, mget( map_j+a.rtoff.x, map_i+a.rtoff.y ) )
       end
    end
 end
 
 ----------------------------------------------------------------
 -- enemies
-----------------------------------------------------------------
 function new_entity( _archetype, _pos, _action )
    local e = { a = _archetype,
                action = _action,
@@ -1167,9 +1154,6 @@ end
 
 ----------------------------------------------------------------
 -- actions
-----------------------------------------------------------------
-
-----------------------------------------------------------------
 function new_action_idle()
    return { name = "idle", anm_id = "idle", t = 0, finished = false }
 end
@@ -1582,7 +1566,6 @@ function update_action_patrol_and_jump( entity, action )
    if action.sub.name == "ptrl"
       and
       action.sub.t > #entity.a.table_anm[action.sub.anm_id].k --only replan after whole cycle
-   -- todo check range
    then
       if abs(player.p1.x-entity.p1.x) < 64
          and
@@ -1630,8 +1613,8 @@ function update_action_skullboss( entity, action )
       elseif sub.name == "jong" and sub.finished then
          sub = new_action_idle()
       end
-   else --outtro
-      --todo
+   else
+      --outtro
    end
    action.sub = sub
    return action
@@ -1671,9 +1654,7 @@ end
 
 ----------------------------------------------------------------
 -- bullets
-----------------------------------------------------------------
 function new_bullet_blast( _p, _s )
---   debug.paused = true
    local b = { a = a_blast,
                anm_id = "move",
                t = 0,
@@ -1756,7 +1737,6 @@ end
 
 ----------------------------------------------------------------
 -- vfx
-----------------------------------------------------------------
 function new_vfx( _a, _p, _s )
    local v = { anm = _a.table_anm["hit"],
                t = 0,
@@ -1776,7 +1756,6 @@ end
 
 ----------------------------------------------------------------
 -- helpers
-----------------------------------------------------------------
 function clamp( v, l, u )
    return min( max( v, l ), u )
 end
@@ -1822,16 +1801,12 @@ function apply_borders( p, box )
 end
 
 function contains_collision_with_normal( collisions, n )
---   add( debug.log, "contains? "..n.x..","..n.y )
    for v in all(collisions) do
       if v.normal.x == n.x
          and
          v.normal.y == n.y
       then
---         add( debug.log, "found" )
          return true
-      -- else
-      --    add( debug.log, "not equal to "..v.normal.x..","..v.normal.y )
       end
    end
    return false
@@ -1839,7 +1814,6 @@ end
 
 ----------------------------------------------------------------
 -- vec2 functions
-----------------------------------------------------------------
 function v2init( _x, _y ) return { x = _x, y = _y } end
 function v2zero() return { x = 0, y = 0 } end
 function v2get( v, i ) if i==0 then return v.x else return v.y end end
@@ -2048,7 +2022,6 @@ function ccd_sort_collisions( collisions, b_first_only )
    end
    return collisions
 end
-----------------------------------------------------------------
 
 __gfx__
 0000000000000000000000000000000000000090000000000000000000a000000008800000880000000880000088000000088000008800000008808000888800
@@ -2115,31 +2088,31 @@ dddddddd1111111155555555d0c0d0c00c0d0700000c0d0c32323233232323203232000023232320
 444999944444444405560560065065504dddcc7444444444000000000000000000ddd10200dd10200000000200dd00000d111dd00dd111d000d0d0d0000d0d00
 44499994f44444f456560565565065654dddccc4944444940505a0000005a00000dd10000ddd100000000000000d0000d0d0d00dd00d0d0d000d00d0000d00d0
 444999944444f4446555655665565556444444444444944400566500055665000dd101000dd101000000000000000000d0000d0000d0000d00000d000000d000
-9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9de4e4e4e4e4e4e4e4e4e4e4e4e49d1f2000000880000002000220022000000000000000000000000000002200220000
+9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d1fe4e4e4e4e4e4e4e4e4e4e4e4e49d1f2000000880000002000220022000000000000000000000000000002200220000
 00000000000000000000000000000000000000000000000000000000000000002200008778000022000222002200000000002200220000000000002220022000
-9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d1f0220087887800220000022202220000000002220022000000000000222022200
+9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d1f9d9d9d9d9d9d9d9d9d9d9d9d9d9d1f0220087887800220000022202220000000002220022000000000000222022200
 00000000000000000000000000000000000000000000000000000000000000000222008778002220000022222220000000000222022200000000000222222200
-9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d1f0222228778222220000028828820000000000222222200000000000288288200
+9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d1f9d9d7f7f9d9d9d9d9d9d7f7f9d9d1f0222228778222220000028828820000000000222222200000000000288288200
 00000000000000000000000000000000000000000000000000000000000000000022111881112200000022222220000000000288288200000000333222222200
-9d9d9d9d9d9d9d889d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d1f00211dd88dd11200003332222233300003333222222233000003333322002230
+9d9d9d9d9d9d9d889d9d9d9d9d9d9d9d1f9d9d9d7f9d9d9d9d9d9d7f9d9d9d1f00211dd88dd11200003332222233300003333222222233000003333322002230
 000000000000000000000000000000000000000000000000000000000000000000111ddd1dd111000333b22222bb33003333332222233330003333bb22002333
-9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d1f081121d1dd1211803333bbbb3bbb333033033b22222b3330003303bbb2002b33
+9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d1f9d7f9d7f9d9d7f7f9d9d7f9d7f9d1f081121d1dd1211803333bbbb3bbb333033033b22222b3330003303bbb2002b33
 0000000000000000000000000000000000000000000000000000000000000000888022111122088833003bbb3bb3033033003bbb3bb300330330033bb3202b33
-9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d1f8080255115520808330003335330003333300333533003330333003333322033
+9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d1f7f9d9d7f9d7f9d9d7f9d7f9d9d7f1f8080255115520808330003335330003333300333533003330333003333322033
 000000000000000000000000000000000000000000000000000000000000000080002552255200083330cc5555cc03333330ccc555cc033303330ccc555cc333
-9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d1f0802552202552080333ccc0555cc03330000ccc555ccc0000333ccc555cc3330
+9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d1f9d7f7f7f9d7f9d9d7f9d7f7f7f9d1f0802552202552080333ccc0555cc03330000ccc555ccc0000333ccc555cc3330
 00000000000000000000000000000000000000000000000000000000000000000002d520025d2000000cc10550c10000000cc10550cc1000000cc1550cc13330
-9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d1f000ddd2002ddd00000c111000011100000c111000011100000c1110001110000
+9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d1f9d9d9d9d9d9d9d9d9d9d9d9d9d9d1f000ddd2002ddd00000c111000011100000c111000011100000c1110001110000
 0000000000000000000000000000000000000000000000000000000000000000002dd020020dd200001111100111110000111110011111000011110001111000
-9d9d9d9c9d9d9d9d9d9d9d9d9c9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d1f0000000880000000000110011000000000000000000000000000011110000000
+9d9d9d9c9d9d9d9d9d9d9d9d9c9d9d9d1f9d9d9d9d9d9d9d9d9d9d9d9d9d9d1f0000000880000000000110011000000000000000000000000000011110000000
 00000000000000000000000000000000000000000000000000000000000000002000008778000002000111001100000000001100110000000000000111100000
-9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d1f2200087887800022000011101110000000001110011000000000000011110000
+9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d1f9d9d9d9d9d9d9d9d9d9d9d9d9d9d1f2200087887800022000011101110000000001110011000000000000011110000
 00000000000000000000000000000000000000000000000000000000000000000220008778000220000011111110000000000111011100a00000000111111000
-9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d1f022200877800222000a01881881000a09000011111110a0008a8001118181000
+9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d1f9d9d9d9d9d9d9d9d9d9d9d9d9d9d1f022200877800222000a01881881000a09000011111110a0008a8001118181000
 000000000000000000000000000000000000000000000000000000000000000002222289982222200a001111111000a009000188188100a0000a99a111110990
-9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d1f00221118811122000a222111112220a0092221111111228a0000022a99aa989a
+9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d1f9d9d9d9d9d9d9d9d9d9d9d9d9d9d1f00221118811122000a222111112220a0092221111111228a0000022a99aa989a
 000000000000000000000000000000000000000000000000000000000000000000211dd88dd1120008a23111113322808a222211111228aa00889a88aa8a8a88
-9d9d1f1f9d9d9d9d9d9d9d9d1f1f9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d1f00111ddd1dd111008aa2333323332aa8a882231111132980aa902299889888a8
+9d9d1f1f9d9d9d9d9d9d9d9d1f1f9d9d1f9d9d9d9d9d9d9d9d9d9d9d9d9d9d1f00111ddd1dd111008aa2333323332aa8a882231111132980aa902299889888a8
 0000000000000000000000000000000000000000000000000000000000000000081121d1dd12118098002333233202899a80233323320aa80000988a999aa99a
 9d1f9d9d9d9d1f9d9d1f9d9d9d9d1f9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d9d1f8880251111520888aa800222522008aa88a0022252200a8800998aa2225008a0
 00000000000000000000000000000000000000000000000000000000000000008800255225520088a880cc5555cc088a8aa0ccc555cc0999088000cc555cc000
