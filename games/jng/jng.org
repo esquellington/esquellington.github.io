@@ -1,3 +1,4 @@
+HexeN SturM
 * Player
 ** DONE Animation as seq of frames
 ** DONE Combined {idle,jump} x shoot
@@ -10,10 +11,10 @@
 ** DONE (WON'T DO) Contextual actions (on_ground, on_wall, on_cliff, etc...)
 ** TODO Appear as reborn (arms up!)
 ** TODO Drown/single hit death
-* Collision detection
+* DONE Collision detection
 ** DONE BP using map tiles as grid
 ** DONE CCD with sequential treatment
-* Map
+* DONE Map
 ** Tile flags
    1: solid
    2: damage
@@ -113,11 +114,17 @@
    - Some can be destroyed
    - Like puzzle platformer
 * Main menu
-  - Title screen
-  - Difficulty
-    - Unborn: 3-hit death, all enemies persistent
-    - Alive: 3-hit death, persistent env traps, regenerate enemies
-    - Undead: 2-hit death, regenerate all env and enemies, GnG-style
+** TODO Splash/Title
+   - SFX
+   - Pointer
+   - Credits
+** DONE Difficulty
+    - Unborn: No death, regenerate all
+    - Alive: 4-hit death, regenerate all
+    - Undead: 2-hit death, regenerate all
+* TODO Ending
+  - Art
+  - Gamestate
 * FX
 ** DONE Death/Evaporate
     - Gen flashing white pixels that fade up/directionally to impact)
@@ -125,8 +132,7 @@
    - startup
    - cathedral ruins
 ** TODO Lightning
-   - Player appeareance
-** DONE Rain/Snow pixels
+** DONE (WON'T DO) Rain/Snow pixels
 ** DONE (WON'T DO) Screen-shake on impact
     - Move camera with noise
 ** DONE (WON'T DO) Dark areas using flickering/dither
