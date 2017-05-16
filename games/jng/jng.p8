@@ -1103,15 +1103,15 @@ function new_room_process_map_cell( r, room_j, room_i, map_j, map_i )
          elseif m == 90 then --cthulhu_shooter
             e = new_entity( a_cthulhu, pos, new_action_shoot( 30, "straight" ) )
          elseif m == 102 then
-            e = new_entity( a_grunt, pos, new_action_wait_and_ram( pos, -1 ) )
+            e = new_entity( a_grunt, pos, new_action_wait_and_ram() )
          elseif m == 120 then
-            e = new_entity( a_bird, pos, new_action_wait_and_fly( pos, -1 ) )
+            e = new_entity( a_bird, pos, new_action_wait_and_fly() )
          elseif m == 60 then --saw l2r
             e = new_entity( a_saw, pos, new_action_oscillate( pos, v2init(1,0), 24, 300 ) )
          elseif m == 63 then --saw r2l
             e = new_entity( a_saw, pos, new_action_oscillate( pos, v2init(-1,0), 24, 300 ) )
          elseif m == 78 then
-            e = new_entity( a_stalactite, pos, new_action_wait_and_drop( pos ) )
+            e = new_entity( a_stalactite, pos, new_action_wait_and_drop() )
          elseif m == 73 and player.num_orbs_placed < player.num_orbs then
             mset(map_j,map_i,72) --install orb permanently
             player.num_orbs_placed += 1
@@ -1122,12 +1122,11 @@ function new_room_process_map_cell( r, room_j, room_i, map_j, map_i )
             e.action.t = flr(rnd(17))
             --bosses
          elseif m == 138 and game.is_skub_alive then
-            e = new_entity( a_skullboss, pos, new_action_skullboss() )
+            e = new_entity( a_skullboss, pos, new_action_boss( update_action_skullboss ) )
          elseif m == 170 and game.is_flab_alive and player.num_orbs == 4 then
-            e = new_entity( a_flameboss, pos, new_action_flameboss() )
+            e = new_entity( a_flameboss, pos, new_action_boss( update_action_flameboss ) )
          elseif m == 136 and game.is_finb_alive then
-            e = new_entity( a_finalboss, pos, new_action_skullboss() )
-            --these should be entities but not enemies, but by now are handled as enemies to avoid extra code.
+            e = new_entity( a_finalboss, pos, new_action_boss( update_action_finalboss ) )
          end
       end
    end
@@ -1195,77 +1194,84 @@ end
 ----------------------------------------------------------------
 -- actions
 function new_action_idle()
-   return { name = "idle", anm_id = "idle", t = 0, finished = false }
+   return { name = "idle", anm_id = "idle", t = 0, finished = false,
+           update_fn = function (ent,act) return act end }
 end
 
 -- move unconditionally
 function new_action_move( target_pos )
    return { name = "move", anm_id = "move", t = 0, finished = false,
-            p_target = target_pos }
+            p_target = target_pos,
+            update_fn = update_action_move }
 end
 
 -- ballistic projectile, play "hit" and disappear on impact. supersedes "fall"
 function new_action_particle( _v, _a )
    return { name = "part", anm_id = "move", t = 0, finished = false,
-            vel = _v, acc = _a }
+            vel = _v, acc = _a,
+            update_fn = update_action_particle }
 end
 
 function new_action_hit()
-   return { name = "hit", anm_id = "hit", t = 0, finished = false }
+   return { name = "hit", anm_id = "hit", t = 0, finished = false,
+            update_fn = update_action_hit }
 end
 
 -- shoot with cooldown timeout
 function new_action_shoot( _timeout, _type )
    return { name = "shoot", anm_id = "attack", t = _timeout-1, finished = false,
             timeout = _timeout,
-            type = _type }
+            type = _type,
+            update_fn = update_action_shoot }
 end
 
 -- move on ground, stop at target/wall/cliff/border
 function new_action_move_on_ground( target_pos )
    return { name = "mong", anm_id = "move", t = 0, finished = false,
-            p_target = target_pos }
+            p_target = target_pos,
+            update_fn = update_action_move_on_ground }
 end
 
 -- move on ground, stop at target/wall/cliff/border
 function new_action_jump_on_ground( target_pos )
    return { name = "jong", anm_id = "jump_up", t = 0, finished = false, first = true,
-            p_target = target_pos }
+            p_target = target_pos,
+            update_fn = update_action_jump_on_ground }
 end
 
 -- patrol in flat area, stop and turn at wall/cliff/border
 function new_action_patrol( start_pos, sign_x )
    return { name = "ptrl", anm_id = "move", t = 0, finished = false,
-            p_start = start_pos,
-            sub = new_action_move_on_ground( v2add( start_pos, v2init( 128*sign_x, 0 ) ) ) }
+            sub = new_action_move_on_ground( v2add( start_pos, v2init( 128*sign_x, 0 ) ) ),
+            update_fn = update_action_patrol }
 end
 
 -- wait on spot, ram to player when on same ground level, accessible and within range
-function new_action_wait_and_ram( start_pos, sign_x )
+function new_action_wait_and_ram()
    return { name = "w&r", anm_id = "idle", t = 0, finished = false,
-            p_start = start_pos,
-            sub = new_action_idle() }
+            sub = new_action_idle(),
+            update_fn = update_action_wait_and_ram }
 end
 
 -- wait on spot, fly to player when within radius
-function new_action_wait_and_fly( start_pos, sign_x )
+function new_action_wait_and_fly()
    return { name = "w&f", anm_id = "idle", t = 0, finished = false,
-            p_start = start_pos,
-            sub = new_action_idle() }
+            sub = new_action_idle(),
+            update_fn = update_action_wait_and_fly }
 end
 
 -- wait on spot, fall on player when on same horizontal level
-function new_action_wait_and_drop( start_pos )
+function new_action_wait_and_drop()
    return { name = "w&d", anm_id = "idle", t = 0, finished = false,
-            p_start = start_pos,
-            sub = new_action_idle() }
+            sub = new_action_idle(),
+            update_fn = update_action_wait_and_drop }
 end
 
 -- wait on spot, fly to player when within radius
 function new_action_patrol_and_jump( start_pos, sign_x )
    return { name = "p&j", anm_id = "move", t = 0, finished = false,
-            p_start = start_pos,
-            sub = new_action_patrol( start_pos, sign_x ) }
+            sub = new_action_patrol( start_pos, sign_x ),
+            update_fn = update_action_patrol_and_jump }
 end
 
 -- oscillate from midpos along dir with sinusoid of given amplitude (in pixels) and period (in frames)
@@ -1274,7 +1280,8 @@ function new_action_oscillate( mid_pos, _dir, _amplitude, _period )
             p_mid = mid_pos,
             dir = _dir,
             amplitude = _amplitude,
-            period = _period }
+            period = _period,
+            update_fn = update_action_oscillate }
 end
 
 -- linear vel along dir, sinusoid perpendicular to it
@@ -1286,57 +1293,24 @@ function new_action_sinusoid( _pos, _dir, _speed, _amplitude, _period, _phase )
             speed = _speed,
             amplitude = _amplitude,
             period = _period,
-            phase = _phase }
+            phase = _phase,
+            update_fn = update_action_sinusoid }
 end
 
-function new_action_skullboss()
-   return { name = "skub", anm_id = "idle", t = 0, finished = false,
+function new_action_boss( _update_fn )
+   return { name = "boss", anm_id = "idle", t = 0, finished = false,
             sub = new_action_idle(),
-            phase = 1 }
-end
-
-function new_action_flameboss()
-   return { name = "flab", anm_id = "idle", t = 0, finished = false,
-            sub = new_action_idle(),
-            phase = 1 }
+            phase = 1,
+            update_fn = _update_fn }
 end
 
 ----------------------------------------------------------------
 function update_action( _entity, _action )
    local act = _action
    act.t += 1
-   if _action.name == "idle" then
-      --idle do nothing
-   elseif _action.name == "move" then
-      act = update_action_move( _entity, _action )
-   elseif _action.name == "part" then
-      act = update_action_particle( _entity, _action )
-   elseif _action.name == "hit" then
-      act = update_action_hit( _entity, _action )
-   elseif _action.name == "shoot" then
-      act = update_action_shoot( _entity, _action )
-   elseif _action.name == "mong" then
-      act = update_action_move_on_ground( _entity, _action )
-   elseif _action.name == "jong" then
-      act = update_action_jump_on_ground( _entity, _action )
-   elseif _action.name == "ptrl" then
-      act = update_action_patrol( _entity, _action )
-   elseif _action.name == "oscl" then
-      act = update_action_oscillate( _entity, _action )
-   elseif _action.name == "sinu" then
-      act = update_action_sinusoid( _entity, _action )
-   elseif _action.name == "w&r" then
-      act = update_action_wait_and_ram( _entity, _action )
-   elseif _action.name == "w&f" then
-      act = update_action_wait_and_fly( _entity, _action )
-   elseif _action.name == "w&d" then
-      act = update_action_wait_and_drop( _entity, _action )
-   elseif _action.name == "p&j" then
-      act = update_action_patrol_and_jump( _entity, _action )
-   elseif _action.name == "skub" then
-      act = update_action_skullboss( _entity, _action )
-   elseif _action.name == "flab" then
-      act = update_action_flameboss( _entity, _action )
+
+   if act.update_fn != nil then
+      act = act.update_fn( _entity, _action )
    end
 
    if act != nil and act.sub != nil then
@@ -1678,6 +1652,38 @@ function update_action_flameboss( entity, action )
             sub = new_action_jump_on_ground( v2init(104,104) )
          end
       elseif sub.name == "jong" and sub.finished then
+         sub = new_action_idle()
+      elseif sub.name == "mong" and sub.finished then
+         sub = new_action_idle()
+      end
+      if sub.name != "mong" then
+         entity.sign = sgn( player.p1.x - entity.p1.x )
+      end
+   else --outtro
+      --todo
+   end
+   action.sub = sub
+   return action
+end
+
+function update_action_finalboss( entity, action )
+   local sub = update_action( entity, action.sub )
+   -- intro/combat/outtro phases
+   if action.phase == 1 then --intro
+      if action.t > 60 then
+         action.phase = 2
+         sub = new_action_wait_and_fly()-- v2init(104,104) )
+      end
+   elseif action.phase == 2 then --combat
+      if sub.name == "idle" and sub.t > 30 then --1s
+         sub = new_action_shoot(30,"parabolic")
+      elseif sub.name == "shoot" and sub.t > 90 then --3x shots
+         if entity.p1.x > 90 then --100 then
+            sub = new_action_move_on_ground( v2init(0,104) )
+         else
+            sub = new_action_jump_on_ground( v2init(104,104) )
+         end
+      elseif sub.name == "w&f" and sub.finished then
          sub = new_action_idle()
       elseif sub.name == "mong" and sub.finished then
          sub = new_action_idle()
