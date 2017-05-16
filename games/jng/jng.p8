@@ -1067,58 +1067,69 @@ end
 
 function new_room_process_map_cell( r, room_j, room_i, map_j, map_i )
    local m = mget( map_j, map_i )
-   local e = nil
    local pos = v2init( room_j*8, room_i*8 )
-   -- Patrollers
+   local e,a
+   -- patrollers
    if m == 48 then
-      e = new_entity( a_caterpillar, pos, new_action_patrol( pos, -1 ) )
+      a = a_caterpillar
    elseif m == 50 then
-      e = new_entity( a_caterpillar2, pos, new_action_patrol( pos, -1 ) )
+      a = a_caterpillar2
    elseif m == 86 then --cthulhu_patroller
-      e = new_entity( a_cthulhu, pos, new_action_patrol( pos, -1 ) )
+      a = a_cthulhu
    elseif m == 118 then
-      e = new_entity( a_mouse, pos, new_action_patrol( pos, -1 ) )
+      a = a_mouse
    elseif m == 68 then
-      e = new_entity( a_teeth, pos, new_action_patrol( pos, -1 ) )
-   elseif m == 124 then
-   -- Misc
-      e = new_entity( a_arachno, pos, new_action_patrol_and_jump( pos, -1 ) )
-   elseif m == 90 then --cthulhu_shooter
-      e = new_entity( a_cthulhu, pos, new_action_shoot( 30, "straight" ) )
-   elseif m == 102 then
-      e = new_entity( a_grunt, pos, new_action_wait_and_ram( pos, -1 ) )
-   elseif m == 120 then
-      e = new_entity( a_bird, pos, new_action_wait_and_fly( pos, -1 ) )
-   elseif m == 60 then --saw l2r
-      e = new_entity( a_saw, pos, new_action_oscillate( pos, v2init(1,0), 24, 300 ) )
-   elseif m == 63 then --saw r2l
-      e = new_entity( a_saw, pos, new_action_oscillate( pos, v2init(-1,0), 24, 300 ) )
-   elseif m == 78 then
-      e = new_entity( a_stalactite, pos, new_action_wait_and_drop( pos ) )
-   elseif m == 73 and player.num_orbs_placed < player.num_orbs then
-      mset(map_j,map_i,72) --install orb permanently
-      player.num_orbs_placed += 1
-   --Idles
-   elseif m == 245 then --flame on ground
-      e = new_entity( a_flame, pos, new_action_idle() )
-   elseif m == 247 then --suspended flame
-      e = new_entity( a_flame, pos, new_action_idle() )
-      e.action.anm_id = "burn" --hack
-      e.action.t = flr(rnd(17))
-   elseif m == 201 then
-      e = new_entity( a_torch, pos, new_action_idle() )
-   elseif m == 64 then
-      e = new_entity( a_orb, pos, new_action_idle() )
-   elseif m == 71 then
-      e = new_entity( a_mutator, pos, new_action_idle() )
-   --Bosses
-   elseif m == 138 and game.is_skub_alive then
-      e = new_entity( a_skullboss, pos, new_action_skullboss() )
-   elseif m == 170 and game.is_flab_alive and player.num_orbs == 4 then
-      e = new_entity( a_flameboss, pos, new_action_flameboss() )
-   elseif m == 136 and game.is_finb_alive then
-      e = new_entity( a_finalboss, pos, new_action_skullboss() )
-      --these should be entities but not enemies, but by now are handled as enemies to avoid extra code.
+      a = a_teeth
+   end
+   if a != nil then
+      e = new_entity( a, pos, new_action_patrol( pos, -1 ) )
+   else
+   --idlers
+      if m == 245 then --flame on ground
+         a = a_flame
+      elseif m == 201 then
+         a = a_torch
+      elseif m == 64 then
+         a = a_orb
+      elseif m == 71 then
+         a = a_mutator
+      end
+      if a != nil then
+         e = new_entity( a, pos, new_action_idle() )
+      else
+         -- misc
+         if m == 124 then
+            e = new_entity( a_arachno, pos, new_action_patrol_and_jump( pos, -1 ) )
+         elseif m == 90 then --cthulhu_shooter
+            e = new_entity( a_cthulhu, pos, new_action_shoot( 30, "straight" ) )
+         elseif m == 102 then
+            e = new_entity( a_grunt, pos, new_action_wait_and_ram( pos, -1 ) )
+         elseif m == 120 then
+            e = new_entity( a_bird, pos, new_action_wait_and_fly( pos, -1 ) )
+         elseif m == 60 then --saw l2r
+            e = new_entity( a_saw, pos, new_action_oscillate( pos, v2init(1,0), 24, 300 ) )
+         elseif m == 63 then --saw r2l
+            e = new_entity( a_saw, pos, new_action_oscillate( pos, v2init(-1,0), 24, 300 ) )
+         elseif m == 78 then
+            e = new_entity( a_stalactite, pos, new_action_wait_and_drop( pos ) )
+         elseif m == 73 and player.num_orbs_placed < player.num_orbs then
+            mset(map_j,map_i,72) --install orb permanently
+            player.num_orbs_placed += 1
+            --idlers
+         elseif m == 247 then --suspended flame
+            e = new_entity( a_flame, pos, new_action_idle() )
+            e.action.anm_id = "burn" --hack
+            e.action.t = flr(rnd(17))
+            --bosses
+         elseif m == 138 and game.is_skub_alive then
+            e = new_entity( a_skullboss, pos, new_action_skullboss() )
+         elseif m == 170 and game.is_flab_alive and player.num_orbs == 4 then
+            e = new_entity( a_flameboss, pos, new_action_flameboss() )
+         elseif m == 136 and game.is_finb_alive then
+            e = new_entity( a_finalboss, pos, new_action_skullboss() )
+            --these should be entities but not enemies, but by now are handled as enemies to avoid extra code.
+         end
+      end
    end
 
    -- init common part and add enemy
@@ -2069,8 +2080,8 @@ __gfx__
 08055500008d55400055ddd0000d5000000d55500005d0000000d0050000d0050000555500005550e8e555eee855eeee8e5555ee8e555eeee85d8eeee85d8eee
 000d0500000d05005500000d000d50000dd000050005d000000d0050000d0050000dd0050000d005eeede5eeeede5eeeeddee5eeeddee5eeee5eddeeee5eddee
 00d0055000d005500000000000d05000000000000050d00000d0000000d0000000d0005000dd0005eedee55eedeee5eedeee5eeedeeee5eeeee5eedeeee5eede
-80808880080488000008800000080808ee88eeee8e88eeeeee8e88eee4e888e4eeeebbee002e00000008882000000dd8f438f000009000000808088080808088
-08488f0408848f040088880000888880e88f8eeee88f8ee4eee8888ee488f884eebbbfe40028e800008282800008355883d88d0000090000808888f00888888f
+80808880080488000008800000080808ee88eeee8e88eeeeee8e88eee4e888e4eeeebbee002e00000008880000000dd8f438f000009000000808088080808088
+08488f0408848f040088880000888880e88f8eeee88f8ee4eee8888ee488f884eebbbfe40028e8000082e2800008355883d88d0000090000808888f00888888f
 088445400884454008845f000845f888e8455eee8885544ee88845fee845554ebbb4544408828e800028282000d8f345534d5440000900000888540000088540
 00885500008855000845540004554800884554eee88455eeee84554e8e855588eb4e55ee02828e80000282000d43d3d44d3554500000900000805400a0805540
 000550000005500008454400405540808e845e4ee8e844eeee4e544eee8e5e8ebee55eee082e2e2000003b000d3435888d534435000090009a0550499a055049
