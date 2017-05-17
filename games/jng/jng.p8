@@ -10,7 +10,7 @@ function _init()
    caabb_88 = aabb_init(0,0,8,8)
    caabb_1616 = aabb_init(0,0,16,16)
    cv2_44 = v2init(4,4)
-   cinitial_room_coords = v2init( 0, 0 )
+   cinitial_room_coords = v2init( 0, 2 )
 
    --debug options
    debug = { cnummodes = 6,
@@ -655,14 +655,14 @@ function init_archetypes()
          cattackbox = caabb_1616,
          cspeed = 2.5,
          chealth = 20,
-         cshootpos = v2init( 10, 6 ),
+         cshootpos = v2init( 1, 11 ),
          rtoff = v2init(1,0)
       }
 
    a_cthulhu.cshoottype = a_spit
    a_skullboss.cshoottype = a_skull
    a_flameboss.cshoottype = a_flame
-   a_finalboss.cshoottype = a_spit
+   --a_finalboss.cshoottype = a_spit --todo specific proj!
 
 end
 
@@ -1101,7 +1101,7 @@ function new_room_process_map_cell( r, room_j, room_i, map_j, map_i )
          if m == 124 then
             e = new_entity( a_arachno, pos, new_action_patrol_and_jump( pos, -1 ) )
          elseif m == 90 then --cthulhu_shooter
-            e = new_entity( a_cthulhu, pos, new_action_shoot( 30, "straight" ) )
+            e = new_entity( a_cthulhu, pos, new_action_shoot( 30, "horizontal" ) )
          elseif m == 102 then
             e = new_entity( a_grunt, pos, new_action_wait_and_ram() )
          elseif m == 120 then
@@ -1383,15 +1383,21 @@ function update_action_shoot( entity, action )
       local a = entity.a
       local st = a.cshoottype
       local pos = v2add( entity.p1, projectile_apply_sign_x( a.cshootpos, entity.sign, a.cvisualbox.max.x - a.cvisualbox.min.x ) )
+      local diff = v2sub( player.p1, pos )
       local e = nil
-      if action.type == "straight" then
+      if action.type == "horizontal" then
          e = new_entity( st,
                          pos,
                          new_action_particle( v2init( entity.sign*st.cspeed, 0 ), v2init(0,0) ) )
+      elseif action.type == "straight" then
+         local dist = v2length( diff )
+         e = new_entity( st,
+                         pos,
+                         new_action_particle( v2scale( st.cspeed/dist, diff ), v2init(0,0) ) )
       elseif action.type == "parabolic" then
          e = new_entity( st,
                          pos,
-                         new_action_particle( compute_projectile_vel_45deg( v2sub( player.p1, pos ), 0.125 ),
+                         new_action_particle( compute_projectile_vel_45deg( diff, 0.125 ),
                                               v2init(0,0.125) ) )
       else --"sinusoid"
          local phase = 0
@@ -1668,28 +1674,20 @@ end
 
 function update_action_finalboss( entity, action )
    local sub = update_action( entity, action.sub )
+   -- entity.sign = sgn( player.p1.x - entity.p1.x )
    -- intro/combat/outtro phases
    if action.phase == 1 then --intro
       if action.t > 60 then
          action.phase = 2
-         sub = new_action_wait_and_fly()-- v2init(104,104) )
+         sub = new_action_idle()
+         a_finalboss.cshoottype = a_spit
       end
    elseif action.phase == 2 then --combat
-      if sub.name == "idle" and sub.t > 30 then --1s
-         sub = new_action_shoot(30,"parabolic")
+      if sub.name == "idle" and sub.t > 60 then --1s
+         sub = new_action_shoot(30,"straight")
       elseif sub.name == "shoot" and sub.t > 90 then --3x shots
-         if entity.p1.x > 90 then --100 then
-            sub = new_action_move_on_ground( v2init(0,104) )
-         else
-            sub = new_action_jump_on_ground( v2init(104,104) )
-         end
-      elseif sub.name == "w&f" and sub.finished then
          sub = new_action_idle()
-      elseif sub.name == "mong" and sub.finished then
-         sub = new_action_idle()
-      end
-      if sub.name != "mong" then
-         entity.sign = sgn( player.p1.x - entity.p1.x )
+         a_finalboss.cshoottype = a_flame
       end
    else --outtro
       --todo
@@ -2162,7 +2160,7 @@ dddddddd1111111155555555d0c0d0c00c0d0700000c0d0c32323233232323203232000023232320
 0000000000000000000000000000000000000000000000000000000000000000081121d1dd12118098002333233202899a80233323320aa80000988a999aa99a
 1f1f9d9d9d9d1f9d9d1f9d9d9d9d1f1fad00aebdadbebc0000bcaebfbebc00bc8880251111520888aa800222522008aa88a0022252200a8800998aa2225008a0
 00000000000000000000000000000000000000000000000000000000000000008800255225520088a880cc5555cc088a8aa0ccc555cc0999088000cc555cc000
-1f9d9d9d9d9d9d9d9d9d9d449d9d9d1faebdadefbe00aebdadbe00aebdae00bc0882555205552880999ccc0555cc09999980ccc555ccc00000011ccc550cc000
+1f9d9d9d9d9d9d9d9d9d9d9d9d9d9d1faebdadefbe00aebdadbe00aebdae00bc0882555205552880999ccc0555cc09999980ccc555ccc00000011ccc550cc000
 00000000000000000000000000000000000000000000000000000000000000000002d520025d2000000cc10550c10000000cc10550cc100000011c0550cc1000
 1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f00aebeae000000aebe000000be0000be000ddd2002ddd00000c111000011100000c11100001110000011100001111000
 0000000000000000000000000000000000000000000000000000000000000000002dd020020dd200001111100111110000111110011111000010000000011100

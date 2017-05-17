@@ -94,9 +94,13 @@ HexeN SturM
    - NOT sure what should it do... maybe ignore it by now, but keep
      sprite
 ** TODO Boss: Final Boss
+   - Phase 1:
+     - Appear in air, inaccessible, shoot N straight shots directed to player
    - Fly around
      - Player must shoot when at accessible height
    - Directed bullets
+     - Player must avoid
+   - Radial bullets
      - Player must avoid
    - Global bullet rain
      - Player must cover under rocks patrolled by indestructible enemies
