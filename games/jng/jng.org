@@ -95,20 +95,19 @@ HexeN SturM
      sprite
 ** TODO Boss: Final Boss
 *** TODO Intro
+    - Play organ for N secs, then fly to mid screen
 *** TODO Phase 1:
-   - Appear in air, inaccessible, shoot N straight shots directed to player
+   - Hover mid-scrren, inaccessible, and shoot N straight shots
+     directed to player
 *** TODO Phase 2:
-   - Teleport around in upper third of the screen (1 point high, 2
-     points low)
-   - Telegraph appearance with flashing sprite
-   - Shoot radial bullets
-   - Can be hit in low spots
+   - Hitting organ gens note/sfx that stuns boss
+   - 2 correct notes will bring him down so that he can be attacked
+   - When recovering, he Shoot radial bullets massively and returns to
+     safe spot
 *** TODO Phase 3:
-   - Global bullet rain
-     - Player must cover under rocks patrolled by indestructible enemies
-   - Slam ground and create shockwaves (the ones originally for the
-     Grunt)
-     - Player Must jump over
+   - Move faster, more difficult to stun
+   - Slam ground periodically creating shockwaves (the ones originally for the
+     Grunt) player Must jump over
 ** TODO Boss: Caterpillar nest
    - Normal caterpillars dig into room from ground, walls, ceiling,
      convert to angry and attack.
