@@ -329,6 +329,67 @@ function init_archetypes()
    add( g_anim, _table_anm["hit"] )
    add( g_anim, _table_anm["hitb"] )
 
+   --enemy bullets (some enemies require them to be defined)
+   _table_anm = {}
+   _table_anm["move"] = {k={66}}
+   _table_anm["hit"] = {k={67,67,67}}
+   a_spit =
+      {
+         table_anm = _table_anm,
+         cvisualbox = caabb_88,
+         cmovebox   = aabb_init( 4, 3, 7, 4 ),
+         cdamagbox  = nil,
+         cattackbox = aabb_init( 1, 3, 6, 4 ),
+         cspeed = 3
+      }
+
+   _table_anm = {}
+   _table_anm["idle"] = {k={ {245,3}, {246,3} }}
+   _table_anm["move"] = {k={ {247,3}, {248,3} }}
+   _table_anm["hit"] = {k={ {249,3}, {250,3}, --hit
+                           {245,5}, {246,5},
+                           {245,5}, {246,5},
+                           {245,5}, {246,5} }} --remain 30 frames (1 sec)
+   _table_anm["burn"] = {k={ {249,3}, {250,3}, {247,3} }}
+   a_flame =
+      {
+         table_anm = _table_anm,
+         cvisualbox = caabb_88,
+         cmovebox   = caabb_88,
+         cdamagbox  = nil,
+         cattackbox = aabb_init( 2, 4, 6, 8 ),
+         cspeed = 1.5
+      }
+   uncompress_anim( a_flame )
+
+   _table_anm = {}
+   _table_anm["move"] = {k={ {94,5}, {95,5} }}
+   _table_anm["hit"]  = _table_anm["move"] --todo
+   a_skull =
+      {
+         table_anm = _table_anm,
+         cvisualbox = caabb_88,
+         cmovebox   = aabb_init( 4, 3, 7, 4 ),
+         cdamagbox  = nil,
+         cattackbox = aabb_init( 4, 0, 7, 3 ),
+         cspeed = 2
+      }
+   uncompress_anim( a_skull )
+
+   _table_anm = {}
+   _table_anm["move"] = {k={ {106,5}, {107,5} }}
+   _table_anm["hit"]  = _table_anm["move"] --todo
+   a_wave =
+      {
+         table_anm = _table_anm,
+         cvisualbox = caabb_88,
+         cmovebox   = aabb_init( 4, 3, 7, 4 ),
+         cdamagbox  = nil,
+         cattackbox = aabb_init( 4, 0, 7, 3 ),
+         cspeed = 2.5
+      }
+   uncompress_anim( a_wave )
+
    --caterpillar
    _table_anm = {}
    _table_anm["move"] = {k={ {48,6}, {49,6} }}
@@ -425,7 +486,8 @@ function init_archetypes()
          cspeed = 0.4,
          chealth = 2,
          cshootpos = v2init( 7, 0 ),
-         rtoff = v2init(0,-1)
+         rtoff = v2init(0,-1),
+         cshoottype = a_spit
       }
    uncompress_anim( a_cthulhu )
 
@@ -510,67 +572,6 @@ function init_archetypes()
          cspeed = 4
       }
 
-   --enemy bullets
-   _table_anm = {}
-   _table_anm["move"] = {k={66}}
-   _table_anm["hit"] = {k={67,67,67}}
-   a_spit =
-      {
-         table_anm = _table_anm,
-         cvisualbox = caabb_88,
-         cmovebox   = aabb_init( 4, 3, 7, 4 ),
-         cdamagbox  = nil,
-         cattackbox = aabb_init( 1, 3, 6, 4 ),
-         cspeed = 3
-      }
-
-   _table_anm = {}
-   _table_anm["idle"] = {k={ {245,3}, {246,3} }}
-   _table_anm["move"] = {k={ {247,3}, {248,3} }}
-   _table_anm["hit"] = {k={ {249,3}, {250,3}, --hit
-                           {245,5}, {246,5},
-                           {245,5}, {246,5},
-                           {245,5}, {246,5} }} --remain 30 frames (1 sec)
-   _table_anm["burn"] = {k={ {249,3}, {250,3}, {247,3} }}
-   a_flame =
-      {
-         table_anm = _table_anm,
-         cvisualbox = caabb_88,
-         cmovebox   = caabb_88,
-         cdamagbox  = nil,
-         cattackbox = aabb_init( 2, 4, 6, 8 ),
-         cspeed = 1.5
-      }
-   uncompress_anim( a_flame )
-
-   _table_anm = {}
-   _table_anm["move"] = {k={ {94,5}, {95,5} }}
-   _table_anm["hit"]  = _table_anm["move"] --todo
-   a_skull =
-      {
-         table_anm = _table_anm,
-         cvisualbox = caabb_88,
-         cmovebox   = aabb_init( 4, 3, 7, 4 ),
-         cdamagbox  = nil,
-         cattackbox = aabb_init( 4, 0, 7, 3 ),
-         cspeed = 2
-      }
-   uncompress_anim( a_skull )
-
-   _table_anm = {}
-   _table_anm["move"] = {k={ {106,5}, {107,5} }}
-   _table_anm["hit"]  = _table_anm["move"] --todo
-   a_wave =
-      {
-         table_anm = _table_anm,
-         cvisualbox = caabb_88,
-         cmovebox   = aabb_init( 4, 3, 7, 4 ),
-         cdamagbox  = nil,
-         cattackbox = aabb_init( 4, 0, 7, 3 ),
-         cspeed = 2.5
-      }
-   uncompress_anim( a_wave )
-
    -- vfx
    a_death = {}
    a_death.table_anm = {}
@@ -633,7 +634,8 @@ function init_archetypes()
          cspeed = 1,
          chealth = 10,
          cshootpos = v2init( 10, 6 ),
-         rtoff = v2init(1,0)
+         rtoff = v2init(1,0),
+         cshoottype = a_skull
       }
 
    _table_anm = {}
@@ -652,15 +654,15 @@ function init_archetypes()
          cspeed = 2.5,
          chealth = 10,
          cshootpos = v2init( 10, 0 ),
-         rtoff = v2init(1,0)
+         rtoff = v2init(1,0),
+         cshoottype = a_flame
       }
 
    _table_anm = {}
    _table_anm["idle"] = {k={136,136,136,168,168,168}}
-   _table_anm["move"] = {k={136}}
-   _table_anm["attack"] = {k={136}}
-   _table_anm["jump_up"] = {k={168}}
-   _table_anm["jump_down"] = {k={136}}
+   _table_anm["move"] = _table_anm["idle"]
+   _table_anm["attack"] = _table_anm["idle"]
+   _table_anm["piano"] = {k={10}}
    a_finalboss =
       {
          table_anm = _table_anm,
@@ -672,13 +674,8 @@ function init_archetypes()
          chealth = 20,
          cshootpos = v2init( 1, 8 ),
          rtoff = v2init(1,0)
+         --cshoottype = xxx --changes dynamically
       }
-
-   a_cthulhu.cshoottype = a_spit
-   a_skullboss.cshoottype = a_skull
-   a_flameboss.cshoottype = a_flame
-   --a_finalboss.cshoottype = a_spit --todo specific proj!
-
 end
 
 ----------------------------------------------------------------
@@ -691,9 +688,6 @@ function init_game()
          is_flab_alive = true,
          is_finb_alive = true,
          state = "menu",
-         -- diff_ids = { "unborn",-- (inf lives)",
-         --              "alive",--  (  4 lives)",
-         --              "undead" },-- (  2 lives)" },
          diff_val = 0
       }
 
@@ -879,14 +873,14 @@ function update_player()
    local p1
    local num_hits_map
    -- first handle collisions with solid map
-   p1, num_hits_map, player.handled_collisions = advance_ccd_box_vs_map( player.p0, v2add( player.p0, pred_vel ), movebox, 1, false )
+   p1, num_hits_map, player.handled_collisions = advance_ccd_box_vs_map( player.p0, v2add( player.p0, pred_vel ), movebox, 1 )--, false )
    -- then handle collisions with damage map important: we do it in a
    -- second pass to allow non-damage tiles to prevent the player from
    -- hitting damage tiles if already supported/deflected by
    -- non-damage tiles
    local p2
    local hits_ccd = {}
-   p2, num_hits_map, hits_ccd = advance_ccd_box_vs_map( player.p0, p1, damagebox, 2, false )
+   p2, num_hits_map, hits_ccd = advance_ccd_box_vs_map( player.p0, p1, damagebox, 2 )--, false )
 
    -- test enemies for collision, even if we've already hit map damage
    local hit_enemy = false
@@ -904,8 +898,7 @@ function update_player()
    -- test powerups/collectables
    hits_ccd = ccd_box_vs_map( player.p0, p2,
                               movebox,
-                              8, --collectable
-                              false ) --all collisions
+                              8)--false ) --all collisions
    for c in all(hits_ccd) do
       if mget(c.tile_j,c.tile_i) == 64 then
          player.num_orbs += 1
@@ -945,10 +938,10 @@ function update_player()
    end
 
    -- check on ground for next frame
+   --flags: 0 is_solid, 1 is_damage
    player.ground_ccd_1 = ccd_box_vs_map( player.p0, v2add( player.p1, v2init(0,1) ),
                                          movebox,
-                                         3, --flags: 0 is_solid, 1 is_damage
-                                         false ) --all collisions
+                                         3)--,false ) --all collisions
    player.on_ground = false
    for c in all(player.ground_ccd_1) do
                               --add( debug.log, "ground(p1) "..c.normal.x..","..c.normal.y )
@@ -1000,14 +993,13 @@ function update_player()
    player.p1 = apply_borders( player.p1, movebox )
 end
 
-function advance_ccd_box_vs_map( p0, p1, box, flags, b_first_only )
+function advance_ccd_box_vs_map( p0, p1, box, flags )--, b_first_only )
 
    local d = v2sub( p1, p0 )
    local remaining_time = 1 --1 step remaining
    local collisions_ccd = ccd_box_vs_map( p0, p1,
                                           box,
-                                          flags,
-                                          b_first_only )
+                                          flags)--,b_first_only )
    local num_hits = 0
    local handled_collisions = {}
    while collisions_ccd != nil do
@@ -1038,8 +1030,7 @@ function advance_ccd_box_vs_map( p0, p1, box, flags, b_first_only )
       if b_retest and remaining_time > 0.01 then
          collisions_ccd = ccd_box_vs_map( p0, p1,
                                           box,
-                                          flags,
-                                          b_first_only )
+                                          flags)--,b_first_only )
       else
          collisions_ccd = nil
       end
@@ -1363,11 +1354,11 @@ function update_action_particle( entity, action )
    entity.p1 = v2add( entity.p0, action.vel )
    --todo if collision, change to "action_impact" and die afterwards
    local movebox = aabb_apply_sign_x( entity.a.cmovebox, entity.sign )
+   --flags: 1 is_solid, 2 is_damage, 4 is destructible
    local map_collisions = ccd_box_vs_map( entity.p0,
                                           entity.p1,
                                           movebox,
-                                          5,   --flags: 1 is_solid, 2 is_damage, 4 is destructible
-                                          true ) --first-only
+                                          5)--,true ) --first-only
    if #map_collisions > 0 then
       --bug: floating flames, workaround using 1.01
       entity.p1 = v2add( entity.p0, v2scale( 1.01*map_collisions[1].interval.min, action.vel ) )
@@ -1519,8 +1510,7 @@ function has_line_of_sight_horizontal( p1, p2 )
    end
    hits_ccd = ccd_box_vs_map( p1, v2init(p2.x,p1.y),
                               aabb_init(0,0,1,1),
-                              3,
-                              true )
+                              3)--,true )
    return #hits_ccd == 0
 end
 
@@ -1530,8 +1520,7 @@ function has_line_of_sight_downwards( p1, p2 )
    end
    hits_ccd = ccd_box_vs_map( p1, v2init(p1.x,p2.y),
                               aabb_init(0,0,1,1),
-                              3,
-                              true )
+                              3)--,true )
    return #hits_ccd == 0
 end
 
@@ -1689,28 +1678,35 @@ end
 
 function update_action_finalboss( entity, action )
    local sub = update_action( entity, action.sub )
-   entity.sign = sgn( player.p1.x - entity.p1.x )
    -- intro/combat/outtro phases
    if action.phase == 1 then --intro
-      if action.t > 30 then --60 then
+      if action.t < 120 then
+         --intro uses piano anim, flip sign to animate cheaply
+         sub.anm_id = "piano"
+         if action.t % 4 == 0 then
+            entity.sign *= -1
+         end
+      elseif action.t < 150 then
+         sub.anm_id = "idle"
+      else
          action.phase = 2
          sub = new_action_move( v2init(56,26) )
       end
    elseif action.phase == 2 then
       if sub.name == "move" and sub.finished then
          sub = new_action_idle()
-         --sub = new_action_oscillate( entity.p1, v2init(0,1), 4, 15 )
+         -- sub = new_action_oscillate( entity.p1, v2init(1,0), 4, 30 )
       elseif sub.name == "idle" and sub.t > 60 then
          a_finalboss.cshoottype = a_flame
          sub = new_action_shoot(30,"straight")
       elseif sub.name == "shoot" and sub.t > 120 then --4x shots
          -- sub = new_action_idle()
-         --a_finalboss.cshoottype = a_flame
          a_finalboss.cspeed = 5
          sub = new_action_move( v2init(56,104) )
          action.phase = 3
       end
    elseif action.phase == 3 then
+      entity.sign = sgn( player.p1.x - entity.p1.x )
       if sub.finished then
          a_finalboss.cshoottype = a_wave
          sub = new_action_shoot(30,"horizontal")
@@ -1746,12 +1742,14 @@ function update_bullets()
       b.p0 = b.p1
       b.p1 = v2add( b.p0, b.v )
 
+      local attackbox = aabb_apply_sign_x( b.a.cattackbox, b.sign )
+
       -- test against map
+      --flags: 1 is_solid, 2 is_damage, 4 is destructible
       local map_collisions = ccd_box_vs_map( b.p0,
                                              b.p1,
-                                             aabb_apply_sign_x( b.a.cattackbox, b.sign ),
-                                             5,   --flags: 1 is_solid, 2 is_damage, 4 is destructible
-                                             true ) --first-only
+                                             attackbox,
+                                             5)--,true ) --first-only
       -- if map collision, save it and shorten predicted trajectory
       if #map_collisions > 0 then
          b.p1 = v2add( b.p0, v2scale( map_collisions[1].interval.min, b.v ) )
@@ -1761,10 +1759,9 @@ function update_bullets()
       -- test against enemies
       local enm_collisions = ccd_box_vs_entities( b.p0,
                                                   b.p1,
-                                                  aabb_apply_sign_x( b.a.cattackbox, b.sign ),
+                                                  attackbox,
                                                   room.enemies,
-                                                  "cdamagebox",
-                                                  true ) --first-only
+                                                  "cdamagebox")--,true ) --first-only
 
       -- if there's enemy collision, either there was no map collision
       -- or the enemy one happened first during the shortened
@@ -2013,18 +2010,13 @@ end
    ccd between box and map
    returns { point, normal, interval } if hit, and nil otherwise
 --]]
-function ccd_box_vs_map( box_pos0, box_pos1, box_aabb, flag_mask, b_first_only )
+function ccd_box_vs_map( box_pos0, box_pos1, box_aabb, flag_mask )--, b_first_only )
    -- swept aabb
    local swept_aabb = aabb_init_2( v2add( v2min( box_pos0, box_pos1 ), box_aabb.min ),
                                   v2add( v2max( box_pos0, box_pos1 ), box_aabb.max ) )
    local overlaps = bp_aabb_vs_map( swept_aabb, flag_mask )
    local collisions = {}
    for o in all(overlaps) do
-
-      -- debug bp
-      rect( o.tile_j*8, o.tile_i*8,
-            (o.tile_j+1)*8, (o.tile_i+1)*8,
-            7 )
 
       local tile_aabb_min = v2init( o.tile_j*8, o.tile_i*8 )
       local tile_aabb_max = v2add( tile_aabb_min, v2init(8,8) ) --8,8 are the sizes of map tile, but could be sub-box
@@ -2040,14 +2032,14 @@ function ccd_box_vs_map( box_pos0, box_pos1, box_aabb, flag_mask, b_first_only )
       end
    end
 
-   return ccd_sort_collisions( collisions, b_first_only )
+   return ccd_sort_collisions( collisions )--, b_first_only )
 end
 
 --[[
    ccd between box and entity["entity_box_name"]
    returns { point, normal, interval } if hit, and nil otherwise
 --]]
-function ccd_box_vs_entities( box_pos0, box_pos1, box_aabb, table_entities, entity_box_name, b_first_only )
+function ccd_box_vs_entities( box_pos0, box_pos1, box_aabb, table_entities, entity_box_name )--, b_first_only )
    local collisions = {}
    for e in all(table_entities) do
       local local_aabb = e.a["cdamagebox"]
@@ -2060,24 +2052,25 @@ function ccd_box_vs_entities( box_pos0, box_pos1, box_aabb, table_entities, enti
          end
       end
    end
-   return ccd_sort_collisions( collisions, b_first_only )
+   return ccd_sort_collisions( collisions )--, b_first_only )
 end
 
-function ccd_sort_collisions( collisions, b_first_only )
+--TEMP: b_first_only param disabled to save around 60 tokens
+function ccd_sort_collisions( collisions )--, b_first_only )
    -- first-only
-   if b_first_only != nil and b_first_only then
-      local first = nil
-      for c in all(collisions) do
-         if first == nil then
-            first = c
-         else
-            if c.interval.min < first.interval.min then
-               first = c
-            end
-         end
-      end
-      collisions = { first }
-   else
+   -- if b_first_only != nil and b_first_only then
+   --    local first = nil
+   --    for c in all(collisions) do
+   --       if first == nil then
+   --          first = c
+   --       else
+   --          if c.interval.min < first.interval.min then
+   --             first = c
+   --          end
+   --       end
+   --    end
+   --    collisions = { first }
+   -- else
       --bubble-sort collisions on increasing inverval.min
       local b_continue = true
       local count = #collisions
@@ -2092,27 +2085,28 @@ function ccd_sort_collisions( collisions, b_first_only )
             end
          end
       end
-   end
-   return collisions
+   -- end
+
+      return collisions
 end
 
 __gfx__
-0000000000000000000000000000000000000090000000000000000000a0000000088000008800008e8e8e88e8e8e88e00088000008800000008808000888800
-00000000000000000000009000000990000000090000909a000000000000a0000088f004088f0040e888888f8e8888fe0088f004088f00400088f804088f8040
-00000000000099a0000009a900009aa90000009a000009a70000900a090000000844544488454400eee8854ee88854ee08445444884544000844544488454400
-00000000000aaaaa0000aaa90000aaa9000009a700099a7a09a9a979000a00008485500084550000ae8e554eee8e54ee84855000845500000485500084550000
-00000000000099a0000009a900009aa90000009a000009a700900a970900000088850000845000009ae55e499ae55e4908550000845000000885880084588800
-00000000000000000000009000000990000000090000909a000000090000a0000805550008555000a9995594a999559480555500805550000085d080085d0000
-0000000000000000000000000000000000000090000000000000000000a00000000d050000d005009aede5ee9aede5ee0dd005000dd0050000050dd00050dd00
-000000000000000000000000000000000000000000000000000000000000000000d005500d000050eede5eeeaede5eeed0005000d00005000000500d000500d0
-000880000000880000008800000880000000880000088000000088f0000088f00000088088080880eee88eeeee88eeeeeee88eeeeee88eeeee88ee8eee88eeee
-0088f00000088f0000888f040088f00000888f040088f0000008845000888450008088f0088888f0ee88feeee88feeeeee88feeeee88feeee88f88eee88f888e
-08845000008845008884544408845000884445400884500000884550080845500888845088088450e88454ee88454eeee8845eeee8845eee88454eee88454eee
-08455000088455000840550088845400084055008884540008845500008455000088455400884554e8455ccd8455ccde88455ccd8845ccde8455ccde845ccdee
-884544000884540080055000080540008005500008044000008055550800555500004500000045008844ccde844ccdeee844ccdee84ccdee844ccdee84ccd4ee
-08055500008d55400055ddd0000d5000000d55500005d0000000d0050000d0050000555500005550e8e555eee855eeee8e5555ee8e555eeee85d8eeee85d8eee
-000d0500000d05005500000d000d50000dd000050005d000000d0050000d0050000dd0050000d005eeede5eeeede5eeeeddee5eeeddee5eeee5eddeeee5eddee
-00d0055000d005500000000000d05000000000000050d00000d0000000d0000000d0005000dd0005eedee55eedeee5eedeee5eeedeeee5eeeee5eedeeee5eede
+0000000000000000000000000000000000000090000000000000000000a000000008800000880000000000088000000000088000008800000008808000888800
+00000000000000000000009000000990000000090000909a000000000000a0000088f004088f004020000088880000000088f004088f00400088f804088f8040
+00000000000099a0000009a900009aa90000009a000009a70000900a090000000844544488454400220002822820000208445444884544000844544488454400
+00000000000aaaaa0000aaa90000aaa9000009a700099a7a09a9a979000a00008485500084550000522002225220002284855000845500000485500084550000
+00000000000099a0000009a900009aa90000009a000009a700900a97090000008885000084500000022200252200022508550000845000000885880084588800
+00000000000000000000009000000990000000090000909a000000090000a0000805550008555000052222525520222080555500805550000085d080085d0000
+0000000000000000000000000000000000000090000000000000000000a00000000d050000d0050000222525225222500dd005000dd0050000050dd00050dd00
+000000000000000000000000000000000000000000000000000000000000000000d005500d0000500152522252222200d0005000d00005000000500d000500d0
+000880000000880000008800000880000000880000088000000088f0000088f000000880880808800115222522252510eee88eeeeee88eeeee88ee8eee88eeee
+0088f00000088f0000888f040088f00000888f040088f0000008845000888450008088f0088888f00888252252525110ee88feeeee88feeee88f88eee88f888e
+088450000088450088845444088450008844454008845000008845500808455008888450880884508080822522228880e8845eeee8845eee88454eee88454eee
+08455000088455000840550088845400084055008884540008845500008455000088455400884554000002222220808088455ccd8845ccde8455ccde845ccdee
+884544000884540080055000080540008005500008044000008055550800555500004500000045000000222022220000e844ccdee84ccdee844ccdee84ccd4ee
+08055500008d55400055ddd0000d5000000d55500005d0000000d0050000d005000055550000555000022520025220008e5555ee8e555eeee85d8eeee85d8eee
+000d0500000d05005500000d000d50000dd000050005d000000d0050000d0050000dd0050000d00500022d2002d22000eddee5eeeddee5eeee5eddeeee5eddee
+00d0055000d005500000000000d05000000000000050d00000d0000000d0000000d0005000dd00050052dd5005dd2500deee5eeedeeee5eeeee5eedeeee5eede
 80808880080488000008800000080808ee88eeee8e88eeeeee8e88eee4e888e4eeeebbee002e00000008880000000dd8f438f000009000000808088080808088
 08488f0408848f040088880000888880e88f8eeee88f8ee4eee8888ee488f884eebbbfe40028e8000082e2800008355883d88d0000090000808888f00888888f
 088445400884454008845f000845f888e8455eee8885544ee88845fee845554ebbb4544408828e800028282000d8f345534d5440000900000888540000088540
@@ -2145,14 +2139,14 @@ cdcddcdcd1dd1d1d00000000c0d0c0d0d0c0d00000c0d0c023383200000232020023202002320020
 dcdccdcc1d1dd1d104444440070d0d0d0d07000000070d0d02333200002320000232000000232000232000022320002077700707777007070000000000000000
 cdcddcdd1111111100400400d0c0c070c0c0c0000000c07023222320023232002323000002323200323200003230000270770606787706060000000000000000
 dddddddd11111111004004000c0d0c0d0c0d0700000c0d0c32323233232323203232000023232320232320002323000067706565677065650000000000000000
-2222222222222222111111112222222244444444222222220006660000066600000666000066600000000000000000000505050550505050eeeeeeee00000000
-42929242d26662dd51616151526662554ff44fffd26662dd00688860006888600068886006888600000000000000000050505055550505057575757557575757
-49999244d66662dd5666615556666255ff4ff4f4d66662dd004668600446686004446860446686000000c00000000c0005050505505050505757575775757575
-49999244d6666ddd566661555666625544444444d6666ddd0444160044411640044444444441600000007c00000007c005050505505050504444444444444444
-2222222222222222111111112222222244444444222222220441114044111144011444444411110000007cd0000007cd05050506605050504e4ee4e440400404
-24292924dd26662d15161615552666254f4f4f4fdd26662d441111444411114401111144011111400007ccd000007ccd50505066660505054444444444444444
-44299994dd26666d5516666555266665f4fff4f4dd26666d4411114401111100d111100001111140007ccdd00007ccdd05050506605050504e4ee4e440400404
-44299994dd66666d551666655526666544444444dd66666d00d5550000d55500d115550005551d000cccddd00ccccdd005050505505050504e4664e440466404
+2222222222222222111111112222222244444444222222220006660000066600000666000066600000000000000000000505050550505050eeeeeeee1d1dd1d1
+42929242d26662dd51616151526662554ff44fffd26662dd00688860006888600068886006888600000000000000000050505055550505057575757514444441
+49999244d66662dd5666615556666255ff4ff4f4d66662dd00466860044668600444686044668600000c000000000c0005050505505050505757575747575754
+49999244d6666ddd566661555666625544444444d6666ddd044416004441164004444444444160000007c000000007c005050505505050504444444475757575
+222222222222222211111111222222224444444422222222044111404411114401144444441111000007cd00000007cd05050506605050504e4ee4e444444444
+24292924dd26662d15161615552666254f4f4f4fdd26662d44111144441111440111114401111140007ccd0000007ccd50505066660505054444444440400404
+44299994dd26666d5516666555266665f4fff4f4dd26666d4411114401111100d11110000111114007ccdd000007ccdd05050506605050504e4ee4e444444444
+44299994dd66666d551666655526666544444444dd66666d00d5550000d55500d115550005551d00cccddd000ccccdd005050505505050504e4664e440466404
 2222222244f4444400000000eeeeeeee222222224494444400000000000000000000000000000000000000000000000000000000000000000000222222000000
 4999944444444f4400060000eeee6eee4cc7ddd444444944000000000000000000000000000000000dd000000002200002222000002222000002028202220000
 499994444f44444406050060e6ee5e6e4cccddd4494444440000000000000000000220000022000000dd200000112800000282000000282000001120d0282000
@@ -2244,24 +2238,24 @@ ffffffffffffffe5c5d4ffd5c4c5d4fffff300000000f300000000f3006600636363634ef300e0f0
 5cffffffffc5c4e5d4ffccffd5e5c5c4fff300000000f300005a6363636363636363c100f3000000000000000000f300000000e06363630000000063c10000000063635c0076006363636300000063ffffffffff70747060746000c5d4ffffffffcdffdcddffffffffffffddffffcdffdccdffffffffc66565c6656565c0ffff
 5c5cffffd5d4d5e5ffffffffffe5d4fffff300000000f300636363636363636363c10000f3000000000000000000f3000000000000f3c063000000000000000000c06363636363c1000000000063c1ffffffff63607070706070c5d40000ffffffffffffffffffffffff63ffffdccdffffffffffffe265c1c065656565ffffff
 ef6cffffffffffe5ffffffffffe5fffffff3000000636363636363637575757575000000f30000e0f00000000000f3000000000000f300c063000000000000000000f300000000000000000063c1006363e2e2c07060e3e37060d400000000ffffffffffffffff63dd0000dcff63ffffffffffffff65c18affc0656565ffffff
-ef6ce82b2ce8e8e53072d6ff30e5ffffc2f4c363757575757575757575757575755c000063000000005c0063e2c2f4c300000066c2f4c30075000000000066636300f300000000000066637575006363636363ff6070e3e360700000000000f1f1ffffffff7c63c10000000000c063ffffe2ffffe265ff47ffff656565ffe2c3
+ef6ce82b2ce8e8e53072d6ff30e5ffffc2f4c363757575757575757575757575755c000063000000005c0063e2c2f4c300000066c2f4c30075000000000066636300f300000000000066637575006363636363ff6070e3e360700000000000f1f1ffffffff7c63c10000000000c063ffffe2ffffe265ffffffff656565ffe2c3
 efe6717171e6e6e671e6e65ce6e671e66363636363636363637171717171717171e6e6e663727272727272636363636362626262626262757575626262626262626262626262626262757575757575626262626262626262626250f1505050626262626262626250505050505050626262626262626262626262626262626262
 efefd07171717171717171717171717171717171717171717171717171717171717171716363636363636363636363636363717171717171717171717171717162626262627171717171717171717171717171717171717171515151515151f1f1f1f1f1f1f1f171717171717171717171717171717171717171717171717171
 efefefd071d1d07171717171717171717171717171717171717171717171d0d1d07171d1eff4c1ffffc0f4efefefefefefefefefefefefefefefefefd071d1efefefefefefd075d1efefefefef4eefefefefefefefd071717151515151515151f1f1f1f1f1f1f17171717171f1717171717171717171d1d0d1d071d1d0717171
-e0efefefefefefd0717171717171d1d071d1d0717171d14ed071d14e71d1efefefefefefeff3ff2afffff3efefefefefefefefefefefefefefefefefef4eefefefefef7cefef75efefefefefefefefefefefefefefefefd0717151f151515171f1f1f1f1f1f1717171f1717171717171717171d071d1ffffffff71ffffffd071
+e0efefefefefefd0717171717171d1d071d1d0717171d14ed071d14e71d1efefefefefefeff3ff40fffff3efefefefefefefefefefefefefefefefefef4eefefefefef7cefef75efefefefefefefefefefefefefefefefd0717151f151515171f1f1f1f1f1f1717171f1717171717171717171d071d1ffffffff71ffffffd071
 efe0efefefefefef4ed0717171d1efefd1efefefd071efefef71efefd1efefefefefefefeff1f1f1f1f1f1efefefefefef72e1e1e1e1e1e1e1e1e1efefefefefef72e1e1e1e1e1e1e1e1e1efefefefefefefeff1efefefefd0715371535371717171717171717171717171d1d071f1717171d1ffd1ffffffffffd0ffffffffd0
 efefe0efefefefefefef7171d1efefefefefefefef71efefefd1efefefefefefefefefeff1f1e9e9e9e9f1f1efefefefefe1c1e9e9e9e9e9e9e9c0e1efefefefefe1c1e9e9e1e9e9e9e9c0e1efefefefefefefc0f1efefefef555353535354717171717171717171d1ffffffffd071717171ffffffffffffffffffffffffffff
 efefefefefefefefefefd071efefefefefefefefefd0efefefefefefefefefefefefeff1f1e9e9e9e9e9e9f1f1efefefefe1e9e9e9e9c9e9e9e9e9e9e9e1e1e1e1e1e9e9e9e9e9e9c9e9e9e9e9e9e1e1e172efefc0f1efefef555353535354d07171717171d1d0d1ffffffffffffffd071d1ffffffffffffffffffffffffffff
 efefefeff0efefefefefef71efefefefefefefefefefefefefefefefefefefefefeff1f1e9e9e9e9e9e9e9e9f1e1efefefe1e9e9e9e9e9e9e9e9e9e9e1c1e9e9e9e9e9e9e9e9e9e9e9e9e9e9e1e1e1e1e1c1efefefc0f156ef555353535354efd0717171d1ffffffffffffffffffffffffffffffffffffffffffffffffffffff
-efefeff0efefefefefefefd0efefefefefefefefefefefefefefefefefefefefef72f1e9e9e9e988e9e9e9e9e9e1e1ef5ce140e9e966e9e9e9e9e1e9e9e9c9e9e9e9e9e9e9e1e966e9e9e9e1e9e9e9e9e9efefefefefc0f1f1f1f153535354efffd071d1ffffffffffffffffff78fffffffffffffffffff7f7ffc2ffffffc3ff
+efefeff0efefefefefefefd0efefefefefefefefefefefefefefefefefefefefef72f1e9e9e9e9e9e9e9e9e9e9e1e1ef5ce140e9e966e9e9e9e9e1e9e9e9c9e9e9e9e9e9e9e1e966e9e9e9e1e9e9e9e9e9efefefefefc0f1f1f1f153535354efffd071d1ffffffffffffffffff78fffffffffffffffffff7f7ffc2ffffffc3ff
 efeff0efefefefefefefefefefefefefefefefefefefefefefefefefefefefef72f1e9e9e9c9e9e9e9e9c9e9e9e9e17272e1e1e1e1e1e1e1e1e1c1e9e9e9e9e9e9e1e9e9e1e1e1e1e1e1e1e140e9e9c9e9efefefefefefef4e555554f1535456ffffffffffffff78ffffffffc2c1ffffffc2ffffffc3ffc0c1ffc0c3f7c2c1ff
 eff0efefefefefefefefefefefefefefefefefefefefefefefefefefefefefeff1e9e9e9e9e9e9e9e9e9e9e9e9e9e9e1e1c1e9e9e9e9e9e9e9e9e9e9e1e1e1e1e1c1e9e1c1e9e9e9e9e9e9c0e1e9e9e9e9efefefefefefefef5555545555f1f1ffffffffffffffc0c3ffffffc0c3ffffffc0c3f7c2c1ffc2c3ffffc049c1ffff
 efefefefefefefefefefefefefefefefefefefefefd071d1efefef7cefefefeff4e9e9e9e9e9e9e9e9e9e9e9e9e9e9f4f4e9e9e9e9e9c9e9e9e9e9e1c1e9e9e9e9e9e9e9e9e9c9e9e9e9e9e9e9e9e1e1e1f0efefefefefefef555554f1f154efffffffffffffffc2c1ffffffc2f4c1ffffffc049c1ffc24949c3fffff3ffffff
 71d1efefefefefefefefefefefefefefefefefefd071d1d0717171717171d1eff4c3e9e9e9e9e9e9e9e9e9e9e9e9c2f4f4c3e9e9e9e9e9e9e9e9e1c1e9e9e9e9e9e9e9e9e9e9e93ce9e9e9e9e95dc0e1e1efefefefef56efef55f154555554efffffffffffffffc0c3ffffffc1c0c3fffffffff3ffc2c1ffffc0c3ffc0c3ffff
 7171d1efefefefefefefefefefefefefefefefd071d1000000000000d071d3f1f1f1f1f1f1f1f1f1f1f1f1f1f1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e9e9e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1efefefefeff1f1ef555554555454effffffffffffffffff3fffffffffff3ffffffc2c1fff3fffffffff3fffff3ffff
 f17171d1efefefefefefefefefefefefefefd071d1000000000000000075f1f1f10000000000f1000000003c00000000000000000000000000000000c0f10000000000000000000000000000000000e1e1efefefefefefeff1f15554555454efffffffffffffff5af3fffffffffff3fffffff3fffff3ffaafffff3fffff3ffff
-f1f1d1ef32efefeff172efefefef32f1f1d071d10040f15c00440000007575755d770000003c00000000e100000000f1f1000000003c00000000003c00000000000000003c0000000000003f0000000000efefefefefefefef5555f15050f1efffe7e8e8e7e8f1f1f1f5f5f1f5f5f1f1f1fff3ffc2c1ffffffffc0c3fff3fff1
-f1f1f1eff1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f17171e6e6e6e6e6e6e6e6e6e6e6e6e6e6f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1
+f1f1d1ef32efefeff172efefefef32f1f1d071d1002a005c00440000007575755d770000003c00000000e100000000f1f1000000003c00000000003c00000000000000003c0000000000003f0000000000efefefefefefefef5555f15050f1efffe7e8e8e7e8f1f1f1f5f5f1f5f5f1f1f1fff3ffc2c1ffffffffc0c3fff3fff1
+f1f1f1eff1f1f1f1f1f1f1f1f1f1f1f1f1717171e6e6e671e6e671e6717171f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f17171e6e6e6e6e6e6e6e6e6e6e6e6e6e6f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1
 __sfx__
 01040000350703507030070330702b070300702b070300603505027040270402b030290202b020300103001027050250501f0501c0501d0502105024050210501e0501d0501c05039050370501e050170500f050
 0110000028070000000000000000280700000029070000002b07000000000000000028070000002b070000002d070000002b07000000280700000000000000002607000000000000000024070000000000000000
