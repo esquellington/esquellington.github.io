@@ -10,7 +10,6 @@ function _init()
    caabb_88 = aabb_init(0,0,8,8)
    caabb_1616 = aabb_init(0,0,16,16)
    cv2_44 = v2init(4,4)
-   cinitial_room_coords = v2init( 0, 0 )
 
    --debug options
    debug = { cnummodes = 6,
@@ -18,26 +17,39 @@ function _init()
              paused = false,
              log = {} }
 
+   --init persistent state
    init_archetypes()
-   init_game()
+   game_state = "menu"
+   game_difficulty = 0
+
+   game =
+      {
+         t = 0,
+         is_skub_alive = true,
+         is_flab_alive = true,
+         is_finb_alive = true,
+         num_orbs = 4,
+         num_orbs_placed = 0,
+         is_mutated = false
+      }
+
 end
 
 ----------------------------------------------------------------
 -- update
 function _update()
 
-   if game.state == "splash" then
+   if game_state == "splash" then
       --todo
-   elseif game.state == "menu" then
-      --todo process inputs
+   elseif game_state == "menu" then
       if btnp(4) then
-         game.state = "play"
-         player.health = a_player.table_health[game.diff_val+1]
+         init_game()
+         game_state = "play"
+         player.health = a_player.table_health[game_difficulty+1]
       elseif btnp(3) then --up
-         game.diff_val = (game.diff_val+1) % 3 --#game.diff_ids
+         game_difficulty = (game_difficulty+1) % 3
       end
-   elseif game.state == "play" then
-      --debug
+   elseif game_state == "play" then
       if btnp(2) then --up
          debug.mode = (debug.mode+1) % debug.cnummodes
       end
@@ -45,18 +57,21 @@ function _update()
          debug.paused = not debug.paused
       end
       if not debug.paused then
-         --game
          game.t += 1
          update_player()
-         --update_map()
          update_enemies()
          update_bullets()
          update_vfx()
       end
-   elseif game.state == "win" then
+      if player.health == 0 then
+         game_state = "death"
+      end
+   elseif game_state == "win" then
       --todo
-   elseif game.state == "death" then
+      game_state = "menu"
+   elseif game_state == "death" then
       --todo
+      game_state = "menu"
    end
 end
 
@@ -93,22 +108,22 @@ end
 function _draw()
    cls()
    pal()
-   if game.state == "splash" then
+   if game_state == "splash" then
       --todo
-   elseif game.state == "menu" then
+   elseif game_state == "menu" then
       --bckgnd
       draw_flash(70)
       draw_rain(15)
       map( 16, 32, 0, 0, 16, 16, 0x7f )
-      spr( 64, 44, 52 + 8*game.diff_val )
+      spr( 64, 44, 52 + 8*game_difficulty )
       print(" easy ",52,54)
       print("normal",52,62)
       print(" hard ",52,70)
-   elseif game.state == "play" then
+   elseif game_state == "play" then
       draw_game()
-   elseif game.state == "win" then
+   elseif game_state == "win" then
       --todo
-   elseif game.state == "death" then
+   elseif game_state == "death" then
       --todo
    end
 end
@@ -172,7 +187,7 @@ function draw_game()
    end
 
    --player
-   if player.is_mutated then
+   if game.is_mutated then
       pal(8,11)
       pal(13,3)
    end
@@ -190,7 +205,7 @@ function draw_game()
            1,1,
            player.sign<0 )
    end
-   if player.is_mutated then
+   if game.is_mutated then
       pal()
    end
 
@@ -226,7 +241,7 @@ function draw_game()
    for i=0,player.health-1 do
       spr( 41, i*8, 0 ) --heart
    end
-   for i=1,player.num_orbs do
+   for i=1,game.num_orbs do
       spr( 64, 128-i*8, 0 ) --orb
    end
 
@@ -323,7 +338,7 @@ function init_archetypes()
          cdamagebox = aabb_init( 2, 1, 6, 7 ),
          cattackbox = nil,
          cmaxvel = v2init( 5, 5 ),
-         table_health = {0,4,2}
+         table_health = {-1,4,2}
       }
    uncompress_anim( a_player )
    -- save indexed player anims (fuck this could be a loop if tables kept order!)
@@ -690,15 +705,7 @@ end
 ----------------------------------------------------------------
 -- game
 function init_game()
-   game =
-      {
-         t = 0,
-         is_skub_alive = true,
-         is_flab_alive = true,
-         is_finb_alive = true,
-         state = "menu",
-         diff_val = 0
-      }
+   game.t = 0
 
    player = { a = a_player,
               state = 1,
@@ -710,14 +717,11 @@ function init_game()
               on_ground = false,
               jump_s = 0,  --original jump direction
               inv_t = 0,
-              health = 0,
-              num_orbs = 4,
-              num_orbs_placed = 0,
-              is_mutated = false }
+              health = 0 }
 
    level = {}
    level.a = a_level
-   level.room_coords = cinitial_room_coords
+   level.room_coords = v2init( 0, 0 )
 
    room = new_room( level.room_coords )
 
@@ -840,7 +844,7 @@ function update_player()
       end
 
       --double-jump if mutated todo limit usage!!
-      if -- player.is_mutated
+      if -- game.is_mutated
          -- and
          player.v.y >= 0 then
          if btnp(5) then
@@ -912,7 +916,7 @@ function update_player()
                               8)--false ) --all collisions
    for c in all(hits_ccd) do
       if mget(c.tile_j,c.tile_i) == 64 then
-         player.num_orbs += 1
+         game.num_orbs += 1
          mset( c.tile_j, c.tile_i, mget( c.tile_j+a_orb.rtoff.x, c.tile_i+a_orb.rtoff.y ) )
          for e in all(room.entities) do
             if e.a == a_orb then
@@ -920,7 +924,7 @@ function update_player()
             end
          end
       elseif mget(c.tile_j,c.tile_i) == 42 then
-         player.is_mutated = true
+         game.is_mutated = true
          mset( c.tile_j, c.tile_i, mget( c.tile_j+a_mutator.rtoff.x, c.tile_i+a_mutator.rtoff.y ) )
          for e in all(room.entities) do
             if e.a == a_mutator then
@@ -942,9 +946,8 @@ function update_player()
       player.inv_t = 60
       player.sign = -player.sign
       player.v = v2init( player.sign * 1.5, -3 )
-      player.health -= 1
-      if player.health == 0 then
-         init_game()
+      if player.health > 0 then
+         player.health -= 1
       end
    end
 
@@ -966,7 +969,7 @@ function update_player()
    local b_cannot_leave_room = room_coords.x == 7
                                and ( ( room_coords.y == 0 and game.is_skub_alive )
                                      or
-                                     ( room_coords.y == 1 and game.is_flab_alive and player.num_orbs_placed == 4 ) )
+                                     ( room_coords.y == 1 and game.is_flab_alive and game.num_orbs_placed == 4 ) )
 
    -- update-map
    if not b_cannot_leave_room then
@@ -1129,9 +1132,9 @@ function new_room_process_map_cell( r, room_j, room_i, map_j, map_i )
             e = new_entity( a_saw, pos, new_action_oscillate( pos, v2init(-1,0), 24, 300 ) )
          elseif m == 78 then
             e = new_entity( a_stalactite, pos, new_action_wait_and_drop() )
-         elseif m == 73 and player.num_orbs_placed < player.num_orbs then
+         elseif m == 73 and game.num_orbs_placed < game.num_orbs then
             mset(map_j,map_i,72) --install orb permanently
-            player.num_orbs_placed += 1
+            game.num_orbs_placed += 1
             --idlers
          elseif m == 247 then --suspended flame
             e = new_entity( a_flame, pos, new_action_idle() )
@@ -1140,7 +1143,7 @@ function new_room_process_map_cell( r, room_j, room_i, map_j, map_i )
             --bosses
          elseif m == 138 and game.is_skub_alive then
             e = new_entity( a_skullboss, pos, new_action_boss( update_action_skullboss ) )
-         elseif m == 170 and game.is_flab_alive and player.num_orbs == 4 then
+         elseif m == 170 and game.is_flab_alive and game.num_orbs == 4 then
             e = new_entity( a_flameboss, pos, new_action_boss( update_action_flameboss ) )
          elseif m == 136 and game.is_finb_alive then
             e = new_entity( a_finalboss, pos, new_action_boss( update_action_finalboss ) )
@@ -2242,16 +2245,16 @@ __map__
 ccffddcdccffffffffffffffffffffffffffffccffffffffffffffffffffffffffdcffffffffffffffdcffffffffffffffffccffffffffffffffffffffffffffffffffffffffccffffffcdffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
 ffccddcdcdddccffffffffffffffffffffffffffffffffffccffffdcffffffffffffffccddcdffffffffffffffffffccffffffffffffcdffccffffffffffffddffffffccffffffffffffffffffddffffffffffcdffffffffddffffffffffffcdfffffffffffffffffffffffffffffffffffffffffffffffff2ffffffffffffdd
 ccffcdffddccffffffffffffffffffffffddffdcffccffffffffffffcdffffffccffffffffffc2f2f2f2f2f2c3ffcdffffdcffffccffffffffcdffffddccffffff635dffffffffff63ffff63ffffffffffffffffffffccffffffcccdffffffffffffffffffffffddffffffffffffdcffffdddcffffffffff65ffffffdcffc3ff
-ffffffffffffffffffcccccdffffffffffffffffffffffffffffffffffffffffffffffffffc2c14e0000004ec0c3ffffffffffffffffffffffffffffffffffffff636363ff63ffffffffff4effffffffddffccffffffffffffffffffffccffffffffffccffffffffffdcffffddffffffffccffffffffffe265c3ffffdcdd6565
-ffddcdffffffffffffffffffffffffffffffc2f2f2f2f2f2f2f2f2f2f2f2f2c3ffc2f2f2f2c100000000000000c0f2f2f2f2f2f2c3ffc2f2f2f2f2c3ff40ffffff634ec0636363ffffffffffffffffffffffffffffddffffffccffffffffffffffffffffffffffffffffffffffffffffdddcddffffffff656565c3ffffff6565
-ffffffffffffffffc5d4ffffffcccdffffc2c1c0c1c0f4c1c0c1c0f4c1c0c1c0f4c100c0f4000000000000000000f4c100000000c0f4c100000000c0f2f0ffffff630000000000e063ffccddffcd63f0ffddffdcffffffffffffcdffffffddffffffffffffccffdcffffdddcffdddcffccffccffffffff65656565ffffffc065
-ffffffffc5ffcdffd5c4fffffffffffffff300000000f300000000f300000000f3000000f3000000000000000000f3000000000000f3000000000000f3ffffffff63000000000000c0630000000063ffffffffffffff78ffffffffffffffffffffffccffffffffffffddffecedccffffdcffffdcffffffc7c86565c3c2ffff65
-ffffffffd5c4ffffc5d4ffcdfffffffffff300000000f300000000f300000000f3000000f3000000000000000000f3000000000000f3000000000000f3ffffffff630000000000000000005d630063ffffcdffffffff7060ffffffddffccffffffffffffffffffffddccddfcfddcddffffccffffffddffd7d865ffc0f4ffff65
-ffffccffffd5c4c5d4ffffffffffd5c4fff300000000f300000000f300000000f3000000f30000000000000000636363f000000000f3000000000000f3ffffffff6300000000636363636363c10063ffffffffffff7060707078ffffffffddffddffffffffdccdffffcddccdffffccffffffdccdffffffff6565e2fff3ffff65
-ffccffffffffd5e5ffffffc5ffffc5d4fff300000000f300000000f300000000f3006363630000000000e0f000c0f4c10000000000f3000000000000f3dcffffcd6300000063c10000000000000063ffffffffff607070607060ffffffffffffffffffffffdcdddccddcffddccffffdcccdcdcdddccdffe2656565e2f3ffff65
-ffffffffffffffe5c5d4ffd5c4c5d4fffff300000000f300000000f3006600636363634ef300e0f0000000000000f3000000000000f300000000005af30000000063000063c1000000000000000063ffffffffff7060707070706464646464ffffffffcccdffffdcddffffffddccffffffcdffffffffe2656565656565c3ff65
-5cffffffffc5c4e5d4ffccffd5e5c5c4fff300000000f300005a6363636363636363c100f3000000000000000000f300000000e06363630000000063c10000000063635c0076006363636300000063ffffffffff70747060746000c5d4ffffffffcdffdcddffffffffffffddffffcdffdccdffffffffc66565c6656565c0ff65
-5c5cffffd5d4d5e5ffffffffffe5d4fffff300000000f300636363636363636363c10000f3000000000000000000f3000000000000f3c063000000000000000000c06363636363c1000000000063c1ffffffff63607070706070c5d40000ffffffffffffffffffffffff63ffffdccdffffffffffffe265c1c065656565ffff65
+ffffffffffffffffffcccccdffffffffffffffffffffffffffffffffffffffffffffffffffc2c14e0000004ec0c3ffffffffffffffffffffffffffffffffffffff636363ff63ffffffffff4effffffffddffccffffffffffffffffffffccffffffffffccffffffffffdcffffddffffffffccffffffffffe265c3ffffdcdd6161
+ffddcdffffffffffffffffffffffffffffffc2f2f2f2f2f2f2f2f2f2f2f2f2c3ffc2f2f2f2c100000000000000c0f2f2f2f2f2f2c3ffc2f2f2f2f2c3ff40ffffff6300c0636363ffffffffffffffffffffffffffffddffffffccffffffffffffffffffffffffffffffffffffffffffffdddcddffffffff656565c3ffffff6161
+ffffffffffffffffc5d4ffffffcccdffffc2c1c0c1c0f4c1c0c1c0f4c1c0c1c0f4c100c0f4000000000000000000f4c100000000c0f4c100000000c0f2f0ffffff630000000000e063ffccddffcd63f0ffddffdcffffffffffffcdffffffddffffffffffffccffdcffffdddcffdddcffccffccffffffff65656565ffffffc061
+ffffffffc5ffcdffd5c4fffffffffffffff300000000f300000000f300000000f3000000f3000000000000000000f3000000000000f3000000000000f3ffffffff63000000000000c0630000000063ffffffffffffff78ffffffffffffffffffffffccffffffffffffddffecedccffffdcffffdcffffffc7c86565c3c2ffff61
+ffffffffd5c4ffffc5d4ffcdfffffffffff300000000f300000000f300000000f3000000f3000000000000000000f3000000000000f3000000000000f3ffffffff630000000000560000005d630063ffffcdffffffff7060ffffffddffccffffffffffffffffffffddccddfcfddcddffffccffffffddffd7d865ffc0f4ffff61
+ffffccffffd5c4c5d4ffffffffffd5c4fff300000000f300000000f300000000f3000000f30000000000000000636363f000000000f3000000000000f3ffffffff6300000000636363636363c10063ffffffffffff7060707078ffffffffddffddffffffffdccdffffcddccdffffccffffffdccdffffffff6565e2fff3ffff61
+ffccffffffffd5e5ffffffc5ffffc5d4fff300000000f300000000f300000000f3006363630000000000e0f000c0f4c10000000000f3000000000000f3dcffffcd6300000063c10000000000000063ffffffffff607070607060ffffffffffffffffffffffdcdddccddcffddccffffdcccdcdcdddccdffe2656565e2f3ffff61
+ffffffffffffffe5c5d4ffd5c4c5d4fffff300000000f300000000f3006600636363634ef300e0f0000000000000f3000000000000f300000000005af30000000063000063c1000000000000000063ffffffffff7060707070706464646464ffffffffcccdffffdcddffffffddccffffffcdffffffffe2656565656565c3ff61
+5cffffffffc5c4e5d4ffccffd5e5c5c4fff300000000f300005a6363636363636363c100f3000000000000000000f300000000e06363630000000063c10000000063635c0076006363636300000063ffffffffff70747060746000c5d4ffffffffcdffdcddffffffffffffddffffcdffdccdffffffffc66565c6656565c0ff61
+5c5cffffd5d4d5e5ffffffffffe5d4fffff300000000f300636363636363636363c10000f3000000000000000000f3000000000000f3c063000000000000000000c06363636363c1000000000063c1ffffffff63607070706070c5d40000ffffffffffffffffffffffff63ffffdccdffffffffffffe265c1c065656565ffff61
 ef6cffffffffffe5ffffffffffe5fffffff3000000636363636363637575757575000000f30000e0f00000000000f3000000000000f300c063000000000000000000f300000000000000000063c1006363e2e2c07060e3e37060d400000000ffffffffffffffff63dd0000dcff63ffffffffffffff65c18affc0656565ffffe4
 ef6ce82b2ce8e8e53072d6ff30e5ffffc2f4c363757575757575757575757575755c000063000000005c0063e2c2f4c300000066c2f4c30075000000000066636300f300000000000066637575006363636363ff6070e3e360700000000000f1f1ffffffff7c63c10000000000c063ffffe2ffffe265ffffffff656565ffe2e4
 efe6717171e6e6e671e6e65ce6e671e66363636363636363637171717171717171e6e6e663727272727272636363636362626262626262757575626262626262626262626262626262757575757575626262626262626262626250f1505050626262626262626250505050505050626262626262626262626262626262626262
