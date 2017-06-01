@@ -4,7 +4,6 @@ __lua__
 
 -- run with: ./pico-8/pico8 -run ./jng.p8 -desktop . -windowed 1
 
-----------------------------------------------------------------
 -- init
 function _init()
    caabb_88 = aabb_init(0,0,8,8)
@@ -35,7 +34,6 @@ function _init()
 
 end
 
-----------------------------------------------------------------
 -- update
 function _update()
 
@@ -77,9 +75,8 @@ end
 
 function draw_flash( prob )
    local dice = flr(rnd(1000))
-   --if (game.t % 17) == 0 --* (game.t % 13) == 0
    if dice < prob then
-      pal(0,7+5*(dice%2)) --7 (white) or 12 (blue)
+      pal(0,7+5*(dice%2))
       palt(0,false)
    end
 end
@@ -89,9 +86,6 @@ function draw_rain( max_y )
       for j=0,15 do
          local dice = flr(rnd(1000))
          spr( 207+16*(dice%2), 8*j, 8*i )
-         -- if dice < 5 then
-         --    draw_lighting( 8*j, 5 )
-         -- end
       end
    end
 end
@@ -103,7 +97,6 @@ function draw_lighting( _x, length )
    end
 end
 
-----------------------------------------------------------------
 -- draw
 function _draw()
    cls()
@@ -294,7 +287,7 @@ end
 function uncompress_anim( archetype )
    for id,anm in pairs(archetype.table_anm) do
       local k = anm.k
-      if type(k[1]) != type(1) then --k is sequence of spans {frame,count}
+      if type(k[1]) != type(1) then --k=seq of spans {frame,count}
          anm.k = {}
          for span in all(k) do
             for f=1,span[2] do
@@ -307,16 +300,13 @@ end
 
 function init_archetypes()
 
-   --level
    a_level = {}
    a_level.cnumrooms = v2init( 8, 3 )
    a_level.cgravity_y = 0.5
 
-   --rooms
    a_room = {}
    a_room.csizes = v2init( 128, 128 )
 
-   --player
    local _table_anm =
       {
          idle  = {k={ {16,8}, {17,8} }},
@@ -353,7 +343,6 @@ function init_archetypes()
    add( g_anim, _table_anm["hit"] )
    add( g_anim, _table_anm["hitb"] )
 
-   --enemy bullets (some enemies require them to be defined)
    a_spit =
       {
          table_anm =
@@ -374,7 +363,7 @@ function init_archetypes()
             {
                idle = {k={ {245,3}, {246,3} }},
                move = {k={ {247,3}, {248,3} }},
-               hit  = {k={ {249,3}, {250,3}, --hit,
+               hit  = {k={ {249,3}, {250,3},
                            {245,5}, {246,5},
                            {245,5}, {246,5},
                            {245,5}, {246,5} }}, --remain 30 frames (1 sec)
@@ -404,17 +393,19 @@ function init_archetypes()
       }
    uncompress_anim( a_skull )
 
+   local a_skull2_idle_anm = {k={58,58,59,59}}
    a_skull2 =
       {
          table_anm =
             {
-               move = {k={ {58,3}, {59,3} }}
+               idle = a_skull2_idle_anm,
+               move = a_skull2_idle_anm
             },
          cvisualbox = caabb_88,
          cmovebox   = nil,
          cdamagbox  = nil,
          cattackbox = aabb_init( 4, 0, 7, 3 ),
-         cspeed = 3
+         cspeed = 1
       }
 
    local a_wave_move_anm = {k={ {106,5}, {107,5} }}
@@ -433,7 +424,6 @@ function init_archetypes()
       }
    uncompress_anim( a_wave )
 
-   --caterpillar
    a_caterpillar =
       {
          table_anm =
@@ -450,7 +440,6 @@ function init_archetypes()
       }
    uncompress_anim( a_caterpillar )
 
-   --caterpillar2
    a_caterpillar2 =
       {
          table_anm =
@@ -466,7 +455,6 @@ function init_archetypes()
          rtoff = v2init(0,-1)
       }
 
-   --saw
    a_saw =
       {
          table_anm =
@@ -483,7 +471,6 @@ function init_archetypes()
          rtoff = v2init(1,0)
       }
 
-   --stalactite
    a_stalactite =
       {
          table_anm =
@@ -501,7 +488,6 @@ function init_archetypes()
          rtoff = v2init(0,1)
       }
 
-   --grunt
    a_grunt =
       {
          table_anm =
@@ -520,7 +506,6 @@ function init_archetypes()
       }
    uncompress_anim( a_grunt )
 
-   --cthulhu
    a_cthulhu =
       {
          table_anm =
@@ -540,7 +525,6 @@ function init_archetypes()
       }
    uncompress_anim( a_cthulhu )
 
-   --mouse
    a_mouse =
       {
          table_anm =
@@ -557,7 +541,6 @@ function init_archetypes()
       }
    uncompress_anim( a_mouse )
 
-   --bird
    a_bird =
       {
          table_anm =
@@ -575,14 +558,13 @@ function init_archetypes()
       }
    uncompress_anim( a_bird )
 
-   --arachno
    a_arachno =
       {
          table_anm =
             {
                move = {k={ {124,5}, {125,5} }},
-               jump_up = {k={126}}, --up
-               jump_down = {k={127}} --down
+               jump_up = {k={126}},
+               jump_down = {k={127}}
             },
          cvisualbox = caabb_88,
          cmovebox   = aabb_init( 2, 0, 6, 8 ),
@@ -594,7 +576,6 @@ function init_archetypes()
       }
    uncompress_anim( a_arachno )
 
-   --teeth
    a_teeth =
       {
          table_anm =
@@ -611,7 +592,6 @@ function init_archetypes()
       }
    uncompress_anim( a_teeth )
 
-   --bullets
    a_blast =
       {
          table_anm =
@@ -1168,7 +1148,8 @@ function new_room_process_map_cell( r, room_j, room_i, map_j, map_i )
          elseif m == 102 then
             e = new_entity( a_grunt, pos, new_action_wait_and_ram() )
          elseif m == 120 then
-            e = new_entity( a_bird, pos, new_action_wait_and_fly() )
+            e = new_entity( a_bird,
+                            pos, new_action_wait_and_fly() )
          elseif m == 60 then --saw l2r
             e = new_entity( a_saw, pos, new_action_oscillate( pos, v2init(1,0), 24, 300 ) )
          elseif m == 63 then --saw r2l
@@ -1176,8 +1157,10 @@ function new_room_process_map_cell( r, room_j, room_i, map_j, map_i )
          elseif m == 78 then
             e = new_entity( a_stalactite, pos, new_action_wait_and_drop() )
          elseif m == 73 and game.num_orbs_placed < game.num_orbs then
-            mset(map_j,map_i,72) --install orb permanently
+            mset(map_j,map_i,72) --install orb
             game.num_orbs_placed += 1
+         elseif m == 92 then --m == 93 and not game.is_finb_alive then
+            e = new_entity( a_skull2, pos, new_action_wait_and_fly() )
             --idlers
          elseif m == 247 then --suspended flame
             e = new_entity( a_flame, pos, new_action_idle() )
@@ -1194,13 +1177,13 @@ function new_room_process_map_cell( r, room_j, room_i, map_j, map_i )
       end
    end
 
-   -- init common part and add enemy
+   -- init common, add enemy
    if e != nil then
       e.health = e.a.chealth
       e.hit_timeout = 0
       add( r.enemies, e )
       add( r.entities, e )
-      --remember spawn pos and replace background with tile at e.a.rtoff
+      --save spawn pos, replace bckgrnd with tile at e.a.rtoff
       local a = e.a
       if a.rtoff != nil
          and a != a_orb
@@ -1228,7 +1211,7 @@ function kill_entity( e )
    del(room.enemies,e)
    del(room.entities,e)
    add(room.zombies,e)
-   -- kill bosses permanently
+   -- kill bosses
    if e.a == a_skullboss then
       game.is_skub_alive = false
       add(messages,{t=150,text="the cemetery door is open"})
@@ -1242,7 +1225,6 @@ function kill_entity( e )
    elseif e.a == a_finalboss then
       game.is_finb_alive = false
       add(messages,{t=150,text="fly free"})
-      --todo transition to ending
    end
 end
 
@@ -1253,7 +1235,7 @@ function update_enemies()
       end
       e.p0 = e.p1
       e.action = update_action( e, e.action )
-      -- remove if no action or out (important for enemy-bullets)
+      -- remove if !action or out (req 4 enemy-bullets)
       if e.action == nil or is_out( e.p1 ) then
          kill_entity( e )
       end
@@ -1274,7 +1256,7 @@ function new_action_move( target_pos )
             update_fn = update_action_move }
 end
 
--- ballistic projectile, play "hit" and disappear on impact. supersedes "fall"
+-- ballistic projectile, play "hit" and disappear on impact
 function new_action_particle( _v, _a )
    return { name = "part", anm_id = "move", t = 0, finished = false,
             vel = _v, acc = _a,
@@ -2176,14 +2158,14 @@ __gfx__
 000d5500000d55000085500000540000e8d5eeee8eeed5eee8ee55eee8e55de8ee55333e00e8820000b333b08f354d8f5d3453f800009000a9995594a9995594
 000d0500000d050000d050000d050000eede5eeeeedde5eeeeede5eeeee5edee55eeeee300028000000b30008834355355344388000a9a009a0d05009a0d0500
 00d0500000d050000d005000d0055000edee5eeeeeee5eeeeedee55eee5eeedeeeeeeeee00000000000030004343b4b343b3434b00a9a900a0d0500000d05000
-00000000000000000000000000000000eeeee66e00000000006776000067760000677600677600000d0d0d000c0c0c0000000000777700600777700706660070
-00000000000000000000000000000000eeee68860000000000787800007878000078780078780000d0d0d0d0c0c0c0c066666006007770607006770700066007
-00000000000000000000000000000000e441448600000000007777000577770006777700777700650d77770d0c77770c00666606077666600066677700666607
-00000000000000000000000000070700411144860000000006070760505757506067576007876606007878d0007878c007657666776556600665567706675667
-00ee0000000000000077700070e7e7071111446e68760700606000600505050506060606565500000d7777000c77770077655660766576606667567006655677
-00e2200000e2e20007e2270007e2e2701111444e7770070760066060505050506060606065666060d0d757d0c0c757c055556600706666006066660006666770
-0e22e8000e2e2e800e22e8000e2e2e805111144e78770606606000060505050506060606565006500d0d0d0d0c0c0c0c70776007700660006006666606077700
-022eee0002e2eee0022eee0002e2eee05511444e677065650006600000505050006060606560000000d0d0d000c0c0c070077770070066600000000006007777
+00000000000000000000000000000000eeeee66eeeeeeeeeee6776eeee6776eeee6776ee6776eeee0d0d0d000c0c0c0000000000777700600777700706660070
+00000000000000000000000000000000eeee6886eeeeeeeeee7878eeee7878eeee7878ee7878eeeed0d0d0d0c0c0c0c066666006007770607006770700066007
+00000000000000000000000000000000e4414486eeeeeeeeee7777eee57777eee67777ee7777ee650d77770d0c77770c00666606077666600066677700666607
+0000000000000000000000000007070041114486eeeeeeeee6e7e76e5e57575e6e67576ee78766e6007878d0007878c007657666776556600665567706675667
+00ee0000000000000077700070e7e7071111446e6876e7ee6e6eee6ee5e5e5e5e6e6e6e65655eeee0d7777000c77770077655660766576606667567006655677
+00e2200000e2e20007e2270007e2e2701111444e777ee7e76ee66e6e5e5e5e5e6e6e6e6e65666e6ed0d757d0c0c757c055556600706666006066660006666770
+0e22e8000e2e2e800e22e8000e2e2e805111144e7877e6e66e6eeee6e5e5e5e5e6e6e6e6565ee65e0d0d0d0d0c0c0c0c70776007700660006006666606077700
+022eee0002e2eee0022eee0002e2eee05511444e677e6565eee66eeeee5e5e5eee6e6e6e656eeeee00d0d0d000c0c0c070077770070066600000000006007777
 00000000000000000000000000008000000000000000000000000000000000002d2ddd2d2d2ddd2d0000000000000000000200000000000005555aa000000000
 000000000000000000000000000000e0000000000000000000000000000000002dcccc2d2d66662d0000000000022000000e000000000000055aa550000a0000
 00cccc0000cccc000028e000000e00000000000000008e700000000000000606dc6996c2d6dd666200222200002ee200000e00000002000000a555000a000a00
@@ -2282,7 +2264,7 @@ d2d2000056656565d222222d02d2dd20d2d2dd2d00080000000000000089a8000089a800080a9080
 2000000006556550ddd22ddd22d2d2d2d2d2d2d2a99aa99a9a8a9a890089a0000009a8000889998089a88989d1d11d1d00000777766000001d1dd1d100000000
 
 __gff__
-0000000000000000000000000000000000000000000000000000000000000000000000000000000000400801010000000000000000404040404040400000000008080000000000400808000000000000020208808080000000000000804000004001010101400000000000000101014040010202010500000000000000000000
+0000000000000000000000000000000000000000000000000000000000000000000000000000000000400801010000000000000000400000000000000000000008080000000000400808000000000000020208808080000000000000804000004001010101400000000000000101014040010202010500000000000000000000
 0202020202020202000000000000000002020202020202020000000000000000020202020202020200000000000000000202020202020202000000000000000040404040404040404040404040404000010101014040014040404040404040000101404001400140404040404040404001014040400000020000024040404040
 __map__
 ccffddcdccffffffffffffffffffffffffffffccffffffffffffffffffffffffffdcffffffffffffffdcffffffffffffffffccffffffffffffffffffffffffffffffffffffffccffffffcdffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
