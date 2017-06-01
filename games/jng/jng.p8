@@ -45,7 +45,7 @@ function _update()
       if btnp(4) then
          init_game()
          game_state = "play"
-         player.health = a_player.table_health[game_difficulty+1]
+         player_health = a_player.table_health[game_difficulty+1]
       elseif btnp(3) then --up
          game_difficulty = (game_difficulty+1) % 3
       end
@@ -63,7 +63,7 @@ function _update()
          update_bullets()
          update_vfx()
       end
-      if player.health == 0 then
+      if player_health == 0 then
          game_state = "death"
       end
    elseif game_state == "win" then
@@ -191,19 +191,19 @@ function draw_game()
       pal(8,11)
       pal(13,3)
    end
-   if player.inv_t % 2 == 0 then
-      local anm = g_anim[player.state]
-      if player.state == 6 and player.sign*player.v.x < 0 then
+   if player_inv_t % 2 == 0 then
+      local anm = g_anim[player_state]
+      if player_state == 6 and player_sign*player_v.x < 0 then
          anm = g_anim[7]
       end --hack: draw backwards jump shoot
-      local anm_t = 1+player.t%#anm.k
+      local anm_t = 1+player_t%#anm.k
       if anm.no_cycle then
-         anm_t = min(1+player.t,#anm.k)
+         anm_t = min(1+player_t,#anm.k)
       end
       spr( anm.k[anm_t],
-           player.p1.x, player.p1.y,
+           player_p1.x, player_p1.y,
            1,1,
-           player.sign<0 )
+           player_sign<0 )
    end
    if game.is_mutated then
       pal()
@@ -215,7 +215,7 @@ function draw_game()
       spr( anm.k[1+b.t%#anm.k],
            b.p1.x, b.p1.y,
            1,1,
-           player.sign<0 )
+           player_sign<0 )
    end
 
    --vfx
@@ -238,7 +238,7 @@ function draw_game()
    end
 
    --hud
-   for i=0,player.health-1 do
+   for i=0,player_health-1 do
       spr( 41, i*8, 0 ) --heart
    end
    for i=1,game.num_orbs do
@@ -266,7 +266,7 @@ function draw_game()
       -- debug info
       -- if debug.mode == 1 then
       --    print("t:"..game.t/10,1,1)
-      --    --print("a:"..g_anim[player.state].n,108,1,14)
+      --    --print("a:"..g_anim[player_state].n,108,1,14)
       --    print("mem:"..stat(0),1,122)
       --    print("cpu:"..stat(1),84,122)
       -- elseif debug.mode == 2 then
@@ -707,17 +707,17 @@ end
 function init_game()
    game.t = 0
 
-   player = { a = a_player,
-              state = 1,
-              t = 0,
-              p0 = v2init( 24, 102 ),
-              p1 = v2init( 24, 102 ),
-              sign = 1,
-              v = v2zero(),
-              on_ground = false,
-              jump_s = 0,  --original jump direction
-              inv_t = 0,
-              health = 0 }
+   player_a = a_player
+   player_state = 1
+   player_t = 0
+   player_p0 = v2init( 24, 102 )
+   player_p1 = v2init( 24, 102 )
+   player_sign = 1
+   player_v = v2zero()
+   player_on_ground = false
+   player_jump_s = 0  --original jump directio
+   player_inv_t = 0
+   player_health = 0
 
    level = {}
    level.a = a_level
@@ -734,168 +734,168 @@ end
 function update_player()
 
    -- debug.log = {}
-   player.t += 1
-   if player.inv_t > 0 then
-      player.inv_t -= 1
+   player_t += 1
+   if player_inv_t > 0 then
+      player_inv_t -= 1
    end
-   player.p0 = player.p1
-   local anm = g_anim[player.state]
+   player_p0 = player_p1
+   local anm = g_anim[player_state]
 
    -- on_ground / on_air
-   if player.on_ground then
+   if player_on_ground then
 
       -- if we were in jmp/shj/fall/hit or just finished
       -- uninterruptible shoot, back to idle, go to idle and process
       -- inputs from there
-      if player.state==3    --jmp
-         or player.state==4 --fall
-         or player.state==6 --shj
-         or player.state==8 --hit
-         or (player.state==5 and player.t > #anm.k) --shi finished
+      if player_state==3    --jmp
+         or player_state==4 --fall
+         or player_state==6 --shj
+         or player_state==8 --hit
+         or (player_state==5 and player_t > #anm.k) --shi finished
       then
-         player.t = 0
-         player.state = 1
-         player.v = v2zero()
+         player_t = 0
+         player_state = 1
+         player_v = v2zero()
       end
 
       -- idle/run
-      if player.state==1 then
+      if player_state==1 then
          -- todo in transitions to run, try to start with
          -- alternative/random legs to improve variation
          if btn(0) then
-            player.t = 0
-            player.state = 2
-            player.sign = -1
-            player.v = v2init(-1.25,0)
+            player_t = 0
+            player_state = 2
+            player_sign = -1
+            player_v = v2init(-1.25,0)
          elseif btn(1) then
-            player.t = 0
-            player.state = 2
-            player.sign = 1
-            player.v = v2init(1.25,0)
+            player_t = 0
+            player_state = 2
+            player_sign = 1
+            player_v = v2init(1.25,0)
          end
-      elseif player.state==2 then --run
+      elseif player_state==2 then --run
          if not (btn(0) or btn(1)) then
-            player.t = 0
-            player.state = 1
-            player.v = v2zero()
+            player_t = 0
+            player_state = 1
+            player_v = v2zero()
          elseif
-            (player.sign>0
+            (player_sign>0
                 and (btn(0)
                         and not btn(1))
                 or
-                player.sign<0
+                player_sign<0
                 and (not btn(0)
                         and btn(1)))
          then
-            player.sign = -player.sign
-            player.v.x = -player.v.x
+            player_sign = -player_sign
+            player_v.x = -player_v.x
          else --reset run speed, otherwise sometimes gets stuck in corners when revesing direction
-            player.v = v2init(player.sign*1.25,0)
+            player_v = v2init(player_sign*1.25,0)
          end
       end
 
       --jump
       if btnp(5) then
-         player.t = 0
-         player.state = 3
-         player.v.y = -4
+         player_t = 0
+         player_state = 3
+         player_v.y = -4
          if btn(0) then
-            player.jump_s = -1
-            player.v.x = -1.25
+            player_jump_s = -1
+            player_v.x = -1.25
          elseif btn(1) then
-            player.jump_s = 1
-            player.v.x = 1.25
+            player_jump_s = 1
+            player_v.x = 1.25
          else
-            player.jump_s = 0
-            player.v.x = 0
+            player_jump_s = 0
+            player_v.x = 0
          end
       end
 
    else --on_air
 
       -- idle,run / jmp
-      if player.state==1 or player.state==2 then
+      if player_state==1 or player_state==2 then
          -- go to fall
-         player.state = 4
-         player.v.x = 0
-      elseif player.state==3 or player.state==6 then
+         player_state = 4
+         player_v.x = 0
+      elseif player_state==3 or player_state==6 then
          --jmp/shj
-         if player.state==6 and player.t > #anm.k then --finished anim
-            player.state = 3 --jmp
-            player.t = #g_anim[3].k / 2
+         if player_state==6 and player_t > #anm.k then --finished anim
+            player_state = 3 --jmp
+            player_t = #g_anim[3].k / 2
          end
          --horizontal jump speed is constantly applied to allow jumping
          --over neighbour blocks
-         player.v.x = player.jump_s * 1.25
+         player_v.x = player_jump_s * 1.25
       end
 
       -- allow air turn
-      if (player.sign>0
+      if (player_sign>0
              and (btn(0)
                      and not btn(1)))
          or
-         (player.sign<0
+         (player_sign<0
              and (not btn(0)
                      and btn(1)))
       then
-         player.sign = -player.sign
+         player_sign = -player_sign
          -- air control todo: does not work anymore since on_ground refactor
-         -- player.v.x = -player.v.x
+         -- player_v.x = -player_v.x
       end
 
       --double-jump if mutated todo limit usage!!
       if -- game.is_mutated
          -- and
-         player.v.y >= 0 then
+         player_v.y >= 0 then
          if btnp(5) then
-            player.t = 0
-            player.state = 3
-            player.v.y = -4
+            player_t = 0
+            player_state = 3
+            player_v.y = -4
             if btn(0) then
-               player.jump_s = -1
-               player.v.x = -1.25
+               player_jump_s = -1
+               player_v.x = -1.25
             elseif btn(1) then
-               player.jump_s = 1
-               player.v.x = 1.25
+               player_jump_s = 1
+               player_v.x = 1.25
             else
-               player.jump_s = 0
-               player.v.x = 0
+               player_jump_s = 0
+               player_v.x = 0
             end
          end
       end
    end
 
    --shoot
-   if player.state!=5 and player.state!=6 and btnp(4) then
-      player.t = 0
-      if player.state==3 then
-         player.state = 6 --shoot jump
+   if player_state!=5 and player_state!=6 and btnp(4) then
+      player_t = 0
+      if player_state==3 then
+         player_state = 6 --shoot jump
       else --idle/run
-         player.state = 5 --shoot idle
-         player.v.x = 0
+         player_state = 5 --shoot idle
+         player_v.x = 0
       end
-      new_bullet_blast( player.p0, player.sign )
+      new_bullet_blast( player_p0, player_sign )
    end
 
-   local movebox = aabb_apply_sign_x(player.a.cmovebox,player.sign)
-   local damagebox = aabb_apply_sign_x(player.a.cdamagebox,player.sign)
+   local movebox = aabb_apply_sign_x(player_a.cmovebox,player_sign)
+   local damagebox = aabb_apply_sign_x(player_a.cdamagebox,player_sign)
    local acc = v2init( 0, level.a.cgravity_y )
-   local pred_vel = v2clamp( v2add( player.v, acc ),
-                             v2scale(-1,player.a.cmaxvel),
-                             player.a.cmaxvel )
+   local pred_vel = v2clamp( v2add( player_v, acc ),
+                             v2scale(-1,player_a.cmaxvel),
+                             player_a.cmaxvel )
 
    -- ccd-advance
    local p1
    local num_hits_map
    -- first handle collisions with solid map
-   p1, num_hits_map, player.handled_collisions = advance_ccd_box_vs_map( player.p0, v2add( player.p0, pred_vel ), movebox, 1 )--, false )
+   p1, num_hits_map, player_handled_collisions = advance_ccd_box_vs_map( player_p0, v2add( player_p0, pred_vel ), movebox, 1 )--, false )
    -- then handle collisions with damage map important: we do it in a
    -- second pass to allow non-damage tiles to prevent the player from
    -- hitting damage tiles if already supported/deflected by
    -- non-damage tiles
    local p2
    local hits_ccd = {}
-   p2, num_hits_map, hits_ccd = advance_ccd_box_vs_map( player.p0, p1, damagebox, 2 )--, false )
+   p2, num_hits_map, hits_ccd = advance_ccd_box_vs_map( player_p0, p1, damagebox, 2 )--, false )
 
    -- test enemies for collision, even if we've already hit map damage
    local hit_enemy = false
@@ -904,14 +904,14 @@ function update_player()
          local attackbox = aabb_apply_sign_x(e.a.cattackbox,e.sign)
          local attack_aabb = aabb_init_2( v2add( attackbox.min, e.p1 ),
                                           v2add( attackbox.max, e.p1 ) )
-         if ccd_box_vs_aabb( player.p0, p2, damagebox, attack_aabb ) != nil then
+         if ccd_box_vs_aabb( player_p0, p2, damagebox, attack_aabb ) != nil then
             hit_enemy = true
          end
       end
    end
 
    -- test powerups/collectables
-   hits_ccd = ccd_box_vs_map( player.p0, p2,
+   hits_ccd = ccd_box_vs_map( player_p0, p2,
                               movebox,
                               8)--false ) --all collisions
    for c in all(hits_ccd) do
@@ -935,32 +935,32 @@ function update_player()
    end
 
    -- advance
-   player.p1 = p2
-   player.v = v2sub( player.p1, player.p0 )
+   player_p1 = p2
+   player_v = v2sub( player_p1, player_p0 )
 
    -- process hits if not invulnerable
    if (hit_enemy or num_hits_map != 0)
-      and player.inv_t == 0 then
-      player.t = 0
-      player.state = 8 --hit todo decide hit/hitb
-      player.inv_t = 60
-      player.sign = -player.sign
-      player.v = v2init( player.sign * 1.5, -3 )
-      if player.health > 0 then
-         player.health -= 1
+      and player_inv_t == 0 then
+      player_t = 0
+      player_state = 8 --hit todo decide hit/hitb
+      player_inv_t = 60
+      player_sign = -player_sign
+      player_v = v2init( player_sign * 1.5, -3 )
+      if player_health > 0 then
+         player_health -= 1
       end
    end
 
    -- check on ground for next frame
    --flags: 0 is_solid, 1 is_damage
-   player.ground_ccd_1 = ccd_box_vs_map( player.p0, v2add( player.p1, v2init(0,1) ),
+   player_ground_ccd_1 = ccd_box_vs_map( player_p0, v2add( player_p1, v2init(0,1) ),
                                          movebox,
                                          3)--,false ) --all collisions
-   player.on_ground = false
-   for c in all(player.ground_ccd_1) do
+   player_on_ground = false
+   for c in all(player_ground_ccd_1) do
                               --add( debug.log, "ground(p1) "..c.normal.x..","..c.normal.y )
-      if c.normal.y < 0 and player.v.y >= 0 then --todo could filter by y-component values for inclined ground
-         player.on_ground = true
+      if c.normal.y < 0 and player_v.y >= 0 then --todo could filter by y-component values for inclined ground
+         player_on_ground = true
       end
    end
 
@@ -974,37 +974,44 @@ function update_player()
    -- update-map
    if not b_cannot_leave_room then
       local offset = 16*8
-      if player.v.x > 0
-         and player.p1.x > offset - movebox.max.x
-      and room_coords.x < level.a.cnumrooms.x-1 then
-         room_coords.x += 1
-         room = new_room( room_coords )
-         player.p1.x = movebox.min.x
-      elseif player.v.x < 0
-         and player.p1.x < movebox.min.x
-      and room_coords.x > 0 then
+      if player_v.x > 0
+      and player_p1.x > offset - movebox.max.x then
+         if room_coords.x < level.a.cnumrooms.x-1 then
+            room_coords.x += 1
+            room = new_room( room_coords )
+            player_p1.x = movebox.min.x
+         elseif room_coords.x == 7 and room_coords.y == 0 then
+            -- enter finalboss room
+            room_coords.x = 0
+            room_coords.y = 2
+            room = new_room( room_coords )
+            player_p1.x = movebox.min.x
+         end
+      elseif player_v.x < 0
+            and player_p1.x < movebox.min.x
+            and room_coords.x > 0 then
          room_coords.x -= 1
          room = new_room( room_coords )
-         player.p1.x = offset - movebox.max.x
-      elseif player.v.y > 0
-         and player.p1.y > offset - movebox.max.y
-      and room_coords.y < level.a.cnumrooms.y-1 then
+         player_p1.x = offset - movebox.max.x
+      elseif player_v.y > 0
+             and player_p1.y > offset - movebox.max.y
+             and room_coords.y < level.a.cnumrooms.y-1 then
          room_coords.y += 1
          room = new_room( room_coords )
-         player.p1.y = movebox.min.y
-      elseif player.v.y < 0
-         and player.p1.y < movebox.min.y
-      and room_coords.y > 0 then
+         player_p1.y = movebox.min.y
+      elseif player_v.y < 0
+             and player_p1.y < movebox.min.y
+             and room_coords.y > 0 then
          room_coords.y -= 1
          room = new_room( room_coords )
-         player.p1.y = offset - movebox.max.y
+         player_p1.y = offset - movebox.max.y
       end
       level.room_coords = room_coords
    end
 
    --borders todo these should be also treated as ccd contacts,
    --otherwise clamping may cause interpenetration with map tiles!!
-   player.p1 = apply_borders( player.p1, movebox )
+   player_p1 = apply_borders( player_p1, movebox )
 end
 
 function advance_ccd_box_vs_map( p0, p1, box, flags )--, b_first_only )
@@ -1409,7 +1416,7 @@ function update_action_shoot( entity, action )
       local a = entity.a
       local st = a.cshoottype
       local pos = v2add( entity.p1, projectile_apply_sign_x( a.cshootpos, entity.sign, a.cvisualbox.max.x - a.cvisualbox.min.x ) )
-      local diff = v2sub( player.p1, pos )
+      local diff = v2sub( player_p1, pos )
       local e = nil
       if action.type == "horizontal" then
          e = new_entity( st,
@@ -1552,8 +1559,8 @@ function update_action_wait_and_ram( entity, action )
       and
       action.sub.t > #entity.a.table_anm[action.sub.anm_id].k --only replan after whole cycle
    then
-      if has_line_of_sight_horizontal( v2add(entity.p1,cv2_44), v2add(player.p1,cv2_44) ) then
-         action.sub = new_action_move_on_ground( player.p1 )
+      if has_line_of_sight_horizontal( v2add(entity.p1,cv2_44), v2add(player_p1,cv2_44) ) then
+         action.sub = new_action_move_on_ground( player_p1 )
       end
    elseif action.sub.finished then
       --reached target, back to idle
@@ -1572,8 +1579,8 @@ function update_action_wait_and_fly( entity, action )
       and
       action.sub.t > #entity.a.table_anm[action.sub.anm_id].k --only replan after whole cycle
    then
-      if v2length( v2sub( player.p1, entity.p1 ) ) < 64 then
-         action.sub = new_action_move( player.p1 ) --flyto player
+      if v2length( v2sub( player_p1, entity.p1 ) ) < 64 then
+         action.sub = new_action_move( player_p1 ) --flyto player
       end
    elseif action.sub.finished then
       --reached target, back to idle
@@ -1594,7 +1601,7 @@ function update_action_wait_and_drop( entity, action )
 
    if action.sub.name == "idle" then
       --fall if below
-      if has_line_of_sight_downwards( v2add(entity.p1,cv2_44), v2add(player.p1,cv2_44) ) then
+      if has_line_of_sight_downwards( v2add(entity.p1,cv2_44), v2add(player_p1,cv2_44) ) then
          action.sub = new_action_particle( v2zero(), v2init(0,a_level.cgravity_y) )
       end
    else
@@ -1611,10 +1618,10 @@ function update_action_patrol_and_jump( entity, action )
       and
       action.sub.t > #entity.a.table_anm[action.sub.anm_id].k --only replan after whole cycle
    then
-      if abs(player.p1.x-entity.p1.x) < 64
+      if abs(player_p1.x-entity.p1.x) < 64
          and
-         has_line_of_sight_horizontal( v2add(entity.p1,cv2_44), v2add(player.p1,cv2_44) ) then
-         action.sub = new_action_jump_on_ground( player.p1 )
+         has_line_of_sight_horizontal( v2add(entity.p1,cv2_44), v2add(player_p1,cv2_44) ) then
+         action.sub = new_action_jump_on_ground( player_p1 )
       end
    elseif action.sub.finished then
       --reached target, back to idle
@@ -1639,7 +1646,7 @@ end
 
 function update_action_skullboss( entity, action )
    local sub = update_action( entity, action.sub )
-   entity.sign = sgn( player.p1.x - entity.p1.x )
+   entity.sign = sgn( player_p1.x - entity.p1.x )
    -- intro/combat/outtro phases
    if action.phase == 1 then --intro
       if action.t > 60 then
@@ -1685,7 +1692,7 @@ function update_action_flameboss( entity, action )
          sub = new_action_idle()
       end
       if sub.name != "mong" then
-         entity.sign = sgn( player.p1.x - entity.p1.x )
+         entity.sign = sgn( player_p1.x - entity.p1.x )
       end
    else --outtro
       --todo
@@ -1724,7 +1731,7 @@ function update_action_finalboss( entity, action )
          action.phase = 3
       end
    elseif action.phase == 3 then
-      entity.sign = sgn( player.p1.x - entity.p1.x )
+      entity.sign = sgn( player_p1.x - entity.p1.x )
       if sub.finished then
          a_finalboss.cshoottype = a_wave
          sub = new_action_shoot(30,"horizontal")
@@ -2201,7 +2208,7 @@ c5c69e9e9ebc9ebcbc9ebcbe9e9ed6c500aebdae00bcbc0000bcbc00bcbc00bc00111ddd1dd11100
 0000000000000000000000000000000000000000000000000000000000000000081121d1dd12118098002333233202899a80233323320aa80000988a999aa99a
 1616169e9eefad88efbdef9e9e161616ad00aebdadbebc0000bcaebfbebc00bc8880251111520888aa800222522008aa88a0022252200a8800998aa2225008a0
 00000000000000000000000000000000000000000000000000000000000000008800255225520088a880cc5555cc088a8aa0ccc555cc0999088000cc555cc000
-4e9e9e9e25bcbcf6f6bcbc259e9ec51eaebdadefbe00aebdadbe00aebdae00bc0882555205552880999ccc0555cc09999980ccc555ccc00000011ccc550cc000
+9e9e9e9e25bcbcf6f6bcbc259e9ec51eaebdadefbe00aebdadbe00aebdae00bc0882555205552880999ccc0555cc09999980ccc555ccc00000011ccc550cc000
 00000000000000000000000000000000000000000000000000000000000000000002d520025d2000000cc10550c10000000cc10550cc100000011c0550cc1000
 2626262626262626262626262626262600aebeae000000aebe000000be0000be000ddd2002ddd00000c111000011100000c11100001110000011100001111000
 0000000000000000000000000000000000000000000000000000000000000000002dd020020dd200001111100111110000111110011111000010000000011100
@@ -2404,3 +2411,4 @@ __music__
 00 41414141
 00 41414141
 00 41414141
+
