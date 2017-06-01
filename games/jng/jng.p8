@@ -354,12 +354,13 @@ function init_archetypes()
    add( g_anim, _table_anm["hitb"] )
 
    --enemy bullets (some enemies require them to be defined)
-   _table_anm = {}
-   _table_anm["move"] = {k={66}}
-   _table_anm["hit"] = {k={67,67,67}}
    a_spit =
       {
-         table_anm = _table_anm,
+         table_anm =
+            {
+               move = {k={66}},
+               hit  = {k={67,67,67}}
+            },
          cvisualbox = caabb_88,
          cmovebox   = aabb_init( 4, 3, 7, 4 ),
          cdamagbox  = nil,
@@ -367,17 +368,18 @@ function init_archetypes()
          cspeed = 3
       }
 
-   _table_anm = {}
-   _table_anm["idle"] = {k={ {245,3}, {246,3} }}
-   _table_anm["move"] = {k={ {247,3}, {248,3} }}
-   _table_anm["hit"] = {k={ {249,3}, {250,3}, --hit
-                           {245,5}, {246,5},
-                           {245,5}, {246,5},
-                           {245,5}, {246,5} }} --remain 30 frames (1 sec)
-   _table_anm["burn"] = {k={ {249,3}, {250,3}, {247,3} }}
    a_flame =
       {
-         table_anm = _table_anm,
+         table_anm =
+            {
+               idle = {k={ {245,3}, {246,3} }},
+               move = {k={ {247,3}, {248,3} }},
+               hit  = {k={ {249,3}, {250,3}, --hit,
+                           {245,5}, {246,5},
+                           {245,5}, {246,5},
+                           {245,5}, {246,5} }}, --remain 30 frames (1 sec)
+               burn = {k={ {249,3}, {250,3}, {247,3} }}
+            },
          cvisualbox = caabb_88,
          cmovebox   = caabb_88,
          cdamagbox  = nil,
@@ -386,12 +388,14 @@ function init_archetypes()
       }
    uncompress_anim( a_flame )
 
-   _table_anm = {}
-   _table_anm["move"] = {k={ {94,5}, {95,5} }}
-   _table_anm["hit"]  = _table_anm["move"] --todo
+   local a_skull_move_anm = {k={ {94,5}, {95,5} }}
    a_skull =
       {
-         table_anm = _table_anm,
+         table_anm =
+            {
+               move = a_skull_move_anm,
+               hit  = a_skull_move_anm,
+            },
          cvisualbox = caabb_88,
          cmovebox   = aabb_init( 4, 3, 7, 4 ),
          cdamagbox  = nil,
@@ -400,12 +404,27 @@ function init_archetypes()
       }
    uncompress_anim( a_skull )
 
-   _table_anm = {}
-   _table_anm["move"] = {k={ {106,5}, {107,5} }}
-   _table_anm["hit"]  = _table_anm["move"] --todo
+   a_skull2 =
+      {
+         table_anm =
+            {
+               move = {k={ {58,3}, {59,3} }}
+            },
+         cvisualbox = caabb_88,
+         cmovebox   = nil,
+         cdamagbox  = nil,
+         cattackbox = aabb_init( 4, 0, 7, 3 ),
+         cspeed = 3
+      }
+
+   local a_wave_move_anm = {k={ {106,5}, {107,5} }}
    a_wave =
       {
-         table_anm = _table_anm,
+         table_anm =
+            {
+               move = a_wave_move_anm,
+               hit  = a_wave_move_anm
+            },
          cvisualbox = caabb_88,
          cmovebox   = aabb_init( 4, 3, 7, 4 ),
          cdamagbox  = nil,
@@ -415,11 +434,12 @@ function init_archetypes()
    uncompress_anim( a_wave )
 
    --caterpillar
-   _table_anm = {}
-   _table_anm["move"] = {k={ {48,6}, {49,6} }}
    a_caterpillar =
       {
-         table_anm = _table_anm,
+         table_anm =
+            {
+               move = {k={ {48,6}, {49,6} }}
+            },
          cvisualbox = caabb_88,
          cmovebox   = caabb_88,
          cdamagebox = aabb_init( 1, 4, 7, 8 ),
@@ -431,11 +451,12 @@ function init_archetypes()
    uncompress_anim( a_caterpillar )
 
    --caterpillar2
-   _table_anm = {}
-   _table_anm["move"] = {k={50,50,50,50,51,51,51,51}}
    a_caterpillar2 =
       {
-         table_anm = _table_anm,
+         table_anm =
+            {
+               move = {k={50,50,50,50,51,51,51,51}},
+            },
          cvisualbox = caabb_88,
          cmovebox   = caabb_88,
          cdamagebox = aabb_init( 0, 2, 8, 8 ),
@@ -446,12 +467,13 @@ function init_archetypes()
       }
 
    --saw
-   _table_anm = {}
-   _table_anm["move"] = {k={60,61,62,63}}
-   _table_anm["hit"]  = {k={60}}
    a_saw =
       {
-         table_anm = _table_anm,
+         table_anm =
+            {
+               move = {k={60,61,62,63}},
+               hit  = {k={60}}
+            },
          cvisualbox = caabb_88,
          cmovebox   = caabb_88,
          cdamagbox  = nil,
@@ -462,13 +484,14 @@ function init_archetypes()
       }
 
    --stalactite
-   _table_anm = {}
-   _table_anm["idle"] = {k={78}}
-   _table_anm["move"] = _table_anm["idle"]
-   _table_anm["hit"]  = {k={79,79,79}}
    a_stalactite =
       {
-         table_anm = _table_anm,
+         table_anm =
+            {
+               idle = {k={78}},
+               move = {k={78}},
+               hit  = {k={79,79,79}}
+            },
          cvisualbox = caabb_88,
          cmovebox   = aabb_init( 1, 1, 7, 7 ),
          cdamagbox  = nil,
@@ -479,13 +502,14 @@ function init_archetypes()
       }
 
    --grunt
-   _table_anm = {}
-   _table_anm["idle"] = {k={ {102,6}, {103,6} }}
-   _table_anm["move"] = {k={ {105,4}, {104,4} }}
-   _table_anm["attack"] = {k={ {105,8}, {106,6} }}
    a_grunt =
       {
-         table_anm = _table_anm,
+         table_anm =
+            {
+               idle = {k={ {102,6}, {103,6} }},
+               move = {k={ {105,4}, {104,4} }},
+               attack = {k={ {105,8}, {106,6} }}
+            },
          cvisualbox = caabb_88,
          cmovebox   = caabb_88,
          cdamagebox = caabb_88,
@@ -497,12 +521,13 @@ function init_archetypes()
    uncompress_anim( a_grunt )
 
    --cthulhu
-   _table_anm = {}
-   _table_anm["move"]   = {k={ {86,4}, {87,4}, {88,4}, {89,4} }}
-   _table_anm["attack"] = {k={ {90,4}, {91,4} }}
    a_cthulhu =
       {
-         table_anm = _table_anm,
+         table_anm =
+            {
+               move   = {k={ {86,4}, {87,4}, {88,4}, {89,4} }},
+               attack = {k={ {90,4}, {91,4} }}
+            },
          cvisualbox = caabb_88,
          cmovebox   = caabb_88,
          cdamagebox = caabb_88,
@@ -516,11 +541,12 @@ function init_archetypes()
    uncompress_anim( a_cthulhu )
 
    --mouse
-   _table_anm = {}
-   _table_anm["move"] = {k={ {118,5}, {119,5} }}
    a_mouse =
       {
-         table_anm = _table_anm,
+         table_anm =
+            {
+               move = {k={ {118,5}, {119,5} }}
+            },
          cvisualbox = caabb_88,
          cmovebox   = aabb_init( 2, 0, 6, 8 ),
          cdamagebox = nil,
@@ -532,12 +558,13 @@ function init_archetypes()
    uncompress_anim( a_mouse )
 
    --bird
-   _table_anm = {}
-   _table_anm["idle"] = {k={ {120,4}, {121,4} }}
-   _table_anm["move"] = {k={ {122,5}, {123,5} }}
    a_bird =
       {
-         table_anm = _table_anm,
+         table_anm =
+            {
+               idle = {k={ {120,4}, {121,4} }},
+               move = {k={ {122,5}, {123,5} }}
+            },
          cvisualbox = caabb_88,
          cmovebox   = aabb_init( 2, 0, 6, 8 ),
          cdamagebox = caabb_88,
@@ -549,13 +576,14 @@ function init_archetypes()
    uncompress_anim( a_bird )
 
    --arachno
-   _table_anm = {}
-   _table_anm["move"] = {k={ {124,5}, {125,5} }}
-   _table_anm["jump_up"] = {k={126}} --up
-   _table_anm["jump_down"] = {k={127}} --down
    a_arachno =
       {
-         table_anm = _table_anm,
+         table_anm =
+            {
+               move = {k={ {124,5}, {125,5} }},
+               jump_up = {k={126}}, --up
+               jump_down = {k={127}} --down
+            },
          cvisualbox = caabb_88,
          cmovebox   = aabb_init( 2, 0, 6, 8 ),
          cdamagebox = caabb_88,
@@ -567,11 +595,12 @@ function init_archetypes()
    uncompress_anim( a_arachno )
 
    --teeth
-   _table_anm = {}
-   _table_anm["move"] = {k={ {68,3}, {69,8}, {70,3} }}
    a_teeth =
       {
-         table_anm = _table_anm,
+         table_anm =
+            {
+               move = {k={ {68,3}, {69,8}, {70,3} }}
+            },
          cvisualbox = caabb_88,
          cmovebox   = caabb_88,
          cdamagbox  = nil,
@@ -583,12 +612,13 @@ function init_archetypes()
    uncompress_anim( a_teeth )
 
    --bullets
-   _table_anm = {}
-   _table_anm["move"] = {k={1,1,1,2,2,2,3,3,3,2,2}}
-   _table_anm["hit"] = {k={4,4,5,5,6,6,6,7}}
    a_blast =
       {
-         table_anm = _table_anm,
+         table_anm =
+            {
+               move = {k={1,1,1,2,2,2,3,3,3,2,2}},
+               hit  = {k={4,4,5,5,6,6,6,7}}
+            },
          cvisualbox = caabb_88,
          cmovebox   = nil,
          cdamagbox  = nil,
@@ -598,15 +628,15 @@ function init_archetypes()
 
    -- vfx
    a_death = {}
-   a_death.table_anm = {}
-   a_death.table_anm["hit"] = {k={74,74,75,75,76,76,77}}
+   a_death.table_anm = { hit = {k={74,74,75,75,76,76,77}} }
 
    -- collectables
-   _table_anm = {}
-   _table_anm["idle"] = {k={64,64,64,65,65,65}}
    a_orb =
       {
-         table_anm = _table_anm,
+         table_anm =
+            {
+               idle = {k={64,64,64,65,65,65}}
+            },
          cvisualbox = caabb_88,
          cmovebox   = caabb_88,
          cdamagbox  = nil,
@@ -615,11 +645,12 @@ function init_archetypes()
          rtoff = v2init(0,-1)
       }
 
-   _table_anm = {}
-   _table_anm["idle"] = {k={42}}
    a_mutator =
       {
-         table_anm = _table_anm,
+         table_anm =
+            {
+               idle = {k={42}}
+            },
          cvisualbox = caabb_88,
          cmovebox   = caabb_88,
          cdamagbox  = nil,
@@ -629,11 +660,12 @@ function init_archetypes()
       }
 
    --env entities
-   _table_anm = {}
-   _table_anm["idle"] = {k={201,201,201,202,202,202}}
    a_torch =
       {
-         table_anm = _table_anm,
+         table_anm =
+            {
+               idle = {k={201,201,201,202,202,202}}
+            },
          cvisualbox = caabb_88,
          cmovebox   = nil,
          cdamagbox  = nil,
@@ -642,15 +674,16 @@ function init_archetypes()
       }
 
    --bosses
-   _table_anm = {}
-   _table_anm["idle"] = {k={138,138,138,140,140,140}}
-   _table_anm["move"] = {k={138}}
-   _table_anm["attack"] = {k={142}}
-   _table_anm["jump_up"] = {k={142}}
-   _table_anm["jump_down"] = {k={138}}
    a_skullboss =
       {
-         table_anm = _table_anm,
+         table_anm =
+            {
+               idle      = {k={138,138,138,140,140,140}},
+               move      = {k={138}},
+               attack    = {k={142}},
+               jump_up   = {k={142}},
+               jump_down = {k={138}}
+            },
          cvisualbox = caabb_1616,
          cmovebox   = caabb_1616,
          cdamagebox = aabb_init( 4, -1, 13, 9 ),
@@ -662,15 +695,16 @@ function init_archetypes()
          cshoottype = a_skull
       }
 
-   _table_anm = {}
-   _table_anm["idle"] = {k={170,170,170,172,172,172}}
-   _table_anm["move"] = {k={174}}
-   _table_anm["attack"] = {k={170}}
-   _table_anm["jump_up"] = {k={172}}
-   _table_anm["jump_down"] = {k={170}}
    a_flameboss =
       {
-         table_anm = _table_anm,
+         table_anm =
+            {
+               idle      = {k={170,170,170,172,172,172}},
+               move      = {k={174}},
+               attack    = {k={170}},
+               jump_up   = {k={172}},
+               jump_down = {k={170}}
+            },
          cvisualbox = caabb_1616,
          cmovebox   = caabb_1616,
          cdamagebox = aabb_init( 4, -1, 13, 9 ),
@@ -682,14 +716,16 @@ function init_archetypes()
          cshoottype = a_flame
       }
 
-   _table_anm = {}
-   _table_anm["idle"] = {k={136,136,136,168,168,168}}
-   _table_anm["move"] = _table_anm["idle"]
-   _table_anm["attack"] = _table_anm["idle"]
-   _table_anm["piano"] = {k={10}}
+   local a_finalboss_idle_anm = {k={136,136,136,168,168,168}}
    a_finalboss =
       {
-         table_anm = _table_anm,
+         table_anm =
+            {
+               idle   = a_finalboss_idle_anm,
+               move   = a_finalboss_idle_anm,
+               attack = a_finalboss_idle_anm,
+               piano  = {k={10}}
+            },
          cvisualbox = caabb_1616,
          cmovebox   = caabb_1616,
          cdamagebox = aabb_init( 4, -1, 13, 9 ),
@@ -2140,14 +2176,14 @@ __gfx__
 000d5500000d55000085500000540000e8d5eeee8eeed5eee8ee55eee8e55de8ee55333e00e8820000b333b08f354d8f5d3453f800009000a9995594a9995594
 000d0500000d050000d050000d050000eede5eeeeedde5eeeeede5eeeee5edee55eeeee300028000000b30008834355355344388000a9a009a0d05009a0d0500
 00d0500000d050000d005000d0055000edee5eeeeeee5eeeeedee55eee5eeedeeeeeeeee00000000000030004343b4b343b3434b00a9a900a0d0500000d05000
-00000000000000000000000000000000eeeee66eeeeeeeeeeeeeeeeeeeeeeeeee77eeeee6667ee7ee776eee6e6777e7e00000000777700600777700706660070
-00000000000000000000000000000000eeee6886eeee7eeeeee6eeeeeeeee7ee7e666ee6ee7667e77e666ee6eee667e766666006007770607006770700066007
-00000000000000000000000000000000e4414486ee7677eeee7677eee66777eee76666e7ee666667e7666676ee66666700666606077666600066677700666607
-0000000000000000000000000007070041114486e77566eeee76577eee7567eee6657667e665566e76655667e667566607657666776556600665567706675667
-00ee0000000000000077700070e7e7071111446eee66577ee77567eeee7657ee766556676665766e7667566ee665566e77655660766576606667567006655677
-00e2200000e2e20007e2270007e2e2701111444eee7767eeee7767eeee77766e6766667e766666ee7e66667e766666ee77766600706666006066660006666770
-0e22e8000e2e2e800e22e8000e2e2e805111144eeee7eeeeeeee6eeeee7eeeee6ee666e77e766eee6ee666e77e7667ee70776007700660006006666606077700
-022eee0002e2eee0022eee0002e2eee05511444eeeeeeeeeeeeeeeeeeeeeeeee6eee677ee7e7776eeeeee77ee7ee766670077770070066600000000006007777
+00000000000000000000000000000000eeeee66e00000000006776000067760000677600677600000d0d0d000c0c0c0000000000777700600777700706660070
+00000000000000000000000000000000eeee68860000000000787800007878000078780078780000d0d0d0d0c0c0c0c066666006007770607006770700066007
+00000000000000000000000000000000e441448600000000007777000577770006777700777700650d77770d0c77770c00666606077666600066677700666607
+00000000000000000000000000070700411144860000000006070760505757506067576007876606007878d0007878c007657666776556600665567706675667
+00ee0000000000000077700070e7e7071111446e68760700606000600505050506060606565500000d7777000c77770077655660766576606667567006655677
+00e2200000e2e20007e2270007e2e2701111444e7770070760066060505050506060606065666060d0d757d0c0c757c055556600706666006066660006666770
+0e22e8000e2e2e800e22e8000e2e2e805111144e78770606606000060505050506060606565006500d0d0d0d0c0c0c0c70776007700660006006666606077700
+022eee0002e2eee0022eee0002e2eee05511444e677065650006600000505050006060606560000000d0d0d000c0c0c070077770070066600000000006007777
 00000000000000000000000000008000000000000000000000000000000000002d2ddd2d2d2ddd2d0000000000000000000200000000000005555aa000000000
 000000000000000000000000000000e0000000000000000000000000000000002dcccc2d2d66662d0000000000022000000e000000000000055aa550000a0000
 00cccc0000cccc000028e000000e00000000000000008e700000000000000606dc6996c2d6dd666200222200002ee200000e00000002000000a555000a000a00
@@ -2246,7 +2282,7 @@ d2d2000056656565d222222d02d2dd20d2d2dd2d00080000000000000089a8000089a800080a9080
 2000000006556550ddd22ddd22d2d2d2d2d2d2d2a99aa99a9a8a9a890089a0000009a8000889998089a88989d1d11d1d00000777766000001d1dd1d100000000
 
 __gff__
-0000000000000000000000000000000000000000000000000000000000000000000000000000000000400801010000000000000000000000000000000000000008080000000000400808000000000000020208808080000000000000804000004001010101400000000000000101014040010202010500000000000000000000
+0000000000000000000000000000000000000000000000000000000000000000000000000000000000400801010000000000000000404040404040400000000008080000000000400808000000000000020208808080000000000000804000004001010101400000000000000101014040010202010500000000000000000000
 0202020202020202000000000000000002020202020202020000000000000000020202020202020200000000000000000202020202020202000000000000000040404040404040404040404040404000010101014040014040404040404040000101404001400140404040404040404001014040400000020000024040404040
 __map__
 ccffddcdccffffffffffffffffffffffffffffccffffffffffffffffffffffffffdcffffffffffffffdcffffffffffffffffccffffffffffffffffffffffffffffffffffffffccffffffcdffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
@@ -2411,4 +2447,3 @@ __music__
 00 41414141
 00 41414141
 00 41414141
-
