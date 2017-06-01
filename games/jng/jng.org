@@ -90,13 +90,13 @@ HexeN SturM
 ** DONE Flame projectile
    - Stick to solid tiles
    - Burn for a while and disappear (timeout)
-** TODO Angry skeleton
-   - NOT sure what should it do... maybe ignore it by now, but keep
-     sprite
+** DONE Angry skeleton
+   - On first pass, do nothing
+   - On second pass, spawn ghosts that fly slowly to player
 ** TODO Boss: Final Boss
-*** TODO Intro
+*** DONE Intro
     - Play organ for N secs, then fly to mid screen
-*** TODO Phase 1:
+*** DONE Phase 1:
    - Hover mid-scrren, inaccessible, and shoot N straight shots
      directed to player
 *** TODO Phase 2:
