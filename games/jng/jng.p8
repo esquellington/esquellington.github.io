@@ -323,7 +323,7 @@ function init_archetypes()
    a_player =
       {
          table_anm = _table_anm,
-         cvisualbox = caabb_88,
+         cvisualbox = caabb_88, --CVISUALBOX is only required for the player!!
          cmovebox   = aabb_init( 1, 1, 7, 7 ),
          cdamagebox = aabb_init( 2, 1, 6, 7 ),
          cattackbox = nil,
@@ -617,25 +617,27 @@ function init_archetypes()
             {
                idle = {k={64,64,64,65,65,65}}
             },
-         cvisualbox = caabb_88,
-         cmovebox   = caabb_88,
-         cdamagbox  = nil,
-         cattackbox = nil,
-         cspeed = 0,
+         -- UNNECESSARY
+         -- cvisualbox = caabb_88,
+         -- cmovebox   = caabb_88,
+         -- cdamagbox  = nil,
+         -- cattackbox = nil,
+         -- cspeed = 0,
          rtoff = v2init(0,-1)
       }
 
    a_mutator =
       {
-         table_anm =
-            {
-               idle = {k={42}}
-            },
-         cvisualbox = caabb_88,
-         cmovebox   = caabb_88,
-         cdamagbox  = nil,
-         cattackbox = nil,
-         cspeed = 0,
+         -- UNNECESSARY
+         -- table_anm =
+         --    {
+         --       idle = {k={42}}
+         --    },
+         -- cvisualbox = caabb_88,
+         -- cmovebox   = caabb_88,
+         -- cdamagbox  = nil,
+         -- cattackbox = nil,
+         -- cspeed = 0,
          rtoff = v2init(1,0)
       }
 
@@ -646,11 +648,12 @@ function init_archetypes()
             {
                idle = {k={201,201,201,202,202,202}}
             },
-         cvisualbox = caabb_88,
-         cmovebox   = nil,
-         cdamagbox  = nil,
-         cattackbox = nil,
-         cspeed = 0
+         -- UNNECESSARY
+         -- cvisualbox = caabb_88,
+         -- cmovebox   = nil,
+         -- cdamagbox  = nil,
+         -- cattackbox = nil,
+         -- cspeed = 0
       }
 
    --bosses
@@ -942,11 +945,12 @@ function update_player()
       elseif mget(c.tile_j,c.tile_i) == 42 then
          game.is_mutated = true
          mset( c.tile_j, c.tile_i, mget( c.tile_j+a_mutator.rtoff.x, c.tile_i+a_mutator.rtoff.y ) )
-         for e in all(room.entities) do
-            if e.a == a_mutator then
-               kill_entity( e )
-            end
-         end
+         --TODO IF IT HAS NO ANM, there's no need for THIS OR FOR part of a_mutator!! SAVE TOKENS
+         -- for e in all(room.entities) do
+         --    if e.a == a_mutator then
+         --       kill_entity( e )
+         --    end
+         -- end
       end
    end
 
@@ -1134,8 +1138,8 @@ function new_room_process_map_cell( r, room_j, room_i, map_j, map_i )
          a = a_torch
       elseif m == 64 then
          a = a_orb
-      elseif m == 71 then
-         a = a_mutator
+      -- elseif m == 42 then
+      --    a = a_mutator
       end
       if a != nil then
          e = new_entity( a, pos, new_action_idle() )
@@ -2264,14 +2268,14 @@ d2d2000056656565d222222d02d2dd20d2d2dd2d00080000000000000089a8000089a800080a9080
 2000000006556550ddd22ddd22d2d2d2d2d2d2d2a99aa99a9a8a9a890089a0000009a8000889998089a88989d1d11d1d00000777766000001d1dd1d100000000
 
 __gff__
-0000000000000000000000000000000000000000000000000000000000000000000000000000000000400801010000000000000000400000000000000000000008080000000000400808000000000000020208808080000000000000804000004001010101400000000000000101014040010202010500000000000000000000
+0000000000000000000000000000000000000000000000000000000000000000000000000000000000400801010000000000000000400000000000000000000008080000000000080808000000000000020208808080000000000000804000004001010101400000000000000101014040010202010500000000000000000000
 0202020202020202000000000000000002020202020202020000000000000000020202020202020200000000000000000202020202020202000000000000000040404040404040404040404040404000010101014040014040404040404040000101404001400140404040404040404001014040400000020000024040404040
 __map__
 ccffddcdccffffffffffffffffffffffffffffccffffffffffffffffffffffffffdcffffffffffffffdcffffffffffffffffccffffffffffffffffffffffffffffffffffffffccffffffcdffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
 ffccddcdcdddccffffffffffffffffffffffffffffffffffccffffdcffffffffffffffccddcdffffffffffffffffffccffffffffffffcdffccffffffffffffddffffffccffffffffffffffffffddffffffffffcdffffffffddffffffffffffcdfffffffffffffffffffffffffffffffffffffffffffffffff2ffffffffffffdd
 ccffcdffddccffffffffffffffffffffffddffdcffccffffffffffffcdffffffccffffffffffc2f2f2f2f2f2c3ffcdffffdcffffccffffffffcdffffddccffffff635dffffffffff63ffff63ffffffffffffffffffffccffffffcccdffffffffffffffffffffffddffffffffffffdcffffdddcffffffffff65ffffffdcffc3ff
 ffffffffffffffffffcccccdffffffffffffffffffffffffffffffffffffffffffffffffffc2c14e0000004ec0c3ffffffffffffffffffffffffffffffffffffff636363ff63ffffffffff4effffffffddffccffffffffffffffffffffccffffffffffccffffffffffdcffffddffffffffccffffffffffe265c3ffffdcdd6161
-ffddcdffffffffffffffffffffffffffffffc2f2f2f2f2f2f2f2f2f2f2f2f2c3ffc2f2f2f2c100000000000000c0f2f2f2f2f2f2c3ffc2f2f2f2f2c3ff40ffffff6300c0636363ffffffffffffffffffffffffffffddffffffccffffffffffffffffffffffffffffffffffffffffffffdddcddffffffff656565c3ffffff6161
+ffddcdffffffffffffffffffffffffffffffc2f2f2f2f2f2f2f2f2f2f2f2f2c3ffc2f2f2f2c100000000000000c0f2f2f2f2f2f2c3ffc2f2f2f2f2c3ff47ffffff6300c0636363ffffffffffffffffffffffffffffddffffffccffffffffffffffffffffffffffffffffffffffffffffdddcddffffffff656565c3ffffff6161
 ffffffffffffffffc5d4ffffffcccdffffc2c1c0c1c0f4c1c0c1c0f4c1c0c1c0f4c100c0f4000000000000000000f4c100000000c0f4c100000000c0f2f0ffffff630000000000e063ffccddffcd63f0ffddffdcffffffffffffcdffffffddffffffffffffccffdcffffdddcffdddcffccffccffffffff65656565ffffffc061
 ffffffffc5ffcdffd5c4fffffffffffffff300000000f300000000f300000000f3000000f3000000000000000000f3000000000000f3000000000000f3ffffffff63000000000000c0630000000063ffffffffffffff78ffffffffffffffffffffffccffffffffffffddffecedccffffdcffffdcffffffc7c86565c3c2ffff61
 ffffffffd5c4ffffc5d4ffcdfffffffffff300000000f300000000f300000000f3000000f3000000000000000000f3000000000000f3000000000000f3ffffffff630000000000560000005d630063ffffcdffffffff7060ffffffddffccffffffffffffffffffffddccddfcfddcddffffccffffffddffd7d865ffc0f4ffff61
@@ -2281,8 +2285,8 @@ ffffffffffffffe5c5d4ffd5c4c5d4fffff300000000f300000000f3006600636363634ef300e0f0
 5cffffffffc5c4e5d4ffccffd5e5c5c4fff300000000f300005a6363636363636363c100f3000000000000000000f300000000e06363630000000063c10000000063635c0076006363636300000063ffffffffff70747060746000c5d4ffffffffcdffdcddffffffffffffddffffcdffdccdffffffffc66565c6656565c0ff61
 5c5cffffd5d4d5e5ffffffffffe5d4fffff300000000f300636363636363636363c10000f3000000000000000000f3000000000000f3c063000000000000000000c06363636363c1000000000063c1ffffffff63607070706070c5d40000ffffffffffffffffffffffff63ffffdccdffffffffffffe265c1c065656565ffff61
 ef6cffffffffffe5ffffffffffe5fffffff3000000636363636363637575757575000000f30000e0f00000000000f3000000000000f300c063000000000000000000f300000000000000000063c1006363e2e2c07060e3e37060d400000000ffffffffffffffff63dd0000dcff63ffffffffffffff65c18affc0656565ffffe4
-ef6ce82b2ce8e8e53072d6ff30e5ffffc2f4c363757575757575757575757575755c000063000000005d0063e2c2f4c300000066c2f4c30075000000000066636300f300000000000066637575006363636363ff6070e3e360700000000000f1f1ffffffff7c63c1000000005dc063ffffe2ffffe265ffffffff656565ffe2e4
-efe6717171e6e6e671e6e65ce6e671e66363636363636363637171717171717171e6e6e663727272727272636363636362626262626262757575626262626262626262626262626262757575757575626262626262626262626250f1505050626262626262626250505050505050626262626262626262626262626262626262
+ef6ce82b2ce8e8e53072d6ff30e5ffffc2f4c363757575757575757575757575755c000063000000005d0063e2c2f4c30000000066f34000c0630000000066636300f300000000000066637575006363636363ff6070e3e360700000000000f1f1ffffffff7c63c1000000005dc063ffffe2ffffe265ffffffff656565ffe2e4
+efe6717171e6e6e671e6e65ce6e671e66363636363636363637171717171717171e6e6e663727272727272636363636362626262626262717171716262626262626262626262626262757575757575626262626262626262626250f1505050626262626262626250505050505050626262626262626262626262626262626262
 efefd07171717171717171717171717171717171717171717171717171717171717171716363636363636363636363636363717171717171717171717171717162626262627171717171717171717171717171717171717171515151515151f1f1f1f1f1f1f1f171717171717171717171717171717171717171717171717171
 efefefd071d1d07171717171717171717171717171717171717171717171d0d1d07171d1eff4c1ffffc0f4efefefefefefefefefefefefefefefefefd071d1efefefefefefd075d1efefefefef4eefefefefefefefd071717151515151515151f1f1f1f1f1f1f17171717171f1717171717171717171d1d0d1d071d1d0717171
 e0efefefefefefd0717171717171d1d071d1d0717171d14ed071d14e71d1efefefefefefeff3ff40fffff3efefefefefefef5defefefefefefefefefef4eefefefefef7cefef75efefefefefefefefefefefefefefefefd0717151f151515171f1f1f1f1f1f1717171f1717171717171717171d071d1ffffffff71ffffffd071
