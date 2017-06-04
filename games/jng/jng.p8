@@ -11,28 +11,23 @@ function _init()
    cv2_44 = v2init(4,4)
 
    --debug options
-   debug = { cnummodes = 6,
-             mode = 0,
-             paused = false,
-             log = {} }
+   -- debug = { cnummodes = 6,
+   --           mode = 0,
+   --           paused = false }
 
    --init persistent state
    init_archetypes()
    game_state = "menu"
    game_difficulty = 0
-
-   game =
-      {
-         t = 0,
-         is_skub_alive = true,
-         is_flab_alive = true,
-         is_finb_alive = true,
-         num_orbs = 0,
-         num_orbs_placed = 0,
-         is_mutated = false,
-         has_key = false,
-         has_broom = false
-      }
+   game_t = 0
+   game_is_skub_alive = true
+   game_is_flab_alive = true
+   game_is_finb_alive = true
+   game_num_orbs = 0
+   game_num_orbs_placed = 0
+   game_is_mutated = false
+   game_has_key = false
+   game_has_broom = fals
 
    g_sfx_0 = -1
    g_time = 0
@@ -50,14 +45,14 @@ function _update()
          g_sfx_0 = 2
       end
       if btnp(4) then
-         init_game()
-         game_state = "play"
-         player_health = a_player.table_health[game_difficulty+1]
          --temp test
          if game_difficulty == 2 then
             game_state = "win"
             g_time = 0
-            -- add(messages,{t=150,text="your executioners have\npayed for their crimes"})
+         else
+            init_game()
+            game_state = "play"
+            player_health = a_player.table_health[game_difficulty+1]
          end
       elseif btnp(2) then --up
          game_difficulty = (game_difficulty-1) % 3
@@ -73,7 +68,7 @@ function _update()
       --    debug.paused = not debug.paused
       -- end
       -- if not debug.paused then
-         game.t += 1
+         game_t += 1
          update_player()
          update_enemies()
          update_bullets()
@@ -105,6 +100,7 @@ function draw_rain( max_y )
       for j=0,15 do
          local dice = flr(rnd(1000))
          spr( 207+16*(dice%2), 8*j, 8*i )
+         -- spr( 227+(dice%2), 8*j, 8*i )
       end
    end
 end
@@ -134,15 +130,31 @@ function _draw()
    elseif game_state == "play" then
       draw_game()
    elseif game_state == "win" then
-      -- local anm_k = a_player.table_anm.broom.k
-      -- local anm_t = 1+g_time%#anm_k
-      -- spr( anm_k[anm_t], 64, 64 )
+      local anm_k = a_player.table_anm.broom.k
+      spr( 236, 80, 32, 2, 2 ) --moon
+      local pos_x = 40 + 8*sin(g_time/150)
+      if g_time >= 300 then
+         local lambda = (g_time-300)
+         pos_x += lambda*lambda/4
+      end
+      spr( anm_k[1+g_time%#anm_k], pos_x, 60 + 2*cos(g_time/30) )
+      draw_rain(15)
+      local _text
+      if g_time == 1 then
+         _text="the vicar and his executioners"
+      elseif g_time == 51 then
+         _text="have been defeated"
+      -- elseif g_time == 101 then
+      --    _text="your sisters may now"
+      -- elseif g_time == 151 then
+      --    _text="rest in peace"
+      end
+      if _text != nil then
+         add(messages,{t=150,text=_text})
+      end
    elseif game_state == "death" then
-      -- local anm_k = a_player.table_anm.broom.k
-      -- local anm_t = 1+g_time%#anm_k
-      -- spr( anm_k[anm_t], 64, 64 )
    end
-   --messages
+
    for m in all(messages) do
       if m.t > 0 then
          print( m.text, 64-(2*#m.text), 32*(m.t/150) ) --4*len/2 = 2*len
@@ -160,7 +172,7 @@ function draw_game()
    local b_rain = (room_coords.x == 0 or room_coords.x == 7) and room_coords.y == 0
    if b_rain then
       local prob = 10 --1%
-      if game.t < 5 then
+      if game_t < 5 then
          prob *= 100 --10%
       end
       draw_flash(prob)
@@ -175,10 +187,10 @@ function draw_game()
        0x7f )
 
    --lightning
-   if game.t < 8 then
-      draw_lighting(24, 14*game.t)
-   elseif game.t < 16 then
-      draw_lighting(24, 165 - 14*game.t )
+   if game_t < 8 then
+      draw_lighting(24, 14*game_t)
+   elseif game_t < 16 then
+      draw_lighting(24, 165 - 14*game_t )
    end
 
    --enemies
@@ -189,28 +201,26 @@ function draw_game()
          while act.sub != nil do
             act = act.sub
          end
-         local size_x = 1
-         local size_y = 1
-         if e.a == a_skullboss
-            or e.a == a_flameboss
-            or e.a == a_finalboss then
-               size_x = 2
-               size_y = 2
-         end
          local anm = e.a.table_anm[act.anm_id]
          local anm_t = 1+act.t%#anm.k
          if anm.no_cycle then
             anm_t = min(1+act.t,#anm.k)
          end
+         local size_x = 1
+         local size_y = 1
+         if e.a.is_large != nil then
+            size_x = 2
+            size_y = 2
+         end
          spr( anm.k[ anm_t ],
               e_p1.x, e_p1.y,
-              size_x,size_y,
+              size_x, size_y,
               e.sign<0 )
       end
    end
 
    --player
-   if game.is_mutated then
+   if game_is_mutated then
       pal(8,11)
       pal(13,3)
    end
@@ -228,7 +238,7 @@ function draw_game()
            1,1,
            player_sign<0 )
    end
-   if game.is_mutated then
+   if game_is_mutated then
       pal()
    end
 
@@ -264,20 +274,20 @@ function draw_game()
    for i=0,player_health-1 do
       spr( 41, i*8, 0 ) --heart
    end
-   for i=1,game.num_orbs do
+   for i=1,game_num_orbs do
       spr( 64, 128-i*8, 0 ) --orb
    end
-   if game.is_mutated then
+   if game_is_mutated then
       spr( 42, 88, 0 )
    end
-   if game.has_key then
+   if game_has_key then
       spr( 71, 80, 0 )
    end
-   if game.has_broom then
+   if game_has_broom then
       spr( 45, 72, 0 )
    end
 
-   if debug.mode > 0 then
+   -- if debug.mode > 0 then
       --entity boxes
       -- local colors = {10,11,8,12}
       -- for e in all(room.entities) do
@@ -297,11 +307,11 @@ function draw_game()
 
       -- debug info
       -- if debug.mode == 1 then
-      --    print("t:"..game.t/10,1,1)
+      --    print("t:"..game_t/10,1,1)
       --    print("mem:"..stat(0),1,122)
       --    print("cpu:"..stat(1),84,122)
       -- end
-   end
+   -- end
 end
 
 -- archetypes
@@ -346,7 +356,7 @@ function init_archetypes()
    a_player =
       {
          table_anm = _table_anm,
-         cvisualbox = caabb_88, --cvisualbox is only required for the player!!
+         -- cvisualbox = caabb_88, --cvisualbox is only required for the player!!
          cmovebox   = aabb_init( 1, 1, 7, 7 ),
          cdamagebox = aabb_init( 2, 1, 6, 7 ),
          cattackbox = nil,
@@ -374,7 +384,7 @@ function init_archetypes()
                move = {k={66}},
                hit  = {k={67,67,67}}
             },
-         cvisualbox = caabb_88,
+         -- cvisualbox = caabb_88,
          cmovebox   = aabb_init( 4, 3, 7, 4 ),
          cdamagbox  = nil,
          cattackbox = aabb_init( 1, 3, 6, 4 ),
@@ -393,7 +403,7 @@ function init_archetypes()
                            {245,5}, {246,5} }}, --remain 30 frames (1 sec)
                burn = {k={ {249,3}, {250,3}, {247,3} }}
             },
-         cvisualbox = caabb_88,
+         -- cvisualbox = caabb_88,
          cmovebox   = caabb_88,
          cdamagbox  = nil,
          cattackbox = aabb_init( 2, 4, 6, 8 ),
@@ -409,7 +419,7 @@ function init_archetypes()
                move = a_skull_move_anm,
                hit  = a_skull_move_anm,
             },
-         cvisualbox = caabb_88,
+         -- cvisualbox = caabb_88,
          cmovebox   = aabb_init( 4, 3, 7, 4 ),
          cdamagbox  = nil,
          cattackbox = aabb_init( 4, 0, 7, 3 ),
@@ -425,7 +435,7 @@ function init_archetypes()
                idle = a_skull2_idle_anm,
                move = a_skull2_idle_anm
             },
-         cvisualbox = caabb_88,
+         -- cvisualbox = caabb_88,
          cmovebox   = nil,
          cdamagbox  = nil,
          cattackbox = aabb_init( 4, 0, 7, 3 ),
@@ -440,7 +450,7 @@ function init_archetypes()
                move = a_wave_move_anm,
                hit  = a_wave_move_anm
             },
-         cvisualbox = caabb_88,
+         -- cvisualbox = caabb_88,
          cmovebox   = aabb_init( 4, 3, 7, 4 ),
          cdamagbox  = nil,
          cattackbox = aabb_init( 4, 0, 7, 3 ),
@@ -454,7 +464,7 @@ function init_archetypes()
             {
                move = {k={ {48,6}, {49,6} }}
             },
-         cvisualbox = caabb_88,
+         -- cvisualbox = caabb_88,
          cmovebox   = caabb_88,
          cdamagebox = aabb_init( 1, 4, 7, 8 ),
          cattackbox = aabb_init( 1, 4, 7, 8 ),
@@ -470,7 +480,7 @@ function init_archetypes()
             {
                move = {k={50,50,50,50,51,51,51,51}},
             },
-         cvisualbox = caabb_88,
+         -- cvisualbox = caabb_88,
          cmovebox   = caabb_88,
          cdamagebox = aabb_init( 0, 2, 8, 8 ),
          cattackbox = caabb_88,
@@ -486,7 +496,7 @@ function init_archetypes()
                move = {k={60,61,62,63}},
                hit  = {k={60}}
             },
-         cvisualbox = caabb_88,
+         -- cvisualbox = caabb_88,
          cmovebox   = caabb_88,
          cdamagbox  = nil,
          cattackbox = aabb_init( 2, 2, 6, 6 ),
@@ -503,7 +513,7 @@ function init_archetypes()
                move = {k={78}},
                hit  = {k={79,79,79}}
             },
-         cvisualbox = caabb_88,
+         -- cvisualbox = caabb_88,
          cmovebox   = aabb_init( 1, 1, 7, 7 ),
          cdamagbox  = nil,
          cattackbox = caabb_88,
@@ -520,7 +530,7 @@ function init_archetypes()
                move = {k={ {105,4}, {104,4} }},
                attack = {k={ {105,8}, {106,6} }}
             },
-         cvisualbox = caabb_88,
+         -- cvisualbox = caabb_88,
          cmovebox   = caabb_88,
          cdamagebox = caabb_88,
          cattackbox = caabb_88,
@@ -555,7 +565,7 @@ function init_archetypes()
             {
                move = {k={ {118,5}, {119,5} }}
             },
-         cvisualbox = caabb_88,
+         -- cvisualbox = caabb_88,
          cmovebox   = aabb_init( 2, 0, 6, 8 ),
          cdamagebox = nil,
          cattackbox = nil,
@@ -572,7 +582,7 @@ function init_archetypes()
                idle = {k={ {120,4}, {121,4} }},
                move = {k={ {122,5}, {123,5} }}
             },
-         cvisualbox = caabb_88,
+         -- cvisualbox = caabb_88,
          cmovebox   = aabb_init( 2, 0, 6, 8 ),
          cdamagebox = caabb_88,
          cattackbox = caabb_88,
@@ -590,7 +600,7 @@ function init_archetypes()
                jump_up = {k={126}},
                jump_down = {k={127}}
             },
-         cvisualbox = caabb_88,
+         -- cvisualbox = caabb_88,
          cmovebox   = aabb_init( 2, 0, 6, 8 ),
          cdamagebox = caabb_88,
          cattackbox = aabb_init( 1, 3, 7, 8 ),
@@ -606,7 +616,7 @@ function init_archetypes()
             {
                move = {k={ {68,3}, {69,8}, {70,3} }}
             },
-         cvisualbox = caabb_88,
+         -- cvisualbox = caabb_88,
          cmovebox   = caabb_88,
          cdamagbox  = nil,
          cattackbox = aabb_init( 1, 2, 6, 8 ),
@@ -623,7 +633,7 @@ function init_archetypes()
                move = {k={1,1,1,2,2,2,3,3,3,2,2}},
                hit  = {k={4,4,5,5,6,6,6,7}}
             },
-         cvisualbox = caabb_88,
+         -- cvisualbox = caabb_88,
          cmovebox   = nil,
          cdamagbox  = nil,
          cattackbox = aabb_init( 4, 3, 8, 4 ),
@@ -667,11 +677,12 @@ function init_archetypes()
          cmovebox   = caabb_1616,
          cdamagebox = aabb_init( 4, -1, 13, 9 ),
          cattackbox = caabb_1616,
-             cspeed = 1,
+         cspeed = 1,
          chealth = 10,
          cshootpos = v2init( 10, 6 ),
          rtoff = v2init(1,0),
-         cshoottype = a_skull
+         cshoottype = a_skull,
+         is_large = true
       }
 
    a_flameboss =
@@ -692,7 +703,8 @@ function init_archetypes()
          chealth = 10,
          cshootpos = v2init( 10, 0 ),
          rtoff = v2init(1,0),
-         cshoottype = a_flame
+         cshoottype = a_flame,
+         is_large = true
       }
 
    local a_finalboss_idle_anm = {k={136,136,136,168,168,168}}
@@ -712,14 +724,15 @@ function init_archetypes()
          cspeed = 2.5,
          chealth = 20,
          cshootpos = v2init( 1, 8 ),
-         rtoff = v2init(1,0)
+         rtoff = v2init(1,0),
+         is_large = true
       }
 end
 
 ----------------------------------------------------------------
 -- game
 function init_game()
-   game.t = 0
+   game_t = 0
 
    player_state = 1
    player_t = 0
@@ -754,7 +767,7 @@ function update_player()
    local state0 = player_state
 
    -- flying / on_ground / on_air
-   if game.has_broom
+   if game_has_broom
       and btnp(2) then --up
       player_state = 10
       player_jump_s = 0
@@ -873,7 +886,7 @@ function update_player()
       end
 
       -- double-jump if mutated todo limit usage!!
-      if -- game.is_mutated
+      if -- game_is_mutated
          -- and
          player_v.y >= 0 then
          if btnp(5) then
@@ -949,7 +962,7 @@ function update_player()
                               8)--false ) --all collisions
    for c in all(hits_ccd) do
       if mget(c.tile_j,c.tile_i) == 64 then
-         game.num_orbs += 1
+         game_num_orbs += 1
          mset( c.tile_j, c.tile_i, mget( c.tile_j, c.tile_i-1 ) )
          for e in all(room.entities) do
             if e.a == a_orb then
@@ -958,16 +971,16 @@ function update_player()
          end
          sfx(9)
       elseif mget(c.tile_j,c.tile_i) == 42 then --mutator
-         game.is_mutated = true
+         game_is_mutated = true
          mset( c.tile_j, c.tile_i, mget( c.tile_j+1, c.tile_i ) )
          sfx(9)
       elseif mget(c.tile_j,c.tile_i) == 71 then --key
-         game.has_key = true
+         game_has_key = true
          mset( c.tile_j, c.tile_i, 255 )
          fset( 110, 0, false )
          sfx(9)
       elseif mget(c.tile_j,c.tile_i) == 45 then --broom
-         game.has_broom = true
+         game_has_broom = true
          mset( c.tile_j, c.tile_i, 0 )
          sfx(9)
          add(messages,{t=150,text="use broom with \x94"})
@@ -995,11 +1008,10 @@ function update_player()
    --flags: 0 is_solid, 1 is_damage
    player_ground_ccd_1 = ccd_box_vs_map( player_p0, v2add( player_p1, v2init(0,1) ),
                                          movebox,
-                                         3)--,false ) --all collisions
+                                         3)
    player_on_ground = false
    for c in all(player_ground_ccd_1) do
-                              --add( debug.log, "ground(p1) "..c.normal.x..","..c.normal.y )
-      if c.normal.y < 0 and player_v.y >= 0 then --todo could filter by y-component values for inclined ground
+      if c.normal.y < 0 and player_v.y >= 0 then
          player_on_ground = true
       end
    end
@@ -1012,9 +1024,9 @@ function update_player()
    local room_coords = level.room_coords
    -- cannot leave room if boss is alive
    local b_cannot_leave_room = room_coords.x == 7
-                               and ( ( room_coords.y == 0 and game.is_skub_alive )
+                               and ( ( room_coords.y == 0 and game_is_skub_alive )
                                      or
-                                     ( room_coords.y == 1 and game.is_flab_alive and game.num_orbs_placed == 4 ) )
+                                     ( room_coords.y == 1 and game_is_flab_alive and game_num_orbs_placed == 4 ) )
 
    -- update-map
    if not b_cannot_leave_room then
@@ -1201,10 +1213,10 @@ function new_room_process_map_cell( r, room_j, room_i, map_j, map_i )
             e = new_entity( a_saw, pos, new_action_oscillate( pos, v2init(-1,0), 24, 300 ) )
          elseif m == 78 then
             e = new_entity( a_stalactite, pos, new_action_wait_and_drop() )
-         elseif m == 73 and game.num_orbs_placed < game.num_orbs then
+         elseif m == 73 and game_num_orbs_placed < game_num_orbs then
             mset(map_j,map_i,72) --install orb
-            game.num_orbs_placed += 1
-         elseif m == 93 and not game.is_flab_alive then
+            game_num_orbs_placed += 1
+         elseif m == 93 and not game_is_flab_alive then
             e = new_entity( a_skull2, pos, new_action_wait_and_fly() )
             --idlers
          elseif m == 247 then --suspended flame
@@ -1212,11 +1224,11 @@ function new_room_process_map_cell( r, room_j, room_i, map_j, map_i )
             e.action.anm_id = "burn" --hack
             e.action.t = flr(rnd(17))
             --bosses
-         elseif m == 138 and game.is_skub_alive then
+         elseif m == 138 and game_is_skub_alive then
             e = new_entity( a_skullboss, pos, new_action_boss( update_action_skullboss ) )
-         elseif m == 170 and game.is_flab_alive and game.num_orbs == 4 then
+         elseif m == 170 and game_is_flab_alive and game_num_orbs == 4 then
             e = new_entity( a_flameboss, pos, new_action_boss( update_action_flameboss ) )
-         elseif m == 136 and game.is_finb_alive then
+         elseif m == 136 and game_is_finb_alive then
             e = new_entity( a_finalboss, pos, new_action_boss( update_action_finalboss ) )
          end
       end
@@ -1257,17 +1269,17 @@ function kill_entity( e )
    add(room.zombies,e)
    -- kill bosses
    if e.a == a_skullboss then
-      game.is_skub_alive = false
+      game_is_skub_alive = false
       add(messages,{t=150,text="the cemetery door is open"})
       mset(1,13,239)
       mset(1,14,239)
    elseif e.a == a_flameboss then
-      game.is_flab_alive = false
+      game_is_flab_alive = false
       add(messages,{t=150,text="the cathedral door is open"})
       mset(127,13,255)
       mset(127,14,255)
    elseif e.a == a_finalboss then
-      game.is_finb_alive = false
+      game_is_finb_alive = false
       add(messages,{t=150,text="fly free"})
    end
 end
@@ -2272,14 +2284,14 @@ c5379e9e9ebc9ebcbc9ebcbe9e9e37c500aebdae00bcbc0000bcbc00bcbc00bc00111ddd1dd11100
 000000444400000000044f4444f44000f40000000000004f56556665000000008bc5552d00010100001d1d1dd1d1d100011111000000000000c0c00000000100
 00000004400000000044f444444f440040000000000000045666666000005cc8bc5552dd0010001101d1d1d11d1d1d10000000110000000010c00c0001001000
 000000000000000044f444f44f444f44000000000000000036336363000005555552dddd110000001d1d1d1dd1d1d1d100000000000000000c00c0c010010000
-2222222256556556000000005e5e5e5e5e5e5e5ef4f4ff4f3b3b43b40000030000300000100000111d1d1d1dd1d1d1d100000677776000000000c00000000000
-022222226566656500000000e5e5e5e5e5e5e5e54f4ff4f433b33b4b00030030003000000100010001d1d1d11d1d1d1000067777777760001000c00040000040
-0002d2dd56666656000000005e5e5e5e6e6e5e5e4f4f4ff44343433b030b30300300300000101000001d1d1dd1d1d1000067776676677600001c0c0100000000
-00002d2d66655566000000205e5e5e5e676e5e5e4ff4f4fff4444344030300b00303b030000100000001d1d11d1d10000677667777777760000c0c0000004000
-000002d25656566620000d2d5e5e5e5e7e7e5e5ef4ff4f444444f4440b0300300b0030300000100000001d1dd1d10000077777777777777000c0c0c000000000
-0000002256666665d2dd22dde5e5e5e56e65e5e54f4f4ff44f444444300303b0030030b000010100000001d11d10000067776667777677761c00c00c00000000
-0000000265665556dd22dd2d5e5e5e5ee65e5e5e4f4f4f4f444444f44b33b4340b303003001000100000001dd10000007766777677776677000c001c04000000
-00000002565566562dd2d2d25e5e5e5e5e5e5e5ef4f4f4f44444f444b43b4343434b33b411000001000000011000000077776677777777770100c00000000400
+2222222256556556000000000100000100100000f4f4ff4f3b3b43b40000030000300000100000111d1d1d1dd1d1d1d100000677776000000000c00000000000
+02222222656665650000000001001010010001004f4ff4f433b33b4b00030030003000000100010001d1d1d11d1d1d1000067777777760001000c00040000040
+0002d2dd566666560000000010001010010001004f4f4ff44343433b030b30300300300000101000001d1d1dd1d1d1000067776676677600001c0c0100000000
+00002d2d666555660000002010010000000010004ff4f4fff4444344030300b00303b030000100000001d1d11d1d10000677667777777760000c0c0000004000
+000002d25656566620000d2d0001000010000010f4ff4f444444f4440b0300300b0030300000100000001d1dd1d10000077777777777777000c0c0c000000000
+0000002256666665d2dd22dd00100010100101004f4f4ff44f444444300303b0030030b000010100000001d11d10000067776667777677761c00c00c00000000
+0000000265665556dd22dd2d00100010000101014f4f4f4f444444f44b33b4340b303003001000100000001dd10000007766777677776677000c001c04000000
+00000002565566562dd2d2d20000010000100001f4f4f4f44444f444b43b4343434b33b411000001000000011000000077776677777777770100c00000000400
 2222222205555650000000002dd2d2d2d2d2d2d20000000000000000000900000000900000009000000000000000000077777777777777761d1dd1d100000100
 2222222065666565000000002dddd2d22dd2d2d20000000000000000000980000009a00000080000000000900000000077767777777677761d1dd1d101000000
 dd2d200056666655200000022dd2dd202dd2d2dd0000000000000000008980000008a8000009800008000900100000016777766777767776d1dd1d1d00000000
@@ -2291,7 +2303,7 @@ d2d2000056656565d222222d02d2dd20d2d2dd2d00080000000000000089a8000089a800080a9080
 
 __gff__
 0000000000000000000000000000000000000000000000000000000000000000000000000000000000400801010800000000000000400000000000000000000008080000000000080808000000000000020208808080000000000000404000004001010101400000000000000101414040010201010500000000000000000000
-0202020202020202000000000000000002020202020202020000000000000000020202020202020200000000000000000202020202020202000000000000000040404040404040404040404040404000010101014040014040404040404040000101400101400140404040404040404001014040400000020000024040404040
+0202020202020202000000000000000002020202020202020000000000000000020202020202020200000000000000000202020202020202000000000000000040404040404040404040404040404000010101014040014040404040404040000101400000400140404040404040404001014040400000020000024040404040
 __map__
 ccffddcdccffffffffffffffffffffffffffffccffffffffffffffffffffffffffdcffffffffffffffdcffffffffffffffffccffffffffffffffffffffffffffffffffffffffccffffffcdffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff61
 ffccddcdcdddccffffffffffffffffffffffffffffffffffccffffdcffffffffffffffccddcdffffffffffffffffffccffffffffffffcdffccffffffffffffddffffffccffffffffffffffffffddffffffffffcdffffffffddffffffffffffcdfffffffffffffffffffffffffffffffffffffffffffffffff2ffffffffffff61
