@@ -27,7 +27,7 @@ function _init()
          is_skub_alive = true,
          is_flab_alive = true,
          is_finb_alive = true,
-         num_orbs = 4,
+         num_orbs = 0,
          num_orbs_placed = 0,
          is_mutated = false,
          has_key = false,
@@ -35,12 +35,13 @@ function _init()
       }
 
    g_sfx_0 = -1
-   global_t = 0
+   g_time = 0
 end
 
 -- update
 function _update()
-   global_t += 1
+   g_time += 1
+   g_rnd_2 = flr(rnd(2))
    if game_state == "splash" then
       --todo
    elseif game_state == "menu" then
@@ -55,7 +56,7 @@ function _update()
          --temp test
          if game_difficulty == 2 then
             game_state = "win"
-            global_t = 0
+            g_time = 0
             -- add(messages,{t=150,text="your executioners have\npayed for their crimes"})
          end
       elseif btnp(2) then --up
@@ -95,7 +96,7 @@ function draw_flash( prob )
    if dice < prob then
       pal(0,7+5*(dice%2))
       palt(0,false)
-      sfx(0+flr(rnd(2))) --0,1
+      sfx(0+g_rnd_2) --0,1
    end
 end
 
@@ -133,12 +134,12 @@ function _draw()
    elseif game_state == "play" then
       draw_game()
    elseif game_state == "win" then
-      local anm_k = a_player.table_anm.broom.k
-      local anm_t = 1+global_t%#anm_k
-      spr( anm_k[anm_t], 64, 64 )
+      -- local anm_k = a_player.table_anm.broom.k
+      -- local anm_t = 1+g_time%#anm_k
+      -- spr( anm_k[anm_t], 64, 64 )
    elseif game_state == "death" then
       -- local anm_k = a_player.table_anm.broom.k
-      -- local anm_t = 1+global_t%#anm_k
+      -- local anm_t = 1+g_time%#anm_k
       -- spr( anm_k[anm_t], 64, 64 )
    end
    --messages
@@ -720,7 +721,6 @@ end
 function init_game()
    game.t = 0
 
-   player_a = a_player
    player_state = 1
    player_t = 0
    player_p0 = v2init( 24, 102 )
@@ -764,7 +764,7 @@ function update_player()
          player_state = 6
          player_v.x = 0
          new_bullet_blast( player_p0, player_sign )
-      elseif btn(5) then
+      elseif btnp(5) then
          player_state = 4
       else
          if btn(0) then
@@ -829,7 +829,7 @@ function update_player()
       if btnp(5) then
          player_state = 3
          player_v.y = -4
-         sfx(11+flr(rnd(2)))
+         sfx(11+g_rnd_2)
          if btn(0) then
             player_jump_s = -1
             player_v.x = -1.25
@@ -872,25 +872,25 @@ function update_player()
          player_sign = -player_sign
       end
 
-      --double-jump if mutated todo limit usage!!
-      -- if -- game.is_mutated
-      --    -- and
-      --    player_v.y >= 0 then
-      --    if btnp(5) then
-      --       player_state = 3
-      --       player_v.y = -4
-      --       if btn(0) then
-      --          player_jump_s = -1
-      --          player_v.x = -1.25
-      --       elseif btn(1) then
-      --          player_jump_s = 1
-      --          player_v.x = 1.25
-      --       else
-      --          player_jump_s = 0
-      --          player_v.x = 0
-      --       end
-      --    end
-      -- end
+      -- double-jump if mutated todo limit usage!!
+      if -- game.is_mutated
+         -- and
+         player_v.y >= 0 then
+         if btnp(5) then
+            player_state = 3
+            player_v.y = -4
+            if btn(0) then
+               player_jump_s = -1
+               player_v.x = -1.25
+            elseif btn(1) then
+               player_jump_s = 1
+               player_v.x = 1.25
+            else
+               player_jump_s = 0
+               player_v.x = 0
+            end
+         end
+      end
    end
 
    --shoot
@@ -907,15 +907,15 @@ function update_player()
       new_bullet_blast( player_p0, player_sign )
    end
 
-   local movebox = aabb_apply_sign_x(player_a.cmovebox,player_sign)
-   local damagebox = aabb_apply_sign_x(player_a.cdamagebox,player_sign)
+   local movebox = aabb_apply_sign_x(a_player.cmovebox,player_sign)
+   local damagebox = aabb_apply_sign_x(a_player.cdamagebox,player_sign)
    local acc = v2init( 0, level.a.cgravity_y )
    if player_state == 10 then
       acc = v2scale(0.1,acc)
    end
    local pred_vel = v2clamp( v2add( player_v, acc ),
-                             v2scale(-1,player_a.cmaxvel),
-                             player_a.cmaxvel )
+                             v2scale(-1,a_player.cmaxvel),
+                             a_player.cmaxvel )
 
    -- ccd-advance
    local p1
@@ -970,7 +970,7 @@ function update_player()
          game.has_broom = true
          mset( c.tile_j, c.tile_i, 0 )
          sfx(9)
-         add(messages,{t=150,text="use brom with \x94"})
+         add(messages,{t=150,text="use broom with \x94"})
       end
    end
 
@@ -1483,13 +1483,14 @@ function update_action_shoot( entity, action )
       if action.type == "horizontal" then
          e = new_entity( st,
                          pos,
-                         new_action_particle( v2init( entity.sign*st.cspeed, 0 ), v2init(0,0) ) )
+                         new_action_particle( v2init( entity.sign*st.cspeed, 0 ), v2zero() ) )
       elseif action.type == "straight" then
          local dist = v2length( diff )
          e = new_entity( st,
                          pos,
-                         new_action_particle( v2scale( st.cspeed/dist, diff ), v2init(0,0) ) )
+                         new_action_particle( v2scale( st.cspeed/dist, diff ), v2zero() ) )
       elseif action.type == "parabolic" then
+         diff.y = 0 --temp: project on ground, otherwise it fails if player flies
          e = new_entity( st,
                          pos,
                          new_action_particle( compute_projectile_vel_45deg( diff, 0.125 ),
@@ -1820,7 +1821,7 @@ function new_bullet_blast( _p, _s )
                v = v2init( _s*a_blast.cspeed, 0 ) }
    add(room.bullets,b)
    add(room.entities,b)
-   sfx(3+flr(rnd(2)))
+   sfx(3+g_rnd_2)
 end
 
 function update_bullets()
@@ -2314,15 +2315,15 @@ e0efefefefefefd0717171717171d1d071d1d0717171d14ed071d14e71d1efefefefefefeff3ff40
 efe0efefefefefef4ed0717171d1efefd1efefefd071efefef71efefd1efefefefefefefeff1f1f1f1f1f1efefefefefef72e1e1e1e1e1e1e1e1e1efefefefefef72e1e1e1e1e1e1e1e1e1efefefefefefefeff1efefefefd0715371535371717171717171717171717171d1d071f1717171d1ffd1ffffffffffd0ffffffffd0
 efefe0efefefefefefef7171d1efefefefefefefef71efefefd1efefefefefefefefefeff1f1e9e9e9e9f1f1efefefefefe1c1e9e9e9e9e9e9e9c0f1efefefefefe1c1e9e9f1e9e9e9e9c0f1efefefefefefefc0f1efefefef555353535354717171717171717171d1ffffffffd071717171ffffffffffffffffffffffffffff
 efefefefefefefefefefd071efefefefefefefefefd0efefefefefefefefefefefefeff1f1e9e9e9e9e9e9f1f1efefefefe1e9e9e9e9c9e9e9e9e9e9e9e1e1e1e1e1e9e9e9e9e9e9c9e9e9e9e9e9e1e1e172efefc0f1efefef555353535354d07171717171d1d0d1ffffffffffffffd071d1ffffffffffffffffffffffffffff
-efefefeff0efefefefefef71efefefefefefefefefefefefefefefefefefefefefeff1f1e9e9e9e9e9e9e9e9f1e1efefefe1e9e9e9e9e9e9e9e9e9e9f1c1e9e9e9e9e9e9e9e9e9e9e9e9e9e9e1e1e1e1e1c1efefefc0f156ef555353535354efd0717171d1ffffffffffffffffffffffffffffffffffffffffffffffffffffff
-efefeff0efefefefefefefd0efefefefefefefefefefefefefefefefefefefefef72f1e9e9e9e9e9e9e9e9e9e9e1e1ef5ce140e9e966e9e9e9e9f1e9e9e9c9e9e9e9e9e9e9f1e966e9e9e9e1e9e9e9c0e1efefefefefc0f1f1f1f153535354efffd071d1ffffffffffffffffff78fffffffffffffffffff7f7ffc2ffffffc3ff
-efeff0efefefefefefefefefefefefefefefefefefefefefefefefefefefefef72f1e9e9e9c9e9e9e9e9c9e9e9e9e17272e1e1e1e1e1e1e1e1e1c1e9e9e9e9e9e9f1e9e9e1e1e1e1e1e1e1e12de9e9e9e1efefefefefefef4e555554f1535456ffffffffffffff78ffffffffc2c1ffffffc2ffffffc3ffc0c1ffc0c3f7c2c1ff
-eff0efefefefefefefefefefefefefefefefefefefefefefefefefefefefefeff1e9e9e9e9e9e9e9e9e9e9e9e9e9e9e1e1c1e9e9e9e9e9e9e9e9e9e9e1e1e1e1e1c1e9f1c1e9e9e9e9e9e9c0f1e9e95de172efefefefefefef5555545555f1f1ffffffffffffffc0c3ffffffc0c3ffffffc0c3f7c2c1ffc2c3ffffc049c1ffff
-efefefefefefefefefefefefefefefefefefefefefd071d1efefef7cefefefeff4e9e9e9e9e9e9e9e9e9e9e9e9e9e9f4f4e9e9e9e9e9c9e9e9e9e9f1c1e9e9e9e9e9e9e9e9e9c9e9e9e9e9e973e9e9f1e1c1efefefefefefef555554f1f154efffffffffffffffc2c1ffffffc2f4c1ffffffc049c1ffc24949c3fffff3ffffff
+efefefeff0efefefefefef71efefefefefefefefefefefefefefefefefefefefefeff1f1e9e9e9e9e9e9e9e9f1f1efefefe1e9e9e9e9e9e9e9e9e9e9f1c1e9e9e9e9e9e9e9e9e9e9e9e9e9e9e1e1e1e1e1c1efefefc0f156ef555353535354efd0717171d1ffffffffffffffffffffffffffffffffffffffffffffffffffffff
+efefeff0efefefefefefefd0efefefefefefefefefefefefefefefefefefefefef72f1e9e9e9e9e9e9e9e9e9e9f1f1ef5ce140e9e966e9e9e9e9f1e9e9e9c9e9e9e9e9e9e9f1e966e9e9e9e1e9e9e9c0e1efefefefefc0f1f1f1f153535354efffd071d1ffffffffffffffffff78fffffffffffffffffff7f7ffc2ffffffc3ff
+efeff0efefefefefefefefefefefefefefefefefefefefefefefefefefefefef72f1e9e9e9c9e9e9e9e9c9e9e9e9f17272e1e1e1e1e1e1e1e1e1c1e9e9e9e9e9e9f1e9e9e1e1e1e1e1e1e1e12de9e9e9e1efefefefefefef4e555554f1535456ffffffffffffff78ffffffffc2c1ffffffc2ffffffc3ffc0c1ffc0c3f7c2c1ff
+eff0efefefefefefefefefefefefefefefefefefefefefefefefefefefefefeff1e9e9e9e9e9e9e9e9e9e9e9e9e9e9f1f1c1e9e9e9e9e9e9e9e9e9e9e1e1e1e1e1c1e9f1c1e9e9e9e9e9e9c0f1e9e95de172efefefefefefef5555545555f1f1ffffffffffffffc0c3ffffffc0c3ffffffc0c3f7c2c1ffc2c3ffffc049c1ffff
+efefefefefefefefefefefefefefefefefefefefefd071d1efefef7cefefefeff4e9e9e9e9e9e9e9e9e9e9e9e9e9e9f4f4e9e9e9e9e9c9e9e9e9e9f1c1e9e9e9e9e9e9e9e9e9c9e9e9e9e9e973e9e9f1e1c1efefefefefefef554054f1f154efffffffffffffffc2c1ffffffc2f4c1ffffffc049c1ffc24949c3fffff3ffffff
 71d1efefefefefefefefefefefefefefefefefefd071d1d0717171717171d1eff4c3e9e9e9e9e9e9e9e9e9e9e9e9c2f4f4c3e9e9e9e9e9e9e9e9f1c1e9e9e9e9e9e9e9e9e9e9e93ce9e9e9e96ee9f1e1e1efefefefef56efef55f154555554efffffffffffffffc0c3ffffffc1c0c3fffffffff3ffc2c1ffffc0c3ffc0c3ffff
-7171d1efefefefefefefefefefefefefefefefd071d1000000000000d071d3f1f1f1f1f1f1f1f1f1f1f1f1f1f1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e9e9e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1efefefefeff1f1ef555554555454effffffffffffffffff3fffffffffff3ffffffc2c1fff3fffffffff3fffff3ffff
+7171d1efefefefefefefefefefefefefefefefd071d1000000000000d071d3f1f1f1f1f1f1f1f1f1f1f1f1f1f1e1f1f1e1e1e1e1e1e1e1e1e1e1e1e1e1e9e9e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1efefefefeff1f1ef555554555454effffffffffffffffff3fffffffffff3ffffffc2c1fff3fffffffff3fffff3ffff
 f17171d1efefefefefefefefefefefefefefd071d1000000000000000075f1f1f10000000000f1000000003c00000000000000000000000000000000c0f10000000000000000000000000000000000e1e1efefefefefefeff1f15554555454efffffffffffffff5af3fffffffffff3fffffff3fffff3ffaafffff3fffff3ffff
-f1f1d1ef32efefeff172efefefef32f1f1757575002a005d00440000007575755c770000003c00000000e100000000f1f1000000003c00000000003c00000000000000003c0000000000003f0000000000efefefefefefefef5555f15050f1efffe7e8e8e7e8f1f1f1f5f5f1f5f5f1f1f1fff3ffc2c1ffffffffc0c3fff3fff1
+f1f1d1ef32efefeff172efefefef32f1f1757575002a005d00440000007575755c770000003c00000000f100000000f1f1000000003c00000000003c00000000000000003c0000000000003f0000000000efefefefefefefef5555f15050f1efffe7e8e8e7e8f1f1f1f5f5f1f5f5f1f1f1fff3ffc2c1ffffffffc0c3fff3fff1
 f1f1f1eff1f1f1f1f1f1f1f1f1f1f1f1f1717171e6e6e671e6e671e6717171f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f17171e6e6e6e6e6e6e6e6e6e6e6e6e6e6f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1
 __sfx__
 000a00000b61010620076300c640196401062014630076200e63006630046200362003610026100460002600016000360005600046000360008600066000a6000560005600076000560004600066000160001600
