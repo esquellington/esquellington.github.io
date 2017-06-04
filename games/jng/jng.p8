@@ -35,11 +35,12 @@ function _init()
       }
 
    g_sfx_0 = -1
-
+   global_t = 0
 end
 
 -- update
 function _update()
+   global_t += 1
    if game_state == "splash" then
       --todo
    elseif game_state == "menu" then
@@ -51,6 +52,12 @@ function _update()
          init_game()
          game_state = "play"
          player_health = a_player.table_health[game_difficulty+1]
+         --temp test
+         if game_difficulty == 2 then
+            game_state = "win"
+            global_t = 0
+            add(messages,{t=150,text="your executioners have\npayed for their crimes"})
+         end
       elseif btnp(3) then --up
          game_difficulty = (game_difficulty+1) % 3
       end
@@ -71,12 +78,9 @@ function _update()
       if player_health == 0 then
          game_state = "death"
       end
-   elseif game_state == "win" then
-      --todo
+   elseif (game_state == "win" or game_state == "death") and btnp(4) then
       game_state = "menu"
-   elseif game_state == "death" then
-      --todo
-      game_state = "menu"
+      messages = {}
    end
 end
 
@@ -123,9 +127,20 @@ function _draw()
    elseif game_state == "play" then
       draw_game()
    elseif game_state == "win" then
-      --todo
+      local anm_k = a_player.table_anm.broom.k
+      local anm_t = 1+global_t%#anm_k
+      spr( anm_k[anm_t], 64, 64 )
    elseif game_state == "death" then
       --todo
+   end
+   --messages
+   for m in all(messages) do
+      if m.t > 0 then
+         print( m.text, 64-(2*#m.text), 32*(m.t/150) ) --4*len/2 = 2*len
+         m.t -= 1
+      else
+         del(messages,m)
+      end
    end
 end
 
@@ -282,15 +297,6 @@ function draw_game()
       --    end
       -- end
    end
-
-   for m in all(messages) do
-      if m.t > 0 then
-         print( m.text, 64-(2*#m.text), 32*(m.t/150) ) --4*len/2 = 2*len
-         m.t -= 1
-      else
-         del(messages,m)
-      end
-   end
 end
 
 ----------------------------------------------------------------
@@ -328,9 +334,10 @@ function init_archetypes()
          shi   = {k={ 8,8,9,9,9 }},
          shj   = {k={ 12,12,13,13  }},
          shjb  = {k={ 14,14,15,15 }}, --same #frames as "shj",
-         hit   = {no_cycle=true,k={ {34,10}, {35,5*6} }},
+         hit   = {no_cycle=true,k={ {34,10}, {35,30} }},
          hitb  = {no_cycle=true,k={ {36,4}, {37,4}, {38,4} }},
-         alive = {k={ 39 }}
+         alive = {k={ 39 }},
+         broom = {k={ {46,4}, {47,4} }}
       }
    a_player =
       {
@@ -353,7 +360,8 @@ function init_archetypes()
    add( g_anim, _table_anm["shj"] )
    add( g_anim, _table_anm["shjb"] )
    add( g_anim, _table_anm["hit"] )
-   add( g_anim, _table_anm["hitb"] )
+   add( g_anim, _table_anm["alive"] )
+   add( g_anim, _table_anm["broom"] )
 
    a_spit =
       {
@@ -655,7 +663,7 @@ function init_archetypes()
          cmovebox   = caabb_1616,
          cdamagebox = aabb_init( 4, -1, 13, 9 ),
          cattackbox = caabb_1616,
-         cspeed = 1,
+             cspeed = 1,
          chealth = 10,
          cshootpos = v2init( 10, 6 ),
          rtoff = v2init(1,0),
@@ -729,6 +737,7 @@ function init_game()
    room = new_room( level.room_coords )
 
    messages = {}
+   add(messages,{t=150,text="begin!"})
 end
 
 ----------------------------------------------------------------
@@ -802,6 +811,7 @@ function update_player()
          player_t = 0
          player_state = 3
          player_v.y = -4
+         sfx(11)
          if btn(0) then
             player_jump_s = -1
             player_v.x = -1.25
@@ -926,15 +936,19 @@ function update_player()
                kill_entity( e )
             end
          end
+         sfx(9)
       elseif mget(c.tile_j,c.tile_i) == 42 then --mutator
          game.is_mutated = true
          mset( c.tile_j, c.tile_i, mget( c.tile_j+1, c.tile_i ) )
+         sfx(9)
       elseif mget(c.tile_j,c.tile_i) == 71 then --key
          game.has_key = true
          mset( c.tile_j, c.tile_i, 255 )
+         sfx(9)
       elseif mget(c.tile_j,c.tile_i) == 45 then --broom
          game.has_broom = true
          mset( c.tile_j, c.tile_i, 0 )
+         sfx(9)
       end
    end
 
@@ -952,8 +966,8 @@ function update_player()
       player_v = v2init( player_sign * 1.5, -3 )
       if player_health > 0 then
          player_health -= 1
-         sfx(5)
       end
+      sfx(8)
    end
 
    -- check on ground for next frame
@@ -1456,7 +1470,7 @@ function update_action_shoot( entity, action )
       e.sign = entity.sign
       add( room.enemies, e )
       add( room.entities, e )
-      --debug.paused = true
+      sfx(7)
    end
    return action
 end
@@ -1616,6 +1630,7 @@ function update_action_wait_and_drop( entity, action )
       --fall if below
       if has_line_of_sight_downwards( v2add(entity.p1,cv2_44), v2add(player_p1,cv2_44) ) then
          action.sub = new_action_particle( v2zero(), v2init(0,a_level.cgravity_y) )
+         sfx(10)
       end
    else
       --keep flying
@@ -1821,7 +1836,6 @@ function update_bullets()
          else
             e.health -= 1
             e.hit_timeout = 4
-            sfx(5)
          end
       elseif #map_collisions > 0 then
          local map_c = map_collisions[1]
@@ -1836,8 +1850,8 @@ function update_bullets()
          b_fx = false
       end
       if b_fx then
-         -- todo play sfx
          new_vfx( a_blast, b.p1, b.sign )
+         sfx(5)
       end
       if b_delete then
          del( room.bullets, b )
@@ -2305,12 +2319,12 @@ __sfx__
 000200000261007620086200963004640086300462001610016000360005600076000460002600026000160001600036000460005600066000260001600036000160005600086000260003600036000360001600
 000100001213018140101500714002130011200111001110031000110001100011000210001100011000210001100011000010000100001000010000100001000010000100001000010000100001000010000100
 0002000007140161500916008130151400c1600814012130081400413001120011100110001100011000110001100011000110001100001000010000100001000010000100001000010000100001000010000100
-000100001505021050210501005001050010500000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0002000002210052200a23014240182300e220052300c210092200523007210072000420002200022000120001200032000420005200062000220001200032000120005200082000220003200032000320001200
+000200001e6301d6401f640286302b610196101a6200f630136301263002620016100060000600006000060000600006000060000600006000060000600006000060000600006000060000600006000060000600
+0006000011540215502b5601e550085400152002520245201d5101751011500000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+000500003d6203361029630216101d63019640136100f6200b6300762001630046000360002600016000160008600066000160002600006000060000600006000060000600006000060000600006000060000600
+00010000067500675008750097500b7500d7400f73011720127201472016730177301773017730147300f7200b720057100270001700047000070000700007000070000700007000070000700007000070000700
+01200010225521955222552225521955222552225521955222552195522255219552225521955222552195521655216552165520f5520f5520d5520d55216552165520d5520f5520f5520f5520d5520d5520d552
 001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
@@ -2364,7 +2378,7 @@ __sfx__
 001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 __music__
 01 01424141
-02 03044141
+02 03444141
 00 40414141
 03 40414141
 00 41414141
