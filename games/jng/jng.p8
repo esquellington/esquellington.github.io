@@ -24,14 +24,14 @@ function _init()
    game =
       {
          t = 0,
-         is_skub_alive = false,
-         is_flab_alive = false,
+         is_skub_alive = true,
+         is_flab_alive = true,
          is_finb_alive = true,
          num_orbs = 4,
          num_orbs_placed = 0,
          is_mutated = false,
          has_key = false,
-         has_broom = false
+         has_broom = true
       }
 
    g_sfx_0 = -1
@@ -58,24 +58,26 @@ function _update()
             global_t = 0
             add(messages,{t=150,text="your executioners have\npayed for their crimes"})
          end
-      elseif btnp(3) then --up
+      elseif btnp(2) then --up
+         game_difficulty = (game_difficulty-1) % 3
+         sfx(13)
+      elseif btnp(3) then --down
          game_difficulty = (game_difficulty+1) % 3
          sfx(13)
       end
    elseif game_state == "play" then
-      if btnp(2) then --up
-         debug.mode = (debug.mode+1) % debug.cnummodes
-      end
-      if btnp(3) then --down
-         debug.paused = not debug.paused
-      end
-      if not debug.paused then
+      -- if btnp(2) then --up
+      --    debug.mode = (debug.mode+1) % debug.cnummodes
+      -- elseif btnp(3) then --down
+      --    debug.paused = not debug.paused
+      -- end
+      -- if not debug.paused then
          game.t += 1
          update_player()
          update_enemies()
          update_bullets()
          update_vfx()
-      end
+      -- end
       if player_health == 0 then
          game_state = "death"
          add(messages,{t=150,text="you faded into oblivion"})
@@ -270,6 +272,9 @@ function draw_game()
    if game.has_key then
       spr( 71, 80, 0 )
    end
+   if game.has_broom then
+      spr( 45, 72, 0 )
+   end
 
    if debug.mode > 0 then
       --entity boxes
@@ -292,20 +297,12 @@ function draw_game()
       -- debug info
       -- if debug.mode == 1 then
       --    print("t:"..game.t/10,1,1)
-      --    --print("a:"..g_anim[player_state].n,108,1,14)
       --    print("mem:"..stat(0),1,122)
       --    print("cpu:"..stat(1),84,122)
-      -- elseif debug.mode == 2 then
-      --    color(14)
-      --    cursor(0,0)
-      --    for s in all( debug.log ) do
-      --       print( s )
-      --    end
       -- end
    end
 end
 
-----------------------------------------------------------------
 -- archetypes
 
 function uncompress_anim( archetype )
@@ -358,16 +355,16 @@ function init_archetypes()
    uncompress_anim( a_player )
    -- save indexed player anims (fuck this could be a loop if tables kept order!)
    g_anim = {}
-   add( g_anim, _table_anm["idle"] )
-   add( g_anim, _table_anm["run"] )
-   add( g_anim, _table_anm["jump"] )
-   add( g_anim, _table_anm["fall"] )
-   add( g_anim, _table_anm["shi"] )
-   add( g_anim, _table_anm["shj"] )
-   add( g_anim, _table_anm["shjb"] )
-   add( g_anim, _table_anm["hit"] )
-   add( g_anim, _table_anm["alive"] )
-   add( g_anim, _table_anm["broom"] )
+   add( g_anim, _table_anm["idle"] ) --1
+   add( g_anim, _table_anm["run"] )  --2
+   add( g_anim, _table_anm["jump"] ) --3
+   add( g_anim, _table_anm["fall"] ) --4
+   add( g_anim, _table_anm["shi"] )  --5
+   add( g_anim, _table_anm["shj"] )  --6
+   add( g_anim, _table_anm["shjb"] ) --7
+   add( g_anim, _table_anm["hit"] )  --8
+   add( g_anim, _table_anm["alive"] )--9
+   add( g_anim, _table_anm["broom"] )--10
 
    a_spit =
       {
@@ -715,7 +712,6 @@ function init_archetypes()
          chealth = 20,
          cshootpos = v2init( 1, 8 ),
          rtoff = v2init(1,0)
-         --cshoottype = xxx --changes dynamically
       }
 end
 
@@ -743,7 +739,7 @@ function init_game()
    room = new_room( level.room_coords )
 
    messages = {}
-   add(messages,{t=150,text="begin!"})
+   -- add(messages,{t=150,text="begin!"})
 end
 
 ----------------------------------------------------------------
@@ -758,10 +754,28 @@ function update_player()
    end
    player_p0 = player_p1
    local anm = g_anim[player_state]
+   local state0 = player_state
 
-   -- on_ground / on_air
-   if player_on_ground then
-
+   -- flying / on_ground / on_air
+   if game.has_broom
+      and btnp(2) then --up
+      player_state = 10
+   end
+   if player_state == 10 then
+      if btn(5) then --jump
+         player_state = 4
+      elseif btn(0) then
+         player_sign = -1
+         player_v = v2init(-1.25,0)
+      elseif btn(1) then
+         player_sign = 1
+         player_v = v2init(1.25,0)
+      elseif btn(2) then --up
+         player_v.y = -1.25
+      elseif btn(3) then --down
+         player_v.y = 1.25
+      end
+   elseif player_on_ground then
       -- if we were in jmp/shj/fall/hit or just finished
       -- uninterruptible shoot, back to idle, go to idle and process
       -- inputs from there
@@ -771,29 +785,27 @@ function update_player()
          or player_state==8 --hit
          or (player_state==5 and player_t > #anm.k) --shi finished
       then
-         player_t = 0
+         -- player_t = 0
          player_state = 1
          player_v = v2zero()
       end
 
       -- idle/run
       if player_state==1 then
-         -- todo in transitions to run, try to start with
-         -- alternative/random legs to improve variation
          if btn(0) then
-            player_t = 0
+            -- player_t = 0
             player_state = 2
             player_sign = -1
             player_v = v2init(-1.25,0)
          elseif btn(1) then
-            player_t = 0
+            -- player_t = 0
             player_state = 2
             player_sign = 1
             player_v = v2init(1.25,0)
          end
       elseif player_state==2 then --run
          if not (btn(0) or btn(1)) then
-            player_t = 0
+            -- player_t = 0
             player_state = 1
             player_v = v2zero()
          elseif
@@ -814,7 +826,7 @@ function update_player()
 
       --jump
       if btnp(5) then
-         player_t = 0
+         -- player_t = 0
          player_state = 3
          player_v.y = -4
          sfx(11+flr(rnd(2)))
@@ -863,30 +875,33 @@ function update_player()
       end
 
       --double-jump if mutated todo limit usage!!
-      if -- game.is_mutated
-         -- and
-         player_v.y >= 0 then
-         if btnp(5) then
-            player_t = 0
-            player_state = 3
-            player_v.y = -4
-            if btn(0) then
-               player_jump_s = -1
-               player_v.x = -1.25
-            elseif btn(1) then
-               player_jump_s = 1
-               player_v.x = 1.25
-            else
-               player_jump_s = 0
-               player_v.x = 0
-            end
-         end
-      end
+      -- if -- game.is_mutated
+      --    -- and
+      --    player_v.y >= 0 then
+      --    if btnp(5) then
+      --       -- player_t = 0
+      --       player_state = 3
+      --       player_v.y = -4
+      --       if btn(0) then
+      --          player_jump_s = -1
+      --          player_v.x = -1.25
+      --       elseif btn(1) then
+      --          player_jump_s = 1
+      --          player_v.x = 1.25
+      --       else
+      --          player_jump_s = 0
+      --          player_v.x = 0
+      --       end
+      --    end
+      -- end
    end
 
    --shoot
-   if player_state!=5 and player_state!=6 and btnp(4) then
-      player_t = 0
+   if player_state!=5
+      and player_state!=6
+      and player_state!=10
+      and btnp(4) then
+      -- player_t = 0
       if player_state==3 then
          player_state = 6 --shoot jump
       else --idle/run
@@ -899,6 +914,9 @@ function update_player()
    local movebox = aabb_apply_sign_x(player_a.cmovebox,player_sign)
    local damagebox = aabb_apply_sign_x(player_a.cdamagebox,player_sign)
    local acc = v2init( 0, level.a.cgravity_y )
+   if player_state == 10 then
+      acc = v2scale(0.1,acc)
+   end
    local pred_vel = v2clamp( v2add( player_v, acc ),
                              v2scale(-1,player_a.cmaxvel),
                              player_a.cmaxvel )
@@ -950,6 +968,7 @@ function update_player()
       elseif mget(c.tile_j,c.tile_i) == 71 then --key
          game.has_key = true
          mset( c.tile_j, c.tile_i, 255 )
+         fset( 110, 0, false )
          sfx(9)
       elseif mget(c.tile_j,c.tile_i) == 45 then --broom
          game.has_broom = true
@@ -965,7 +984,7 @@ function update_player()
    -- process hits if not invulnerable
    if (hit_enemy or num_hits_map != 0)
       and player_inv_t == 0 then
-      player_t = 0
+      -- player_t = 0
       player_state = 8 --hit todo decide hit/hitb
       player_inv_t = 60
       player_sign = -player_sign
@@ -989,6 +1008,11 @@ function update_player()
       end
    end
 
+   -- reset time if state changed
+   if player_state != state0 then
+      player_t = 0
+   end
+
    local room_coords = level.room_coords
    -- cannot leave room if boss is alive
    local b_cannot_leave_room = room_coords.x == 7
@@ -1001,7 +1025,8 @@ function update_player()
       local offset = 16*8
       if player_v.x > 0
       and player_p1.x > offset - movebox.max.x then
-         if room_coords.x < level.a.cnumrooms.x-1 then
+         if room_coords.x < level.a.cnumrooms.x-1
+         and room_coords.y != 2 then --not in finalboss room
             room_coords.x += 1
             room = new_room( room_coords )
             player_p1.x = movebox.min.x
@@ -2266,7 +2291,7 @@ d2d2000056656565d222222d02d2dd20d2d2dd2d00080000000000000089a8000089a800080a9080
 2000000006556550ddd22ddd22d2d2d2d2d2d2d2a99aa99a9a8a9a890089a0000009a8000889998089a88989d1d11d1d00000777766000001d1dd1d100000000
 
 __gff__
-0000000000000000000000000000000000000000000000000000000000000000000000000000000000400801010800000000000000400000000000000000000008080000000000080808000000000000020208808080000000000000804000004001010101400000000000000101014040010201010500000000000000000000
+0000000000000000000000000000000000000000000000000000000000000000000000000000000000400801010800000000000000400000000000000000000008080000000000080808000000000000020208808080000000000000404000004001010101400000000000000101414040010201010500000000000000000000
 0202020202020202000000000000000002020202020202020000000000000000020202020202020200000000000000000202020202020202000000000000000040404040404040404040404040404000010101014040014040404040404040000101400101400140404040404040404001014040400000020000024040404040
 __map__
 ccffddcdccffffffffffffffffffffffffffffccffffffffffffffffffffffffffdcffffffffffffffdcffffffffffffffffccffffffffffffffffffffffffffffffffffffffccffffffcdffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff61
@@ -2431,3 +2456,4 @@ __music__
 00 41414141
 00 41414141
 00 41414141
+
