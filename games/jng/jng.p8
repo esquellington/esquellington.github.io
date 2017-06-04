@@ -31,7 +31,7 @@ function _init()
          num_orbs_placed = 0,
          is_mutated = false,
          has_key = false,
-         has_broom = true
+         has_broom = false
       }
 
    g_sfx_0 = -1
@@ -56,7 +56,7 @@ function _update()
          if game_difficulty == 2 then
             game_state = "win"
             global_t = 0
-            add(messages,{t=150,text="your executioners have\npayed for their crimes"})
+            -- add(messages,{t=150,text="your executioners have\npayed for their crimes"})
          end
       elseif btnp(2) then --up
          game_difficulty = (game_difficulty-1) % 3
@@ -737,12 +737,9 @@ function init_game()
    level.room_coords = v2init( 0, 0 )
 
    room = new_room( level.room_coords )
-
-   messages = {}
-   -- add(messages,{t=150,text="begin!"})
+   add(messages,{t=150,text="move \x8b\x91, jump \x8e, shoot \x97    "})
 end
 
-----------------------------------------------------------------
 -- player
 --- ccd movement with strong non-penetration guarantee on static map tiles
 function update_player()
@@ -760,20 +757,28 @@ function update_player()
    if game.has_broom
       and btnp(2) then --up
       player_state = 10
+      player_jump_s = 0
    end
    if player_state == 10 then
-      if btn(5) then --jump
+      if btnp(4) then
+         player_state = 6
+         player_v.x = 0
+         new_bullet_blast( player_p0, player_sign )
+      elseif btn(5) then
          player_state = 4
-      elseif btn(0) then
-         player_sign = -1
-         player_v = v2init(-1.25,0)
-      elseif btn(1) then
-         player_sign = 1
-         player_v = v2init(1.25,0)
-      elseif btn(2) then --up
-         player_v.y = -1.25
-      elseif btn(3) then --down
-         player_v.y = 1.25
+      else
+         if btn(0) then
+            player_sign = -1
+            player_v.x = -1.25
+         elseif btn(1) then
+            player_sign = 1
+            player_v.x = 1.25
+         end
+         if btn(2) then --up
+            player_v.y = -1.25
+         elseif btn(3) then --down
+            player_v.y = 1.25
+         end
       end
    elseif player_on_ground then
       -- if we were in jmp/shj/fall/hit or just finished
@@ -785,7 +790,6 @@ function update_player()
          or player_state==8 --hit
          or (player_state==5 and player_t > #anm.k) --shi finished
       then
-         -- player_t = 0
          player_state = 1
          player_v = v2zero()
       end
@@ -793,19 +797,16 @@ function update_player()
       -- idle/run
       if player_state==1 then
          if btn(0) then
-            -- player_t = 0
             player_state = 2
             player_sign = -1
             player_v = v2init(-1.25,0)
          elseif btn(1) then
-            -- player_t = 0
             player_state = 2
             player_sign = 1
             player_v = v2init(1.25,0)
          end
       elseif player_state==2 then --run
          if not (btn(0) or btn(1)) then
-            -- player_t = 0
             player_state = 1
             player_v = v2zero()
          elseif
@@ -826,7 +827,6 @@ function update_player()
 
       --jump
       if btnp(5) then
-         -- player_t = 0
          player_state = 3
          player_v.y = -4
          sfx(11+flr(rnd(2)))
@@ -855,7 +855,7 @@ function update_player()
             player_state = 3 --jmp
             player_t = #g_anim[3].k / 2
          end
-         --horizontal jump speed is constantly applied to allow jumping
+         --horiz jmp vel constantly applied to allow jmp
          --over neighbour blocks
          player_v.x = player_jump_s * 1.25
       end
@@ -863,15 +863,13 @@ function update_player()
       -- allow air turn
       if (player_sign>0
              and (btn(0)
-                     and not btn(1)))
+                  and not btn(1)))
          or
          (player_sign<0
              and (not btn(0)
-                     and btn(1)))
+                  and btn(1)))
       then
          player_sign = -player_sign
-         -- air control todo: does not work anymore since on_ground refactor
-         -- player_v.x = -player_v.x
       end
 
       --double-jump if mutated todo limit usage!!
@@ -879,7 +877,6 @@ function update_player()
       --    -- and
       --    player_v.y >= 0 then
       --    if btnp(5) then
-      --       -- player_t = 0
       --       player_state = 3
       --       player_v.y = -4
       --       if btn(0) then
@@ -901,7 +898,6 @@ function update_player()
       and player_state!=6
       and player_state!=10
       and btnp(4) then
-      -- player_t = 0
       if player_state==3 then
          player_state = 6 --shoot jump
       else --idle/run
@@ -974,6 +970,7 @@ function update_player()
          game.has_broom = true
          mset( c.tile_j, c.tile_i, 0 )
          sfx(9)
+         add(messages,{t=150,text="use brom with \x94"})
       end
    end
 
@@ -981,11 +978,10 @@ function update_player()
    player_p1 = p2
    player_v = v2sub( player_p1, player_p0 )
 
-   -- process hits if not invulnerable
+   -- hits if !invulnerable
    if (hit_enemy or num_hits_map != 0)
       and player_inv_t == 0 then
-      -- player_t = 0
-      player_state = 8 --hit todo decide hit/hitb
+      player_state = 8 --hit
       player_inv_t = 60
       player_sign = -player_sign
       player_v = v2init( player_sign * 1.5, -3 )
@@ -1144,6 +1140,8 @@ function new_room( coords )
       sfx(-1,0)
       g_sfx_0 = -1
    end
+
+   messages = {}
 
    return r
 end
@@ -2233,23 +2231,23 @@ dddddddd11111111004004000c0d0c0d0c0d0700000c0d0c32323233232323203232000023232320
 00000000000000000000000000000000000000000000000000000000000000000022111881112200000022222220000000000288288200000000333222222200
 16161c9e9e9e9e9e9e9e9e9e9e0c161600efadef0000adbeaebd0000efaeef0000211dd88dd11200003332222233300003333222222233000003333322002230
 000000000000000000000000000000000000000000000000000000000000000000111ddd1dd111000333b22222bb33003333332222233330003333bb22002333
-c5379e9e9e9e9e9e9e9e9e9e9e9ee6d200bcbeaebdadef0000efbdadbe00bc00081121d1dd1211803333bbbb3bbb333033033b22222b3330003303bbb2002b33
+c5379e9e9e9e9e9e9e9e9e9e9e9e37c500bcbeaebdadef0000efbdadbe00bc00081121d1dd1211803333bbbb3bbb333033033b22222b3330003303bbb2002b33
 0000000000000000000000000000000000000000000000000000000000000000888022111122088833003bbb3bb3033033003bbb3bb300330330033bb3202b33
 16169c9e9e9e9e9e9e9e9e9e9e9c161600bc0000aebeae0000beaebe0000bc008080255115520808330003335330003333300333533003330333003333322033
 000000000000000000000000000000000000000000000000000000000000000080002552255200083330cc5555cc03333330ccc555cc033303330ccc555cc333
-c5379e9e9e9ebc9e9e9e9e9e9e9ee6c500bc000000000000000000000000bc000802552202552080333ccc0555cc03330000ccc555ccc0000333ccc555cc3330
+c5379e9e9e9ebc9e9e9e9e9e9e9e37c500bc000000000000000000000000bc000802552202552080333ccc0555cc03330000ccc555ccc0000333ccc555cc3330
 00000000000000000000000000000000000000000000000000000000000000000002d520025d2000000cc10550c10000000cc10550cc1000000cc1550cc13330
 16169c9ebd9ebcbc9e9e9e9e9e9c1616adbe000000000000000000000000aebd000ddd2002ddd00000c111000011100000c111000011100000c1110001110000
 0000000000000000000000000000000000000000000000000000000000000000002dd020020dd200001111100111110000111110011111000011110001111000
-c5379e9eef9ebcbcbc9e9ead9e9ee6c5ae0000000000000000000000000000be0000000880000000000110011000000000000000000000000000011110000000
+c5379e9eef9ebcbcbc9e9ead9e9e37c5ae0000000000000000000000000000be0000000880000000000110011000000000000000000000000000011110000000
 00000000000000000000000000000000000000000000000000000000000000002000008778000002000111001100000000001100110000000000000111100000
 16169c9ebcbcbcbcbcbc9ebc9e9c161600adbd0000ad00000000bd00aebd00ad2200087887800022000011101110000000001110011000000000000011110000
 00000000000000000000000000000000000000000000000000000000000000000220008778000220000011111110000000000111011100a00000000111111000
-c5379e9eaebcaeefefbebcbc9e9ee6c5adbeaebe00aebd0000adbe0000bc00bc022200877800222000a01881881000a09000011111110a0008a8001118181000
+c5379e9eaebcaeefefbebcbc9e9e37c5adbeaebe00aebd0000adbe0000bc00bc022200877800222000a01881881000a09000011111110a0008a8001118181000
 000000000000000000000000000000000000000000000000000000000000000002222289982222200a001111111000a009000188188100a0000a99a111110990
 16169c9e9eef9ebcbc9eefbc9e9c1616aebd00adbfbfefbeaeefadbfbdefbfef00221118811122000a222111112220a0092221111111228a0000022a99aa989a
 000000000000000000000000000000000000000000000000000000000000000000211dd88dd1120008a23111113322808a222211111228aa00889a88aa8a8a88
-c5379e9e9ebc9ebcbc9ebcbe9e9ee6c500aebdae00bcbc0000bcbc00bcbc00bc00111ddd1dd111008aa2333323332aa8a882231111132980aa902299889888a8
+c5379e9e9ebc9ebcbc9ebcbe9e9e37c500aebdae00bcbc0000bcbc00bcbc00bc00111ddd1dd111008aa2333323332aa8a882231111132980aa902299889888a8
 0000000000000000000000000000000000000000000000000000000000000000081121d1dd12118098002333233202899a80233323320aa80000988a999aa99a
 1616169e9eefad88efbdef9e9e161616ad00aebdadbebc0000bcaebfbebc00bc8880251111520888aa800222522008aa88a0022252200a8800998aa2225008a0
 00000000000000000000000000000000000000000000000000000000000000008800255225520088a880cc5555cc088a8aa0ccc555cc0999088000cc555cc000
@@ -2307,21 +2305,21 @@ ffccffffffffd5e5ffffffc5ffffc5d4fff300000000f300000000f300000000f300636363000000
 ffffffffffffffe5c5d4ffd5c4c5d4fffff300000000f300000000f3006600636363634ef300e0f0000000000000f3000000000000f300000000005af30000000063000063c1000000000000000063ffffffffff7060707070706464646464ffffffffcccdffffdcddffffffddccffffffcdffffffffe2656565656565c3ff61
 ffffffffffc5c4e5d4ffccffd5e5c5c4fff300000000f300005a6363636363636363c100f3000000000000000000f300000000e06363630000000063c10000000063635c0076006363636300000063ffffffffff70747060746000c5d4ffffffffcdffdcddffffffffffffddffffcdffdccdffffffffc66565c6656565c0ff61
 5c72ffffd5d4d5e5ffffffffffe5d4fffff300000000f300636363636363636363c10000f3000000000000000000f3000000000000f3c063000000000000000000c06363636363c1000000000063c1ffffffff63607070706070c5d40000ffffffffffffffffffffffff63ffffdccdffffffffffffe265c1c065656565ffff61
-ef73ffffffffffe5ffffffffffe5fffffff3000000636363636363637575757575000000f30000e0f00000000000f3000000000000f300c063000000000000000000f300000000000000000063c1006363e2e2c0706000007060d400000000ffffffffffffffff63dd0000dcff63ffffffffffffff65c18affc0656565ffff73
+ef73ffffffffffe5ffff2dffffe5fffffff3000000636363636363637575757575000000f30000e0f00000000000f3000000000000f300c063000000000000000000f300000000000000000063c1006363e2e2c0706000007060d400000000ffffffffffffffff63dd0000dcff63ffffffffffffff65c18affc0656565ffff73
 ef6ce82b2ce8e8e53072d6ff30e5ffffc2f4c363757575757575757575757575755c000063000000005d0063e2c2f4c30000000066f34000c0630000000066636300f300000000000066637575006363636363ff6070005660700000000000f1f1ffffffff7c63c1000000005dc063ffffe2ffffe265ffffffff656565ffe26d
 efe6717171e6e6e671e6e65ce6e671e66363636363636363637171717171717171e6e6e663727272727272636363636362626262626262717171716262626262626262626262626262757575757575626262626262626262626250f1505050626262626262626250505050505050626262626262626262626262626262626262
 efefd07171717171717171717171717171717171717171717171717171717171717171716363636363636363636363636363717171717171717171717171717162626262627171717171717171717171717171717171717171515151515151f1f1f1f1f1f1f1f171717171717171717171717171717171717171717171717171
 efefefd071d1d07171717171717171717171717171717171717171717171d0d1d07171d1eff4c1ffffc0f4efefefefefefefefefefefefefefefefefd071d1efefefefefefd075d1efefefefef4eefefefefefefefd071717151515151515151f1f1f1f1f1f1f17171717171f1717171717171717171d1d0d1d071d1d0717171
 e0efefefefefefd0717171717171d1d071d1d0717171d14ed071d14e71d1efefefefefefeff3ff40fffff3efefefefefefef5defefefefefefefefefef4eefefefefef7cefef75efefefefefefefefefefefefefefefefd0717151f151515171f1f1f1f1f1f1717171f1717171717171717171d071d1ffffffff71ffffffd071
 efe0efefefefefef4ed0717171d1efefd1efefefd071efefef71efefd1efefefefefefefeff1f1f1f1f1f1efefefefefef72e1e1e1e1e1e1e1e1e1efefefefefef72e1e1e1e1e1e1e1e1e1efefefefefefefeff1efefefefd0715371535371717171717171717171717171d1d071f1717171d1ffd1ffffffffffd0ffffffffd0
-efefe0efefefefefefef7171d1efefefefefefefef71efefefd1efefefefefefefefefeff1f1e9e9e9e9f1f1efefefefefe1c1e9e9e9e9e9e9e9c0e1efefefefefe1c1e9e9e1e9e9e9e9c0e1efefefefefefefc0f1efefefef555353535354717171717171717171d1ffffffffd071717171ffffffffffffffffffffffffffff
+efefe0efefefefefefef7171d1efefefefefefefef71efefefd1efefefefefefefefefeff1f1e9e9e9e9f1f1efefefefefe1c1e9e9e9e9e9e9e9c0f1efefefefefe1c1e9e9f1e9e9e9e9c0f1efefefefefefefc0f1efefefef555353535354717171717171717171d1ffffffffd071717171ffffffffffffffffffffffffffff
 efefefefefefefefefefd071efefefefefefefefefd0efefefefefefefefefefefefeff1f1e9e9e9e9e9e9f1f1efefefefe1e9e9e9e9c9e9e9e9e9e9e9e1e1e1e1e1e9e9e9e9e9e9c9e9e9e9e9e9e1e1e172efefc0f1efefef555353535354d07171717171d1d0d1ffffffffffffffd071d1ffffffffffffffffffffffffffff
-efefefeff0efefefefefef71efefefefefefefefefefefefefefefefefefefefefeff1f1e9e9e9e9e9e9e9e9f1e1efefefe1e9e9e9e9e9e9e9e9e9e9e1c1e9e9e9e9e9e9e9e9e9e9e9e9e9e9e1e1e1e1e1c1efefefc0f156ef555353535354efd0717171d1ffffffffffffffffffffffffffffffffffffffffffffffffffffff
-efefeff0efefefefefefefd0efefefefefefefefefefefefefefefefefefefefef72f1e9e9e9e9e9e9e9e9e9e9e1e1ef5ce140e9e966e9e9e9e9e1e9e9e9c9e9e9e9e9e9e9e1e966e9e9e9e1e9e9e9e9e9efefefefefc0f1f1f1f153535354efffd071d1ffffffffffffffffff78fffffffffffffffffff7f7ffc2ffffffc3ff
-efeff0efefefefefefefefefefefefefefefefefefefefefefefefefefefefef72f1e9e9e9c9e9e9e9e9c9e9e9e9e17272e1e1e1e1e1e1e1e1e1c1e9e9e9e9e9e9e1e9e9e1e1e1e1e1e1e1e140e9e9c9e9efefefefefefef4e555554f1535456ffffffffffffff78ffffffffc2c1ffffffc2ffffffc3ffc0c1ffc0c3f7c2c1ff
-eff0efefefefefefefefefefefefefefefefefefefefefefefefefefefefefeff1e9e9e9e9e9e9e9e9e9e9e9e9e9e9e1e1c1e9e9e9e9e9e9e9e9e9e9e1e1e1e1e1c1e9e1c1e9e9e9e9e9e9c0e1e9e9e9e9efefefefefefefef5555545555f1f1ffffffffffffffc0c3ffffffc0c3ffffffc0c3f7c2c1ffc2c3ffffc049c1ffff
-efefefefefefefefefefefefefefefefefefefefefd071d1efefef7cefefefeff4e9e9e9e9e9e9e9e9e9e9e9e9e9e9f4f4e9e9e9e9e9c9e9e9e9e9e1c1e9e9e9e9e9e9e9e9e9c9e9e9e9e9e9e9e9e1e1e1f0efefefefefefef555554f1f154efffffffffffffffc2c1ffffffc2f4c1ffffffc049c1ffc24949c3fffff3ffffff
-71d1efefefefefefefefefefefefefefefefefefd071d1d0717171717171d1eff4c3e9e9e9e9e9e9e9e9e9e9e9e9c2f4f4c3e9e9e9e9e9e9e9e9e1c1e9e9e9e9e9e9e9e9e9e9e93ce9e9e9e9e95dc0e1e1efefefefef56efef55f154555554efffffffffffffffc0c3ffffffc1c0c3fffffffff3ffc2c1ffffc0c3ffc0c3ffff
+efefefeff0efefefefefef71efefefefefefefefefefefefefefefefefefefefefeff1f1e9e9e9e9e9e9e9e9f1e1efefefe1e9e9e9e9e9e9e9e9e9e9f1c1e9e9e9e9e9e9e9e9e9e9e9e9e9e9e1e1e1e1e1c1efefefc0f156ef555353535354efd0717171d1ffffffffffffffffffffffffffffffffffffffffffffffffffffff
+efefeff0efefefefefefefd0efefefefefefefefefefefefefefefefefefefefef72f1e9e9e9e9e9e9e9e9e9e9e1e1ef5ce140e9e966e9e9e9e9f1e9e9e9c9e9e9e9e9e9e9f1e966e9e9e9e1e9e9e9c0e1efefefefefc0f1f1f1f153535354efffd071d1ffffffffffffffffff78fffffffffffffffffff7f7ffc2ffffffc3ff
+efeff0efefefefefefefefefefefefefefefefefefefefefefefefefefefefef72f1e9e9e9c9e9e9e9e9c9e9e9e9e17272e1e1e1e1e1e1e1e1e1c1e9e9e9e9e9e9f1e9e9e1e1e1e1e1e1e1e12de9e9e9e1efefefefefefef4e555554f1535456ffffffffffffff78ffffffffc2c1ffffffc2ffffffc3ffc0c1ffc0c3f7c2c1ff
+eff0efefefefefefefefefefefefefefefefefefefefefefefefefefefefefeff1e9e9e9e9e9e9e9e9e9e9e9e9e9e9e1e1c1e9e9e9e9e9e9e9e9e9e9e1e1e1e1e1c1e9f1c1e9e9e9e9e9e9c0f1e9e95de172efefefefefefef5555545555f1f1ffffffffffffffc0c3ffffffc0c3ffffffc0c3f7c2c1ffc2c3ffffc049c1ffff
+efefefefefefefefefefefefefefefefefefefefefd071d1efefef7cefefefeff4e9e9e9e9e9e9e9e9e9e9e9e9e9e9f4f4e9e9e9e9e9c9e9e9e9e9f1c1e9e9e9e9e9e9e9e9e9c9e9e9e9e9e973e9e9f1e1c1efefefefefefef555554f1f154efffffffffffffffc2c1ffffffc2f4c1ffffffc049c1ffc24949c3fffff3ffffff
+71d1efefefefefefefefefefefefefefefefefefd071d1d0717171717171d1eff4c3e9e9e9e9e9e9e9e9e9e9e9e9c2f4f4c3e9e9e9e9e9e9e9e9f1c1e9e9e9e9e9e9e9e9e9e9e93ce9e9e9e96ee9f1e1e1efefefefef56efef55f154555554efffffffffffffffc0c3ffffffc1c0c3fffffffff3ffc2c1ffffc0c3ffc0c3ffff
 7171d1efefefefefefefefefefefefefefefefd071d1000000000000d071d3f1f1f1f1f1f1f1f1f1f1f1f1f1f1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e9e9e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1efefefefeff1f1ef555554555454effffffffffffffffff3fffffffffff3ffffffc2c1fff3fffffffff3fffff3ffff
 f17171d1efefefefefefefefefefefefefefd071d1000000000000000075f1f1f10000000000f1000000003c00000000000000000000000000000000c0f10000000000000000000000000000000000e1e1efefefefefefeff1f15554555454efffffffffffffff5af3fffffffffff3fffffff3fffff3ffaafffff3fffff3ffff
 f1f1d1ef32efefeff172efefefef32f1f1757575002a005d00440000007575755c770000003c00000000e100000000f1f1000000003c00000000003c00000000000000003c0000000000003f0000000000efefefefefefefef5555f15050f1efffe7e8e8e7e8f1f1f1f5f5f1f5f5f1f1f1fff3ffc2c1ffffffffc0c3fff3fff1
@@ -2456,4 +2454,3 @@ __music__
 00 41414141
 00 41414141
 00 41414141
-
