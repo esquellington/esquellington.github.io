@@ -24,8 +24,8 @@ function _init()
    game =
       {
          t = 0,
-         is_skub_alive = true,
-         is_flab_alive = true,
+         is_skub_alive = false,
+         is_flab_alive = false,
          is_finb_alive = true,
          num_orbs = 4,
          num_orbs_placed = 0,
@@ -60,6 +60,7 @@ function _update()
          end
       elseif btnp(3) then --up
          game_difficulty = (game_difficulty+1) % 3
+         sfx(13)
       end
    elseif game_state == "play" then
       if btnp(2) then --up
@@ -77,9 +78,12 @@ function _update()
       end
       if player_health == 0 then
          game_state = "death"
+         add(messages,{t=150,text="you faded into oblivion"})
+         sfx(-1,0)
       end
    elseif (game_state == "win" or game_state == "death") and btnp(4) then
       game_state = "menu"
+      sfx(13)
       messages = {}
    end
 end
@@ -89,7 +93,7 @@ function draw_flash( prob )
    if dice < prob then
       pal(0,7+5*(dice%2))
       palt(0,false)
-      sfx(1)
+      sfx(0+flr(rnd(2))) --0,1
    end
 end
 
@@ -131,7 +135,9 @@ function _draw()
       local anm_t = 1+global_t%#anm_k
       spr( anm_k[anm_t], 64, 64 )
    elseif game_state == "death" then
-      --todo
+      -- local anm_k = a_player.table_anm.broom.k
+      -- local anm_t = 1+global_t%#anm_k
+      -- spr( anm_k[anm_t], 64, 64 )
    end
    --messages
    for m in all(messages) do
@@ -811,7 +817,7 @@ function update_player()
          player_t = 0
          player_state = 3
          player_v.y = -4
-         sfx(11)
+         sfx(11+flr(rnd(2)))
          if btn(0) then
             player_jump_s = -1
             player_v.x = -1.25
@@ -1033,13 +1039,13 @@ function update_player()
    player_p1 = apply_borders( player_p1, movebox )
 end
 
-function advance_ccd_box_vs_map( p0, p1, box, flags )--, b_first_only )
+function advance_ccd_box_vs_map( p0, p1, box, flags )
 
    local d = v2sub( p1, p0 )
    local remaining_time = 1 --1 step remaining
    local collisions_ccd = ccd_box_vs_map( p0, p1,
                                           box,
-                                          flags)--,b_first_only )
+                                          flags)
    local num_hits = 0
          local handled_collisions = {}
    while collisions_ccd != nil do
@@ -1070,7 +1076,7 @@ function advance_ccd_box_vs_map( p0, p1, box, flags )--, b_first_only )
       if b_retest and remaining_time > 0.01 then
          collisions_ccd = ccd_box_vs_map( p0, p1,
                                           box,
-                                          flags)--,b_first_only )
+                                          flags)
       else
          collisions_ccd = nil
       end
@@ -1091,7 +1097,6 @@ function new_room( coords )
          bullets = {},
          vfx = {}
       }
-   --add player
    add( r.entities, player )
    --process static map cells to create entities
    for j=0,15 do
@@ -1101,11 +1106,18 @@ function new_room( coords )
    end
 
    --sfx
-   if coords.x == 0 and coords.y == 0 then
+   if coords.y == 0 and (coords.x == 0 or coords.x == 7) then
       sfx(2,0)
       g_sfx_0 = 2
+   -- elseif coords.y == 1 and coords.x == 7 then
+   --    sfx(15,0)
+   --    g_sfx_0 = 15
+   elseif coords.y == 2 and coords.x == 0 then
+      sfx(16,0)
+      g_sfx_0 = 16
    elseif g_sfx_0 != -1 then
       sfx(-1,0)
+      g_sfx_0 = -1
    end
 
    return r
@@ -1753,7 +1765,6 @@ function update_action_finalboss( entity, action )
          a_finalboss.cshoottype = a_flame
          sub = new_action_shoot(30,"straight")
       elseif sub.name == "shoot" and sub.t > 120 then --4x shots
-         -- sub = new_action_idle()
          a_finalboss.cspeed = 5
          sub = new_action_move( v2init(56,104) )
          action.phase = 3
@@ -1803,7 +1814,7 @@ function update_bullets()
       local map_collisions = ccd_box_vs_map( b.p0,
                                              b.p1,
                                              attackbox,
-                                             5)--,true ) --first-only
+                                             5)
       -- if map collision, save it and shorten predicted trajectory
       if #map_collisions > 0 then
          b.p1 = v2add( b.p0, v2scale( map_collisions[1].interval.min, b.v ) )
@@ -1815,18 +1826,14 @@ function update_bullets()
                                                   b.p1,
                                                   attackbox,
                                                   room.enemies,
-                                                  "cdamagebox")--,true ) --first-only
+                                                  "cdamagebox")
 
       -- if there's enemy collision, either there was no map collision
       -- or the enemy one happened first during the shortened
       -- trajectory, so in both cases we handle the enemy collision.
-      -- todo: vfx could be different for map/enemies
       local b_delete = true
       local b_fx = true
       if #enm_collisions > 0 then
-         --local enm_c = enm_collisions[1]
-         -- unnecessary b.p1 = v2add( b.p0, v2scale( enm_c.interval.min, b.v ) )
-         -- unnecessary b.v = v2zero()
          local e = enm_collisions[1].entity
          if e.a.cdamagebox != nil
             and e.health == 1 then
@@ -2065,7 +2072,7 @@ end
    ccd between box and map
    returns { point, normal, interval } if hit, and nil otherwise
 --]]
-function ccd_box_vs_map( box_pos0, box_pos1, box_aabb, flag_mask )--, b_first_only )
+function ccd_box_vs_map( box_pos0, box_pos1, box_aabb, flag_mask )
    -- swept aabb
    local swept_aabb = aabb_init_2( v2add( v2min( box_pos0, box_pos1 ), box_aabb.min ),
                                    v2add( v2max( box_pos0, box_pos1 ), box_aabb.max ) )
@@ -2076,7 +2083,7 @@ function ccd_box_vs_map( box_pos0, box_pos1, box_aabb, flag_mask )--, b_first_on
       local tile_aabb_min = v2init( o.tile_j*8, o.tile_i*8 )
       local tile_aabb_max = v2add( tile_aabb_min, v2init(8,8) ) --8,8 are the sizes of map tile, but could be sub-box
 
-      --todo: consider instead geting only up to the first non-0 hit, and clipping interval incrementally to reduce tested pairs
+      --todo: consider instead getting only up to the first non-0 hit, and clipping interval incrementally to reduce tested pairs
       local c = ccd_box_vs_aabb( box_pos0, box_pos1, box_aabb,
                                  aabb_init_2( tile_aabb_min, tile_aabb_max ) )
       if c != nil then
@@ -2087,14 +2094,14 @@ function ccd_box_vs_map( box_pos0, box_pos1, box_aabb, flag_mask )--, b_first_on
       end
    end
 
-   return ccd_sort_collisions( collisions )--, b_first_only )
+   return ccd_sort_collisions( collisions )
 end
 
 --[[
    ccd between box and entity["entity_box_name"]
    returns { point, normal, interval } if hit, and nil otherwise
 --]]
-function ccd_box_vs_entities( box_pos0, box_pos1, box_aabb, table_entities, entity_box_name )--, b_first_only )
+function ccd_box_vs_entities( box_pos0, box_pos1, box_aabb, table_entities, entity_box_name )
    local collisions = {}
    for e in all(table_entities) do
       local local_aabb = e.a["cdamagebox"]
@@ -2107,42 +2114,25 @@ function ccd_box_vs_entities( box_pos0, box_pos1, box_aabb, table_entities, enti
          end
       end
    end
-   return ccd_sort_collisions( collisions )--, b_first_only )
+   return ccd_sort_collisions( collisions )
 end
 
---temp: b_first_only param disabled to save around 60 tokens
-function ccd_sort_collisions( collisions )--, b_first_only )
-   -- first-only
-   -- if b_first_only != nil and b_first_only then
-   --    local first = nil
-   --    for c in all(collisions) do
-   --       if first == nil then
-   --          first = c
-   --       else
-   --          if c.interval.min < first.interval.min then
-   --             first = c
-   --          end
-   --       end
-   --    end
-   --    collisions = { first }
-   -- else
-      --bubble-sort collisions on increasing inverval.min
-      local b_continue = true
-      local count = #collisions
-      while b_continue do
-         b_continue = false
-         for i = 1,count-1 do
-            if collisions[i].interval.min > collisions[i+1].interval.min then
-               local tmp = collisions[i]
-               collisions[i] = collisions[i+1]
-               collisions[i+1] = tmp
-               b_continue = true
-            end
+--bubble-sort collisions on increasing inverval.min
+function ccd_sort_collisions( collisions )
+   local b_continue = true
+   local count = #collisions
+   while b_continue do
+      b_continue = false
+      for i = 1,count-1 do
+         if collisions[i].interval.min > collisions[i+1].interval.min then
+            local tmp = collisions[i]
+            collisions[i] = collisions[i+1]
+            collisions[i+1] = tmp
+            b_continue = true
          end
       end
-   -- end
-
-      return collisions
+   end
+   return collisions
 end
 
 __gfx__
@@ -2279,11 +2269,11 @@ __gff__
 0000000000000000000000000000000000000000000000000000000000000000000000000000000000400801010800000000000000400000000000000000000008080000000000080808000000000000020208808080000000000000804000004001010101400000000000000101014040010201010500000000000000000000
 0202020202020202000000000000000002020202020202020000000000000000020202020202020200000000000000000202020202020202000000000000000040404040404040404040404040404000010101014040014040404040404040000101400101400140404040404040404001014040400000020000024040404040
 __map__
-ccffddcdccffffffffffffffffffffffffffffccffffffffffffffffffffffffffdcffffffffffffffdcffffffffffffffffccffffffffffffffffffffffffffffffffffffffccffffffcdffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-ffccddcdcdddccffffffffffffffffffffffffffffffffffccffffdcffffffffffffffccddcdffffffffffffffffffccffffffffffffcdffccffffffffffffddffffffccffffffffffffffffffddffffffffffcdffffffffddffffffffffffcdfffffffffffffffffffffffffffffffffffffffffffffffff2ffffffffffffdd
-ccffcdffddccffffffffffffffffffffffddffdcffccffffffffffffcdffffffccffffffffffc2f2f2f2f2f2c3ffcdffffdcffffccffffffffcdffffddccffffff635dffffffffff63ffff63ffffffffffffffffffffccffffffcccdffffffffffffffffffffffddffffffffffffdcffffdddcffffffffff65ffffffdcffc3ff
-ffffffffffffffffffcccccdffffffffffffffffffffffffffffffffffffffffffffffffffc2c14e0000004ec0c3ffffffffffffffffffffffffffffffffffffff636363ff63ffffffffff4effffffffddffccffffffffffffffffffffccffffffffffccffffffffffdcffffddffffffffccffffffffffe265c3ffffdcdd6161
-ffddcdffffffffffffffffffffffffffffffc2f2f2f2f2f2f2f2f2f2f2f2f2c3ffc2f2f2f2c100000000000000c0f2f2f2f2f2f2c3ffc2f2f2f2f2c3ff47ffffff6300c0636363ffffffffffffffffffffffffffffddffffffccffffffffffffffffffffffffffffffffffffffffffffdddcddffffffff656565c3ffffff6161
+ccffddcdccffffffffffffffffffffffffffffccffffffffffffffffffffffffffdcffffffffffffffdcffffffffffffffffccffffffffffffffffffffffffffffffffffffffccffffffcdffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff61
+ffccddcdcdddccffffffffffffffffffffffffffffffffffccffffdcffffffffffffffccddcdffffffffffffffffffccffffffffffffcdffccffffffffffffddffffffccffffffffffffffffffddffffffffffcdffffffffddffffffffffffcdfffffffffffffffffffffffffffffffffffffffffffffffff2ffffffffffff61
+ccffcdffddccffffffffffffffffffffffddffdcffccffffffffffffcdffffffccffffffffffc2f2f2f2f2f2c3ffcdffffdcffffccffffffffcdffffddccffffff635dffffffffff63ffff63ffffffffffffffffffffccffffffcccdffffffffffffffffffffffddffffffffffffdcffffdddcffffffffff65ffffffdc727261
+ffffffffffffffffffcccccdffffffffffffffffffffffffffffffffffffffffffffffffffc2c14e0000004ec0c3ffffffffffffffffffffffffffffffffffffff636363ff63ffffffffff4effffffffddffccffffffffffffffffffffccffffffffffccffffffffffdcffffddffffffffccffffffffffe265c3ffffdc616161
+ffddcdffffffffffffffffffffffffffffffc2f2f2f2f2f2f2f2f2f2f2f2f2c3ffc2f2f2f2c100000000000000c0f2f2f2f2f2f2c3ffc2f2f2f2f2c3ff47ffffff6300c0636363ffffffffffffffffffffffffffffddffffffccffffffffffffffffffffffffffffffffffffffffffffdddcddffffffff656565c3ffffc06161
 ffffffffffffffffc5d4ffffffcccdffffc2c1c0c1c0f4c1c0c1c0f4c1c0c1c0f4c100c0f4000000000000000000f4c100000000c0f4c100000000c0f2f0ffffff63000000004ee063ffccddffcd63f0ffddffdcffffffffffffcdffffffddffffffffffffccffdcffffdddcffdddcffccffccffffffff65656565ffffffc061
 ffffffffc5ffcdffd5c4fffffffffffffff300000000f300000000f300000000f3000000f3000000000000000000f3000000000000f3000000000000f3ffffffff63000000000000c0630000000063ffffffffffffff78ffffffffffffffffffffffccffffffffffffddffecedccffffdcffffdcffffffc7c86565c3c2ffff61
 ffffffffd5c4ffffc5d4ffcdfffffffffff300000000f300000000f300000000f3000000f3000000000000000000f3000000000000f3000000000000f3ffffffff630000000000000000005d630063ffffcdffffffff7060ffffffddffccffffffffffffffffffffddccddfcfddcddffffccffffffddffd7d865ffc0f4ffff61
@@ -2312,23 +2302,23 @@ f17171d1efefefefefefefefefefefefefefd071d1000000000000000075f1f1f10000000000f100
 f1f1d1ef32efefeff172efefefef32f1f1757575002a005d00440000007575755c770000003c00000000e100000000f1f1000000003c00000000003c00000000000000003c0000000000003f0000000000efefefefefefefef5555f15050f1efffe7e8e8e7e8f1f1f1f5f5f1f5f5f1f1f1fff3ffc2c1ffffffffc0c3fff3fff1
 f1f1f1eff1f1f1f1f1f1f1f1f1f1f1f1f1717171e6e6e671e6e671e6717171f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f17171e6e6e6e6e6e6e6e6e6e6e6e6e6e6f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1
 __sfx__
-00400000075400a5400c5300f53013530135501255010550175501e5502355023550105500d5500c5500f550165501b5501e5501a550105500d5500d550195501b55019550195502c55030550105500d5500f000
+000a00000b61010620076300c640196401062014630076200e63006630046200362003610026100460002600016000360005600046000360008600066000a6000560005600076000560004600066000160001600
 000b00000b61013620076302163018630106300b630076300463006630046200362003610026100460002600016000360005600046000360008600066000a6000560005600076000560004600066000160001600
 000c002003617066170a6170d6170c6100a610076100b6100d6100d610096100561006610076100a6100e6100f6100d6100a610086100a6100d6101061011610106100e6100b61008610086100b6100961006610
-000200000261005630076400463001620046200161001610016000360005600076000460002600026000160001600036000460005600066000260001600036000160005600086000260003600036000360001600
-000200000261007620086200963004640086300462001610016000360005600076000460002600026000160001600036000460005600066000260001600036000160005600086000260003600036000360001600
-000100001213018140101500714002130011200111001110031000110001100011000210001100011000210001100011000010000100001000010000100001000010000100001000010000100001000010000100
+000200000261005620076300463001620046200161001610016000360005600076000460002600026000160001600036000460005600066000260001600036000160005600086000260003600036000360001600
+000200000261007620086200963004630086200462001610016100360005600076000460002600026000160001600036000460005600066000260001600036000160005600086000260003600036000360001600
+000100001213018140101400714002130011200111001110031000110001100011000210001100011000210001100011000010000100001000010000100001000010000100001000010000100001000010000100
 0002000007140161500916008130151400c1600814012130081400413001120011100110001100011000110001100011000110001100001000010000100001000010000100001000010000100001000010000100
-0002000002210052200a23014240182300e220052300c210092200523007210072000420002200022000120001200032000420005200062000220001200032000120005200082000220003200032000320001200
-000200001e6301d6401f640286302b610196101a6200f630136301263002620016100060000600006000060000600006000060000600006000060000600006000060000600006000060000600006000060000600
-0006000011540215502b5601e550085400152002520245201d5101751011500000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0002000002210052200a23014220182100e220052100c210092200521007210072000420002200022000120001200032000420005200062000220001200032000120005200082000220003200032000320001200
+000200001e6101d6201f620286102b610196101a6200f620136101261002620016100060000600006000060000600006000060000600006000060000600006000060000600006000060000600006000060000600
+0006000011530215402b5401e540085300152002520245101d5101751011500000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 000500003d6203361029630216101d63019640136100f6200b6300762001630046000360002600016000160008600066000160002600006000060000600006000060000600006000060000600006000060000600
 00010000067500675008750097500b7500d7400f73011720127201472016730177301773017730147300f7200b720057100270001700047000070000700007000070000700007000070000700007000070000700
+0001000006750087500c7501175015750177401773015720117201072010730107300e7300a730037300272002720017100270001700047000070000700007000070000700007000070000700007000070000700
+000600000f530145400a540125300f5200651002500245001d5001750011500005000050000500005000050000500005000050000500005000050000500005000050000500005000050000500005000050000500
+001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00200020376113b61137611316213361136611356113362134621386113b6113761132621356213761134611326113561132611316113461139611366112f6212e61132611376213a62135611326113161133611
 01200010225521955222552225521955222552225521955222552195522255219552225521955222552195521655216552165520f5520f5520d5520d55216552165520d5520f5520f5520f5520d5520d5520d552
-001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
@@ -2441,4 +2431,3 @@ __music__
 00 41414141
 00 41414141
 00 41414141
-
