@@ -18,8 +18,8 @@ function _init()
    --init persistent state
    init_archetypes()
    game_state = "menu"
-   game_difficulty = 0
    game_t = 0
+   game_difficulty = 0
    game_is_skub_alive = true
    game_is_flab_alive = true
    game_is_finb_alive = true
@@ -30,12 +30,11 @@ function _init()
    game_has_broom = fals
 
    g_sfx_0 = -1
-   g_time = 0
 end
 
 -- update
 function _update()
-   g_time += 1
+   game_t += 1
    g_rnd_2 = flr(rnd(2))
    if game_state == "menu" then
       if g_sfx_0 == -1 then
@@ -43,15 +42,11 @@ function _update()
          g_sfx_0 = 2
       end
       if btnp(4) then
-         --temp test
-         if game_difficulty == 2 then
-            game_state = "win"
-            g_time = 0
-         else
-            init_game()
-            game_state = "play"
-            player_health = a_player.table_health[game_difficulty+1]
-         end
+         game_state = "intro"
+         game_t = 0
+         init_game()
+         player_health = a_player.table_health[game_difficulty+1]
+         add_message("in a land with no sun...")
       elseif btnp(2) then --up
          game_difficulty = (game_difficulty-1) % 3
          sfx(13)
@@ -60,21 +55,30 @@ function _update()
          sfx(13)
       end
    elseif game_state == "play" then
-      game_t += 1
       update_player()
       update_enemies()
       update_bullets()
       update_vfx()
       if player_health == 0 then
          game_state = "death"
+         game_t = 0
          add_message("you faded into oblivion")
          sfx(-1,0)
       elseif not game_is_finb_alive then
          game_state = "win"
+         game_t = 0
       end
-   elseif (game_state == "win" or game_state == "death") and btnp(4) then
+   elseif (game_state == "intro"
+           or game_state == "win"
+           or game_state == "death") and btnp(4) then
+      if game_state == "intro" then
+         game_state = "play"
+         add_message("move \x8b\x91, jump \x8e, shoot \x97    ")
+      else
+         game_state = "menu"
+      end
       game_is_finb_alive = true
-      game_state = "menu"
+      game_t = 0
       sfx(13)
       messages = {}
    end
@@ -118,17 +122,19 @@ function _draw()
       print(" easy ",52,54)
       print("normal",52,62)
       print(" hard ",52,70)
+   elseif game_state == "intro" then
+      draw_rain(15)
    elseif game_state == "play" then
       draw_game()
    elseif game_state == "win" then
       local anm_k = a_player.table_anm.broom.k
       spr( 236, 80, 50, 2, 2 )
-      local pos_x = 40 + 8*sin(g_time/150)
-      if g_time >= 450 then
-         local lambda = (g_time-450)
+      local pos_x = 40 + 8*sin(game_t/150)
+      if game_t >= 450 then
+         local lambda = (game_t-450)
          pos_x += lambda*lambda/4 - 3*lambda
       end
-      spr( anm_k[1+g_time%#anm_k], pos_x, 70 + 2*cos(g_time/30) )
+      spr( anm_k[1+game_t%#anm_k], pos_x, 70 + 2*cos(game_t/30) )
       draw_rain(15)
       local table_text =
          {
@@ -140,7 +146,7 @@ function _draw()
             {301,"(2017)"}
          }
       for s in all(table_text) do
-         if s[1] == g_time then
+         if s[1] == game_t then
             add_message(s[2])
          end
       end
@@ -745,7 +751,6 @@ function init_game()
    level.room_coords = v2init( 0, 0 )
 
    room = new_room( level.room_coords )
-   add_message("move \x8b\x91, jump \x8e, shoot \x97    ")
 end
 
 -- player
@@ -2461,4 +2466,3 @@ __music__
 00 41414141
 00 41414141
 00 41414141
-
