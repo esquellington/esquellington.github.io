@@ -1,5 +1,5 @@
 HexeN SturM
-* Player
+* DONE Player
 ** DONE Animation as seq of frames
 ** DONE Combined {idle,jump} x shoot
 ** DONE Jump over a wall we're next to
@@ -9,8 +9,6 @@ HexeN SturM
      and cancelled only when there's a collision
 ** DONE Hit/Death
 ** DONE (WON'T DO) Contextual actions (on_ground, on_wall, on_cliff, etc...)
-** TODO Appear as reborn (arms up!)
-** TODO Drown/single hit death
 * DONE Collision detection
 ** DONE BP using map tiles as grid
 ** DONE CCD with sequential treatment
@@ -20,11 +18,11 @@ HexeN SturM
    2: damage
 ** DONE 1 solid block type (flag 0)
 ** DONE room change
-* Projectiles
+* DONE Projectiles
 ** DONE CCD
 ** DONE Hit VFX
 ** TODO Hit SFX
-* Enemies
+* DONE Enemies
 ** Simple plans
    - Periodic: linear vel, stay, go back (ex: saws)
      - no CD except for player/bullets
@@ -93,7 +91,7 @@ HexeN SturM
 ** DONE Angry skeleton
    - On first pass, do nothing
    - On second pass, spawn ghosts that fly slowly to player
-** TODO Boss: Final Boss
+** DONE Boss: Final Boss
 *** DONE Intro
     - Play organ for N secs, then fly to mid screen
 *** DONE Phase 1:
@@ -118,8 +116,8 @@ HexeN SturM
    - Rocks fall from ceiling and stack up
    - Some can be destroyed
    - Like puzzle platformer
-* Main menu
-** TODO Splash/Title
+* DONE Main menu
+** DONE Splash/Title
    - SFX
    - Pointer
    - Credits
@@ -127,23 +125,27 @@ HexeN SturM
     - Unborn: No death, regenerate all
     - Alive: 4-hit death, regenerate all
     - Undead: 2-hit death, regenerate all
-* TODO Ending
+* TODO Intro
+** TODO Art
+** DONE Text
+* DONE Ending
   - Art
   - Gamestate
-* FX
+* DONE FX
 ** DONE Death/Evaporate
     - Gen flashing white pixels that fade up/directionally to impact)
 ** DONE Flashing
    - startup
    - cathedral ruins
-** TODO Lightning
+** DONE Lightning
 ** DONE (WON'T DO) Rain/Snow pixels
 ** DONE (WON'T DO) Screen-shake on impact
     - Move camera with noise
 ** DONE (WON'T DO) Dark areas using flickering/dither
-* BUGS
+* TODO Balance
+* TODO BUGS
 ** TODO AABB sizes are a bit wrong when inverted (seem to drift left)
-** TODO ground collision bugs when hit
+** TODO collision bugs when hit or on broomstick
 ** TODO miissing or late wall/ceiling collision when changing rooms
    - make room change more robust by placing char strictly at the
      border regardless of speed
