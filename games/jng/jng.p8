@@ -4,25 +4,18 @@ __lua__
 
 -- run with: ./pico-8/pico8 -run ./jng.p8 -desktop . -windowed 1
 
--- init
 function _init()
    caabb_88 = aabb_init(0,0,8,8)
    caabb_1616 = aabb_init(0,0,16,16)
    cv2_44 = v2init(4,4)
 
-   --debug options
-   -- debug = { cnummodes = 6,
-   --           mode = 0,
-   --           paused = false }
-
-   --init persistent state
    init_archetypes()
    game_state = "menu"
    game_t = 0
    game_difficulty = 0
    game_is_skub_alive = true
    game_is_flab_alive = true
-   game_is_finb_alive = true
+   game_is_finb_alive = false
    game_num_orbs = 0
    game_num_orbs_placed = 0
    game_is_mutated = false
@@ -30,9 +23,10 @@ function _init()
    game_has_broom = fals
 
    g_sfx_0 = -1
+
+   messages = {}
 end
 
--- update
 function _update()
    game_t += 1
    g_rnd_2 = flr(rnd(2))
@@ -46,7 +40,6 @@ function _update()
          game_t = 0
          init_game()
          player_health = a_player.table_health[game_difficulty+1]
-         add_message("in a land with no sun...")
       elseif btnp(2) then --up
          game_difficulty = (game_difficulty-1) % 3
          sfx(13)
@@ -64,6 +57,7 @@ function _update()
          game_t = 0
          add_message("you faded into oblivion")
          sfx(-1,0)
+         g_sfx_0 = -1
       elseif not game_is_finb_alive then
          game_state = "win"
          game_t = 0
@@ -71,16 +65,15 @@ function _update()
    elseif (game_state == "intro"
            or game_state == "win"
            or game_state == "death") and btnp(4) then
+      game_t = 0
+      messages = {}
+      g_sfx_0 = -1
       if game_state == "intro" then
          game_state = "play"
-         add_message("move \x8b\x91, jump \x8e, shoot \x97    ")
+         -- game_is_finb_alive = true
       else
          game_state = "menu"
       end
-      game_is_finb_alive = true
-      game_t = 0
-      sfx(13)
-      messages = {}
    end
 end
 
@@ -89,7 +82,7 @@ function draw_flash( prob )
    if dice < prob then
       pal(0,7+5*(dice%2))
       palt(0,false)
-      sfx(0+g_rnd_2) --0,1
+      sfx(0+g_rnd_2)
    end
 end
 
@@ -98,7 +91,6 @@ function draw_rain( max_y )
       for j=0,15 do
          local dice = flr(rnd(1000))
          spr( 207+16*(dice%2), 8*j, 8*i )
-         -- spr( 227+(dice%2), 8*j, 8*i )
       end
    end
 end
@@ -110,10 +102,10 @@ function draw_lighting( _x, length )
    end
 end
 
--- draw
 function _draw()
    cls()
    pal()
+   local table_text
    if game_state == "menu" then
       draw_flash(5)
       draw_rain(15)
@@ -124,6 +116,21 @@ function _draw()
       print(" hard ",52,70)
    elseif game_state == "intro" then
       draw_rain(15)
+      table_text =
+         {
+            {1,  "iN A LAND WITH NO SUN"},
+            {30, "ONLY HEXEN FOUGHT THE PLAGUE"},
+            {60, "BUT THE BISHOP FELT HIS POWER"},
+            {90, "THREATENED BY THEIR NATURAL ARTS"},
+            {120,"SO WITH LIES AND TREACHERY"},
+            {150,"HE CONVINCED THEY WERE TO BLAME"},
+            {180,"AND SENTENCED THEM TO DEATH."},
+            {300,"jUST BEFORE THE EXECUTION"},
+            {330,"AN OMEN WAS PROCLAIMED:"},
+            {400,"THOU SHALL FEAR THE hEXENsTORM"}
+            -- {400,"move \x8b\x91, jump \x8e, shoot \x97    "},
+            -- {500,"(press \x8e or \x97 to start)"}
+         }
    elseif game_state == "play" then
       draw_game()
    elseif game_state == "win" then
@@ -136,27 +143,28 @@ function _draw()
       end
       spr( anm_k[1+game_t%#anm_k], pos_x, 70 + 2*cos(game_t/30) )
       draw_rain(15)
-      local table_text =
+      table_text =
          {
-            {1,"the vicar has been defeated"},
-            {51,"your sisters may now"},
-            {101,"live in peace"},
-            {201,"hexen storm"},
-            {251,"a pico-8 game by esquellington"},
-            {301,"(2017)"}
+            {1,"tHE BISHOP HAS BEEN DEFEATED!"},
+            {30,"YOUR SISTERS MAY NOW"},
+            {60,"REST IN PEACE"},
+            {100,"hEXENsTORM"},
+            {160,"A PICO-8 GAME BY eSQUELLINGTON"}
+            -- {301,"(2017)"}
          }
-      for s in all(table_text) do
-         if s[1] == game_t then
-            add_message(s[2])
-         end
-      end
    elseif game_state == "death" then
       spr( 236, 80, 50, 2, 2 )
    end
 
+   for s in all(table_text) do
+      if s[1] == game_t then
+         add_message(s[2])
+      end
+   end
+
    for m in all(messages) do
       if m.t > 0 then
-         print( m.text, 64-(2*#m.text), 32*(m.t/150) ) --4*len/2 = 2*len
+         print( m.text, 64-(2*#m.text), 128*(m.t/256) ) --4*len/2 = 2*len
          m.t -= 1
       else
          del(messages,m)
@@ -169,7 +177,6 @@ function draw_game()
    local room_tile_x = level.room_coords.x * 16
    local room_tile_y = level.room_coords.y * 16
 
-   --flash
    local b_rain = room_tile_x == 0 and room_tile_y == 0
    if b_rain then
       if game_t == 0 then
@@ -185,14 +192,12 @@ function draw_game()
        0,0,16,16,
        0x7f )
 
-   --lightning
    if game_t < 8 then
       draw_lighting(24, 14*game_t)
    elseif game_t < 16 then
       draw_lighting(24, 165 - 14*game_t )
    end
 
-   --enemies
    for e in all(room.enemies) do
       local e_p1 = e.p1
       if e.hit_timeout % 2 == 0 then
@@ -218,11 +223,6 @@ function draw_game()
       end
    end
 
-   --player
-   -- if game_is_mutated then
-   --    pal(8,11)
-   --    pal(13,3)
-   -- end
    if player_inv_t % 2 == 0 then
       local anm = g_anim[player_state]
       if player_state == 6 and player_sign*player_v.x < 0 then
@@ -237,11 +237,7 @@ function draw_game()
            1,1,
            player_sign<0 )
    end
-   -- if game_is_mutated then
-   --    pal()
-   -- end
 
-   --bullets
    for b in all(room.bullets) do
       local anm = b.a.table_anm[b.anm_id]
       spr( anm.k[1+b.t%#anm.k],
@@ -250,7 +246,6 @@ function draw_game()
            player_sign<0 )
    end
 
-   --vfx
    for v in all(room.vfx) do
       spr( v.anm.k[1+v.t%#v.anm.k],
            v.p.x, v.p.y,
@@ -264,7 +259,6 @@ function draw_game()
        0,0,16,16,
        0x80 )
 
-   --rain
    if b_rain then
       draw_rain(14)
    end
@@ -303,13 +297,6 @@ function draw_game()
       --             colors[debug.mode] )
       --    end
       -- end
-
-      -- debug info
-      -- if debug.mode == 1 then
-      --    print("t:"..game_t/10,1,1)
-      --    print("mem:"..stat(0),1,122)
-      --    print("cpu:"..stat(1),84,122)
-      -- end
    -- end
 end
 
@@ -328,7 +315,7 @@ function uncompress_anim( archetype )
 end
 
 function add_message( _text )
-   add( messages, {t=150, text=_text} )
+   add( messages, {t=256, text=_text} )
 end
 
 function init_archetypes()
@@ -2322,7 +2309,7 @@ ef6ce82b2ce8e8e53072d6ff30e5ffffc2f4c363757575757575757575757575755c000063000000
 efe6717171e6e6e671e6e65ce6e671e66363636363636363637171717171717171e6e6e663727272727272636363636362626262626262717171716262626262626262626262626262757575757575626262626262626262626250f1505050626262626262626250505050505050626262626262626262626262626262626262
 efefd07171717171717171717171717171717171717171717171717171717171717171716363636363636363636363636363717171717171717171717171717162626262627171717171717171717171717171717171717171515151515151f1f1f1f1f1f1f1f171717171717171717171717171717171717171717171717171
 efefefd071d1d07171717171717171717171717171717171717171717171d0d1d07171d1eff4c1ffffc0f4efefefefefefefefefefefefefefefefefd071d1efefefefefefd075d1efefefefef4eefefefefefefefd071717151515151515151f1f1f1f1f1f1f17171717171f1717171717171717171d1d0d1d071d1d0717171
-e0efefefefefefd0717171717171d1d071d1d0717171d14ed071d14e71d1efefefefefefeff3ff40fffff3efefefefefefef5defefefefefefefefefef4eefefefefef7cefef75efefefefefefefefefefefefefefefefd0717151f151515171f1f1f1f1f1f1717171f1717171717171717171d071d1ffffffff71ffffffd071
+e0efefefefefefd0717171717171d1d071d1d0717171d14ed071d14e71d1efefefefefefeff3ff40fffff3efefefefefefef5defefef76efefefefefef4eefefefefef7cefef75efefefefefefefefefefefefefefefefd0717151f151515171f1f1f1f1f1f1717171f1717171717171717171d071d1ffffffff71ffffffd071
 efe0efefefefefef4ed0717171d1efefd1efefefd071efefef71efefd1efefefefefefefeff1f1f1f1f1f1efefefefefef72e1e1e1e1e1e1e1e1e1efefefefefef72e1e1e1e1e1e1e1e1e1efefefefefefefeff1efefefefd0715371535371717171717171717171717171d1d071f1717171d1ffd1ffffffffffd0ffffffffd0
 efefe0efefefefefefef7171d1efefefefefefefef71efefefd1efefefefefefefefefeff1f1e9e9e9e9f1f1efefefefefe1c1e9e9e9e9e9e9e9c0f1efefefefefe1c1e9e9f1e9e9e9e9c0f1efefefefefefefc0f1efefefef555353535354717171717171717171d1ffffffffd071717171ffffffffffffffffffffffffffff
 efefefefefefefefefefd071efefefefefefefefefd0efefefefefefefefefefefefeff1f1e9e9e9e9e9e9f1f1efefefefe1e9e9e9e9c9e9e9e9e9e9e9e1e1e1e1e1e9e9e9e9e9e9c9e9e9e9e9e9e1e1e172efefc0f1efefef555353535354d07171717171d1d0d1ffffffffffffffd071d1ffffffffffffffffffffffffffff
@@ -2331,7 +2318,7 @@ efefeff0efefefefefefefd0efefefefefefefefefefefefefefefefefefefefef72f1e9e9e9e9e9
 efeff0efefefefefefefefefefefefefefefefefefefefefefefefefefefefef72f1e9e9e9c9e9e9e9e9c9e9e9e9f17272e1e1e1e1e1e1e1e1e1c1e9e9e9e9e9e9f1e9e9e1e1e1e1e1e1e1e12de9e9e9e1efefefefefefef4e555554f1535456ffffffffffffff78ffffffffc2c1ffffffc2ffffffc3ffc0c1ffc0c3f7c2c1ff
 eff0efefefefefefefefefefefefefefefefefefefefefefefefefefefefefeff1e9e9e9e9e9e9e9e9e9e9e9e9e9e9f1f1c1e9e9e9e9e9e9e9e9e9e9e1e1e1e1e1c1e9f1c1e9e9e9e9e9e9c0f1e9e95de172efefefefefefef5555545555f1f1ffffffffffffffc0c3ffffffc0c3ffffffc0c3f7c2c1ffc2c3ffffc049c1ffff
 efefefefefefefefefefefefefefefefefefefefefd071d1efefef7cefefefeff4e9e9e9e9e9e9e9e9e9e9e9e9e9e9f4f4e9e9e9e9e9c9e9e9e9e9f1c1e9e9e9e9e9e9e9e9e9c9e9e9e9e9e973e9e9f1e1c1efefefefefefef554054f1f154efffffffffffffffc2c1ffffffc2f4c1ffffffc049c1ffc24949c3fffff3ffffff
-71d1efefefefefefefefefefefefefefefefefefd071d1d0717171717171d1eff4c3e9e9e9e9e9e9e9e9e9e9e9e9c2f4f4c3e9e976e9e9e9e9e9f1c1e9e9e9e9e9e9e9e9e9e9e93ce9e9e9e96ee9f1e1e1efefefefef56efef55f154555554efffffffffffffffc0c3ffffffc1c0c3fffffffff3ffc2c1ffffc0c3ffc0c3ffff
+71d1efefefefefefefefefefefefefefefefefefd071d1d0717171717171d1eff4c3e9e9e9e9e9e9e9e9e9e9e9e9c2f4f4c3e9e9e9e9e9e9e9e9f1c1e9e9e9e9e9e9e9e9e9e9e93ce9e9e9e96ee9f1e1e1efefefefef56efef55f154555554efffffffffffffffc0c3ffffffc1c0c3fffffffff3ffc2c1ffffc0c3ffc0c3ffff
 7171d1efefefefefefefefefefefefefefefefd071d1000000000000d071d3f1f1f1f1f1f1f1f1f1f1f1f1f1f1e1f1f1e1e1e1e1e1e1e1e1e1e1e1e1e1e9e9e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1efefefefeff1f1ef555554555454effffffffffffffffff3fffffffffff3ffffffc2c1fff3fffffffff3fffff3ffff
 f17171d1efefefefefefefefefefefefefefd071d1000000000000000075f1f1f10000000000f1000000003c00000000000000000000000000000000c0f10000000000000000000000000000000000e1e1efefefefefefeff1f15554555454efffffffffffffff5af3fffffffffff3fffffff3fffff3ffaafffff3fffff3ffff
 f1f1d1ef32efefeff172efefefef32f1f1757575002a005d00440000007575755c770000003c00000000f100000000f1f1000000003c00000000003c00000000000000003c0000000000003f0000000000efefefefefefefef5555f15050f1efffe7e8e8e7e8f1f1f1f5f5f1f5f5f1fffffff3ffc2c1ffffffffc0c3fff3ffff
