@@ -20,13 +20,13 @@ function _init()
    game_t = 0
    game_difficulty = 0
    game_is_skub_alive = true
-   game_is_flab_alive = true
+   game_is_flab_alive = false
    game_is_finb_alive = true
    game_num_orbs = 0
    game_num_orbs_placed = 0
-   game_is_mutated = false
+   game_has_rose = false
    game_has_key = false
-   game_has_broom = false
+   game_has_broom = true
 
    -- menu music
    sfx(2,0)
@@ -275,7 +275,7 @@ function draw_game()
    for i=1,game_num_orbs do
       spr( 64, 128-i*8, 0 )
    end
-   if game_is_mutated then
+   if game_has_rose then
       spr( 42, 88, 0 )
    end
    if game_has_key then
@@ -432,7 +432,7 @@ function init_archetypes()
          cmovebox   = nil,
          cdamagbox  = nil,
          cattackbox = caabb_4073,
-         cspeed = 1
+         cspeed = 0.75
       }
 
    local a_wave_move_anm = {k={ {106,5}, {107,5} }}
@@ -878,24 +878,24 @@ function update_player()
       end
 
       -- double-jump if mutated todo limit usage!!
-      if -- game_is_mutated
-         -- and
-         player_v.y >= 0 then
-         if btnp(5) then
-            player_state = 3
-            player_v.y = -4
-            if btn(0) then
-               player_jump_s = -1
-               player_v.x = -1.25
-            elseif btn(1) then
-               player_jump_s = 1
-               player_v.x = 1.25
-            else
-               player_jump_s = 0
-               player_v.x = 0
-            end
-         end
-      end
+      -- if -- game_is_mutated
+      --    -- and
+      --    player_v.y >= 0 then
+      --    if btnp(5) then
+      --       player_state = 3
+      --       player_v.y = -4
+      --       if btn(0) then
+      --          player_jump_s = -1
+      --          player_v.x = -1.25
+      --       elseif btn(1) then
+      --          player_jump_s = 1
+      --          player_v.x = 1.25
+      --       else
+      --          player_jump_s = 0
+      --          player_v.x = 0
+      --       end
+      --    end
+      -- end
    end
 
    --shoot
@@ -962,8 +962,8 @@ function update_player()
             end
          end
          sfx(9)
-      elseif mget(c.tile_j,c.tile_i) == 42 then --mutator
-         game_is_mutated = true
+      elseif mget(c.tile_j,c.tile_i) == 42 then --rose
+         game_has_rose = true
          mset( c.tile_j, c.tile_i, mget( c.tile_j+1, c.tile_i ) )
          sfx(9)
       elseif mget(c.tile_j,c.tile_i) == 71 then --key
@@ -1195,7 +1195,7 @@ function new_room_process_map_cell( r, room_j, room_i, map_j, map_i )
             e = new_entity( a_grunt, pos, new_action_wait_and_ram() )
          elseif m == 120 then
             e = new_entity( a_bird,
-                            pos, new_action_wait_and_fly() )
+                            pos, new_action_wait_and_fly(60) )
          elseif m == 60 then --saw l2r
             e = new_entity( a_saw, pos, new_action_oscillate( pos, v2init(1,0), 24, 300 ) )
          elseif m == 63 then --saw r2l
@@ -1206,7 +1206,7 @@ function new_room_process_map_cell( r, room_j, room_i, map_j, map_i )
             mset(map_j,map_i,72) --install orb
             game_num_orbs_placed += 1
          elseif m == 93 and not game_is_flab_alive then
-            e = new_entity( a_skull2, pos, new_action_wait_and_fly() )
+            e = new_entity( a_skull2, pos, new_action_wait_and_fly(128) )
             --idlers
          elseif m == 247 then --suspended flame
             e = new_entity( a_flame, pos, new_action_idle() )
@@ -1339,7 +1339,7 @@ function new_action_patrol( start_pos, sign_x )
    return { name = "ptrl", anm_id = "move", t = 0, finished = false,
             sub = new_action_move_on_ground( v2add( start_pos, v2init( 128*sign_x, 0 ) ) ),
             update_fn = update_action_patrol }
-end
+                 end
 
 -- wait on spot, ram to player when on same ground level, accessible and within range
 function new_action_wait_and_ram()
@@ -1349,9 +1349,10 @@ function new_action_wait_and_ram()
 end
 
 -- wait on spot, fly to player when within radius
-function new_action_wait_and_fly()
+function new_action_wait_and_fly( _radius )
    return { name = "w&f", anm_id = "idle", t = 0, finished = false,
             sub = new_action_idle(),
+            radius = _radius,
             update_fn = update_action_wait_and_fly }
 end
 
@@ -1642,7 +1643,7 @@ function update_action_wait_and_fly( entity, action )
       and
       action.sub.t > #entity.a.table_anm[action.sub.anm_id].k --only replan after whole cycle
    then
-      if v2length( v2sub( player_p1, entity.p1 ) ) < 60 then
+      if v2length( v2sub( player_p1, entity.p1 ) ) < action.radius then
          action.sub = new_action_move( player_p1 ) --flyto player
       end
    elseif action.sub.finished then
@@ -2256,22 +2257,22 @@ c5379e9e9ebc9ebcbc9ebcbe9e9e37c500aebdae00bcbc0000bcbc00bcbc00bc00111ddd1dd11100
 00000000000000000000000000000000000000000000000000000000000000000002d520025d2000000cc10550c10000000cc10550cc100000011c0550cc1000
 2626262626262626262626262626262600aebeae000000aebe000000be0000be000ddd2002ddd00000c111000011100000c11100001110000011100001111000
 0000000000000000000000000000000000000000000000000000000000000000002dd020020dd200001111100111110000111110011111000010000000011100
-22d2d2d22d2d2d22000000022000000000000000000000006d2dddd62222255555522dd200000080080000001d1dd1d100000000000000000000c00000100000
-002d2d2dd2d2d20000000002200000004000000000000004d66dd66ddd2555cc885552d208000090090000801d1dd1d10000000001111110100c110001000010
-0002d2dddd2d20000000002222000000f40000000000004fd6866c6dd25500ae8aad552d890008900980009801dd1d100000000000000011001c100010000100
+22d2d2d22d2d2d22000000022000000000000000010000006d2dddd62222255555522dd200000080080000001d1dd1d100000000000000000000c00000100000
+002d2d2dd2d2d20000000002200000004000100100000104d66dd66ddd2555cc885552d208000090090000801d1dd1d10000000001111110100c110001000010
+0002d2dddd2d20000000002222000000f40000000001004fd6866c6dd25500ae8aad552d890008900980009801dd1d100000000000000011001c100010000100
 00002d2dd2d20000000002d22d2000004f400000000004f4dd6d26dd25550000abbb55529a90099aa99009a901d1dd1000000000000000000011c00000001000
-000002d22d20000000002d2dd2d20000f4f4000000004f4f2d6dd6d225005000ab555552444004444440044401dd1d10000001100000000000011c0100010000
+000002d22d20000000002d2dd2d20000f4f4001001004f4f2d6dd6d225005000ab555552444004444440044401dd1d10000001100000000000011c0100010000
 00000022220000000002d2dddd2d200044ff40000004ff4fd6b6696d55a00500b55ccc55444004444440044401d1dd1000011001110000000001c10000100010
 0000000220000000002d2d2dd2d2d200ff44f400004f44ffd66dd66d5a00005c55cbbbc504000040040000401d1dd1d10110000000000000100c100000000100
 000000022000000022d2d2d22d2d2d224fff4f4004f4f4f46dddd2d65b0000055cb888b504000040040000401d1dd1d100000000000000000010c01000001000
 04f444f44f444f4000000004400000004f4f4f4004f4fff400555000500000c555baa885000000110000000110000000000000000000000000000c0000000001
 0044f444444f44000000000440000000ff44f400004f44ff0566650000000050c55bba85110001000000001dd100000000000000110000011000c00100000010
-00004f4444f400000000004444000000f4ff40000004ff440566665000000500bc55ba5500101000000001d11d10000000000000001111100000c00001000100
-0000044444400000000004f44f400000f4f4000000004f4f06555665000000008bc5bd520001000000001d1dd1d100000000000000000000000c0c0010000000
-000000f44f00000000004444444400004f400000000004f456666565000000008bc55552100010000001d1d11d1d10000000000000000000010c001000000001
+00004f4444f400000000004444000000f4ff40100004ff440566665000000500bc55ba5500101000000001d11d10000000000000001111100000c00001000100
+0000044444400000000004f44f400000f4f4000000104f4f06555665000000008bc5bd520001000000001d1dd1d100000000000000000000000c0c0010000000
+000000f44f00000000004444444400004f401000000004f456666565000000008bc55552100010000001d1d11d1d10000000000000000000010c001000000001
 000000444400000000044f4444f44000f40000000000004f56556665000000008bc5552d00010100001d1d1dd1d1d100011111000000000000c0c00000000100
-00000004400000000044f444444f440040000000000000045666666000005cc8bc5552dd0010001101d1d1d11d1d1d10000000110000000010c00c0001001000
-000000000000000044f444f44f444f44000000000000000036336363000005555552dddd110000001d1d1d1dd1d1d1d100000000000000000c00c0c010010000
+00000004400000000044f444444f440040000001010000045666666000005cc8bc5552dd0010001101d1d1d11d1d1d10000000110000000010c00c0001001000
+000000000000000044f444f44f444f44000100000000000036336363000005555552dddd110000001d1d1d1dd1d1d1d100000000000000000c00c0c010010000
 2222222256556556000000004949494904f40000f4f4ff4f3b3b43b40000030000300000100000111d1d1d1dd1d1d1d100000677776000000000c00000000000
 02222222656665650000000049444944ff4ff4f44f4ff4f433b33b4b00030030003000000100010001d1d1d11d1d1d1000067777777760001000c00040000040
 0002d2dd5666665600000000444944494ff4ffff4f4f4ff44343433b030b30300300300000101000001d1d1dd1d1d1000067776676677600001c0c0100000000
@@ -2305,20 +2306,20 @@ ffffccff26d5c4c5d4ff36ffffffd5c4fff300000000f300000000f300000000f3000000f3000000
 ffccffff26ffd5e5ffffffc5ffffc5d4fff300000000f300000000f300000000f3006363630000000000e0f000c0f4c10000000000f3000000000000f3dcffffcd6300000063c10000000000000063ffffffffff607070607060ffffffffffffffffffffffdcdddccddcffddccffffdcccdcdcdddccdffe2656565e2f3ffff61
 ffffffff36ffffe5c5e4c4d5c4c5d4fffff300000000f300000000f3006600636363634ef300e0f0000000000000f3000000000000f300000000005af30000000063000063c1000000000000000063ffffffffff7060707070706464646464ffffffffcccdffffdcddffffffddccffffffcdffffffffe2656565656565c3ff61
 ffffffffffc5c4e5d426ccffd5e5c5c4fff300000000f300005a6363636363636363c100f3000000000000000000f300000000e06363630000000063c10000000063635c0076006363636300000063ffffffffff70747060746000c5d4ffffffffcdffdcddffffffffffffddffffcdffdccdffffffffc66565c6656565c0ff61
-5c72ffffd5d4d5e5ff36ffffffe5d426fff300000000f300636363636363636363c10000f3000000000000000000f3000000000000f3c063000000000000000000c06363636363c1000000000063c1ffffffff63607070706070c5d40000ffffffffffffffffffffffff63ffffdccdffffffffffffe265c1c065656565ffff61
+5c72ffffd5d4d5e5ff36ffffffe5d426fff300000000f300636363636363636363c10000f30000005d0000000000f3000000000000f3c063000000000000000000c06363636363c1000000000063c1ffffffff63607070706070c5d40000ffffffffffffffffffffffff63ffffdccdffffffffffffe265c1c065656565ffff61
 ef73ffffffffffe5ffffffffffe5ff36fff300002d636363636363637575757575000000f30000e0f00000000000f3000000000000f300c063000000000000000000f300000000000000000063c1006363e2e2c0706000007060d400000000ffffffffffffffff63dd0000dcff63ffffffffffffff65c18affc0656565ffff73
-ef6ce82b2ce8e8e53072d6ff30e5ffffc2f4c363757575757575757575757575755c000063000000005d0063e2c2f4c30000000066f34000c0630000000066636300f300000000000066637575006363636363ff6070005660700000000000f1f1ffffffff5663c1000000005dc063ffffe2ffffe265ffffffff656565ffe26d
+ef6ce82b2ce8e8e53072d6ff30e5ffffc2f4c363757575757575757575757575755c00006300000000000063e2c2f4c30000000066f34000c0630000000066636300f300000000000066637575006363636363ff6070005660700000000000f1f1ffffffff5663c1000000005dc063ffffe2ffffe265ffffffff656565ffe26d
 efe6717171e6e6e671e6e6e6e6e671e66363636363636363637171717171717171e6e6e663727272727272636363636362626262626262717171716262626262626262626262626262757575757575626262626262626262626250f1505050626262626262626250505050505050626262626262626262626262626262626262
 efefd07171717171717171717171717171717171717171717171717171717171717171716363636363636363636363636363717171717171717171717171717162626262627171717171717171717171717171717171717171515151515151f1f1f1f1f1f1f1f171717171717171717171717171717171717171717171717171
 efefefd071d1d07171717171717171717171717171717171717171717171d0d1d07171d1eff4c1ffffc0f4efefefefefefefefefefefefefefefefefd071d1efefefefefefd075d1efefefefef4eefefefefefefefd071717151515151515151f1f1f1f1f1f1f17171717171f1717171717171717171d1d0d1d071d1d0717171
-e0efefefefefefd0717171717171d1d071d1d0717171d14ed071d14e71d1efefefefefefeff3ff40fffff3efefefefefefef5defefef76efefefefefef4eefefefefef7cefef75efefefefefefefefefefefefefefefefd0717151f151515171f1f1f1f1f1f1717171f1717171717171717171d071d1ffffffff71ffffffd071
+e0efefefefefefd0717171717171d1d071d1d0717171d14ed071d14e71d1efefefefefefeff3ff40fffff3efefefefefefef5cefefef76efefefefefef4eefefefefef7cefef75efefefefefefefefefefefefefefefefd0717151f151515171f1f1f1f1f1f1717171f1717171717171717171d071d1ffffffff71ffffffd071
 efe0efefefefefef4ed0717171d1efefd1efefefd071efefef71efefd1efefefefefefefeff1f1f1f1f1f1efefefefefef72e1e1e1e1e1e1e1e1e1efefefefefef72e1e1e1e1e1e1e1e1e1efefefefefefefeff1efefefefd0715371535371717171717171717171717171d1d071f1717171d1ffd1ffffffffffd0ffffffffd0
 efefe0efefefefefefef7171d1efefefefefefefef71efefefd1efefefefefefefefefeff1f1e9e9e9e9f1f1efefefefefe1c1e9e9e9e9e9e9e9c0f1efefefefefe1c1e9e9f1e9e9e9e9c0f1efefefefefefefc0f1efefefef555353535354717171717171717171d1ffffffffd071717171ffffffffffffffffffffffffffff
 efefefefefefefefefefd071efefefefefefefefefd0efefefefefefefefefefefefeff1f1e9e9e9e9e9e9f1f1efefefefe1e9e9e9e9c9e9e9e9e9e9e9e1e1e1e1e1e9e9e9e9e9e9c9e9e9e9e9e9e1e1e172efefc0f1efefef555353535354d07171717171d1d0d1ffffffffffffffd071d1ffffffffffffffffffffffffffff
 efefefeff0efefefefefef71efefefefefefefefefefefefefefefefefefefefefeff1f1e9e9e9e9e9e9e9e9f1f1efefefe1e9e9e9e9e9e9e9e9e9e9f1c1e9e9e9e9e9e9e9e9e9e9e9e9e9e9e1e1e1e1e1c1efefefc0f156ef555353535354efd0717171d1ffffffffffffffffffffffffffffffffffffffffffffffffffffff
-efefeff0efefefefefefefd0efefefefefefefefefefefefefefefefefefefefef72f1e9e9e9e9e9e9e9e9e9e9f1f1ef5ce140e9e966e9e9e9e9f1e9e9e9c9e9e9e9e9e9e9f1e966e9e9e9e1e9e9e9c0e1efefefefefc0f1f1f1f153535354efffd071d1ffffffffffffffffff78fffffffffffffffffff7f7ffc2ffffffc3ff
+efefeff0efefefefefefefd0efefefefefefefefefefefefefefefefefefefefef72f1e9e9e9e9e9e9e9e9e9e9f1f1ef5de140e9e966e9e9e9e9f1e9e9e9c9e9e9e9e9e9e9f1e966e9e95de1e9e9e9c0e1efefefefefc0f1f1f1f153535354efffd071d1ffffffffffffffffff78fffffffffffffffffff7f7ffc2ffffffc3ff
 efeff0efefefefefefefefefefefefefefefefefefefefefefefefefefefefef72f1e9e9e9c9e9e9e9e9c9e9e9e9f17272e1e1e1e1e1e1e1e1e1c1e9e9e9e9e9e9f1e9e9e1e1e1e1e1e1e1e12de9e9e9e1efefefefefefef4e555554f1535456ffffffffffffff78ffffffffc2c1ffffffc2ffffffc3ffc0c1ffc0c3f7c2c1ff
-eff0efefefefefefefefefefefefefefefefefefefefefefefefefefefefefeff1e9e9e9e9e9e9e9e9e9e9e9e9e9e9f1f1c1e9e9e9e9e9e9e9e9e9e9e1e1e1e1e1c1e9f1c1e9e9e9e9e9e9c0f1e9e95de172efefefefefefef5555545555f1f1ffffffffffffffc0c3ffffffc0c3ffffffc0c3f7c2c1ffc2c3ffffc049c1ffff
+eff0efefefefefefefefefefefefefefefefefefefefefefefefefefefefefeff1e9e9e9e9e9e9e9e9e9e9e9e9e9e9f1f1c1e9e9e9e9e9e9e9e9e9e9e1e1e1e1e1c1e9f1c1e9e9e9e9e9e9c0f1e9e9e9e172efefefefefefef5555545555f1f1ffffffffffffffc0c3ffffffc0c3ffffffc0c3f7c2c1ffc2c3ffffc049c1ffff
 efefefefefefefefefefefefefefefefefefefefefd071d1efefef7cefefefeff4e9e9e9e9e9e9e9e9e9e9e9e9e9e9f4f4e9e9e9e9e9c9e9e9e9e9f1c1e9e9e9e9e9e9e9e9e9c9e9e9e9e9e973e9e9f1e1c1efefefefefefef554054f1f154efffffffffffffffc2c1ffffffc2f4c1ffffffc049c1ffc24949c3fffff3ffffff
 71d1efefefefefefefefefefefefefefefefefefd071d1d0717171717171d1eff4c3e9e9e9e9e9e9e9e9e9e9e9e9c2f4f4c3e9e9e9e9e9e9e9e9f1c1e9e9e9e9e9e9e9e9e9e9e93ce9e9e9e96ee9f1e1e1efefefefef56efef55f154555554efffffffffffffffc0c3ffffffc1c0c3fffffffff3ffc2c1ffffc0c3ffc0c3ffff
 7171d1efefefefefefefefefefefefefefefefd071d1000000000000d071d3f1f1f1f1f1f1f1f1f1f1f1f1f1f1e1f1f1e1e1e1e1e1e1e1e1e1e1e1e1e1e9e9e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1efefefefeff1f1ef555554555454effffffffffffffffff3fffffffffff3ffffffc2c1fff3fffffffff3fffff3ffff
@@ -2455,4 +2456,3 @@ __music__
 00 41414141
 00 41414141
 00 41414141
-
