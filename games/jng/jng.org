@@ -125,8 +125,8 @@ HexeN SturM
     - Unborn: No death, regenerate all
     - Alive: 4-hit death, regenerate all
     - Undead: 2-hit death, regenerate all
-* TODO Intro
-** TODO Art
+* DONE Intro
+** DONE Art
 ** DONE Text
 * DONE Ending
   - Art
@@ -143,12 +143,20 @@ HexeN SturM
     - Move camera with noise
 ** DONE (WON'T DO) Dark areas using flickering/dither
 * TODO Balance
+** TODO FlameBoss is too hard, actually impossible due to ramming if the player does not have the broom
+* TODO Polish
+** TODO Use free sprites to add detail/variety
 * TODO BUGS
 ** TODO AABB sizes are a bit wrong when inverted (seem to drift left)
 ** TODO collision bugs when hit or on broomstick
 ** TODO miissing or late wall/ceiling collision when changing rooms
    - make room change more robust by placing char strictly at the
      border regardless of speed
+** TODO bosses remain dead after continue, so if final boss is dead the game cannot be replayed without resetting the cartridge
+* TODO Write
+** TODO Game entry description
+** TODO Tips/Walkthrough
+** TODO Postmortem
 * FW
 ** DONE RLE anims
    - list of key + repetitions
