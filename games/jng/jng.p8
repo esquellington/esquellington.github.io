@@ -28,7 +28,6 @@ function _init()
    game_has_key = false
    game_has_broom = true
 
-   -- menu music
    sfx(2,0)
 
    messages = {}
@@ -99,15 +98,6 @@ function draw_rain( max_y )
    end
 end
 
--- function draw_stars()
---    for i=0,15 do
---       for j=0,15 do
---          local dice = flr(rnd(1000))
---          spr( 28+flr((dice%100)/99), 8*j, 8*i )
---       end
---    end
--- end
-
 function draw_lighting( _x, length )
    local frames = {206,222,238}
    for y=16,length,8 do
@@ -128,7 +118,7 @@ function _draw()
       print("normal",52,62)
       print(" hard ",52,70)
    elseif game_state == "intro" then
-      draw_rain(15)
+      -- draw_rain(15)
       table_text =
          {
             {1,  "in a land with no sun"},
@@ -153,7 +143,6 @@ function _draw()
          pos_x += lambda*lambda/4 - 3*lambda
       end
       spr( anm_k[1+game_t%#anm_k], pos_x, 70 + 2*cos(game_t/30) )
-      -- draw_stars()
       table_text =
          {
             {1,"the bishop has been defeated!"},
@@ -357,7 +346,6 @@ function init_archetypes()
    a_player =
       {
          table_anm = _table_anm,
-         -- cvisualbox = caabb_88, --cvisualbox is only required for the player!!
          cmovebox   = caabb_1177,
          cdamagebox = aabb_init( 2, 1, 6, 7 ),
          cattackbox = nil,
@@ -365,7 +353,7 @@ function init_archetypes()
          table_health = {-1,4,2}
       }
    uncompress_anim( a_player )
-   -- save indexed player anims (fuck this could be a loop if tables kept order!)
+   -- indexed player anims
    g_anim = {}
    add( g_anim, _table_anm["idle"] ) --1
    add( g_anim, _table_anm["run"] )  --2
@@ -385,7 +373,6 @@ function init_archetypes()
                move = {k={66}},
                hit  = {k={67,67,67}}
             },
-         -- cvisualbox = caabb_88,
          cmovebox   = caabb_4374,
          cdamagbox  = nil,
          cattackbox = aabb_init( 1, 3, 6, 4 ),
@@ -401,10 +388,9 @@ function init_archetypes()
                hit  = {k={ {249,3}, {250,3},
                            {245,5}, {246,5},
                            {245,5}, {246,5},
-                           {245,5}, {246,5} }}, --remain 30 frames (1 sec)
+                           {245,5}, {246,5} }},
                burn = {k={ {249,3}, {250,3}, {247,3} }}
             },
-         -- cvisualbox = caabb_88,
          cmovebox   = caabb_88,
          cdamagbox  = nil,
          cattackbox = aabb_init( 2, 4, 6, 8 ),
@@ -420,7 +406,6 @@ function init_archetypes()
                move = a_skull_move_anm,
                hit  = a_skull_move_anm,
             },
-         -- cvisualbox = caabb_88,
          cmovebox   = caabb_4374,
          cdamagbox  = nil,
          cattackbox = caabb_4073,
@@ -436,7 +421,6 @@ function init_archetypes()
                idle = a_skull2_idle_anm,
                move = a_skull2_idle_anm
             },
-         -- cvisualbox = caabb_88,
          cmovebox   = nil,
          cdamagbox  = nil,
          cattackbox = caabb_4073,
@@ -451,7 +435,6 @@ function init_archetypes()
                move = a_wave_move_anm,
                hit  = a_wave_move_anm
             },
-         -- cvisualbox = caabb_88,
          cmovebox   = caabb_4374,
          cdamagbox  = nil,
          cattackbox = caabb_4073,
@@ -465,7 +448,6 @@ function init_archetypes()
             {
                move = {k={ {48,6}, {49,6} }}
             },
-         -- cvisualbox = caabb_88,
          cmovebox   = caabb_88,
          cdamagebox = caabb_1478,
          cattackbox = caabb_1478,
@@ -481,7 +463,6 @@ function init_archetypes()
             {
                move = {k={50,50,50,50,51,51,51,51}},
             },
-         -- cvisualbox = caabb_88,
          cmovebox   = caabb_88,
          cdamagebox = aabb_init( 0, 2, 8, 8 ),
          cattackbox = caabb_88,
@@ -497,7 +478,6 @@ function init_archetypes()
                move = {k={60,61,62,63}},
                hit  = {k={60}}
             },
-         -- cvisualbox = caabb_88,
          cmovebox   = caabb_88,
          cdamagbox  = nil,
          cattackbox = aabb_init( 2, 2, 6, 6 ),
@@ -514,7 +494,6 @@ function init_archetypes()
                move = {k={78}},
                hit  = {k={79,79,79}}
             },
-         -- cvisualbox = caabb_88,
          cmovebox   = caabb_1177,
          cdamagbox  = nil,
          cattackbox = caabb_88,
@@ -531,7 +510,6 @@ function init_archetypes()
                move = {k={ {105,4}, {104,4} }},
                attack = {k={ {105,8}, {106,6} }}
             },
-         -- cvisualbox = caabb_88,
          cmovebox   = caabb_88,
          cdamagebox = caabb_88,
          cattackbox = caabb_88,
@@ -566,7 +544,6 @@ function init_archetypes()
             {
                move = {k={ {118,5}, {119,5} }}
             },
-         -- cvisualbox = caabb_88,
          cmovebox   = caabb_2068,
          cdamagebox = nil,
          cattackbox = nil,
@@ -583,7 +560,6 @@ function init_archetypes()
                idle = {k={ {120,4}, {121,4} }},
                move = {k={ {122,5}, {123,5} }}
             },
-         -- cvisualbox = caabb_88,
          cmovebox   = caabb_2068,
          cdamagebox = caabb_88,
          cattackbox = caabb_88,
@@ -601,7 +577,6 @@ function init_archetypes()
                jump_up = {k={126}},
                jump_down = {k={127}}
             },
-         -- cvisualbox = caabb_88,
          cmovebox   = caabb_2068,
          cdamagebox = caabb_88,
          cattackbox = caabb_1478,
@@ -617,7 +592,6 @@ function init_archetypes()
             {
                move = {k={ {68,3}, {69,8}, {70,3} }}
             },
-         -- cvisualbox = caabb_88,
          cmovebox   = caabb_88,
          cdamagbox  = nil,
          cattackbox = aabb_init( 1, 2, 6, 8 ),
@@ -634,7 +608,6 @@ function init_archetypes()
                move = {k={1,1,1,2,2,2,3,3,3,2,2}},
                hit  = {k={4,4,5,5,6,6,6,7}}
             },
-         -- cvisualbox = caabb_88,
          cmovebox   = nil,
          cdamagbox  = nil,
          cattackbox = aabb_init( 4, 3, 8, 4 ),
@@ -1082,9 +1055,18 @@ function advance_ccd_box_vs_map( p0, p1, box, flags )
       local b_retest = false
       for c in all(collisions_ccd) do
 
-         -- TODO CORRECT p0 position unconditionally for all overlapping contacts at t=0
-         -- if p0 overlap, fix it
+         -- Correct p0 if overlap
+         if player_state == 10 then
+            local tile_mid_y = 8*(c.tile_i - level.room_coords.y * 16) + 4
+            local box_hs_y = 0.5 * (box.max.y - box.min.y)
+            local diff_mid_y = p0.y + box.min.y + box_hs_y - tile_mid_y
+            local depth_y = 8 - abs( diff_mid_y )
+            if depth_y > 0 and depth_y < 3 then
+               p0.y += sgn(diff_mid_y) * depth_y
+            end
+         end
 
+         -- Correct displacement
          local dn = v2dot( d, c.normal )
          if not b_retest
             and dn < 0
@@ -1289,7 +1271,6 @@ function update_enemies()
    end
 end
 
-----------------------------------------------------------------
 -- actions
 function new_action_idle()
    return { name = "idle", anm_id = "idle", t = 0, finished = false,
@@ -1303,7 +1284,7 @@ function new_action_move( target_pos )
             update_fn = update_action_move }
 end
 
--- ballistic projectile, play "hit" and disappear on impact
+-- ballistic projectile
 function new_action_particle( _v, _a )
    return { name = "part", anm_id = "move", t = 0, finished = false,
             vel = _v, acc = _a,
@@ -1315,7 +1296,7 @@ function new_action_hit()
             update_fn = update_action_hit }
 end
 
--- shoot with cooldown timeout
+-- shoot with cooldown
 function new_action_shoot( _timeout, _type )
    return { name = "shoot", anm_id = "attack", t = _timeout-1, finished = false,
             timeout = _timeout,
@@ -1344,14 +1325,14 @@ function new_action_patrol( start_pos, sign_x )
             update_fn = update_action_patrol }
                  end
 
--- wait on spot, ram to player when on same ground level, accessible and within range
+-- wait on spot, ram to player if on same y-level, accessible & in range
 function new_action_wait_and_ram()
    return { name = "w&r", anm_id = "idle", t = 0, finished = false,
             sub = new_action_idle(),
             update_fn = update_action_wait_and_ram }
 end
 
--- wait on spot, fly to player when within radius
+-- wait on spot, fly to player when in radius
 function new_action_wait_and_fly( _radius )
    return { name = "w&f", anm_id = "idle", t = 0, finished = false,
             sub = new_action_idle(),
@@ -1359,21 +1340,21 @@ function new_action_wait_and_fly( _radius )
             update_fn = update_action_wait_and_fly }
 end
 
--- wait on spot, fall on player when on same horizontal level
+-- wait on spot, fall on player when on same y-level
 function new_action_wait_and_drop()
    return { name = "w&d", anm_id = "idle", t = 0, finished = false,
             sub = new_action_idle(),
             update_fn = update_action_wait_and_drop }
 end
 
--- wait on spot, fly to player when within radius
+-- wait on spot, fly to player when in radius
 function new_action_patrol_and_jump( start_pos, sign_x )
    return { name = "p&j", anm_id = "move", t = 0, finished = false,
             sub = new_action_patrol( start_pos, sign_x ),
             update_fn = update_action_patrol_and_jump }
 end
 
--- oscillate from midpos along dir with sinusoid of given amplitude (in pixels) and period (in frames)
+-- oscillate from midpos along dir with sinusoid of given amplitude (pixels) and period (frames)
 function new_action_oscillate( mid_pos, _dir, _amplitude, _period )
    return { name = "oscl", anm_id = "move", t = 0, finished = false,
             p_mid = mid_pos,
@@ -1403,7 +1384,6 @@ function new_action_boss( _update_fn )
             update_fn = _update_fn }
 end
 
-----------------------------------------------------------------
 function update_action( _entity, _action )
    local act = _action
    act.t += 1
@@ -1574,11 +1554,11 @@ function update_action_jump_on_ground( entity, action )
       action.v.y += acc_y
       local speed = v2length( action.v )
       if dist < speed then
-         -- success, closer than 1 timestep advance
+         -- success, closer than 1 dt
          entity.p1 = action.p_target
          action.finished = true
       else
-         -- todo this seems to easily overshoot
+         -- todo this overshoots
          entity.p1 = v2add( entity.p0, v2scale( min(speed,dist)/speed, action.v ) )
          entity.sign = sgn( action.v.x )
       end
@@ -1604,7 +1584,7 @@ function has_line_of_sight_horizontal( p1, p2 )
    end
    hits_ccd = ccd_box_vs_map( p1, v2init(p2.x,p1.y),
                               aabb_init(0,0,1,1),
-                              3)--,true )
+                              3)
    return #hits_ccd == 0
 end
 
@@ -1614,7 +1594,7 @@ function has_line_of_sight_downwards( p1, p2 )
    end
    hits_ccd = ccd_box_vs_map( p1, v2init(p1.x,p2.y),
                               aabb_init(0,0,1,1),
-                              3)--,true )
+                              3)
    return #hits_ccd == 0
 end
 
