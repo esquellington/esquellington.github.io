@@ -151,6 +151,7 @@ HexeN SturM
      player constantly, otherwise, they should move in straight lines.
 * TODO Polish
 ** TODO Use free sprites to add detail/variety
+** DONE Auto transition from intro/ending to game/menu
 ** DONE (WON'T DO) Golden key could lead to secret room behind bishop door, procedurally generated, to include all enemies in different "stands" like a gallery
 * DONE BUGS
 ** DONE bosses remain dead after continue, so if final boss is dead the game cannot be replayed without resetting the cartridge

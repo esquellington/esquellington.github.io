@@ -16,7 +16,7 @@ function _init()
    cv2_44 = v2init(4,4)
 
    init_archetypes()
-   game_state = "menu"
+   game_state = "win"
    game_t = 0
    game_difficulty = 0
    init_persistence()
@@ -30,7 +30,7 @@ function init_persistence()
    game_is_skub_alive = true
    game_is_flab_alive = true
    game_is_finb_alive = true
-   game_num_orbs = 4
+   game_num_orbs = 0
    game_num_orbs_placed = 0
    game_has_rose = false
    game_has_key = false
@@ -60,7 +60,6 @@ function _update()
       if player_health == 0 then
          game_state = "death"
          game_t = 0
-         add_message("you failed")
          sfx(18,0)
       elseif not game_is_finb_alive then
          game_state = "win"
@@ -69,8 +68,8 @@ function _update()
       end
    elseif ((game_state == "intro"
                or game_state == "win"
-               or game_state == "death") and btnp(4))
-   or (game_state == "death" and game_t > 330) then
+               or game_state == "death") and (btnp(4)) or game_t > 630)
+   then
       game_t = 0
       messages = {}
       if game_state == "intro" then
@@ -78,7 +77,6 @@ function _update()
          init_game()
          player_health = a_player.table_health[game_difficulty+1]
       else
-         -- reset persistence
          if game_state == "win" then
             init_persistence()
          end
@@ -160,7 +158,12 @@ function _draw()
             {160,"a pico-8 game by esquellington"}
          }
    elseif game_state == "death" then
-      local scroll = max( 0, game_t/3 - 30 )
+      table_text =
+         {
+            {1,"you"},
+            {120,"failed!"}
+         }
+      local scroll = max( 0, game_t/5 - 30 )
       pal(1,0)
       map( 0, 0, 0, 8+scroll, 16, 16, 0x20 )
       spr( 36, 8, 112+scroll, 2, 2 )
@@ -659,10 +662,10 @@ function init_archetypes()
             },
          cvisualbox = caabb_1616,
          cmovebox   = caabb_1616,
-         cdamagebox = caabb_4n1139,
+         --cdamagebox = caabb_4n1139,
          cattackbox = caabb_1616,
          cspeed = 1,
-         chealth = 10,
+         chealth = 20,
          cshootpos = v2init( 10, 6 ),
          rtoff = v2init(1,0),
          cshoottype = a_skull,
@@ -680,10 +683,10 @@ function init_archetypes()
             },
          cvisualbox = caabb_1616,
          cmovebox   = caabb_1616,
-         cdamagebox = caabb_4n1139,
+         --cdamagebox = caabb_4n1139,
          cattackbox = caabb_1616,
          cspeed = 2.5,
-         chealth = 10,
+         chealth = 20,
          cshootpos = v2init( 10, 0 ),
          rtoff = v2init(1,0),
          cshoottype = a_flame,
@@ -702,7 +705,7 @@ function init_archetypes()
             },
          cvisualbox = caabb_1616,
          cmovebox   = caabb_1616,
-         cdamagebox = caabb_4n1139,
+         --cdamagebox = nil,--caabb_4n1139,
          cattackbox = caabb_1616,
          cspeed = 2.5,
          chealth = 20,
@@ -730,7 +733,7 @@ function init_game()
 
    level = {}
    level.a = a_level
-   level.room_coords = v2init( 0, 0 )
+   level.room_coords = v2zero()
 
    room = new_room( level.room_coords )
 end
@@ -1714,6 +1717,7 @@ function update_action_skullboss( entity, action )
          action.phase = 2
       end
    elseif action.phase == 2 then --combat
+      a_skullboss.cdamagebox = caabb_4n1139
       if sub.name == "idle" and sub.t > 30 then --1s
          sub = new_action_shoot(30,"sinusoid")
       elseif sub.name == "shoot" and sub.t > 120 then --4x shots
@@ -1739,6 +1743,7 @@ function update_action_flameboss( entity, action )
          sub = new_action_jump_on_ground( v2init(104,104) )
       end
    elseif action.phase == 2 then --combat
+      a_flameboss.cdamagebox = caabb_4n1139
       if sub.name == "idle" and sub.t > 30 then --1s
          if entity.p1.x > 90 then --3s
             a_flameboss.cshootpos = v2init( 10, 0 )
@@ -1777,6 +1782,7 @@ function update_action_finalboss( entity, action )
          sub = new_action_move( v2init(56,26) )
       end
    elseif action.phase == 2 then
+      a_finalboss.cdamagebox = caabb_4n1139
       if sub.name == "move" and sub.finished then
          sub = new_action_idle()
          -- sub = new_action_oscillate( entity.p1, v2init(1,0), 4, 30 )
