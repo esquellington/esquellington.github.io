@@ -143,8 +143,9 @@ HexeN SturM
     - Move camera with noise
 ** DONE (WON'T DO) Dark areas using flickering/dither
 * TODO Balance
+** TODO Boss energy HUD
 ** TODO Broom makes everything too easy, but FINB and FLAB need it
-** TODO FlameBoss is too hard, actually impossible due to ramming if the player does not have the broom
+** DONE FlameBoss is too hard, actually impossible due to ramming if the player does not have the broom
 ** TODO Balance flying skulls
    - if player has broom, they're very easy and should instead move to
      player constantly, otherwise, they should move in straight lines.

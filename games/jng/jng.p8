@@ -28,9 +28,9 @@ end
 
 function init_persistence()
    game_is_skub_alive = true
-   game_is_flab_alive = false
+   game_is_flab_alive = true
    game_is_finb_alive = true
-   game_num_orbs = 0
+   game_num_orbs = 4
    game_num_orbs_placed = 0
    game_has_rose = false
    game_has_key = false
@@ -118,7 +118,7 @@ function _draw()
    pal()
    local table_text
    if game_state == "menu" then
-      draw_flash(5)
+      draw_flash(10)
       draw_rain(15)
       map( 16, 32, 0, 0, 16, 16, 0x7f )
       spr( 64, 44, 52 + 8*game_difficulty )
@@ -673,7 +673,7 @@ function init_archetypes()
             {
                idle      = {k={170,170,170,172,172,172}},
                move      = {k={174}},
-               attack    = {k={170}},
+               attack    = {k={174}},
                jump_up   = {k={172}},
                jump_down = {k={170}}
             },
@@ -729,7 +729,7 @@ function init_game()
 
    level = {}
    level.a = a_level
-   level.room_coords = v2init( 0, 0 )
+   level.room_coords = v2init( 7, 1 )
 
    room = new_room( level.room_coords )
 end
@@ -1701,7 +1701,6 @@ end
 function update_action_skullboss( entity, action )
    local sub = update_action( entity, action.sub )
    entity.sign = sgn( player_p1.x - entity.p1.x )
-   -- intro/combat/outtro phases
    if action.phase == 1 then --intro
       if action.t > 60 then
          action.phase = 2
@@ -1718,8 +1717,6 @@ function update_action_skullboss( entity, action )
       elseif sub.name == "jong" and sub.finished then
          sub = new_action_idle()
       end
-   else
-      --outtro
    end
    action.sub = sub
    return action
@@ -1727,7 +1724,7 @@ end
 
 function update_action_flameboss( entity, action )
    local sub = update_action( entity, action.sub )
-   -- intro/combat/outtro phases
+   entity.sign = sgn( player_p1.x - entity.p1.x )
    if action.phase == 1 then --intro
       if action.t > 60 then
          action.phase = 2
@@ -1735,21 +1732,22 @@ function update_action_flameboss( entity, action )
       end
    elseif action.phase == 2 then --combat
       if sub.name == "idle" and sub.t > 30 then --1s
-         sub = new_action_shoot(30,"parabolic")
-      elseif sub.name == "shoot" and sub.t > 90 then --3x shots
-         if entity.p1.x > 90 then --100 then
-            sub = new_action_move_on_ground( v2init(0,104) )
+         if entity.p1.x > 90 then --3s
+            a_flameboss.cshootpos = v2init( 10, 0 )
+            sub = new_action_shoot(15,"parabolic") --6x
+         else
+            a_flameboss.cshootpos = v2init( 1, 7 ) --3x
+            sub = new_action_shoot(30,"horizontal")
+         end
+      elseif sub.name == "shoot" and sub.t > 90 then --3x
+         if entity.p1.x > 90 then
+            sub = new_action_jump_on_ground( v2init(0,104) )
          else
             sub = new_action_jump_on_ground( v2init(104,104) )
          end
       elseif (sub.name == "jong" or sub.name == "mong") and sub.finished then
          sub = new_action_idle()
       end
-      if sub.name != "mong" then
-         entity.sign = sgn( player_p1.x - entity.p1.x )
-      end
-   else --outtro
-      --todo
    end
    action.sub = sub
    return action
@@ -1757,7 +1755,6 @@ end
 
 function update_action_finalboss( entity, action )
    local sub = update_action( entity, action.sub )
-   -- intro/combat/outtro phases
    if action.phase == 1 then --intro
       if action.t < 120 then
          --intro uses piano anim, flip sign to animate cheaply
@@ -1778,7 +1775,7 @@ function update_action_finalboss( entity, action )
       elseif sub.name == "idle" and sub.t > 60 then
          a_finalboss.cshoottype = a_flame
          sub = new_action_shoot(30,"straight")
-      elseif sub.name == "shoot" and sub.t > 120 then --4x shots
+      elseif sub.name == "shoot" and sub.t > 120 then --4x
          a_finalboss.cspeed = 5
          sub = new_action_move( v2init(56,104) )
          action.phase = 3
@@ -1792,8 +1789,6 @@ function update_action_finalboss( entity, action )
          sub = new_action_move( v2init(56,26) )
          action.phase = 2
       end
-   else --outtro
-      --todo
    end
    action.sub = sub
    return action
