@@ -146,11 +146,12 @@ HexeN SturM
 ** DONE Boss energy HUD
 ** DONE Broom makes everything too easy, but FINB and FLAB need it
 ** DONE FlameBoss is too hard, actually impossible due to ramming if the player does not have the broom
+** DONE Rose projectile 2x damage
 ** TODO Balance flying skulls
    - if player has broom, they're very easy and should instead move to
      player constantly, otherwise, they should move in straight lines.
 * TODO Polish
-** TODO Use free sprites to add detail/variety
+** DONE Use free sprites to add detail/variety
 ** DONE Auto transition from intro/ending to game/menu
 ** DONE (WON'T DO) Golden key could lead to secret room behind bishop door, procedurally generated, to include all enemies in different "stands" like a gallery
 * DONE BUGS
