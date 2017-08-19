@@ -31,9 +31,9 @@ function init_persistence()
    game_is_finb_alive = true
    game_num_orbs = 0
    game_num_orbs_placed = 0
-   game_has_rose = true
+   game_has_rose = false
    game_has_key = false
-   game_has_broom = true
+   game_has_broom = false
 end
 
 function _update()
@@ -68,7 +68,9 @@ function _update()
       end
    elseif ((game_state == "intro"
                or game_state == "win"
-               or game_state == "death") and (btnp(4) or game_t > 630))
+               or game_state == "death")
+         and ( (btnp(4) and game_state != "win")
+               or game_t > 630))
    then
       game_t = 0
       messages = {}
@@ -124,7 +126,6 @@ function _draw()
       print("normal",52,62)
       print(" hard ",52,70)
    elseif game_state == "intro" then
-      -- draw_rain(15)
       table_text =
          {
             {1,  "in a land with no sun"},
@@ -647,7 +648,7 @@ function init_archetypes()
             }
       }
 
-   --env entities
+   --env
    a_torch =
       {
          table_anm =
@@ -718,7 +719,6 @@ function init_archetypes()
       }
 end
 
-----------------------------------------------------------------
 -- game
 function init_game()
    game_t = 0
@@ -730,7 +730,7 @@ function init_game()
    player_sign = 1
    player_v = v2zero()
    player_on_ground = false
-   player_jump_s = 0  --original jump directio
+   player_jump_s = 0
    player_inv_t = 0
    player_health = 0
    player_weapon_a = a_blast
@@ -742,10 +742,7 @@ function init_game()
 end
 
 -- player
---- ccd movement with strong non-penetration guarantee on static map tiles
 function update_player()
-
-   -- debug.log = {}
    player_t += 1
    if player_inv_t > 0 then
       player_inv_t -= 1
@@ -880,9 +877,9 @@ function update_player()
       and player_state!=10
       and btnp(4) then
       if player_state==3 then
-         player_state = 6 --shoot jump
+         player_state = 6 --shjmp
       else --idle/run
-         player_state = 5 --shoot idle
+         player_state = 5 --shidl
          player_v.x = 0
       end
       new_bullet_blast( player_p0, player_sign )
@@ -902,14 +899,14 @@ function update_player()
    local p1
    local num_hits_map
    -- first handle collisions with solid map
-   p1, num_hits_map, player_handled_collisions = advance_ccd_box_vs_map( player_p0, v2add( player_p0, pred_vel ), movebox, 1 )--, false )
+   p1, num_hits_map, player_handled_collisions = advance_ccd_box_vs_map( player_p0, v2add( player_p0, pred_vel ), movebox, 1 )
    -- then handle collisions with damage map important: we do it in a
    -- second pass to allow non-damage tiles to prevent the player from
    -- hitting damage tiles if already supported/deflected by
    -- non-damage tiles
    local p2
    local hits_ccd = {}
-   p2, num_hits_map, hits_ccd = advance_ccd_box_vs_map( player_p0, p1, damagebox, 2 )--, false )
+   p2, num_hits_map, hits_ccd = advance_ccd_box_vs_map( player_p0, p1, damagebox, 2 )
 
    -- test enemies for collision, even if we've already hit map damage
    local hit_enemy = false
@@ -925,9 +922,7 @@ function update_player()
    end
 
    -- test powerups/collectables
-   hits_ccd = ccd_box_vs_map( player_p0, p2,
-                              movebox,
-                              8)--false ) --all collisions
+   hits_ccd = ccd_box_vs_map( player_p0, p2, movebox, 8 )
    for c in all(hits_ccd) do
       if mget(c.tile_j,c.tile_i) == 64 then
          game_num_orbs += 1
@@ -974,10 +969,7 @@ function update_player()
    end
 
    -- check on ground for next frame
-   --flags: 0 is_solid, 1 is_damage
-   player_ground_ccd_1 = ccd_box_vs_map( player_p0, v2add( player_p1, v2init(0,1) ),
-                                         movebox,
-                                         3)
+   player_ground_ccd_1 = ccd_box_vs_map( player_p0, v2add( player_p1, v2init(0,1) ), movebox, 3 )
    player_on_ground = false
    for c in all(player_ground_ccd_1) do
       if c.normal.y < 0 and player_v.y >= 0 then
@@ -991,12 +983,6 @@ function update_player()
    end
 
    local room_coords = level.room_coords
-   -- cannot leave room if boss is alive
-   -- local b_cannot_leave_room = room_coords.x == 7
-   --                             and ( ( room_coords.y == 0 and game_is_skub_alive )
-   --                                   or
-   --                                   ( room_coords.y == 1 and game_is_flab_alive and game_num_orbs_placed == 4 ) )
-
    -- update-map
    if room_boss == nil then --not b_cannot_leave_room then
       local offset = 16*8
@@ -1036,8 +1022,7 @@ function update_player()
       level.room_coords = room_coords
    end
 
-   --borders todo these should be also treated as ccd contacts,
-   --otherwise clamping may cause interpenetration with map tiles!!
+   --borders
    player_p1 = apply_borders( player_p1, movebox )
 end
 
@@ -1091,7 +1076,6 @@ function advance_ccd_box_vs_map( p0, p1, box, flags )
    return p1, num_hits, handled_collisions
 end
 
-----------------------------------------------------------------
 -- rooms
 function new_room( coords )
    kill_room()
@@ -1226,7 +1210,6 @@ function new_room_process_map_cell( r, room_j, room_i, map_j, map_i )
    end
 end
 
-----------------------------------------------------------------
 -- enemies
 function new_entity( _archetype, _pos, _action )
    return { a = _archetype,
@@ -1425,15 +1408,9 @@ end
 function update_action_particle( entity, action )
    action.vel = v2add( action.vel, action.acc )
    entity.p1 = v2add( entity.p0, action.vel )
-   --todo if collision, change to "action_impact" and die afterwards
    local movebox = aabb_apply_sign_x( entity.a.cmovebox, entity.sign )
-   --flags: 1 is_solid, 2 is_damage, 4 is destructible
-   local map_collisions = ccd_box_vs_map( entity.p0,
-                                          entity.p1,
-                                          movebox,
-                                          5)--,true ) --first-only
+   local map_collisions = ccd_box_vs_map( entity.p0, entity.p1, movebox, 5 )
    if #map_collisions > 0 then
-      --bug: floating flames, workaround using 1.01
       entity.p1 = v2add( entity.p0, v2scale( 1.01*map_collisions[1].interval.min, action.vel ) )
       return new_action_hit()
    else
@@ -1582,9 +1559,7 @@ function has_line_of_sight_horizontal( p1, p2 )
    if flr(p1.y) != flr(p2.y) then
       return false
    end
-   hits_ccd = ccd_box_vs_map( p1, v2init(p2.x,p1.y),
-                              aabb_init(0,0,1,1),
-                              3)
+   hits_ccd = ccd_box_vs_map( p1, v2init(p2.x,p1.y), aabb_init(0,0,1,1), 3 )
    return #hits_ccd == 0
 end
 
@@ -1768,7 +1743,6 @@ function update_action_finalboss( entity, action )
       a_finalboss.cdamagebox = caabb_4n1139
       if sub.name == "move" and sub.finished then
          sub = new_action_idle()
-         -- sub = new_action_oscillate( entity.p1, v2init(1,0), 4, 30 )
       elseif sub.name == "idle" and sub.t > 60 then
          a_finalboss.cshoottype = a_flame
          sub = new_action_shoot(30,"straight")
@@ -1791,7 +1765,6 @@ function update_action_finalboss( entity, action )
    return action
 end
 
-----------------------------------------------------------------
 -- bullets
 function new_bullet_blast( _p, _s )
    local b = { a = player_weapon_a,
