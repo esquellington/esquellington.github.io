@@ -632,7 +632,7 @@ function init_archetypes()
          cdamagbox  = nil,
          cattackbox = caabb_4374,
          cspeed = 2.5,
-         cdamage = 3
+         cdamage = 2
       }
 
    -- vfx
@@ -1845,7 +1845,6 @@ function update_bullets()
    end
 end
 
-----------------------------------------------------------------
 -- vfx
 function new_vfx( _a, _p, _s )
    local v = { anm = _a.table_anm["hit"],
@@ -1864,7 +1863,6 @@ function update_vfx()
    end
 end
 
-----------------------------------------------------------------
 -- helpers
 function clamp( v, l, u )
    return min( max( v, l ), u )
@@ -1884,7 +1882,7 @@ function aabb_init_2( _pmin, _pmax )
             max = _pmax }
 end
 
--- invert l/r an aabb (assuming sprite size 8 or 16... this is ugly)
+-- HACK: invert l/r an aabb (assuming size 8 or 16)
 function aabb_apply_sign_x( aabb, sign_x )
    if sign_x < 0 then
       if aabb.max.x - aabb.min.y > 8 then
@@ -1895,7 +1893,6 @@ function aabb_apply_sign_x( aabb, sign_x )
                   max = v2init( 7 - aabb.min.x, aabb.max.y ) }
       end
    end
-   -- otherwise
    return aabb
 end
 
@@ -1910,19 +1907,6 @@ function apply_borders( p, box )
                   clamp( p.y, 0-box.min.y-8, 128-box.max.y ) )
 end
 
--- function contains_collision_with_normal( collisions, n )
---    for v in all(collisions) do
---       if v.normal.x == n.x
---          and
---          v.normal.y == n.y
---       then
---          return true
---       end
---    end
---    return false
--- end
-
-----------------------------------------------------------------
 -- vec2 functions
 function v2init( _x, _y ) return { x = _x, y = _y } end
 function v2zero() return { x = 0, y = 0 } end
@@ -1940,7 +1924,6 @@ function v2length( v ) return sqrt( v2length2( v ) ) end
 function v2perp( v ) return { x = -v.y, y = v.x } end
 function v2clamp( v, l, u ) return { x = min( max( v.x, l.x ), u.x ),
                                      y = min( max( v.y, l.y ), u.y ) } end
-
 
 --[[
    ray vs aabb at origin
@@ -2059,9 +2042,8 @@ function ccd_box_vs_map( box_pos0, box_pos1, box_aabb, flag_mask )
    for o in all(overlaps) do
 
       local tile_aabb_min = v2init( o.tile_j*8, o.tile_i*8 )
-      local tile_aabb_max = v2add( tile_aabb_min, v2init(8,8) ) --8,8 are the sizes of map tile, but could be sub-box
+      local tile_aabb_max = v2add( tile_aabb_min, v2init(8,8) )
 
-      --todo: consider instead getting only up to the first non-0 hit, and clipping interval incrementally to reduce tested pairs
       local c = ccd_box_vs_aabb( box_pos0, box_pos1, box_aabb,
                                  aabb_init_2( tile_aabb_min, tile_aabb_max ) )
       if c != nil then
