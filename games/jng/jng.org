@@ -173,6 +173,19 @@ HexeN SturM
 ** TODO Game entry description
 ** TODO Tips/Walkthrough
 ** TODO Postmortem
+
+A classic-inspired jump'n gun with "nonlinear" level layout, a good number of enemy types with unique behaviours, a few bosses, a couple of (not-so) secrets and a cheesy story.
+
+The game is rather short, and meant to be played in Normal or Hard difficulties, but I've included an Easy mode with unlimited hitpoints to allow anybody to finish it by brute force (you'll even get the good ending when finishing the game this way, but you'll feel cheap inside :)
+
+Progress is saved as long as the cartridge is not reset/reloaded so if you collect an item or kill a boss, you won't need to do it again, despite restarting the game at the beginning.
+
+This is my first Pico8 cartridge, and probably last. It started as the Ghosts'n Goblins homage I've always wanted to make, but turned into something else as I started to deal with map/sprite size limits. I had a lot of fun making it, especially the art, but the strict limits on tokens and code size made the lazy programmer in me cry :-}
+
+Known bugs in v0.9:
+- You can get stuck in walls at screen transitions when jumping (move backwards to get unstuck)
+- Quite rare missed collisions with ground
+
 * FW
 ** DONE RLE anims
    - list of key + repetitions

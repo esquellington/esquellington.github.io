@@ -2,7 +2,6 @@ pico-8 cartridge // http://www.pico-8.com
 version 8
 __lua__
 
--- run with: ./pico-8/pico8 -run ./jng.p8 -desktop . -windowed 1
 
 function _init()
    caabb_88 = aabb_init(0,0,8,8)
@@ -17,7 +16,7 @@ function _init()
    init_archetypes()
    game_state = "menu"
    game_t = 0
-   game_difficulty = 0
+   game_difficulty = 1
    init_persistence()
 
    sfx(2,0)
@@ -44,10 +43,10 @@ function _update()
          game_state = "intro"
          game_t = 0
          sfx(17,0)
-      elseif btnp(2) then --up
+      elseif btnp(2) then
          game_difficulty -= 1
          sfx(13)
-      elseif btnp(3) then --down
+      elseif btnp(3) then
          game_difficulty += 1
          sfx(13)
       end
@@ -178,7 +177,7 @@ function _draw()
 
    for m in all(messages) do
       if m.t > 0 then
-         print( m.text, 64-(2*#m.text), 128*(m.t/256), 3 ) --4*len/2 = 2*len
+         print( m.text, 64-(2*#m.text), 128*(m.t/256), 3 )
          m.t -= 1
       else
          del(messages,m)
@@ -200,7 +199,7 @@ function draw_game()
       end
    end
 
-   --bckgnd
+
    map(room_tile_x,
        room_tile_y,
        0,0,16,16,
@@ -241,7 +240,7 @@ function draw_game()
       local anm = g_anim[player_state]
       if player_state == 6 and player_sign*player_v.x < 0 then
          anm = g_anim[7]
-      end --hack: draw backwards jump shoot
+      end
       local anm_t = 1+player_t%#anm.k
       if anm.no_cycle then
          anm_t = min(1+player_t,#anm.k)
@@ -267,7 +266,7 @@ function draw_game()
            v.sign<0 )
    end
 
-   --overlay
+
    map(room_tile_x,
        room_tile_y,
        0,0,16,16,
@@ -277,7 +276,7 @@ function draw_game()
       draw_rain(14)
    end
 
-   --hud
+
    for i=0,player_health-1 do
       spr( 41, i*8, 0 )
    end
@@ -297,30 +296,30 @@ function draw_game()
       rectfill( 33, 10, 33+62*(room_boss.health/room_boss.a.chealth), 12, 8 )
    end
 
-   -- if debug.mode > 0 then
-      --entity boxes
-      -- local colors = {10,11,8,12}
-      -- for e in all(room.entities) do
-      --    local a = e.a
-      --    local e_p1 = e.p1
-      --    local boxes = {a.cvisualbox,a.cmovebox,a.cdamagebox,a.cattackbox}
-      --    local box = boxes[debug.mode]
-      --    if box != nil then
-      --       box = aabb_apply_sign_x(box,e.sign)
-      --       rect( e_p1.x + box.min.x,
-      --             e_p1.y + box.min.y,
-      --             e_p1.x + box.max.x-1,
-      --             e_p1.y + box.max.y-1,
-      --             colors[debug.mode] )
-      --    end
-      -- end
-   -- end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 end
 
 function uncompress_anim( archetype )
    for id,anm in pairs(archetype.table_anm) do
       local k = anm.k
-      if type(k[1]) != type(1) then --k=seq of spans {frame,count}
+      if type(k[1]) != type(1) then
          anm.k = {}
          for span in all(k) do
             for f=1,span[2] do
@@ -348,7 +347,7 @@ function init_archetypes()
          fall  = {k={ {32,4}, {33,4} }},
          shi   = {k={ 8,8,9,9,9 }},
          shj   = {k={ 12,12,13,13  }},
-         shjb  = {k={ 14,14,15,15 }}, --same #frames as "shj",
+         shjb  = {k={ 14,14,15,15 }},
          hit   = {no_cycle=true,k={ {34,10}, {35,30} }},
          hitb  = {no_cycle=true,k={ {36,4}, {37,4}, {38,4} }},
          alive = {k={ 39 }},
@@ -364,18 +363,18 @@ function init_archetypes()
          table_health = {-1,5,3}
       }
    uncompress_anim( a_player )
-   -- indexed player anims
+
    g_anim = {}
-   add( g_anim, _table_anm["idle"] ) --1
-   add( g_anim, _table_anm["run"] )  --2
-   add( g_anim, _table_anm["jump"] ) --3
-   add( g_anim, _table_anm["fall"] ) --4
-   add( g_anim, _table_anm["shi"] )  --5
-   add( g_anim, _table_anm["shj"] )  --6
-   add( g_anim, _table_anm["shjb"] ) --7
-   add( g_anim, _table_anm["hit"] )  --8
-   add( g_anim, _table_anm["alive"] )--9
-   add( g_anim, _table_anm["broom"] )--10
+   add( g_anim, _table_anm["idle"] )
+   add( g_anim, _table_anm["run"] )
+   add( g_anim, _table_anm["jump"] )
+   add( g_anim, _table_anm["fall"] )
+   add( g_anim, _table_anm["shi"] )
+   add( g_anim, _table_anm["shj"] )
+   add( g_anim, _table_anm["shjb"] )
+   add( g_anim, _table_anm["hit"] )
+   add( g_anim, _table_anm["alive"] )
+   add( g_anim, _table_anm["broom"] )
 
    a_spit =
       {
@@ -635,11 +634,11 @@ function init_archetypes()
          cdamage = 2
       }
 
-   -- vfx
+
    a_death = {}
    a_death.table_anm = { hit = {k={74,74,75,75,76,76,77}} }
 
-   -- collectables
+
    a_orb =
       {
          table_anm =
@@ -648,7 +647,7 @@ function init_archetypes()
             }
       }
 
-   --env
+
    a_torch =
       {
          table_anm =
@@ -657,7 +656,7 @@ function init_archetypes()
             }
       }
 
-   --bosses
+
    a_skullboss =
       {
          table_anm =
@@ -719,7 +718,6 @@ function init_archetypes()
       }
 end
 
--- game
 function init_game()
    game_t = 0
 
@@ -741,7 +739,6 @@ function init_game()
    room = new_room( level.room_coords )
 end
 
--- player
 function update_player()
    player_t += 1
    if player_inv_t > 0 then
@@ -751,9 +748,9 @@ function update_player()
    local anm = g_anim[player_state]
    local state0 = player_state
 
-   -- flying / on_ground / on_air
+
    if game_has_broom
-      and btnp(2) then --up
+      and btnp(2) then
       player_state = 10
       player_jump_s = 0
    end
@@ -772,27 +769,27 @@ function update_player()
             player_sign = 1
             player_v.x = 1.25
          end
-         if btn(2) then --up
+         if btn(2) then
             player_v.y = -1.25
-         elseif btn(3) then --down
+         elseif btn(3) then
             player_v.y = 1.25
          end
       end
    elseif player_on_ground then
-      -- if we were in jmp/shj/fall/hit or just finished
-      -- uninterruptible shoot, back to idle, go to idle and process
-      -- inputs from there
-      if player_state==3    --jmp
-         or player_state==4 --fall
-         or player_state==6 --shj
-         or player_state==8 --hit
-         or (player_state==5 and player_t > #anm.k) --shi finished
+
+
+
+      if player_state==3
+         or player_state==4
+         or player_state==6
+         or player_state==8
+         or (player_state==5 and player_t > #anm.k)
       then
          player_state = 1
          player_v = v2zero()
       end
 
-      -- idle/run
+
       if player_state==1 then
          if btn(0) then
             player_state = 2
@@ -803,7 +800,7 @@ function update_player()
             player_sign = 1
             player_v = v2init(1.25,0)
          end
-      elseif player_state==2 then --run
+      elseif player_state==2 then
          if not (btn(0) or btn(1)) then
             player_state = 1
             player_v = v2zero()
@@ -818,12 +815,12 @@ function update_player()
          then
             player_sign = -player_sign
             player_v.x = -player_v.x
-         else --reset run speed, otherwise sometimes gets stuck in corners when revesing direction
+         else
             player_v = v2init(player_sign*1.25,0)
          end
       end
 
-      --jump
+
       if btnp(5) then
          player_state = 3
          player_v.y = -4
@@ -840,25 +837,25 @@ function update_player()
          end
       end
 
-   else --on_air
+   else
 
-      -- idle,run / jmp
+
       if player_state==1 or player_state==2 then
-         -- go to fall
+
          player_state = 4
          player_v.x = 0
       elseif player_state==3 or player_state==6 then
-         --jmp/shj
-         if player_state==6 and player_t > #anm.k then --finished anim
-            player_state = 3 --jmp
+
+         if player_state==6 and player_t > #anm.k then
+            player_state = 3
             player_t = #g_anim[3].k / 2
          end
-         --horiz jmp vel constantly applied to allow jmp
-         --over neighbour blocks
+
+
          player_v.x = player_jump_s * 1.25
       end
 
-      -- allow air turn
+
       if (player_sign>0
              and (btn(0)
                   and not btn(1)))
@@ -871,15 +868,15 @@ function update_player()
       end
    end
 
-   --shoot
+
    if player_state!=5
       and player_state!=6
       and player_state!=10
       and btnp(4) then
       if player_state==3 then
-         player_state = 6 --shjmp
-      else --idle/run
-         player_state = 5 --shidl
+         player_state = 6
+      else
+         player_state = 5
          player_v.x = 0
       end
       new_bullet_blast( player_p0, player_sign )
@@ -895,20 +892,20 @@ function update_player()
                              v2scale(-1,a_player.cmaxvel),
                              a_player.cmaxvel )
 
-   -- ccd-advance
+
    local p1
    local num_hits_map
-   -- first handle collisions with solid map
+
    p1, num_hits_map, player_handled_collisions = advance_ccd_box_vs_map( player_p0, v2add( player_p0, pred_vel ), movebox, 1 )
-   -- then handle collisions with damage map important: we do it in a
-   -- second pass to allow non-damage tiles to prevent the player from
-   -- hitting damage tiles if already supported/deflected by
-   -- non-damage tiles
+
+
+
+
    local p2
    local hits_ccd = {}
    p2, num_hits_map, hits_ccd = advance_ccd_box_vs_map( player_p0, p1, damagebox, 2 )
 
-   -- test enemies for collision, even if we've already hit map damage
+
    local hit_enemy = false
    for e in all(room.enemies) do
       if e.a.cattackbox != nil  then
@@ -921,7 +918,7 @@ function update_player()
       end
    end
 
-   -- test powerups/collectables
+
    hits_ccd = ccd_box_vs_map( player_p0, p2, movebox, 8 )
    for c in all(hits_ccd) do
       if mget(c.tile_j,c.tile_i) == 64 then
@@ -933,17 +930,17 @@ function update_player()
             end
          end
          sfx(9)
-      elseif mget(c.tile_j,c.tile_i) == 42 then --rose
+      elseif mget(c.tile_j,c.tile_i) == 42 then
          game_has_rose = true
          mset( c.tile_j, c.tile_i, mget( c.tile_j+1, c.tile_i ) )
          player_weapon_a = a_rose
          sfx(9)
-      elseif mget(c.tile_j,c.tile_i) == 71 then --key
+      elseif mget(c.tile_j,c.tile_i) == 71 then
          game_has_key = true
          mset( c.tile_j, c.tile_i, 0 )
          fset( 110, 0, false )
          sfx(9)
-      elseif mget(c.tile_j,c.tile_i) == 45 then --broom
+      elseif mget(c.tile_j,c.tile_i) == 45 then
          game_has_broom = true
          mset( c.tile_j, c.tile_i, 0 )
          sfx(9)
@@ -951,14 +948,14 @@ function update_player()
       end
    end
 
-   -- advance
+
    player_p1 = p2
    player_v = v2sub( player_p1, player_p0 )
 
-   -- hits if !invulnerable
+
    if (hit_enemy or num_hits_map != 0)
       and player_inv_t == 0 then
-      player_state = 8 --hit
+      player_state = 8
       player_inv_t = 60
       player_sign = -player_sign
       player_v = v2init( player_sign * 1.5, -3 )
@@ -968,7 +965,7 @@ function update_player()
       sfx(8)
    end
 
-   -- check on ground for next frame
+
    player_ground_ccd_1 = ccd_box_vs_map( player_p0, v2add( player_p1, v2init(0,1) ), movebox, 3 )
    player_on_ground = false
    for c in all(player_ground_ccd_1) do
@@ -977,24 +974,24 @@ function update_player()
       end
    end
 
-   -- reset time if state changed
+
    if player_state != state0 then
       player_t = 0
    end
 
    local room_coords = level.room_coords
-   -- update-map
-   if room_boss == nil then --not b_cannot_leave_room then
+
+   if room_boss == nil then
       local offset = 16*8
       if player_v.x > 0
       and player_p1.x > offset - movebox.max.x then
          if room_coords.x < a_level_cnumrooms.x-1
-         and room_coords.y != 2 then --not in finalboss room
+         and room_coords.y != 2 then
             room_coords.x += 1
             room = new_room( room_coords )
             player_p1.x = movebox.min.x
          elseif room_coords.x == 7 and room_coords.y == 0 then
-            -- enter finalboss room
+
             room_coords.x = 0
             room_coords.y = 2
             room = new_room( room_coords )
@@ -1022,13 +1019,13 @@ function update_player()
       level.room_coords = room_coords
    end
 
-   --borders
+
    player_p1 = apply_borders( player_p1, movebox )
 end
 
 function advance_ccd_box_vs_map( p0, p1, box, flags )
    local d = v2sub( p1, p0 )
-   local remaining_time = 1 --1 step remaining
+   local remaining_time = 1
    local collisions_ccd = ccd_box_vs_map( p0, p1, box, flags )
    local num_hits = 0
    local handled_collisions = {}
@@ -1036,7 +1033,7 @@ function advance_ccd_box_vs_map( p0, p1, box, flags )
       local b_retest = false
       for c in all(collisions_ccd) do
 
-         -- correct p0 if overlap
+
          if player_state == 10 then
             local tile_mid_y = 8*(c.tile_i - level.room_coords.y * 16) + 4
             local box_hs_y = 0.5 * (box.max.y - box.min.y)
@@ -1047,26 +1044,26 @@ function advance_ccd_box_vs_map( p0, p1, box, flags )
             end
          end
 
-         -- correct displacement
+
          local dn = v2dot( d, c.normal )
          if not b_retest
             and dn < 0
          then
             num_hits += 1
             add( handled_collisions, c )
-            -- move up to toi
+
             p0 = v2add( p0, v2scale( 0.99*c.interval.min, d ) )
-            -- clip interval
-            local remaining_fraction = (1-c.interval.min) --interval [min..1] becomes new [0..1]
+
+            local remaining_fraction = (1-c.interval.min)
             remaining_time *= remaining_fraction
-            -- correct displacement
+
             d = v2sub( d, v2scale( dn, c.normal ) )
-            -- predict during remaining fraction along corrected displacement
+
             p1 = v2add( p0, v2scale( remaining_fraction, d ) )
             b_retest = true
          end
       end
-      -- retest if required or flag for exit otherwise
+
       if b_retest and remaining_time > 0.01 then
          collisions_ccd = ccd_box_vs_map( p0, p1, box, flags )
       else
@@ -1076,7 +1073,6 @@ function advance_ccd_box_vs_map( p0, p1, box, flags )
    return p1, num_hits, handled_collisions
 end
 
--- rooms
 function new_room( coords )
    kill_room()
    local r =
@@ -1089,15 +1085,15 @@ function new_room( coords )
       }
    room_boss = nil
    add( r.entities, player )
-   --process static map cells to create entities
+
    for j=0,15 do
       for i=0,15 do
          new_room_process_map_cell( r, j, i, coords.x*16 + j, coords.y*16 + i )
       end
    end
 
-   --sfx
-   sfx(-1,0) --stop last music
+
+   sfx(-1,0)
    if coords.x + coords.y == 0 then
       sfx(2,0)
    elseif coords.x == 7 and coords.y == 0 and game_is_skub_alive then
@@ -1126,12 +1122,12 @@ function new_room_process_map_cell( r, room_j, room_i, map_j, map_i )
    local m = mget( map_j, map_i )
    local pos = v2init( room_j*8, room_i*8 )
    local e,a
-   -- patrollers
+
    if m == 48 then
       a = a_caterpillar
    elseif m == 50 then
       a = a_caterpillar2
-   elseif m == 86 then --cthulhu_patroller
+   elseif m == 86 then
       a = a_cthulhu
    elseif m == 118 then
       a = a_mouse
@@ -1141,8 +1137,8 @@ function new_room_process_map_cell( r, room_j, room_i, map_j, map_i )
    if a != nil then
       e = new_entity( a, pos, new_action_patrol( pos, -1 ) )
    else
-   --idlers
-      if m == 245 then --flame on ground
+
+      if m == 245 then
          a = a_flame
       elseif m == 201 then
          a = a_torch
@@ -1152,32 +1148,32 @@ function new_room_process_map_cell( r, room_j, room_i, map_j, map_i )
       if a != nil then
          e = new_entity( a, pos, new_action_idle() )
       else
-         -- misc
+
          if m == 124 then
             e = new_entity( a_arachno, pos, new_action_patrol_and_jump( pos, -1 ) )
-         elseif m == 90 then --cthulhu_shooter
+         elseif m == 90 then
             e = new_entity( a_cthulhu, pos, new_action_shoot( 30, "horizontal" ) )
          elseif m == 102 then
             e = new_entity( a_grunt, pos, new_action_wait_and_ram() )
          elseif m == 120 then
             e = new_entity( a_bird, pos, new_action_wait_and_fly(60) )
-         elseif m == 60 then --saw l2r
+         elseif m == 60 then
             e = new_entity( a_saw, pos, new_action_oscillate( pos, v2init(1,0), 24, 300 ) )
-         elseif m == 63 then --saw r2l
+         elseif m == 63 then
             e = new_entity( a_saw, pos, new_action_oscillate( pos, v2init(-1,0), 24, 300 ) )
          elseif m == 78 then
             e = new_entity( a_stalactite, pos, new_action_wait_and_drop() )
          elseif m == 73 and game_num_orbs_placed < game_num_orbs then
-            mset(map_j,map_i,72) --install orb
+            mset(map_j,map_i,72)
             game_num_orbs_placed += 1
          elseif m == 93 and not game_is_flab_alive then
             e = new_entity( a_skull2, pos, new_action_wait_and_fly(128) )
-            --idlers
-         elseif m == 247 then --suspended flame
+
+         elseif m == 247 then
             e = new_entity( a_flame, pos, new_action_idle() )
-            e.action.anm_id = "burn" --hack
+            e.action.anm_id = "burn"
             e.action.t = flr(rnd(17))
-            --bosses
+
          elseif m == 138 and game_is_skub_alive then
             e = new_entity( a_skullboss, pos, new_action_boss( update_action_skullboss ) )
             room_boss = e
@@ -1191,13 +1187,13 @@ function new_room_process_map_cell( r, room_j, room_i, map_j, map_i )
       end
    end
 
-   -- init common, add enemy
+
    if e != nil then
       e.health = e.a.chealth
       e.hit_timeout = 0
       add( r.enemies, e )
       add( r.entities, e )
-      --save spawn pos, replace bckgrnd with tile at e.a.rtoff
+
       local a = e.a
       if a.rtoff != nil
          and a != a_orb
@@ -1210,7 +1206,6 @@ function new_room_process_map_cell( r, room_j, room_i, map_j, map_i )
    end
 end
 
--- enemies
 function new_entity( _archetype, _pos, _action )
    return { a = _archetype,
             action = _action,
@@ -1223,7 +1218,7 @@ function kill_entity( e )
    del(room.enemies,e)
    del(room.entities,e)
    add(room.zombies,e)
-   -- kill bosses
+
    if e.a == a_skullboss then
       game_is_skub_alive = false
       add_message("the cemetery door is open")
@@ -1247,27 +1242,24 @@ function update_enemies()
       end
       e.p0 = e.p1
       e.action = update_action( e, e.action )
-      -- remove if !action or out (req 4 enemy-bullets)
+
       if e.action == nil or is_out( e.p1 ) then
          kill_entity( e )
       end
    end
 end
 
--- actions
 function new_action_idle()
    return { name = "idle", anm_id = "idle", t = 0, finished = false,
            update_fn = function (ent,act) return act end }
 end
 
--- move unconditionally
 function new_action_move( target_pos )
    return { name = "move", anm_id = "move", t = 0, finished = false,
             p_target = target_pos,
             update_fn = update_action_move }
 end
 
--- ballistic projectile
 function new_action_particle( _v, _a )
    return { name = "part", anm_id = "move", t = 0, finished = false,
             vel = _v, acc = _a,
@@ -1279,7 +1271,6 @@ function new_action_hit()
             update_fn = update_action_hit }
 end
 
--- shoot with cooldown
 function new_action_shoot( _timeout, _type )
    return { name = "shoot", anm_id = "attack", t = _timeout-1, finished = false,
             timeout = _timeout,
@@ -1287,35 +1278,30 @@ function new_action_shoot( _timeout, _type )
             update_fn = update_action_shoot }
 end
 
--- move on ground, stop at target/wall/cliff/border
 function new_action_move_on_ground( target_pos )
    return { name = "mong", anm_id = "move", t = 0, finished = false,
             p_target = target_pos,
             update_fn = update_action_move_on_ground }
 end
 
--- move on ground, stop at target/wall/cliff/border
 function new_action_jump_on_ground( target_pos )
    return { name = "jong", anm_id = "jump_up", t = 0, finished = false, first = true,
             p_target = target_pos,
             update_fn = update_action_jump_on_ground }
 end
 
--- patrol in flat area, stop and turn at wall/cliff/border
 function new_action_patrol( start_pos, sign_x )
    return { name = "ptrl", anm_id = "move", t = 0, finished = false,
             sub = new_action_move_on_ground( v2add( start_pos, v2init( 128*sign_x, 0 ) ) ),
             update_fn = update_action_patrol }
                  end
 
--- wait on spot, ram to player if on same y-level, accessible & in range
 function new_action_wait_and_ram()
    return { name = "w&r", anm_id = "idle", t = 0, finished = false,
             sub = new_action_idle(),
             update_fn = update_action_wait_and_ram }
 end
 
--- wait on spot, fly to player when in radius
 function new_action_wait_and_fly( _radius )
    return { name = "w&f", anm_id = "idle", t = 0, finished = false,
             sub = new_action_idle(),
@@ -1323,21 +1309,18 @@ function new_action_wait_and_fly( _radius )
             update_fn = update_action_wait_and_fly }
 end
 
--- wait on spot, fall on player when on same y-level
 function new_action_wait_and_drop()
    return { name = "w&d", anm_id = "idle", t = 0, finished = false,
             sub = new_action_idle(),
             update_fn = update_action_wait_and_drop }
 end
 
--- wait on spot, fly to player when in radius
 function new_action_patrol_and_jump( start_pos, sign_x )
    return { name = "p&j", anm_id = "move", t = 0, finished = false,
             sub = new_action_patrol( start_pos, sign_x ),
             update_fn = update_action_patrol_and_jump }
 end
 
--- oscillate from midpos along dir with sinusoid of given amplitude (pixels) and period (frames)
 function new_action_oscillate( mid_pos, _dir, _amplitude, _period )
    return { name = "oscl", anm_id = "move", t = 0, finished = false,
             p_mid = mid_pos,
@@ -1347,7 +1330,6 @@ function new_action_oscillate( mid_pos, _dir, _amplitude, _period )
             update_fn = update_action_oscillate }
 end
 
--- linear vel along dir, sinusoid perpendicular to it
 function new_action_sinusoid( _pos, _dir, _speed, _amplitude, _period, _phase )
    return { name = "sinu", anm_id = "move", t = 0, finished = false,
             start_pos = _pos,
@@ -1451,12 +1433,12 @@ function update_action_shoot( entity, action )
                          pos,
                          new_action_particle( v2scale( st.cspeed/dist, diff ), v2zero() ) )
       elseif action.type == "parabolic" then
-         diff.y = 0 --temp: project on ground, otherwise it fails if player flies
+         diff.y = 0
          e = new_entity( st,
                          pos,
                          new_action_particle( compute_projectile_vel_45deg( diff, 0.125 ),
                                               v2init(0,0.125) ) )
-      else --"sinusoid"
+      else
          local phase = 0
          if (action.t / action.timeout) % 2 > 0 then phase = 0.5 end
          e = new_entity( st,
@@ -1490,19 +1472,19 @@ function update_action_move_on_ground( entity, action )
       end
       local diff = v2sub( action.p_target, entity.p1 )
       local dist = v2length( diff )
-      if is_solid( p_forward ) --hit wall
-         or is_out( p_forward ) --hit border
-         or not is_solid( p_feet ) --hit cliff
+      if is_solid( p_forward )
+         or is_out( p_forward )
+         or not is_solid( p_feet )
       then
-         -- blocked
+
          entity.p1.x -= entity.sign
          action.finished = true
       elseif dist < entity.a.cspeed then
-         -- success, closer than 1 timestep advance
+
          entity.p1 = action.p_target
          action.finished = true
       else
-         -- advance
+
          entity.p1 = v2add( entity.p0, v2scale( min(entity.a.cspeed,dist)/dist, diff ) )
          entity.sign = sgn( diff.x )
       end
@@ -1510,18 +1492,16 @@ function update_action_move_on_ground( entity, action )
    return action
 end
 
--- solve for projectile |v0| thrown at 45 deg that hits target, no sign considered yet
--- todo no solution if target is above 45 deg, detect it and avoid jumping
 function compute_projectile_vel_45deg( diff, acc_y )
    local t = sqrt( abs( 2 * (diff.y-diff.x) / acc_y ) )
-   local cos45 = cos(0.125) --angle 0..2pi --> 0..1
-   local speed = abs(diff.x) / (cos45*t) --speed to hit target at 45 deg angle
-   -- compute vel vector from magnitude and direction with correct sign
+   local cos45 = cos(0.125)
+   local speed = abs(diff.x) / (cos45*t)
+
    return v2scale( speed, v2init( sgn(diff.x) * cos45, -cos45 ) )
 end
 
 function update_action_jump_on_ground( entity, action )
-   local acc_y = 0.5 * a_level_cgravity_y --0.5 slowdown over global acc to get slower trajectory
+   local acc_y = 0.5 * a_level_cgravity_y
    local diff = v2sub( action.p_target, entity.p1 )
    if action.first then
       action.v = compute_projectile_vel_45deg( diff, acc_y )
@@ -1531,11 +1511,11 @@ function update_action_jump_on_ground( entity, action )
       action.v.y += acc_y
       local speed = v2length( action.v )
       if dist < speed then
-         -- success, closer than 1 dt
+
          entity.p1 = action.p_target
          action.finished = true
       else
-         -- todo this overshoots
+
          entity.p1 = v2add( entity.p0, v2scale( min(speed,dist)/speed, action.v ) )
          entity.sign = sgn( action.v.x )
       end
@@ -1574,72 +1554,72 @@ function has_line_of_sight_downwards( p1, p2 )
 end
 
 function update_action_wait_and_ram( entity, action )
-   -- update sub
+
    action.sub = update_action( entity, action.sub )
-   -- think
+
    if action.sub.name == "idle"
       and
-      action.sub.t > #entity.a.table_anm[action.sub.anm_id].k --only replan after whole cycle
+      action.sub.t > #entity.a.table_anm[action.sub.anm_id].k
    then
       if has_line_of_sight_horizontal( v2add(entity.p1,cv2_44), v2add(player_p1,cv2_44) ) then
          action.sub = new_action_move_on_ground( player_p1 )
       end
    elseif action.sub.finished then
-      --reached target, back to idle
+
       action.sub = new_action_idle()
    else
-      --keep ramming
+
    end
    return action
 end
 
 function update_action_wait_and_fly( entity, action )
-   -- update sub
+
    action.sub = update_action( entity, action.sub )
-   -- think
+
    if action.sub.name == "idle"
       and
-      action.sub.t > #entity.a.table_anm[action.sub.anm_id].k --only replan after whole cycle
+      action.sub.t > #entity.a.table_anm[action.sub.anm_id].k
    then
       if v2length( v2sub( player_p1, entity.p1 ) ) < action.radius then
-         action.sub = new_action_move( player_p1 ) --flyto player
+         action.sub = new_action_move( player_p1 )
       end
    elseif action.sub.finished then
-      --reached target, back to idle
+
       action.sub = new_action_idle()
    else
-      --keep flying
+
    end
    return action
 end
 
 function update_action_wait_and_drop( entity, action )
-   -- update sub
+
    action.sub = update_action( entity, action.sub )
-   -- if it has hit the ground it may have disappeared, so return nil
+
    if action.sub == nil then
       return nil
    end
 
    if action.sub.name == "idle" then
-      --fall if below
+
       if has_line_of_sight_downwards( v2add(entity.p1,cv2_44), v2add(player_p1,cv2_44) ) then
          action.sub = new_action_particle( v2zero(), v2init(0,a_level_cgravity_y) )
          sfx(10)
       end
    else
-      --keep flying
+
    end
    return action
 end
 
 function update_action_patrol_and_jump( entity, action )
-   -- update sub
+
    action.sub = update_action( entity, action.sub )
-   -- think
+
    if action.sub.name == "ptrl"
       and
-      action.sub.t > #entity.a.table_anm[action.sub.anm_id].k --only replan after whole cycle
+      action.sub.t > #entity.a.table_anm[action.sub.anm_id].k
    then
       if abs(player_p1.x-entity.p1.x) < 64
          and
@@ -1647,10 +1627,10 @@ function update_action_patrol_and_jump( entity, action )
          action.sub = new_action_jump_on_ground( player_p1 )
       end
    elseif action.sub.finished then
-      --reached target, back to idle
+
       action.sub = new_action_patrol( entity.p1, entity.sign )
    else
-      --keep ramming
+
    end
    return action
 end
@@ -1670,15 +1650,15 @@ end
 function update_action_skullboss( entity, action )
    local sub = update_action( entity, action.sub )
    entity.sign = sgn( player_p1.x - entity.p1.x )
-   if action.phase == 1 then --intro
+   if action.phase == 1 then
       if action.t > 60 then
          action.phase = 2
       end
-   elseif action.phase == 2 then --combat
+   elseif action.phase == 2 then
       a_skullboss.cdamagebox = caabb_4n1139
-      if sub.name == "idle" and sub.t > 30 then --1s
+      if sub.name == "idle" and sub.t > 30 then
          sub = new_action_shoot(30,"sinusoid")
-      elseif sub.name == "shoot" and sub.t > 120 then --4x shots
+      elseif sub.name == "shoot" and sub.t > 120 then
          if entity.p1.x > 100 then
             sub = new_action_jump_on_ground( v2init(0,104) )
          else
@@ -1695,22 +1675,22 @@ end
 function update_action_flameboss( entity, action )
    local sub = update_action( entity, action.sub )
    entity.sign = sgn( player_p1.x - entity.p1.x )
-   if action.phase == 1 then --intro
+   if action.phase == 1 then
       if action.t > 60 then
          action.phase = 2
          sub = new_action_jump_on_ground( v2init(104,104) )
       end
-   elseif action.phase == 2 then --combat
+   elseif action.phase == 2 then
       a_flameboss.cdamagebox = caabb_4n1139
-      if sub.name == "idle" and sub.t > 30 then --1s
-         if entity.p1.x > 90 then --3s
+      if sub.name == "idle" and sub.t > 30 then
+         if entity.p1.x > 90 then
             a_flameboss.cshootpos = v2init( 10, 0 )
-            sub = new_action_shoot(15,"parabolic") --6x
+            sub = new_action_shoot(15,"parabolic")
          else
-            a_flameboss.cshootpos = v2init( 1, 7 ) --3x
+            a_flameboss.cshootpos = v2init( 1, 7 )
             sub = new_action_shoot(30,"horizontal")
          end
-      elseif sub.name == "shoot" and sub.t > 90 then --3x
+      elseif sub.name == "shoot" and sub.t > 90 then
          if entity.p1.x > 90 then
             sub = new_action_jump_on_ground( v2init(0,104) )
          else
@@ -1726,9 +1706,9 @@ end
 
 function update_action_finalboss( entity, action )
    local sub = update_action( entity, action.sub )
-   if action.phase == 1 then --intro
+   if action.phase == 1 then
       if action.t < 120 then
-         --intro uses piano anim, flip sign to animate cheaply
+
          sub.anm_id = "piano"
          if action.t % 4 == 0 then
             entity.sign *= -1
@@ -1746,7 +1726,7 @@ function update_action_finalboss( entity, action )
       elseif sub.name == "idle" and sub.t > 60 then
          a_finalboss.cshoottype = a_flame
          sub = new_action_shoot(30,"straight")
-      elseif sub.name == "shoot" and sub.t > 120 then --4x
+      elseif sub.name == "shoot" and sub.t > 120 then
          a_finalboss.cspeed = 5
          sub = new_action_move( v2init(56,104) )
          action.phase = 3
@@ -1765,7 +1745,6 @@ function update_action_finalboss( entity, action )
    return action
 end
 
--- bullets
 function new_bullet_blast( _p, _s )
    local b = { a = player_weapon_a,
                anm_id = "move",
@@ -1787,28 +1766,28 @@ function update_bullets()
 
       local attackbox = aabb_apply_sign_x( b.a.cattackbox, b.sign )
 
-      -- test against map
-      --flags: 1 is_solid, 2 is_damage, 4 is destructible
+
+
       local map_collisions = ccd_box_vs_map( b.p0,
                                              b.p1,
                                              attackbox,
                                              5)
-      -- if map collision, save it and shorten predicted trajectory
+
       if #map_collisions > 0 then
          b.p1 = v2add( b.p0, v2scale( map_collisions[1].interval.min, b.v ) )
-         -- unnecessary b.v = v2zero()
+
       end
 
-      -- test against enemies
+
       local enm_collisions = ccd_box_vs_entities( b.p0,
                                                   b.p1,
                                                   attackbox,
                                                   room.enemies,
                                                   "cdamagebox")
 
-      -- if there's enemy collision, either there was no map collision
-      -- or the enemy one happened first during the shortened
-      -- trajectory, so in both cases we handle the enemy collision.
+
+
+
       local b_delete = true
       local b_fx = true
       if #enm_collisions > 0 then
@@ -1824,7 +1803,7 @@ function update_bullets()
          end
       elseif #map_collisions > 0 then
          local map_c = map_collisions[1]
-         -- destructible scenario, flag 1<<2
+
          if band( map_c.flags, 4 ) != 0 then
             mset( map_c.tile_j, map_c.tile_i, 0 )
          end
@@ -1845,7 +1824,6 @@ function update_bullets()
    end
 end
 
--- vfx
 function new_vfx( _a, _p, _s )
    local v = { anm = _a.table_anm["hit"],
                t = 0,
@@ -1863,7 +1841,6 @@ function update_vfx()
    end
 end
 
--- helpers
 function clamp( v, l, u )
    return min( max( v, l ), u )
 end
@@ -1882,7 +1859,6 @@ function aabb_init_2( _pmin, _pmax )
             max = _pmax }
 end
 
--- HACK: invert l/r an aabb (assuming size 8 or 16)
 function aabb_apply_sign_x( aabb, sign_x )
    if sign_x < 0 then
       if aabb.max.x - aabb.min.y > 8 then
@@ -1907,7 +1883,6 @@ function apply_borders( p, box )
                   clamp( p.y, 0-box.min.y-8, 128-box.max.y ) )
 end
 
--- vec2 functions
 function v2init( _x, _y ) return { x = _x, y = _y } end
 function v2zero() return { x = 0, y = 0 } end
 function v2get( v, i ) if i==0 then return v.x else return v.y end end
@@ -1925,25 +1900,16 @@ function v2perp( v ) return { x = -v.y, y = v.x } end
 function v2clamp( v, l, u ) return { x = min( max( v.x, l.x ), u.x ),
                                      y = min( max( v.y, l.y ), u.y ) } end
 
---[[
-   ray vs aabb at origin
-   returns { point, normal, interval } if hit, and nil otherwise
-   inspired in rtcd 5.3, pg 181, ported from geo::np::graycast_centeredaabb()
---]]
 function ray_vs_centered_aabb( ray_pos, ray_dir, ray_interval,
                                aabb_hs )
    local rh = {}
    rh.interval = ray_interval
    local first_hit_axis = 0
    for it_axis = 0,1 do
-      -- if parallel to slab, either overlaps for any lambda or for none.
-      if abs( v2get( ray_dir, it_axis ) ) < 0.001 then --g_pdefaultcontext->m_epsilon_dir )
+      if abs( v2get( ray_dir, it_axis ) ) < 0.001 then
          if abs( v2get( ray_pos, it_axis ) ) > v2get( aabb_hs, it_axis ) then
-            -- no hit
             return nil
          end
-         -- otherwise, current axis does not clip the interval, and
-         -- other axis must be checked as usual.
       else
          local inv_divisor = 1.0 / v2get( ray_dir, it_axis )
          local lambda0 = ( -v2get( aabb_hs, it_axis ) - v2get( ray_pos, it_axis ) ) * inv_divisor
@@ -1953,7 +1919,6 @@ function ray_vs_centered_aabb( ray_pos, ray_dir, ray_interval,
             lambda0 = lambda1
             lambda1 = tmp
          end
-         -- clip lambda-interval and update first-axis
          if rh.interval.min < lambda0 then
             rh.interval.min = lambda0
             first_hit_axis = it_axis
@@ -1963,10 +1928,9 @@ function ray_vs_centered_aabb( ray_pos, ray_dir, ray_interval,
          end
          if rh.interval.max < rh.interval.min then
             return nil
-         end --empty interval, no overlap
+         end
       end
    end
-   -- compute point and normal
    rh.point  = v2add( ray_pos, v2scale( rh.interval.min, ray_dir ) )
    rh.normal = {x=0,y=0}
    if v2get( ray_pos, first_hit_axis ) < 0 then
@@ -1977,27 +1941,19 @@ function ray_vs_centered_aabb( ray_pos, ray_dir, ray_interval,
    return rh
 end
 
---[[
-   ray vs aabb
-   returns { point, normal, interval } if hit, and nil otherwise
---]]
 function ray_vs_aabb( ray_pos, ray_dir, interval,
                       aabb )
    local aabb_mid = v2scale( 0.5, v2add( aabb.min, aabb.max ) )
    local aabb_hs = v2scale( 0.5, v2sub( aabb.max, aabb.min ) )
    local rp = v2sub( ray_pos, aabb_mid )
    local rh = ray_vs_centered_aabb( rp, ray_dir, interval,
-                                    aabb_hs ) --hs try to use full aabb instead
+                                    aabb_hs )
    if rh != nil then
-      rh.point = v2add( rh.point, aabb_mid ) --just translate
+      rh.point = v2add( rh.point, aabb_mid )
    end
    return rh
 end
 
---[[
-   ccd between moving box and static aabb
-   returns { point, normal, interval } if hit, and nil otherwise
---]]
 function ccd_box_vs_aabb( box_pos0, box_pos1, box_aabb,
                           aabb )
    local box_aabb_mid = v2scale( 0.5, v2add( box_aabb.min, box_aabb.max ) )
@@ -2009,15 +1965,10 @@ function ccd_box_vs_aabb( box_pos0, box_pos1, box_aabb,
                        fat_aabb )
 end
 
---[[
-   bp to gather static solid tiles in the map that overlap an aabb
-   returns { tile_i, tile_j } if hit, and nil otherwise
---]]
 function bp_aabb_vs_map( aabb, flag_mask )
    local overlaps = {}
-   local tile_min = v2flr( v2scale( 0.125, aabb.min ) ) --1/8
-   local tile_max = v2flr( v2scale( 0.125, aabb.max ) ) --1/8
-   --todo avoid accessing out of bounds, revisit rounding
+   local tile_min = v2flr( v2scale( 0.125, aabb.min ) )
+   local tile_max = v2flr( v2scale( 0.125, aabb.max ) )
    for j=tile_min.x, tile_max.x do
       for i=tile_min.y, tile_max.y do
          if band( flag_mask, fget( mget( level.room_coords.x * 16 + j,
@@ -2029,12 +1980,7 @@ function bp_aabb_vs_map( aabb, flag_mask )
    return overlaps
 end
 
---[[
-   ccd between box and map
-   returns { point, normal, interval } if hit, and nil otherwise
---]]
 function ccd_box_vs_map( box_pos0, box_pos1, box_aabb, flag_mask )
-   -- swept aabb
    local swept_aabb = aabb_init_2( v2add( v2min( box_pos0, box_pos1 ), box_aabb.min ),
                                    v2add( v2max( box_pos0, box_pos1 ), box_aabb.max ) )
    local overlaps = bp_aabb_vs_map( swept_aabb, flag_mask )
@@ -2057,10 +2003,6 @@ function ccd_box_vs_map( box_pos0, box_pos1, box_aabb, flag_mask )
    return ccd_sort_collisions( collisions )
 end
 
---[[
-   ccd between box and entity["entity_box_name"]
-   returns { point, normal, interval } if hit, and nil otherwise
---]]
 function ccd_box_vs_entities( box_pos0, box_pos1, box_aabb, table_entities, entity_box_name )
    local collisions = {}
    for e in all(table_entities) do
@@ -2077,7 +2019,6 @@ function ccd_box_vs_entities( box_pos0, box_pos1, box_aabb, table_entities, enti
    return ccd_sort_collisions( collisions )
 end
 
---bubble-sort collisions on increasing inverval.min
 function ccd_sort_collisions( collisions )
    local b_continue = true
    local count = #collisions
@@ -2160,11 +2101,11 @@ dddddddd11111111004004000c0d0c0d0c0d0700000c0d0c32323233232323203232000023232320
 444999944444444405560560505050504dddcc7444444444000000000000000000ddd10200dd10200000000200dd00000d111dd00dd111d000d0d0d0000d0d00
 44499994f44444f456560565050505054dddccc4944444940505a0000005a00000dd10000ddd100000000000000d0000d0d0d00dd00d0d0d000d00d0000d00d0
 444999944444f4446555655605050505444444444444944400566500055665000dd101000dd101000000000000000000d0000d0000d0000d00000d000000d000
-1616169e161616161616161616161616ad0000adbfbdad0000bdadbfbd0000bd2000000880000002000220022000000000000000000000000000002200220000
+16161616161616161616161616161616ad0000adbfbdad0000bdadbfbd0000bd2000000880000002000220022000000000000000000000000000002200220000
 00000000000000000000000000000000000000000000000000000000000000002200008778000022000222002200000000002200220000000000002220022000
-1616169e1c9e0c16161c9e0c16161616aebd00bcadbebc0000bcaebdbc00adbe0220087887800220000022202220000000002220022000000000000222022200
+161616161c9e0c16161c9e0c16161616aebd00bcadbebc0000bcaebdbc00adbe0220087887800220000022202220000000002220022000000000000222022200
 00000000000000000000000000000000000000000000000000000000000000000222008778002220000022222220000000000222022200000000000222222200
-1616169e9e9e9e0c1c9e9e9e0c16161600bc00efbe00aebdadbe00aeefbdbc000222228778222220000028828820000000000222222200000000000288288200
+1616161c9e9e9e0c1c9e9e9e0c16161600bc00efbe00aebdadbe00aeefbdbc000222228778222220000028828820000000000222222200000000000288288200
 00000000000000000000000000000000000000000000000000000000000000000022111881112200000022222220000000000288288200000000333222222200
 16161c9e9e9e9e9e9e9e9e9e9e0c161600efadef0000adbeaebd0000efaeef0000211dd88dd11200003332222233300003333222222233000003333322002230
 000000000000000000000000000000000000000000000000000000000000000000111ddd1dd111000333b22222bb33003333332222233330003333bb22002333
@@ -2242,7 +2183,7 @@ ffccffff26ffd5e5ffffffc5ffffc5d4fff300000000f300000000f300000000f300636363000000
 ffffffff36ffffe5c5e4c4d5c4c5d4fffff300000000f300000000f3006600636363634ef300e0f0000000000000f3000000000000f300000000005af30000000063000063c1000000000000000063ffffffffff7060707070706464646464ffffffffcccdffffdcddffffffddccffffffcdffffffffe2656565656565c3ff61
 ffffffffffc5c4e5d426ccffd5e5c5c4fff300000000f300005a6363636363636363c100f3000000000000000000f300000000e06363630000000063c10000000063635c0076006363636300000063ffffffffff70747060746000c5d4ffffffffcdffdcddffffffffffffddffffcdffdccdffffffffc66565c66565ffc0ff61
 5c2b2cffd5d4d5e5ff36ffffffe5d426fff300000000f300636363636363636363c10000f30000005d0000000000f3000000000000f3c063000000000000000000c06363636363c1000000000063c1ffffffff63607070706070c5d40000ffffffffffffffffffffffff63ffffdccdffffffffffffe265c1c0656565e2ffff61
-eff1f1f1ffffffe5ffffffffffe5ff36fff3000000636363636363637575757575000000f30000e0f00000000000f3000000000000f300c063000000000000000000f300000000000000000063c1006363e2e2c0706000007060d400000000ffffffffffffffff63dd0000dcff63ffffffffffffff65c18affc0656565ffff61
+f1f1f1f1ffffffe5ffffffffffe5ff36fff3000000636363636363637575757575000000f30000e0f00000000000f3000000000000f300c063000000000000000000f300000000000000000063c1006363e2e2c0706000007060d400000000ffffffffffffffff63dd0000dcff63ffffffffffffff65c18affc0656565ffff61
 efefef6cffe8e8e53072d6ff30e5ffffc2f4c363757575757575757575757575750037006300000000000063e2c2f4c30000000066f34000c0630000000066636300f300000000000066637575006363636363ff6070005660700000000000f1f1ffffffff5663c10000000000c063ffffe2ffffe265ffffffff656565e2ffe3
 efeff0d0e6e6e6e671e6e6e6e6e671e66363636363636363637171717171717171e6e6e663727272727272636363636362626262626262717171716262626262626262626262626262757575757575626262626262626262626250f1505050626262626262626250505050505050626262626262626262626262626262626262
 eff0efefd0717171717171717171717171717171717171717171717171717171717171716363636363636363636363636363717171717171717171717171717162626262627171717171717171717171717171717171717171515151515151517171717171717171717171717171717171717171717171717171717171717171
@@ -2260,7 +2201,7 @@ efeff0efefefefefefefefefefefefefefefefefd071d1d0717171717171d1eff4c3e9e9e9e9e9e9
 d1efefefefefefefefefefefefefefefefefefd071d1000039000039d071d3f1f1f1f1f1f1f1f1f1f1f1f1f1f1e1f1f1e1e1e1e1e1e1e1e1e1e1e1e1e1e9e9e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1efefefefeff1f1ef555554555454effffffffffffffffff3fffffffffff3ffffffc2c1fff3fffffffff3fffff3ffff
 71d1efefefefefefefefefefefefefefefefd071d1000000000000390075f1f100001c001c00f1000000003c00000000000000000000000000000000c0f100001c0000000000000000000000000000e1e1efefefefefefeff1f15554555454efffffffffffffff5af3fffffffffff3fffffff3fffff3ffaafffff3fffff3ffff
 7171d1ef32efefeff172efefefef32f1f1757575002a005d004400000075757547000000003c00000000f100760000f1f1000000003c00000000003c00000000000000003c0000000000003f0000000000efefef37efef37ef5555f15050f1efffe737e8e7e8f1f1f1f5f5f1f5f5f1fffffff3ffc2c1ffffffffc0c3fff3ffff
-f1f1f1eff1f1f1f1f1f1f1f1f1f1f1f1f1717171e6e6e671e6e671e6717171f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f171e6e67171e6e6e6e6e6e6e6e6e6e6e6e6e6e6e6f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1
+f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1717171e6e6e671e6e671e6717171f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f171e6e67171e6e6e6e6e6e6e6e6e6e6e6e6e6e6e6f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1
 __sfx__
 000a00000b61010620076300c640196401062014630076200e63006630046200362003610026100460002600016000360005600046000360008600066000a6000560005600076000560004600066000160001600
 000b00000b61013620076302163018630106300b630076300463006630046200362003610026100460002600016000360005600046000360008600066000a6000560005600076000560004600066000160001600
@@ -2391,3 +2332,4 @@ __music__
 00 41414141
 00 41414141
 00 41414141
+
