@@ -2,7 +2,7 @@ pico-8 cartridge // http://www.pico-8.com
 version 8
 __lua__
 
--- run with: ./pico-8/pico8 -run ./jng.p8 -desktop . -windowed 1
+-- run with: ./pico-8/pico8 -run ./jng.p8 -desktop . -windowed 1x
 
 function _init()
    caabb_88 = aabb_init(0,0,8,8)
@@ -26,6 +26,7 @@ function _init()
 end
 
 function init_persistence()
+   reload() --resets map/progress
    game_is_skub_alive = true
    game_is_flab_alive = true
    game_is_finb_alive = true
@@ -2394,4 +2395,3 @@ __music__
 00 41414141
 00 41414141
 00 41414141
-
