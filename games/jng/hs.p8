@@ -1226,12 +1226,12 @@ function kill_entity( e )
 
    if e.a == a_skullboss then
       game_is_skub_alive = false
-      add_message("the cemetery door is open")
+      add_message("\x8b\x8b\x8b cemetery door open")
       mset(3,14,239)
       room_boss = nil
    elseif e.a == a_flameboss then
       game_is_flab_alive = false
-      add_message("the cathedral door is open")
+      add_message("\x94\x94\x94 cathedral door open")
       mset(127,14,255)
       room_boss = nil
    elseif e.a == a_finalboss then
