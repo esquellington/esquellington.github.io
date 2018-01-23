@@ -1,0 +1,25 @@
+Bring me the biggest sword you can find!
+* Puzzle
+* Player
+** Normal
+*** Idle
+*** Walk
+*** Jump
+*** Ladder
+** Sword
+*** Idle
+*** Walk
+* Items
+** TODO Key
+* Enemies
+** TODO FIXED movement
+* Scenery
+** DONE Static platforms
+** TODO Ladders
+** TODO Moving platforms
+*** TODO Vertical/Horizontal
+*** TODO Periodic
+*** TODO Switch on/off
+* NPC
+** Knight
+** Dragon
