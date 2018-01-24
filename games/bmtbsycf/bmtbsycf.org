@@ -9,10 +9,18 @@ Bring me the biggest sword you can find!
 ** Sword
 *** Idle
 *** Walk
+*** Turn
+    - Flip sword and move to the other side, but not instantly
+    - Req planning as all movement with sword
+* Sword
+  - Own collision/physics
 * Items
 ** TODO Key
 * Enemies
 ** TODO FIXED movement
+** Cannon
+   - Shoot periodically
+   - Projectiles bounce on sword
 * Scenery
 ** DONE Static platforms
 ** TODO Ladders
