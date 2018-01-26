@@ -120,17 +120,25 @@ function draw_game()
       if anm.no_cycle then
          anm_t = min(1+player_t,#anm.k)
       end
-      if game_has_sword then
-         spr( anm.k[anm_t]-1,
-              player_p1.x, player_p1.y,
-              2,1,
-              player_sign<0 )
-      else
-         spr( anm.k[anm_t],
-              player_p1.x, player_p1.y,
-              1,1,
-              player_sign<0 )
-      end
+      spr( anm.k[anm_t],
+           player_p1.x, player_p1.y,
+           1,1,
+           player_sign<0 )
+   end
+
+   if game_has_sword then
+      local anm = g_anim[player_state]
+      local anm_t = 1+player_t%#anm.k
+      spr( anm.k[anm_t]-1, -- sword sprite left to corresponding player sprite
+           player_p1.x - player_sign*8, player_p1.y,
+           1,1,
+           player_sign<0 )
+   else
+      --standalone sword
+      spr( 112, --TODO explicit frame could be constant or short anim showing "magic"
+           sword_p1.x, sword_p1.y,
+           1,1,
+           sword_sign<0 )
    end
 
    for b in all(room.bullets) do
@@ -222,6 +230,8 @@ function init_archetypes()
    uncompress_anim( a_player )
    -- indexed player anims
    g_anim = {}
+   add( g_anim, _table_anm["idle_sword"] )--9
+   add( g_anim, _table_anm["walk_sword"] )--10
    add( g_anim, _table_anm["idle"] ) --1
    add( g_anim, _table_anm["walk"] ) --2
    add( g_anim, _table_anm["jump"] ) --3
@@ -230,8 +240,6 @@ function init_archetypes()
    add( g_anim, _table_anm["shj"] )  --6
    add( g_anim, _table_anm["shjb"] ) --7
    add( g_anim, _table_anm["hit"] )  --8
-   add( g_anim, _table_anm["idle_sword"] )--9
-   add( g_anim, _table_anm["walk_sword"] )--10
 
    a_spit =
       {
@@ -595,6 +603,10 @@ function init_game()
    else
       player_weapon_a = a_blast
    end
+
+   sword_p1 = v2init(0,86)
+   sword_sign = 1
+
    level = {}
    level.room_coords = v2zero()
 
@@ -611,12 +623,20 @@ function update_player()
    local anm = g_anim[player_state]
    local state0 = player_state
 
-   -- flying / on_ground / on_air
+   -- TEMP grab/release sword
    if game_has_sword
       and btnp(2) then --up
-      player_state = 10
-      player_jump_s = 0
+         game_has_sword = false
+         sword_p1 = v2add( player_p0, v2init(-8*player_sign,0) )
+         sword_sign =  player_sign
    end
+   if not game_has_sword
+      and btnp(3) then --up
+         game_has_sword = true
+         --sword_p1 = v2sub( player_p0, v2init(-8*player_sign,0) )
+   end
+
+   -- on_ground / on_air
    if player_state == 10 then
       if btnp(4) then
          player_state = 6
@@ -2251,4 +2271,3 @@ __music__
 00 41414141
 00 41414141
 00 41414141
-
