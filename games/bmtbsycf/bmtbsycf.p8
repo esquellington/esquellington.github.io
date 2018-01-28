@@ -5,7 +5,7 @@ __lua__
 -- run with: ./pico-8/pico8 -run ./bmtbsycf.p8 -desktop . -windowed 1
 
 function _init()
-   caabb_88 = aabb_init(0,0,8,8)
+   caabb_0088 = aabb_init(0,0,8,8)
    caabb_1616 = aabb_init(0,0,16,16)
    caabb_4073 = aabb_init( 4, 0, 7, 3 )
    caabb_4374 = aabb_init( 4, 3, 7, 4 )
@@ -44,7 +44,7 @@ function _update()
    if game_state == "menu" then
       game_state = "play"
       init_game()
-      player_health = a_player.table_health[game_difficulty+1]
+      player.health = a_player.table_health[game_difficulty+1]
       game_t = 0
    elseif game_state == "play" then
       update_player()
@@ -114,28 +114,31 @@ function draw_game()
       end
    end
 
-   if player_inv_t % 2 == 0 then
-      local anm = g_anim[player_state]
-      local anm_t = 1+player_t%#anm.k
+   if player.inv_t % 2 == 0 then
+      local anm = g_anim[player.state]
+      if game_has_sword then
+         anm = g_anim[player.state+8]
+      end
+      local anm_t = 1+player.t%#anm.k
       if anm.no_cycle then
-         anm_t = min(1+player_t,#anm.k)
+         anm_t = min(1+player.t,#anm.k)
       end
       spr( anm.k[anm_t],
-           player_p1.x, player_p1.y,
+           player.p1.x, player.p1.y,
            1,1,
-           player_sign<0 )
+           player.sign<0 )
    end
 
    if game_has_sword then
-      local anm = g_anim[player_state]
-      local anm_t = 1+player_t%#anm.k
+      local anm = g_anim[player.state+8]
+      local anm_t = 1+player.t%#anm.k
       spr( anm.k[anm_t]-1, -- sword sprite left to corresponding player sprite
-           player_p1.x - player_sign*8, player_p1.y,
+           player.p1.x - player.sign*8, player.p1.y,
            1,1,
-           player_sign<0 )
+           player.sign<0 )
    else
       --standalone sword
-      spr( 112, --TODO explicit frame could be constant or short anim showing "magic"
+      spr( 112, --todo explicit frame could be constant or short anim showing "magic"
            sword_p1.x, sword_p1.y,
            1,1,
            sword_sign<0 )
@@ -163,7 +166,17 @@ function draw_game()
        0x80 )
 
    if debug_mode > 0 then
+      -- temporal
+      -- if player.on_ground then
+      --    spr( 255,
+      --         player.p1.x, player.p1.y,
+      --         1,1,
+      --         player.sign<0 )
+      -- end
       local colors = {10,11,8,12}
+      if player.on_ground then
+         colors[2] = 2
+      end
       for e in all(room.entities) do
          local a = e.a
          local e_p1 = e.p1
@@ -207,31 +220,30 @@ function init_archetypes()
    local _table_anm =
       {
          idle  = {k={ {16,8}, {17,8} }},
-         walk   = {k={ {18,6}, {19,3}, {20,6}, {21,3} }},
+         walk  = {k={ {18,6}, {19,3}, {20,6}, {21,3} }},
          jump  = {no_cycle=true,k={ {22,4}, {22,4} }}, --todo add frame
          fall  = {k={ {23,4}, {23,4} }}, --todo add frame
          shi   = {k={ {16,8}, {17,8} }},
          shj   = {k={ 12,12,13,13  }},
          shjb  = {k={ 14,14,15,15 }}, --same #frames as "shj",
-         hit   = {no_cycle=true,k={ {34,10}, {35,30} }},
-         hitb  = {no_cycle=true,k={ {36,4}, {37,4}, {38,4} }},
+         hit   = {no_cycle=true,k={ {23,10}, {23,30} }},
+         hitb  = {no_cycle=true,k={ {23,4}, {23,4}, {23,4} }},
          idle_sword = {k={ {2,8}, {4,8} }},
          walk_sword = {k={ {6,6}, {8,6}, {10,8} }}
       }
    a_player =
       {
-         table_anm = _table_anm,
-         cmovebox   = caabb_1177,
+         table_anm  = _table_anm,
+         cmovebox   = caabb_1177, --caabb_0088,
          cdamagebox = aabb_init( 2, 1, 6, 7 ),
          cattackbox = nil,
+         cspeed = 1,
          cmaxvel = v2init( 5, 5 ),
          table_health = {-1,5,3}
       }
    uncompress_anim( a_player )
    -- indexed player anims
    g_anim = {}
-   add( g_anim, _table_anm["idle_sword"] )--9
-   add( g_anim, _table_anm["walk_sword"] )--10
    add( g_anim, _table_anm["idle"] ) --1
    add( g_anim, _table_anm["walk"] ) --2
    add( g_anim, _table_anm["jump"] ) --3
@@ -240,6 +252,8 @@ function init_archetypes()
    add( g_anim, _table_anm["shj"] )  --6
    add( g_anim, _table_anm["shjb"] ) --7
    add( g_anim, _table_anm["hit"] )  --8
+   add( g_anim, _table_anm["idle_sword"] )--9
+   add( g_anim, _table_anm["walk_sword"] )--10
 
    a_spit =
       {
@@ -266,7 +280,7 @@ function init_archetypes()
                            {245,5}, {246,5} }},
                burn = {k={ {249,3}, {250,3}, {247,3} }}
             },
-         cmovebox   = caabb_88,
+         cmovebox   = caabb_0088,
          cdamagbox  = nil,
          cattackbox = aabb_init( 2, 4, 6, 8 ),
          cspeed = 1.5
@@ -323,7 +337,7 @@ function init_archetypes()
             {
                move = {k={ {48,6}, {49,6} }}
             },
-         cmovebox   = caabb_88,
+         cmovebox   = caabb_0088,
          cdamagebox = caabb_1478,
          cattackbox = caabb_1478,
          cspeed = 0.5,
@@ -338,9 +352,9 @@ function init_archetypes()
             {
                move = {k={50,50,50,51,51,51}},
             },
-         cmovebox   = caabb_88,
+         cmovebox   = caabb_0088,
          cdamagebox = aabb_init( 0, 2, 8, 8 ),
-         cattackbox = caabb_88,
+         cattackbox = caabb_0088,
          cspeed = 1,
          chealth = 2,
          rtoff = v2init(0,-1)
@@ -352,7 +366,7 @@ function init_archetypes()
             {
                move = {k={60,61,62,63}}
             },
-         cmovebox   = caabb_88,
+         cmovebox   = caabb_0088,
          cdamagbox  = nil,
          cattackbox = aabb_init( 2, 2, 6, 6 ),
          cspeed = 1,
@@ -369,7 +383,7 @@ function init_archetypes()
             },
          cmovebox   = caabb_1177,
          cdamagbox  = nil,
-         cattackbox = caabb_88,
+         cattackbox = caabb_0088,
          cspeed = 5,
          rtoff = v2init(0,1)
       }
@@ -382,9 +396,9 @@ function init_archetypes()
                move = {k={ {105,4}, {104,4} }},
                attack = {k={ {105,8}, {106,6} }}
             },
-         cmovebox   = caabb_88,
-         cdamagebox = caabb_88,
-         cattackbox = caabb_88,
+         cmovebox   = caabb_0088,
+         cdamagebox = caabb_0088,
+         cattackbox = caabb_0088,
          cspeed = 1,
          chealth = 3,
          rtoff = v2init(0,-1)
@@ -398,9 +412,9 @@ function init_archetypes()
                move   = {k={ {86,4}, {87,4}, {88,4}, {89,4} }},
                attack = {k={ {90,4}, {91,4} }}
             },
-         cvisualbox = caabb_88,
-         cmovebox   = caabb_88,
-         cdamagebox = caabb_88,
+         cvisualbox = caabb_0088,
+         cmovebox   = caabb_0088,
+         cdamagebox = caabb_0088,
          cattackbox = caabb_1478,
          cspeed = 0.4,
          chealth = 2,
@@ -432,8 +446,8 @@ function init_archetypes()
                move = {k={ {122,5}, {123,5} }}
             },
          cmovebox   = caabb_2068,
-         cdamagebox = caabb_88,
-         cattackbox = caabb_88,
+         cdamagebox = caabb_0088,
+         cattackbox = caabb_0088,
          cspeed = 1.25,
          chealth = 1,
          rtoff = v2init(0,-1)
@@ -449,7 +463,7 @@ function init_archetypes()
                jump_down = {k={127}}
             },
          cmovebox   = caabb_2068,
-         cdamagebox = caabb_88,
+         cdamagebox = caabb_0088,
          cattackbox = caabb_1478,
          cspeed = 0.75,
          chealth = 2,
@@ -463,7 +477,7 @@ function init_archetypes()
             {
                move = {k={ {68,3}, {69,8}, {70,3} }}
             },
-         cmovebox   = caabb_88,
+         cmovebox   = caabb_0088,
          cdamagbox  = nil,
          cattackbox = aabb_init( 1, 2, 6, 8 ),
          cspeed = 1.5,
@@ -587,22 +601,21 @@ end
 function init_game()
    game_t = 0
 
-   player_state = 1
-   player_t = 0
-   player_p0 = v2init( 8, 86 )
-   player_p1 = v2init( 8, 86 )
-   player_sign = 1
-   cplayer_speed = 0.6
-   player_v = v2zero()
-   player_on_ground = false
-   player_jump_s = 0
-   player_inv_t = 0
-   player_health = 0
-   if game_has_rose then
-      player_weapon_a = a_rose
-   else
-      player_weapon_a = a_blast
-   end
+   player =
+      {
+         a = a_player,
+         state = 1,
+         t = 0,
+         p0 = v2init( 8, 86 ),
+         p1 = v2init( 8, 86 ),
+         sign = 1,
+         v = v2zero(),
+         on_ground = false,
+         jump_s = 0,
+         inv_t = 0,
+         health = 0,
+         weapon_a = a_blast
+      }
 
    sword_p1 = v2init(0,86)
    sword_sign = 1
@@ -615,163 +628,140 @@ end
 
 -- player
 function update_player()
-   player_t += 1
-   if player_inv_t > 0 then
-      player_inv_t -= 1
+   player.t += 1
+   if player.inv_t > 0 then
+      player.inv_t -= 1
    end
-   player_p0 = player_p1
-   local anm = g_anim[player_state]
-   local state0 = player_state
+   player.p0 = player.p1
+   local anm = g_anim[player.state]
+   local state0 = player.state
 
-   -- TEMP grab/release sword
+   -- temp grab/release sword
    if game_has_sword
       and btnp(2) then --up
          game_has_sword = false
-         sword_p1 = v2add( player_p0, v2init(-8*player_sign,0) )
-         sword_sign =  player_sign
+         sword_p1 = v2add( player.p0, v2init(-8*player.sign,0) )
+         sword_sign =  player.sign
    end
    if not game_has_sword
       and btnp(3) then --up
          game_has_sword = true
-         --sword_p1 = v2sub( player_p0, v2init(-8*player_sign,0) )
+         --sword_p1 = v2sub( player.p0, v2init(-8*player.sign,0) )
    end
 
    -- on_ground / on_air
-   if player_state == 10 then
-      if btnp(4) then
-         player_state = 6
-         player_v.x = 0
-         new_bullet_blast( player_p0, player_sign )
-      elseif btnp(5) then
-         player_state = 4
-      else
-         if btn(0) then
-            player_sign = -1
-            player_v.x = -cplayer_speed
-         elseif btn(1) then
-            player_sign = 1
-            player_v.x = cplayer_speed
-         end
-         if btn(2) then --up
-            player_v.y = -cplayer_speed
-         elseif btn(3) then --down
-            player_v.y = cplayer_speed
-         end
-      end
-   elseif player_on_ground then
+   if player.on_ground then
       -- if we were in jmp/shj/fall/hit or just finished
       -- uninterruptible shoot, back to idle, go to idle and process
       -- inputs from there
-      if player_state==3    --jmp
-         or player_state==4 --fall
-         or player_state==6 --shj
-         or player_state==8 --hit
-         or (player_state==5 and player_t > #anm.k) --shi finished
+      if player.state==3    --jmp
+         or player.state==4 --fall
+         or player.state==6 --shj
+         or player.state==8 --hit
+         or (player.state==5 and player.t > #anm.k) --shi finished
       then
-         player_state = 1
-         player_v = v2zero()
+         player.state = 1
+         player.v = v2zero()
       end
 
       -- idle/walk
-      if player_state==1 then
+      if player.state==1 then
          if btn(0) then
-            player_state = 2
-            player_sign = -1
-            player_v = v2init(-cplayer_speed,0)
+            player.state = 2
+            player.sign = -1
+            player.v = v2init(-player.a.cspeed,0)
          elseif btn(1) then
-            player_state = 2
-            player_sign = 1
-            player_v = v2init(cplayer_speed,0)
+            player.state = 2
+            player.sign = 1
+            player.v = v2init(player.a.cspeed,0)
          end
-      elseif player_state==2 then --walk
+      elseif player.state==2 then --walk
          if not (btn(0) or btn(1)) then
-            player_state = 1
-            player_v = v2zero()
+            player.state = 1
+            player.v = v2zero()
          elseif
-            (player_sign>0
+            (player.sign>0
                 and (btn(0)
                         and not btn(1))
                 or
-                player_sign<0
+                player.sign<0
                 and (not btn(0)
                         and btn(1)))
          then
-            player_sign = -player_sign
-            player_v.x = -player_v.x
+            player.sign = -player.sign
+            player.v.x = -player.v.x
          else --reset walk speed, otherwise sometimes gets stuck in corners when revesing direction
-            player_v = v2init(player_sign*cplayer_speed,0)
+            player.v = v2init(player.sign*player.a.cspeed,0)
          end
       end
 
       --jump
       if btnp(5) then
-         player_state = 3
-         player_v.y = -4
+         player.state = 3
+         player.v.y = -4
          sfx(11+g_rnd_2)
          if btn(0) then
-            player_jump_s = -1
-            player_v.x = -cplayer_speed
+            player.jump_s = -1
+            player.v.x = -player.a.cspeed
          elseif btn(1) then
-            player_jump_s = 1
-            player_v.x = cplayer_speed
+            player.jump_s = 1
+            player.v.x = player.a.cspeed
          else
-            player_jump_s = 0
-            player_v.x = 0
+            player.jump_s = 0
+            player.v.x = 0
          end
       end
 
    else --on_air
 
       -- idle,walk / jmp
-      if player_state==1 or player_state==2 then
+      if player.state==1 or player.state==2 then
          -- go to fall
-         player_state = 4
-         player_v.x = 0
-      elseif player_state==3 or player_state==6 then
+         player.state = 4
+         player.v.x = 0
+      elseif player.state==3 or player.state==6 then
          --jmp/shj
-         if player_state==6 and player_t > #anm.k then --finished anim
-            player_state = 3 --jmp
-            player_t = #g_anim[3].k / 2
+         if player.state==6 and player.t > #anm.k then --finished anim
+            player.state = 3 --jmp
+            player.t = #g_anim[3].k / 2
          end
          --horiz jmp vel constantly applied to allow jmp
          --over neighbour blocks
-         player_v.x = player_jump_s * cplayer_speed
+         player.v.x = player.jump_s * player.a.cspeed
       end
 
       -- allow air turn
-      if (player_sign>0
+      if (player.sign>0
              and (btn(0)
                   and not btn(1)))
          or
-         (player_sign<0
+         (player.sign<0
              and (not btn(0)
                   and btn(1)))
       then
-         player_sign = -player_sign
+         player.sign = -player.sign
       end
+
    end
 
    --shoot
-   if player_state!=5
-      and player_state!=6
-      and player_state!=10
+   if player.state!=5
+      and player.state!=6
+      and player.state!=10
       and btnp(4) then
-      if player_state==3 then
-         player_state = 6 --shjmp
+      if player.state==3 then
+         player.state = 6 --shjmp
       else --idle/walk
-         player_state = 5 --shidl
-         player_v.x = 0
+         player.state = 5 --shidl
+         player.v.x = 0
       end
-      new_bullet_blast( player_p0, player_sign )
+      new_bullet_blast( player.p0, player.sign )
    end
 
-   local movebox = aabb_apply_sign_x(a_player.cmovebox,player_sign)
-   local damagebox = aabb_apply_sign_x(a_player.cdamagebox,player_sign)
+   local movebox = aabb_apply_sign_x(a_player.cmovebox,player.sign)
+   local damagebox = aabb_apply_sign_x(a_player.cdamagebox,player.sign)
    local acc = v2init( 0, a_level_cgravity_y )
-   if player_state == 10 then
-      acc = v2scale(0.1,acc)
-   end
-   local pred_vel = v2clamp( v2add( player_v, acc ),
+   local pred_vel = v2clamp( v2add( player.v, acc ),
                              v2scale(-1,a_player.cmaxvel),
                              a_player.cmaxvel )
 
@@ -779,14 +769,14 @@ function update_player()
    local p1
    local num_hits_map
    -- first handle collisions with solid map
-   p1, num_hits_map, player_handled_collisions = advance_ccd_box_vs_map( player_p0, v2add( player_p0, pred_vel ), movebox, 1 )
-   -- then handle collisions with damage map important: we do it in a
+   p1, num_hits_map, player.handled_collisions = advance_ccd_box_vs_map( player.p0, v2add( player.p0, pred_vel ), movebox, 1 )
+   -- then handle collisions with damage map. IMPORTANT: we do it in a
    -- second pass to allow non-damage tiles to prevent the player from
    -- hitting damage tiles if already supported/deflected by
-   -- non-damage tiles
+   -- non-damage ones
    local p2
    local hits_ccd = {}
-   p2, num_hits_map, hits_ccd = advance_ccd_box_vs_map( player_p0, p1, damagebox, 2 )
+   p2, num_hits_map, hits_ccd = advance_ccd_box_vs_map( player.p0, p1, damagebox, 2 )
 
    -- test enemies for collision, even if we've already hit map damage
    local hit_enemy = false
@@ -795,14 +785,14 @@ function update_player()
          local attackbox = aabb_apply_sign_x(e.a.cattackbox,e.sign)
          local attack_aabb = aabb_init_2( v2add( attackbox.min, e.p1 ),
                                           v2add( attackbox.max, e.p1 ) )
-         if ccd_box_vs_aabb( player_p0, p2, damagebox, attack_aabb ) != nil then
+         if ccd_box_vs_aabb( player.p0, p2, damagebox, attack_aabb ) != nil then
             hit_enemy = true
          end
       end
    end
 
    -- test powerups/collectables
-   hits_ccd = ccd_box_vs_map( player_p0, p2, movebox, 8 )
+   hits_ccd = ccd_box_vs_map( player.p0, p2, movebox, 8 )
    for c in all(hits_ccd) do
       if mget(c.tile_j,c.tile_i) == 64 then
          game_num_orbs += 1
@@ -816,7 +806,7 @@ function update_player()
       elseif mget(c.tile_j,c.tile_i) == 42 then --rose
          game_has_rose = true
          mset( c.tile_j, c.tile_i, mget( c.tile_j+1, c.tile_i ) )
-         player_weapon_a = a_rose
+         player.weapon_a = a_rose
          sfx(9)
       elseif mget(c.tile_j,c.tile_i) == 71 then --key
          game_has_key = true
@@ -832,78 +822,88 @@ function update_player()
    end
 
    -- advance
-   player_p1 = p2
-   player_v = v2sub( player_p1, player_p0 )
+   player.p1 = p2
+   player.v = v2sub( player.p1, player.p0 )
 
    -- hits if !invulnerable
    if (hit_enemy or num_hits_map != 0)
-      and player_inv_t == 0 then
-      player_state = 8 --hit
-      player_inv_t = 60
-      player_sign = -player_sign
-      player_v = v2init( player_sign * 1.5, -3 )
-      if player_health > 0 then
-         player_health -= 1
+      and player.inv_t == 0 then
+      player.state = 8 --hit
+      player.inv_t = 60
+      --bounce along x, but do not turn player
+      player.v = v2init( -player.sign * 1.5, -3 )
+      if player.health > 0 then
+         player.health -= 1
       end
       sfx(8)
    end
 
-   -- check on ground for next frame
-   player_ground_ccd_1 = ccd_box_vs_map( player_p0, v2add( player_p1, v2init(0,1) ), movebox, 3 )
-   player_on_ground = false
-   for c in all(player_ground_ccd_1) do
-      if c.normal.y < 0 and player_v.y >= 0 then
-         player_on_ground = true
+   -- check on ground for next frame using a shape-cast
+   player.on_ground = false
+   player.ground_ccd_1 = {}
+   if player.v.y >= 0 then
+      pred_vel = v2clamp( v2add( player.v, acc ),
+                          v2scale(-1,a_player.cmaxvel),
+                          a_player.cmaxvel )
+      pred_vel.x = 0 -- y-only prediction??
+      player.ground_ccd_1 = ccd_box_vs_map( player.p0,
+                                            v2add( player.p1, pred_vel ),
+                                            movebox,
+                                            3 )
+      for c in all(player.ground_ccd_1) do
+         if c.normal.y < 0 then
+            player.on_ground = true
+         end
       end
    end
 
    -- reset time if state changed
-   if player_state != state0 then
-      player_t = 0
+   if player.state != state0 then
+      player.t = 0
    end
 
    local room_coords = level.room_coords
    -- update-map
    if room_boss == nil then --not b_cannot_leave_room then
       local offset = 16*8
-      if player_v.x > 0
-      and player_p1.x > offset - movebox.max.x then
+      if player.v.x > 0
+      and player.p1.x > offset - movebox.max.x then
          if room_coords.x < a_level_cnumrooms.x-1
          and room_coords.y != 2 then --not in finalboss room
             room_coords.x += 1
             room = new_room( room_coords )
-            player_p1.x = movebox.min.x
+            player.p1.x = movebox.min.x
          elseif room_coords.x == 7 and room_coords.y == 0 then
             -- enter finalboss room
             room_coords.x = 0
             room_coords.y = 2
             room = new_room( room_coords )
-            player_p1.x = movebox.min.x
+            player.p1.x = movebox.min.x
          end
-      elseif player_v.x < 0
-            and player_p1.x < movebox.min.x
+      elseif player.v.x < 0
+            and player.p1.x < movebox.min.x
             and room_coords.x > 0 then
          room_coords.x -= 1
          room = new_room( room_coords )
-         player_p1.x = offset - movebox.max.x
-      elseif player_v.y > 0
-             and player_p1.y > offset - movebox.max.y
+         player.p1.x = offset - movebox.max.x
+      elseif player.v.y > 0
+             and player.p1.y > offset - movebox.max.y
              and room_coords.y < a_level_cnumrooms.y-1 then
          room_coords.y += 1
          room = new_room( room_coords )
-         player_p1.y = movebox.min.y
-      elseif player_v.y < 0
-             and player_p1.y < movebox.min.y
+         player.p1.y = movebox.min.y
+      elseif player.v.y < 0
+             and player.p1.y < movebox.min.y
              and room_coords.y > 0 then
          room_coords.y -= 1
          room = new_room( room_coords )
-         player_p1.y = offset - movebox.max.y
+         player.p1.y = offset - movebox.max.y
       end
       level.room_coords = room_coords
    end
 
    --borders
-   player_p1 = apply_borders( player_p1, movebox )
+   player.p1 = apply_borders( player.p1, movebox )
 end
 
 function advance_ccd_box_vs_map( p0, p1, box, flags )
@@ -917,7 +917,7 @@ function advance_ccd_box_vs_map( p0, p1, box, flags )
       for c in all(collisions_ccd) do
 
          -- correct p0 if overlap
-         if player_state == 10 then
+         if player.state == 10 then
             local tile_mid_y = 8*(c.tile_i - level.room_coords.y * 16) + 4
             local box_hs_y = 0.5 * (box.max.y - box.min.y)
             local diff_mid_y = p0.y + box.min.y + box_hs_y - tile_mid_y
@@ -969,6 +969,7 @@ function new_room( coords )
       }
    room_boss = nil
    add( r.entities, player )
+   -- temporal!!
    --process static map cells to create entities
    -- for j=0,15 do
    --    for i=0,15 do
@@ -1319,7 +1320,7 @@ function update_action_shoot( entity, action )
       local a = entity.a
       local st = a.cshoottype
       local pos = v2add( entity.p1, projectile_apply_sign_x( a.cshootpos, entity.sign, a.cvisualbox.max.x - a.cvisualbox.min.x ) )
-      local diff = v2sub( player_p1, pos )
+      local diff = v2sub( player.p1, pos )
       local e = nil
       if action.type == "horizontal" then
          e = new_entity( st,
@@ -1461,8 +1462,8 @@ function update_action_wait_and_ram( entity, action )
       and
       action.sub.t > #entity.a.table_anm[action.sub.anm_id].k --only replan after whole cycle
    then
-      if has_line_of_sight_horizontal( v2add(entity.p1,cv2_44), v2add(player_p1,cv2_44) ) then
-         action.sub = new_action_move_on_ground( player_p1 )
+      if has_line_of_sight_horizontal( v2add(entity.p1,cv2_44), v2add(player.p1,cv2_44) ) then
+         action.sub = new_action_move_on_ground( player.p1 )
       end
    elseif action.sub.finished then
       --reached target, back to idle
@@ -1481,8 +1482,8 @@ function update_action_wait_and_fly( entity, action )
       and
       action.sub.t > #entity.a.table_anm[action.sub.anm_id].k --only replan after whole cycle
    then
-      if v2length( v2sub( player_p1, entity.p1 ) ) < action.radius then
-         action.sub = new_action_move( player_p1 ) --flyto player
+      if v2length( v2sub( player.p1, entity.p1 ) ) < action.radius then
+         action.sub = new_action_move( player.p1 ) --flyto player
       end
    elseif action.sub.finished then
       --reached target, back to idle
@@ -1503,7 +1504,7 @@ function update_action_wait_and_drop( entity, action )
 
    if action.sub.name == "idle" then
       --fall if below
-      if has_line_of_sight_downwards( v2add(entity.p1,cv2_44), v2add(player_p1,cv2_44) ) then
+      if has_line_of_sight_downwards( v2add(entity.p1,cv2_44), v2add(player.p1,cv2_44) ) then
          action.sub = new_action_particle( v2zero(), v2init(0,a_level_cgravity_y) )
          sfx(10)
       end
@@ -1521,10 +1522,10 @@ function update_action_patrol_and_jump( entity, action )
       and
       action.sub.t > #entity.a.table_anm[action.sub.anm_id].k --only replan after whole cycle
    then
-      if abs(player_p1.x-entity.p1.x) < 64
+      if abs(player.p1.x-entity.p1.x) < 64
          and
-         has_line_of_sight_horizontal( v2add(entity.p1,cv2_44), v2add(player_p1,cv2_44) ) then
-         action.sub = new_action_jump_on_ground( player_p1 )
+         has_line_of_sight_horizontal( v2add(entity.p1,cv2_44), v2add(player.p1,cv2_44) ) then
+         action.sub = new_action_jump_on_ground( player.p1 )
       end
    elseif action.sub.finished then
       --reached target, back to idle
@@ -1549,7 +1550,7 @@ end
 
 function update_action_skullboss( entity, action )
    local sub = update_action( entity, action.sub )
-   entity.sign = sgn( player_p1.x - entity.p1.x )
+   entity.sign = sgn( player.p1.x - entity.p1.x )
    if action.phase == 1 then --intro
       if action.t > 60 then
          action.phase = 2
@@ -1574,7 +1575,7 @@ end
 
 function update_action_flameboss( entity, action )
    local sub = update_action( entity, action.sub )
-   entity.sign = sgn( player_p1.x - entity.p1.x )
+   entity.sign = sgn( player.p1.x - entity.p1.x )
    if action.phase == 1 then --intro
       if action.t > 60 then
          action.phase = 2
@@ -1632,7 +1633,7 @@ function update_action_finalboss( entity, action )
          action.phase = 3
       end
    elseif action.phase == 3 then
-      entity.sign = sgn( player_p1.x - entity.p1.x )
+      entity.sign = sgn( player.p1.x - entity.p1.x )
       if sub.finished then
          a_finalboss.cshoottype = a_wave
          sub = new_action_shoot(30,"horizontal")
@@ -1647,13 +1648,13 @@ end
 
 -- bullets
 function new_bullet_blast( _p, _s )
-   local b = { a = player_weapon_a,
+   local b = { a = player.weapon_a,
                anm_id = "move",
                t = 0,
                p0 = _p,
                p1 = _p,
                sign = _s,
-               v = v2init( _s*player_weapon_a.cspeed, 0 ) }
+               v = v2init( _s*player.weapon_a.cspeed, 0 ) }
    add(room.bullets,b)
    add(room.entities,b)
    sfx(3+g_rnd_2)
@@ -1672,7 +1673,7 @@ function update_bullets()
       local map_collisions = ccd_box_vs_map( b.p0,
                                              b.p1,
                                              attackbox,
-                                             5)
+                                             5 )
       -- if map collision, save it and shorten predicted trajectory
       if #map_collisions > 0 then
          b.p1 = v2add( b.p0, v2scale( map_collisions[1].interval.min, b.v ) )
@@ -1684,7 +1685,7 @@ function update_bullets()
                                                   b.p1,
                                                   attackbox,
                                                   room.enemies,
-                                                  "cdamagebox")
+                                                  "cdamagebox" )
 
       -- if there's enemy collision, either there was no map collision
       -- or the enemy one happened first during the shortened
@@ -1715,7 +1716,7 @@ function update_bullets()
          b_fx = false
       end
       if b_fx then
-         new_vfx( player_weapon_a, b.p1, b.sign )
+         new_vfx( player.weapon_a, b.p1, b.sign )
          sfx(5)
       end
       if b_delete then
@@ -1766,11 +1767,11 @@ end
 function aabb_apply_sign_x( aabb, sign_x )
    if sign_x < 0 then
       if aabb.max.x - aabb.min.y > 8 then
-         return { min = v2init( 15 - aabb.max.x, aabb.min.y ),
-                  max = v2init( 15 - aabb.min.x, aabb.max.y ) }
+         return { min = v2init( 16 - aabb.max.x, aabb.min.y ),
+                  max = v2init( 16 - aabb.min.x, aabb.max.y ) }
       else
-         return { min = v2init( 7 - aabb.max.x, aabb.min.y ),
-                  max = v2init( 7 - aabb.min.x, aabb.max.y ) }
+         return { min = v2init( 8 - aabb.max.x, aabb.min.y ),
+                  max = v2init( 8 - aabb.min.x, aabb.max.y ) }
       end
    end
    return aabb
@@ -1938,6 +1939,34 @@ function ccd_box_vs_map( box_pos0, box_pos1, box_aabb, flag_mask )
 end
 
 --[[
+   ccd between box and map
+   returns { point, normal, interval } if hit, and nil otherwise
+--]]
+function ccd_box_vs_map_downwards( box_pos0, box_pos1, box_aabb, flag_mask )
+   -- swept aabb
+   local swept_aabb = aabb_init_2( v2add( v2min( box_pos0, box_pos1 ), box_aabb.min ),
+                                   v2add( v2max( box_pos0, box_pos1 ), box_aabb.max ) )
+   local overlaps = bp_aabb_vs_map( swept_aabb, flag_mask )
+   local collisions = {}
+   for o in all(overlaps) do
+
+      local tile_aabb_min = v2init( o.tile_j*8, o.tile_i*8 )
+      local tile_aabb_max = v2add( tile_aabb_min, v2init(8,8) )
+
+      local c = ccd_box_vs_aabb( box_pos0, box_pos1, box_aabb,
+                                 aabb_init_2( tile_aabb_min, tile_aabb_max ) )
+      if c != nil and c.normal.y < 0 then
+         c.tile_i = level.room_coords.y * 16 + o.tile_i
+         c.tile_j = level.room_coords.x * 16 + o.tile_j
+         c.flags = fget( mget( c.tile_j, c.tile_i ) )
+         add( collisions, c )
+      end
+   end
+
+   return ccd_sort_collisions( collisions )
+end
+
+--[[
    ccd between box and entity["entity_box_name"]
    returns { point, normal, interval } if hit, and nil otherwise
 --]]
@@ -2040,91 +2069,91 @@ dd66666d5526666555166665551666650505050549494949e2e7eee7eeeeeeee0000000000000000
 1cdc100001ccdc109a900a0a5e5e5e5eeeeeedd111eeeeeee65256522525252eeeee333e22533522032bb3523b52bb2000322b3320b320b0053b883b88b30020
 1dc10000001cd10009000000e5e5e5e5eeee1d1ceeeeeeeeeeeeee6e5e525652eeeeeeee020533203022b3320b320b2000020b0320b020b225b88323b88b3b23
 111000000001100000000000e5e5e5e5eeeec1cccceeeeeeeeeeeeeeee6e6eeeeeeeeeee005003003020b0300b0200020002b0020b0000b025b2233b522b22b0
-1616169e161616161616161616161616ad0000adbfbdad0000bdadbfbd0000bd2000000880000002000220022000000000000000000000000000002200220000
-00000000000000000000000000000000000000000000000000000000000000002200008778000022000222002200000000002200220000000000002220022000
-1616169e1c9e0c16161c9e0c16161616aebd00bcadbebc0000bcaebdbc00adbe0220087887800220000022202220000000002220022000000000000222022200
-00000000000000000000000000000000000000000000000000000000000000000222008778002220000022222220000000000222022200000000000222222200
-1616169e9e9e9e0c1c9e9e9e0c16161600bc00efbe00aebdadbe00aeef00bc000222228778222220000028828820000000000222222200000000000288288200
-00000000000000000000000000000000000000000000000000000000000000000022111881112200000022222220000000000288288200000000333222222200
-16161c9e9e9e9e9e9e9e9e9e9e0c161600efadef0000adbeaebd0000efbdef0000211dd88dd11200003332222233300003333222222233000003333322002230
-000000000000000000000000000000000000000000000000000000000000000000111ddd1dd111000333b22222bb33003333332222233330003333bb22002333
-c5379e9e9e9e9e9e9e9e9e9e9e9e37c500bcbeaebdadef0000efbdadbeaebc00081121d1dd1211803333bbbb3bbb333033033b22222b3330003303bbb2002b33
-0000000000000000000000000000000000000000000000000000000000000000888022111122088833003bbb3bb3033033003bbb3bb300330330033bb3202b33
-16169c9e9e9e9e9e9e9e9e9e9e9c161600bc0000aebeae0000beaebe0000bc008080255115520808330003335330003333300333533003330333003333322033
-000000000000000000000000000000000000000000000000000000000000000080002552255200083330cc5555cc03333330ccc555cc033303330ccc555cc333
-c5379e9e9e9e839e9e9e9e9e9e9e37c500bc000000000000000000000000bc000802552202552080333ccc0555cc03330000ccc555ccc0000333ccc555cc3330
-00000000000000000000000000000000000000000000000000000000000000000002d520025d2000000cc10550c10000000cc10550cc1000000cc1550cc13330
-16169c9ebd9ebc839e9e9e9e9e9c1616adbe000000000000000000000000aebd000ddd2002ddd00000c111000011100000c111000011100000c1110001110000
-0000000000000000000000000000000000000000000000000000000000000000002dd020020dd200001111100111110000111110011111000011110001111000
-c5379e9eef9ebcbc839e9ead9e9e37c5ae0000000000000000000000000000be0000000880000000000110011000000000000000000000000980000000000990
-00000000000000000000000000000000000000000000000000000000000000002000008778000002000111001100000000001100110000008aa0110011000a88
-16169c9ebc83bcbcbc839ebc9e9c161600adbd0000ad00000000bd00aebd00ad22000878878000220000111011100000000011100110000088001110011000a8
-00000000000000000000000000000000000000000000000000000000000000000220008778000220000011111110000000000111011100a09a80011101110989
-c5379e9eaebcaeefefbe83bc9e9e37c5adbeaebe00aebd0000adbe0000bc00bc022200877800222000a01881881000a09000011111110a00a8800111111108a9
-000000000000000000000000000000000000000000000000000000000000000002222289982222200a001111111000a009000188188100a08a2001881881028a
-16169c9e9eef9ebcbc9eefbc9e9c1616aebd00adbfbfefbeaeefadbfbdefbfef00221118811122000a222111112220a0092221111111228a89220111111122a0
-000000000000000000000000000000000000000000000000000000000000000000211dd88dd1120008a23111113322808a222211111228aa0922221111122a80
-c5379e9e9ebc9ebcbc9ebcbe9e9e37c500aebdae00bcbc82f1bcbc00bcbc00bc00111ddd1dd111008aa2333323332aa8a8822311111329809002331111132008
-0000000000000000000000000000000000000000000000000000000000000000081121d1dd12118098002333233202899a80233323320aa80900233223320090
-1616169e9eefad88efbdef9e9e161616ad00aebdadbebc0000bcaebfbebc00bc8880251111520888aa800222522008aa88a0022252200a880000022552200000
-00000000000000000000000000000000000000000000000000000000000000008800255225520088a880cc5555cc088a8aa0ccc555cc09990900cc5555cc0a00
-9e9e9e9e25bcbcf6f6bcbc259e9e37c5aebdadefbe00aebdadbe00aebdae00bc0882555205552880999ccc0555cc09999980ccc555ccc0000000ccc55ccc0009
-00000000000000000000000000000000000000000000000000000000000000000002d520025d2000000cc10550c10000000cc10550cc10009001cc0550cc10a0
-2626262626262626262626262626262600aebeae000000aebe000000be0000be000ddd2002ddd00000c111000011100000c11100001110000001110000111000
-0000000000000000000000000000000000000000000000000000000000000000002dd020020dd200001111100111110000111110011111000011110000111100
-22d2d2d22d2d2d22000000022000000000000000010000006d2dddd62222255555522dd200000080080000001d1dd1d100000000000000000000c00000100000
-002d2d2dd2d2d20000000002200000004000100100000104d66dd66ddd2555cc885552d208000090090000801d1dd1d10000000001111110100c110001000010
-0002d2dddd2d20000000002222000000f40000000001004fd6866c6dd25500ae8aad552d890008900980009801dd1d100000000000000011001c100010000100
-00002d2dd2d20000000002d22d2000004f400000000004f4dd6d26dd25550000abbb55529a90099aa99009a901d1dd1000000000000000000011c00000001000
-000002d22d20000000002d2dd2d20000f4f4001001004f4f2d6dd6d225005000ab555552444004444440044401dd1d10000001100000000000011c0100010000
-00000022220000000002d2dddd2d200044ff40000004ff4fd6b6696d55a00500b55ccc55444004444440044401d1dd1000011001110000000001c10000100010
-0000000220000000002d2d2dd2d2d200ff44f400004f44ffd66dd66d5a00005c55cbbbc504000040040000401d1dd1d10110000000000000100c100000000100
-000000022000000022d2d2d22d2d2d224fff4f4004f4f4f46dddd2d65b0000055cb888b504000040040000401d1dd1d100000000000000000010c01000001000
-04f444f44f444f4000000004400000004f4f4f4004f4fff400555000500000c555baa885000000110000000110000000000000000000000000000c0000000001
-0044f444444f44000000000440000000ff44f400004f44ff0566650000000050c55bba85110001000000001dd100000000000000110000011000c00100000010
-00004f4444f400000000004444000000f4ff40100004ff440566665000000500bc55ba5500101000000001d11d10000000000000001111100000c00001000100
-0000044444400000000004f44f400000f4f4000000104f4f06555665000000008bc5bd520001000000001d1dd1d100000000000000000000000c0c0010000000
-000000f44f00000000004444444400004f401000000004f456666565000000008bc55552100010000001d1d11d1d10000000000000000000010c001000000001
-000000444400000000044f4444f44000f40000000000004f56556665000000008bc5552d00010100001d1d1dd1d1d100011111000000000000c0c00000000100
-00000004400000000044f444444f440040000001010000045666666000005cc8bc5552dd0010001101d1d1d11d1d1d10000000110000000010c00c0001001000
-000000000000000044f444f44f444f44000100000000000036336363000005555552dddd110000001d1d1d1dd1d1d1d100000000000000000c00c0c010010000
-2222222256556556000000004e4e4e4e04f40000f4f4ff4f3b3b43b40000030000300000100000111d1d1d1dd1d1d1d100000677776000000000c00000000000
-0222222265666565000000004e444e44ff4ff4f44f4ff4f433b33b4b00030030003000000100010001d1d1d11d1d1d1000067777777760001000c00040000040
-0002d2dd5666665600000000444e444e4ff4ffff4f4f4ff44343433b030b30300300300000101000001d1d1dd1d1d1000067776676677600001c0c0100000000
-00002d2d66655566000000204a4e4e4effff4ff44ff4f4fff4444344030300b00303b030000100000001d1d11d1d10000677667777777760000c0c0000004000
-000002d25656566620000d2da0ae4e4ef4f4ff4ff4ff4f444444f4440b0300300b0030300000100000001d1dd1d10000077777777777777000c0c0c000000000
-0000002256666665d2dd22dd4a444e444ffff4f44f4f4ff44f444444300303b0030030b000010100000001d11d10000067776667777677761c00c00c00000000
-0000000265665556dd22dd2d444e444ef4f4ffff4f4f4f4f444444f44b33b4340b303003001000100000001dd10000007766777677776677000c001c04000000
-00000002565566562dd2d2d24e4e4e4e004f4f40f4f4f4f44444f444b43b4343434b33b411000001000000011000000077776677777777770100c00000000400
-2222222205555650000000002dd2d2d2d2d2d2d20000000000000000000900000000900000009000000000000000000077777777777777761d1dd1d100000100
-2222222065666565000000002dddd2d22dd2d2d20000000000000000000980000009a00000080000000000900000000077767777777677761d1dd1d101000000
-dd2d200056666655200000022dd2dd202dd2d2dd0000000000000000008980000008a8000009800008000900100000016777766777767776d1dd1d1d00000000
-d2d2000056656565d222222d02d2dd20d2d2dd2d00080000000000000089a8000089a800080a908000800800d111111d0777777777677770d1d1dd1d00000000
-2d200000565656652dddddd202dd2d20dddd2d2d0009800000009000009a9a00009a990080098008008098001d1dd1d10677677776767760d1dd1d1d00001000
-2200000056666665d2dddd2d02dd2d202d2d2ddd008a90800808980008aaa9000089aa9089a9aa9808a99a80d1d11d1d0067777777777600d1d1dd1d00000000
-20000000556656552d2dd2d22d2ddd202d2dd2d208a9a8a009a99800089a9800008a9a80899aa9988a9a9a981d1dd1d100067777777760001d1dd1d110000010
-2000000006556550ddd22ddd22d2d2d2d2d2d2d2a99aa99a9a8a9a890089a0000009a8000889998089a88989d1d11d1d00000777766000001d1dd1d100000000
+1616169e161616161616161616161616ad0000adbfbdad0000bdadbfbd0000bd2eeeeee88eeeeee2eee22ee22eeeeeeeeeeeeeeeeeeeeeeeeeeeee22ee22eeee
+000000000000000000000000000000000000000000000000000000000000000022eeee8778eeee22eee222ee22eeeeeeeeee22ee22eeeeeeeeeeee222ee22eee
+1616169e1c9e0c16161c9e0c16161616aebd00bcadbebc0000bcaebdbc00adbee22ee878878ee22eeeee222e222eeeeeeeee222ee22eeeeeeeeeeee222e222ee
+0000000000000000000000000000000000000000000000000000000000000000e222ee8778ee222eeeee2222222eeeeeeeeee222e222eeeeeeeeeee2222222ee
+1616169e9e9e9e0c1c9e9e9e0c16161600bc00efbe00aebdadbe00aeef00bc00e22222877822222eeeee2882882eeeeeeeeee2222222eeeeeeeeeee2882882ee
+0000000000000000000000000000000000000000000000000000000000000000ee221118811122eeeeee2222222eeeeeeeeee2882882eeeeeeee3332222222ee
+16161c9e9e9e9e9e9e9e9e9e9e0c161600efadef0000adbeaebd0000efbdef00ee211dd88dd112eeee33322222333eeee3333222222233eeeee3333322ee223e
+0000000000000000000000000000000000000000000000000000000000000000ee111ddd1dd111eee333b22222bb33ee333333222223333eee3333bb22ee2333
+c5379e9e9e9e9e9e9e9e9e9e9e9e37c500bcbeaebdadef0000efbdadbeaebc00e81121d1dd12118e3333bbbb3bbb333e33e33b22222b333eee33e3bbb2ee2b33
+0000000000000000000000000000000000000000000000000000000000000000888e22111122e88833ee3bbb3bb3e33e33ee3bbb3bb3ee33e33ee33bb32e2b33
+16169c9e9e9e9e9e9e9e9e9e9e9c161600bc0000aebeae0000beaebe0000bc008e8e25511552e8e833eee333533eee33333ee333533ee333e333ee3333322e33
+00000000000000000000000000000000000000000000000000000000000000008eee25522552eee8333ecc5555cce333333eccc555cce333e333eccc555cc333
+c5379e9e9e9e839e9e9e9e9e9e9e37c500bc000000000000000000000000bc00e8e25522e2552e8e333ccce555cce333eeeeccc555ccceeee333ccc555cc333e
+0000000000000000000000000000000000000000000000000000000000000000eee2d52ee25d2eeeeeecc1e55ec1eeeeeeecc1e55ecc1eeeeeecc155ecc1333e
+16169c9ebd9ebc839e9e9e9e9e9c1616adbe000000000000000000000000aebdeeeddd2ee2dddeeeeec111eeee111eeeeec111eeee111eeeeec111eee111eeee
+0000000000000000000000000000000000000000000000000000000000000000ee2dde2ee2edd2eeee11111ee11111eeee11111ee11111eeee1111eee1111eee
+c5379e9eef9ebcbc839e9ead9e9e37c5ae0000000000000000000000000000beeeeeeee88eeeeeeeeee11ee11eeeeeeeeeeeeeeeeeeeeeeee98eeeeeeeeee99e
+00000000000000000000000000000000000000000000000000000000000000002eeeee8778eeeee2eee111ee11eeeeeeeeee11ee11eeeeee8aae11ee11eeea88
+16169c9ebc83bcbcbc839ebc9e9c161600adbd0000ad00000000bd00aebd00ad22eee878878eee22eeee111e111eeeeeeeee111ee11eeeee88ee111ee11eeea8
+0000000000000000000000000000000000000000000000000000000000000000e22eee8778eee22eeeee1111111eeeeeeeeee111e111eeae9a8ee111e111e989
+c5379e9eaebcaeefefbe83bc9e9e37c5adbeaebe00aebd0000adbe0000bc00bce222ee8778ee222eeeae1881881eeeae9eeee1111111eaeea88ee1111111e8a9
+0000000000000000000000000000000000000000000000000000000000000000e22222899822222eeaee1111111eeeaee9eee1881881eeae8a2ee1881881e28a
+16169c9e9eef9ebcbc9eefbc9e9c1616aebd00adbfbfefbeaeefadbfbdefbfefee221118811122eeea22211111222eaee92221111111228a8922e111111122ae
+0000000000000000000000000000000000000000000000000000000000000000ee211dd88dd112eee8a231111133228e8a222211111228aae922221111122a8e
+c5379e9e9ebc9ebcbc9ebcbe9e9e37c500aebdae00bcbc82f1bcbc00bcbc00bcee111ddd1dd111ee8aa2333323332aa8a88223111113298e9ee2331111132ee8
+0000000000000000000000000000000000000000000000000000000000000000e81121d1dd12118e98ee23332332e2899a8e23332332eaa8e9ee23322332ee9e
+1616169e9eefad88efbdef9e9e161616ad00aebdadbebc0000bcaebfbebc00bc888e25111152e888aa8ee222522ee8aa88aee222522eea88eeeee225522eeeee
+000000000000000000000000000000000000000000000000000000000000000088ee25522552ee88a88ecc5555cce88a8aaeccc555cce999e9eecc5555cceaee
+9e9e9e9e25bcbcf6f6bcbc259e9e37c5aebdadefbe00aebdadbe00aebdae00bce8825552e555288e999ccce555cce999998eccc555ccceeeeeeeccc55ccceee9
+0000000000000000000000000000000000000000000000000000000000000000eee2d52ee25d2eeeeeecc1e55ec1eeeeeeecc1e55ecc1eee9ee1cce55ecc1eae
+2626262626262626262626262626262600aebeae000000aebe000000be0000beeeeddd2ee2dddeeeeec111eeee111eeeeec111eeee111eeeeee111eeee111eee
+0000000000000000000000000000000000000000000000000000000000000000ee2dde2ee2edd2eeee11111ee11111eeee11111ee11111eeee1111eeee1111ee
+22d2d2d22d2d2d22000000022000000000000000010000006d2dddd62222255555522dd2eeeeee8ee8eeeeee1d1dd1d1eeeeeeeeeeeeeeeeeeeeceeeee1eeeee
+002d2d2dd2d2d20000000002200000004000100100000104d66dd66ddd2555cc885552d2e8eeee9ee9eeee8e1d1dd1d1eeeeeeeee111111e1eec11eee1eeee1e
+0002d2dddd2d20000000002222000000f40000000001004fd6866c6dd25500ae8aad552d89eee89ee98eee98e1dd1d1eeeeeeeeeeeeeee11ee1c1eee1eeee1ee
+00002d2dd2d20000000002d22d2000004f400000000004f4dd6d26dd25550000abbb55529a9ee99aa99ee9a9e1d1dd1eeeeeeeeeeeeeeeeeee11ceeeeeee1eee
+000002d22d20000000002d2dd2d20000f4f4001001004f4f2d6dd6d225005000ab555552444ee444444ee444e1dd1d1eeeeee11eeeeeeeeeeee11ce1eee1eeee
+00000022220000000002d2dddd2d200044ff40000004ff4fd6b6696d55a00500b55ccc55444ee444444ee444e1d1dd1eeee11ee111eeeeeeeee1c1eeee1eee1e
+0000000220000000002d2d2dd2d2d200ff44f400004f44ffd66dd66d5a00005c55cbbbc5e4eeee4ee4eeee4e1d1dd1d1e11eeeeeeeeeeeee1eec1eeeeeeee1ee
+000000022000000022d2d2d22d2d2d224fff4f4004f4f4f46dddd2d65b0000055cb888b5e4eeee4ee4eeee4e1d1dd1d1eeeeeeeeeeeeeeeeee1ece1eeeee1eee
+04f444f44f444f4000000004400000004f4f4f4004f4fff400555000500000c555baa885eeeeee11eeeeeee11eeeeeeeeeeeeeeeeeeeeeeeeeeeeceeeeeeeee1
+0044f444444f44000000000440000000ff44f400004f44ff0566650000000050c55bba8511eee1eeeeeeee1dd1eeeeeeeeeeeeee11eeeee11eeecee1eeeeee1e
+00004f4444f400000000004444000000f4ff40100004ff440566665000000500bc55ba55ee1e1eeeeeeee1d11d1eeeeeeeeeeeeeee11111eeeeeceeee1eee1ee
+0000044444400000000004f44f400000f4f4000000104f4f06555665000000008bc5bd52eee1eeeeeeee1d1dd1d1eeeeeeeeeeeeeeeeeeeeeeececee1eeeeeee
+000000f44f00000000004444444400004f401000000004f456666565000000008bc555521eee1eeeeee1d1d11d1d1eeeeeeeeeeeeeeeeeeee1ecee1eeeeeeee1
+000000444400000000044f4444f44000f40000000000004f56556665000000008bc5552deee1e1eeee1d1d1dd1d1d1eee11111eeeeeeeeeeeececeeeeeeee1ee
+00000004400000000044f444444f440040000001010000045666666000005cc8bc5552ddee1eee11e1d1d1d11d1d1d1eeeeeee11eeeeeeee1eceeceee1ee1eee
+000000000000000044f444f44f444f44000100000000000036336363000005555552dddd11eeeeee1d1d1d1dd1d1d1d1eeeeeeeeeeeeeeeeeceecece1ee1eeee
+2222222256556556000000004e4e4e4e04f40000f4f4ff4f3b3b43b400000300ee3eeeee1eeeee111d1d1d1dd1d1d1d1eeeee677776eeeeeeeeeceeeeeeeeeee
+0222222265666565000000004e444e44ff4ff4f44f4ff4f433b33b4b00030030ee3eeeeee1eee1eee1d1d1d11d1d1d1eeee6777777776eee1eeeceee4eeeee4e
+0002d2dd5666665600000000444e444e4ff4ffff4f4f4ff44343433b030b3030e3ee3eeeee1e1eeeee1d1d1dd1d1d1eeee677766766776eeee1cece1eeeeeeee
+00002d2d66655566000000204a4e4e4effff4ff44ff4f4fff4444344030300b0e3e3be3eeee1eeeeeee1d1d11d1d1eeee67766777777776eeeececeeeeee4eee
+000002d25656566620000d2da0ae4e4ef4f4ff4ff4ff4f444444f4440b030030ebee3e3eeeee1eeeeeee1d1dd1d1eeeee77777777777777eeecececeeeeeeeee
+0000002256666665d2dd22dd4a444e444ffff4f44f4f4ff44f444444300303b0e3ee3ebeeee1e1eeeeeee1d11d1eeeee67776667777677761ceeceeceeeeeeee
+0000000265665556dd22dd2d444e444ef4f4ffff4f4f4f4f444444f44b33b434eb3e3ee3ee1eee1eeeeeee1dd1eeeeee7766777677776677eeecee1ce4eeeeee
+00000002565566562dd2d2d24e4e4e4e004f4f40f4f4f4f44444f444b43b4343434b33b411eeeee1eeeeeee11eeeeeee7777667777777777e1eeceeeeeeee4ee
+2222222205555650000000002dd2d2d2d2d2d2d2000000000000000000090000eeee9eeeeeee9eeeeeeeeeeeeeeeeeee77777777777777761d1dd1d1eeeee1ee
+2222222065666565000000002dddd2d22dd2d2d2000000000000000000098000eee9aeeeeee8eeeeeeeeee9eeeeeeeee77767777777677761d1dd1d1e1eeeeee
+dd2d200056666655200000022dd2dd202dd2d2dd000000000000000000898000eee8a8eeeee98eeee8eee9ee1eeeeee16777766777767776d1dd1d1deeeeeeee
+d2d2000056656565d222222d02d2dd20d2d2dd2d00080000000000000089a800ee89a8eee8ea9e8eee8ee8eed111111de77777777767777ed1d1dd1deeeeeeee
+2d200000565656652dddddd202dd2d20dddd2d2d0009800000009000009a9a00ee9a99ee8ee98ee8ee8e98ee1d1dd1d1e67767777676776ed1dd1d1deeee1eee
+2200000056666665d2dddd2d02dd2d202d2d2ddd008a90800808980008aaa900ee89aa9e89a9aa98e8a99a8ed1d11d1dee677777777776eed1d1dd1deeeeeeee
+20000000556656552d2dd2d22d2ddd202d2dd2d208a9a8a009a99800089a9800ee8a9a8e899aa9988a9a9a981d1dd1d1eee6777777776eee1d1dd1d11eeeee1e
+2000000006556550ddd22ddd22d2d2d2d2d2d2d2a99aa99a9a8a9a890089a000eee9a8eee889998e89a88989d1d11d1deeeee777766eeeee1d1dd1d1eeeeeeee
 
 __gff__
-0000000000000000000000600060600000000000000000000000000000000101010101010101000101000101010101010101010101010101010101010101010101010101010100080101000101080101010108800101000101010101010108010101020101010001010001016040080101010801010101010100010100000000
+0000000000000000000000600060600000000000000000000000000000000101010101010101000101008080808080800101010101010101010180808080808001010101810100080202020202020101010100000000000002020202020000000404020101000000020202020202000001010801010101010002020202020202
 0202020202020202000000000000000002020202020202020000000000000000020202020202020200000000000000000202020202020202000000000000000040404040606040404040404040404000010101016060014040404040404040000101400160600140404040404040404001014040400000020000024040404040
 __map__
-45007000000000000072000000400000ffffffccffffffffffffffffffffffffffdcffffffffffffffdcffffffffffffffffccffffffffffffffffffffffffffffffffffffffccffffffcdffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff61
-40404000000000604040400000400000ffffffffffffffffccffffdcffffffffffffffccddcdffffffffffffffffffccffffffffffffcdffccffffffffffffddffffffccffffffffffffffffffddffffffffffcdffffffffddffffffffffffcdfffffffffffffffffffffffffffffffffffffffffffffffff2ffffffffffff61
-40000000000000600000000000400000ffddffdcffccffffffffffffcdffffffccffffffffffc2f2f2f2f2f2c3ffcdffffdcffffccffffffffcdffffddccffffff635dffffffffff63ffff63ffffffffffffffffffffccffffffcccdffffffffffffffffffffffddffffffffffffdcffffdddcffffffffff65ffffffdc727261
-400000000000006000004d004e400000ffffffffffffffffffffffffffffffffffffffffffc2c14e0000004ec0c3ffffffffffffffffffffffffffffffffffffff636363ff63ffffffffff4effffffffddffccffffffffffffffffffffccffffffffffccffffffffffdcffffddffffffffccffffffffffe265c3ffffdc616161
-40404040604040400000000040400000ffffc2f2f2f2f2f2f2f2f2f2f2f2f2c3ffc2f2f2f2c100000000000000c0f2f2f2f2f2f2c3ffc2f2f2f2f2c3ffffffffff6327c0636363ffffffffffffffffffffffffffffddffffffccffffffffffffffffffffffffffffffffffffffffffffdddcddffffffff656565c3ffffc06161
-40000000600000000000000000000000ffc2c1c0c1c0f4c1c0c1c0f4c1c0c1c0f4c100c0f4000000000000000000f4c100000000c0f4c100000000c0f2f0ffffff6300001c001ce063ffccddffcd63f0ffddffdcffffffffffffcdffffffddffffffffffffccffdcffffdddcffdddcffccffccffffffff65656565ffffffc061
-40000000600000005800610000007140fff300000000f300000000f300000000f3000000f3000000000000000000f3000000000000f3000000000000f3ffffffff6300001c000000c0630000000063ffffffffffffff78ffffffffffffffffffffffccffffffffffffddffecedccffffdcffffdcffffffc7c86565c3c2ffff61
-40000000404040404040406300404040fff300000000f300000000f300000000f3000000f3000000000000000000f3000000000000f3000000000000f3ffffffff630000000000000000005d630063ffffcdffffffff7060ffffffddffccffffffffffffffffffffddccddfcfddcddffffccffffffddffd7d865ffc0f4ffff61
-402a2b00000000000000000000000040fff300000000f300000000f300000000f3000000f30000000000000000636363f000000000f3000000000000f3ffffffff6300000000636363636363c10063ffffffffffff7060707078ffffffffddffddffffffffdccdffffcddccdffffccffffffdccdffffffff6565e2fff3ffff61
-403a3b00000000005b00000000000040fff300000000f300000000f300000000f3006363630000000000e0f000c0f4c10000000000f3000000000000f3dcffffcd6300000063c10000000000000063ffffffffff607070607060ffffffffffffffffffffffdcdddccddcffddccffffdcccdcdcdddccdffe2656565e2f3ffff61
-404040404040406040400048000040f0fff300000000f300000000f3006600636363634ef300e0f0000000000000f3000000000000f300000000005af30000000063000063c1000000000000000063ffffffffff7060707070706464646464ffffffffcccdffffdcddffffffddccffffffcdffffffffe2656565656565c3ff61
-4000000000000060004c00000040f000fff300000000f300005a6363636363636363c100f3000000000000000000f300000000e06363630000000063c10000000063635c0076006363636300000063ffffffffff70747060746000c5d4ffffffffcdffdcddffffffffffffddffffcdffdccdffffffffc66565c66565ffc0ff61
-4000000000000060005c000000401e1ffff300000000f300636363636363636363c10000f30000005d0000000000f3000000000000f3c063000000000000000000c06363636363c1000000000063c1ffffffff63607070706070c5d40000ffffffffffffffffffffffff63ffffdccdffffffffffffe265c1c0656565e2ffff61
-40000000006a6b60005c000000442e2ffff300000063636363636363d1efefeff3000000f30000e0f00000000000f3000000000000f300c063000000000000000000f300000000000000000063c1006363e2e2c0706000007060d400000000ffffffffffffffff63dd0000dcff63ffffffffffffff65c18affc0656565ffff61
-40000000007a7b600000000000443e3fc2f4c3637575757575757575ef37efeff30037006300000000000063e2c2f4c30000000066f34000c0630000000066636300f300000000000066637575006363636363ff6070005660700000000000f1f1ffffffff5663c10000000000c063ffffe2ffffe265ffffffff656565e2ffe3
-4242424242424242424242424242424263636363636363636371717171e6717171e6e6e663727272727272636363636362626262626262717171716262626262626262626262626262757575757575626262626262626262626250f1505050626262626262626250505050505050626262626262626262626262626262626262
+4500700000000000007200000040000000000000000000000000000000000000ffdcffffffffffffffdcffffffffffffffffccffffffffffffffffffffffffffffffffffffffccffffffcdffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff61
+4040400000000060404040000040000000000000000000000000000000000000ffffffccddcdffffffffffffffffffccffffffffffffcdffccffffffffffffddffffffccffffffffffffffffffddffffffffffcdffffffffddffffffffffffcdfffffffffffffffffffffffffffffffffffffffffffffffff2ffffffffffff61
+4000000000000060000000000040000000000000000000000000000000000000ccffffffffffc2f2f2f2f2f2c3ffcdffffdcffffccffffffffcdffffddccffffff635dffffffffff63ffff63ffffffffffffffffffffccffffffcccdffffffffffffffffffffffddffffffffffffdcffffdddcffffffffff65ffffffdc727261
+400000000000006000004d004e40000000000000000000000000000000000000ffffffffffc2c14e0000004ec0c3ffffffffffffffffffffffffffffffffffffff636363ff63ffffffffff4effffffffddffccffffffffffffffffffffccffffffffffccffffffffffdcffffddffffffffccffffffffffe265c3ffffdc616161
+4040404060404040000000004040000000000000000000000000000040000000ffc2f2f2f2c100000000000000c0f2f2f2f2f2f2c3ffc2f2f2f2f2c3ffffffffff6327c0636363ffffffffffffffffffffffffffffddffffffccffffffffffffffffffffffffffffffffffffffffffffdddcddffffffff656565c3ffffc06161
+4000000060000000000000000000000000000000000000000000004040000000f4c100c0f4000000000000000000f4c100000000c0f4c100000000c0f2f0ffffff6300001c001ce063ffccddffcd63f0ffddffdcffffffffffffcdffffffddffffffffffffccffdcffffdddcffdddcffccffccffffffff65656565ffffffc061
+4000000060000000580061000000714000000000000000000000404000000000f3000000f3000000000000000000f3000000000000f3000000000000f3ffffffff6300001c000000c0630000000063ffffffffffffff78ffffffffffffffffffffffccffffffffffffddffecedccffffdcffffdcffffffc7c86565c3c2ffff61
+4000000040404040404040630040404000000000000000000040400000000000f3000000f3000000000000000000f3000000000000f3000000000000f3ffffffff630000000000000000005d630063ffffcdffffffff7060ffffffddffccffffffffffffffffffffddccddfcfddcddffffccffffffddffd7d865ffc0f4ffff61
+402a2b00006a6b00000000000000004000000000000000004040000000000000f3000000f30000000000000000636363f000000000f3000000000000f3ffffffff6300000000636363636363c10063ffffffffffff7060707078ffffffffddffddffffffffdccdffffcddccdffffccffffffdccdffffffff6565e2fff3ffff61
+403a3b00007a7b005b0000000000004000000000000040004000000000000000f3006363630000000000e0f000c0f4c10000000000f3000000000000f3dcffffcd6300000063c10000000000000063ffffffffff607070607060ffffffffffffffffffffffdcdddccddcffddccffffdcccdcdcdddccdffe2656565e2f3ffff61
+404040404040406040400048000040f0000000000040400000000000000000006363634ef300e0f0000000000000f3000000000000f300000000005af30000000063000063c1000000000000000063ffffffffff7060707070706464646464ffffffffcccdffffdcddffffffddccffffffcdffffffffe2656565656565c3ff61
+4000000000000060004c00000040f000000000004040000000000000000000006363c100f3000000000000000000f300000000e06363630000000063c10000000063635c0076006363636300000063ffffffffff70747060746000c5d4ffffffffcdffdcddffffffffffffddffffcdffdccdffffffffc66565c66565ffc0ff61
+4000000000000060005c000000401e1f0000004040000000400000404000000063c10000f30000005d0000000000f3000000000000f3c063000000000000000000c06363636363c1000000000063c1ffffffff63607070706070c5d40000ffffffffffffffffffffffff63ffffdccdffffffffffffe265c1c0656565e2ffff61
+4000000000000060005c000000442e2f00004040000000000000000000000040f3000000f30000e0f00000000000f3000000000000f300c063000000000000000000f300000000000000000063c1006363e2e2c0706000007060d400000000ffffffffffffffff63dd0000dcff63ffffffffffffff65c18affc0656565ffff61
+4000000000000060000000000000000000404000000040000040400040004000f30037006300000000000063e2c2f4c30000000066f34000c0630000000066636300f300000000000066637575006363636363ff6070005660700000000000f1f1ffffffff5663c10000000000c063ffffe2ffffe265ffffffff656565e2ffe3
+424242424242424242424242424242424242424242424242424242424242424271e6e6e663727272727272636363636362626262626262717171716262626262626262626262626262757575757575626262626262626262626250f1505050626262626262626250505050505050626262626262626262626262626262626262
 eff0efefd0717171717171717171717171717171717171717171717171717171717171716363636363636363636363636363717171717171717171717171717162626262627171717171717171717171717171717171717171515151515151517171717171717171717171717171717171717171717171717171717171717171
 efefefefefd0717171717171717171717171717171717171717171717171d0d1d07171d1eff4c1ffffc0f4efefefefefefefefefefefefefefefefefd071d1efefefefefefd075d1efefefefef4eefefefefefefefd07171715151515151515171717171717171717171717171717171717171717171d1d0d1d071d1d0717171
 e0efefefefefd071717171717171d1d071d1d0717171d14ed071d14e71d1efefefefefefeff3ff40fffff3efefefefefefef5cefefef76efefefefefef4eefefefefef7cefef75efefefefefefefefefefefefefefef39d0717151f15151517171717171717171717171717171717171717171d071d1ffffffff71ffffffd071
