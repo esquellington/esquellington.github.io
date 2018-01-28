@@ -234,7 +234,7 @@ function init_archetypes()
    a_player =
       {
          table_anm  = _table_anm,
-         cmovebox   = caabb_1177, --caabb_0088,
+         cmovebox   = caabb_1177, --caabb_0088 IMPORTANT: MUST be SMALLER than 0088 to fit in single-block holes!
          cdamagebox = aabb_init( 2, 1, 6, 7 ),
          cattackbox = nil,
          cspeed = 1,
@@ -853,6 +853,7 @@ function update_player()
       for c in all(player.ground_ccd_1) do
          if c.normal.y < 0 then
             player.on_ground = true
+            player.v.y = 0
          end
       end
    end
