@@ -1,8 +1,8 @@
 pico-8 cartridge // http://www.pico-8.com
-version 8
+version 14
 __lua__
 
--- run with: ./pico-8/pico8 -run ./jng.p8 -desktop . -windowed 1x
+-- run with: ./pico-8/pico8 -run ./jng.p8 -desktop . -windowed 1
 
 function _init()
    caabb_88 = aabb_init(0,0,8,8)
@@ -17,6 +17,7 @@ function _init()
    init_archetypes()
    game_state = "menu"
    game_t = 0
+   debug_mode = 2
    game_difficulty = 0
    init_persistence()
 
@@ -129,16 +130,17 @@ function _draw()
    elseif game_state == "intro" then
       table_text =
          {
-            {1,  "in a land with no sun"},
-            {30, "only hexen fought the plague"},
-            {60, "but the bishop felt his power"},
-            {90, "threatened by their natural arts"},
-            {120,"and with lies and treachery"},
-            {150,"he convinced they were to blame"},
-            {180,"and sentenced them to death."},
-            {300,"just before their execution"},
-            {330,"an omen they proclaimed:"},
-            {400,"thou shall fear the hexenstorm!"}
+            -- {1,  "in a land with no sun"},
+            -- TEMPORAL!!
+            -- {30, "only hexen fought the plague"},
+            -- {60, "but the bishop felt his power"},
+            -- {90, "threatened by their natural arts"},
+            -- {120,"and with lies and treachery"},
+            -- {150,"he convinced they were to blame"},
+            -- {180,"and sentenced them to death."},
+            -- {300,"just before their execution"},
+            -- {330,"an omen they proclaimed:"},
+            -- {400,"thou shall fear the hexenstorm!"}
          }
    elseif game_state == "play" then
       draw_game()
@@ -153,17 +155,19 @@ function _draw()
       spr( anm_k[1+game_t%#anm_k], pos_x, 70 + 2*cos(game_t/30) )
       table_text =
          {
-            {1,"the bishop has been defeated!"},
-            {30,"your sisters may now"},
-            {60,"rest in peace"},
-            {110,"//// hexenstorm ////"},
-            {160,"a pico-8 game by esquellington"}
+            -- TEMPORAL!!
+            -- {1,"the bishop has been defeated!"},
+            -- {30,"your sisters may now"},
+            -- {60,"rest in peace"},
+            -- {110,"//// hexenstorm ////"},
+            -- {160,"a pico-8 game by esquellington"}
          }
    elseif game_state == "death" then
       table_text =
          {
-            {1,"you"},
-            {120,"failed!"}
+            -- TEMPORAL!!
+            -- {1,"you"},
+            -- {120,"failed!"}
          }
       local scroll = max( 0, game_t/5 - 30 )
       pal(1,0)
@@ -298,24 +302,31 @@ function draw_game()
       rectfill( 33, 10, 33+62*(room_boss.health/room_boss.a.chealth), 12, 8 )
    end
 
-   -- if debug.mode > 0 then
-      --entity boxes
-      -- local colors = {10,11,8,12}
-      -- for e in all(room.entities) do
-      --    local a = e.a
-      --    local e_p1 = e.p1
-      --    local boxes = {a.cvisualbox,a.cmovebox,a.cdamagebox,a.cattackbox}
-      --    local box = boxes[debug.mode]
-      --    if box != nil then
-      --       box = aabb_apply_sign_x(box,e.sign)
-      --       rect( e_p1.x + box.min.x,
-      --             e_p1.y + box.min.y,
-      --             e_p1.x + box.max.x-1,
-      --             e_p1.y + box.max.y-1,
-      --             colors[debug.mode] )
-      --    end
-      -- end
-   -- end
+   if debug_mode > 0 then
+      local colors = {10,11,8,12}
+      -- player mover box
+      local box = aabb_apply_sign_x(a_player.cmovebox,player_sign)
+      rect( player_p1.x + box.min.x,
+            player_p1.y + box.min.y,
+            player_p1.x + box.max.x-1,
+            player_p1.y + box.max.y-1,
+            colors[2] )
+      -- entity boxes
+      for e in all(room.entities) do
+         local a = e.a
+         local e_p1 = e.p1
+         local boxes = {a.cvisualbox,a.cmovebox,a.cdamagebox,a.cattackbox}
+         local box = boxes[debug_mode]
+         if box != nil then
+            box = aabb_apply_sign_x(box,e.sign)
+            rect( e_p1.x + box.min.x,
+                  e_p1.y + box.min.y,
+                  e_p1.x + box.max.x-1,
+                  e_p1.y + box.max.y-1,
+                  colors[debug_mode] )
+         end
+      end
+   end
 end
 
 function uncompress_anim( archetype )
@@ -357,7 +368,7 @@ function init_archetypes()
       }
    a_player =
       {
-         table_anm = _table_anm,
+         table_anm  = _table_anm,
          cmovebox   = caabb_1177,
          cdamagebox = aabb_init( 2, 1, 6, 7 ),
          cattackbox = nil,
@@ -964,22 +975,40 @@ function update_player()
       and player_inv_t == 0 then
       player_state = 8 --hit
       player_inv_t = 60
-      player_sign = -player_sign
-      player_v = v2init( player_sign * 1.5, -3 )
+      --bounce along x, but do not turn player
+      player_v = v2init( -player_sign * 1.5, -3 )
       if player_health > 0 then
          player_health -= 1
       end
       sfx(8)
    end
 
-   -- check on ground for next frame
-   player_ground_ccd_1 = ccd_box_vs_map( player_p0, v2add( player_p1, v2init(0,1) ), movebox, 3 )
+   -- check on ground for next frame using a shape-cast
    player_on_ground = false
-   for c in all(player_ground_ccd_1) do
-      if c.normal.y < 0 and player_v.y >= 0 then
-         player_on_ground = true
+   player_ground_ccd_1 = {}
+   if player_v.y >= 0 then
+      pred_vel = v2clamp( v2add( player_v, acc ),
+                          v2scale(-1,a_player.cmaxvel),
+                          a_player.cmaxvel )
+      -- pred_vel.x = 0 -- y-only prediction??
+      player_ground_ccd_1 = ccd_box_vs_map( player_p0, --player_p1,
+                                            v2add( player_p1, pred_vel ),
+                                            movebox,
+                                            3 )
+      for c in all(player_ground_ccd_1) do
+         if c.normal.y < 0 then
+            player_on_ground = true
+         end
       end
    end
+
+   -- player_ground_ccd_1 = ccd_box_vs_map( player_p0, v2add( player_p1, v2init(0,1) ), movebox, 3 )
+   -- player_on_ground = false
+   -- for c in all(player_ground_ccd_1) do
+   --    if c.normal.y < 0 and player_v.y >= 0 then
+   --       player_on_ground = true
+   --    end
+   -- end
 
    -- reset time if state changed
    if player_state != state0 then
@@ -1092,7 +1121,7 @@ function new_room( coords )
          vfx = {}
       }
    room_boss = nil
-   add( r.entities, player )
+   -- add( r.entities, player ) IMPORTANT THIS WAS WRONG!! player was not a proper entity since it became player_??? for token reduction!!!
    --process static map cells to create entities
    for j=0,15 do
       for i=0,15 do
@@ -1729,43 +1758,44 @@ function update_action_flameboss( entity, action )
 end
 
 function update_action_finalboss( entity, action )
-   local sub = update_action( entity, action.sub )
-   if action.phase == 1 then --intro
-      if action.t < 120 then
-         --intro uses piano anim, flip sign to animate cheaply
-         sub.anm_id = "piano"
-         if action.t % 4 == 0 then
-            entity.sign *= -1
-         end
-      elseif action.t < 150 then
-         sub.anm_id = "idle"
-      else
-         action.phase = 2
-         sub = new_action_move( v2init(56,26) )
-      end
-   elseif action.phase == 2 then
-      a_finalboss.cdamagebox = caabb_4n1139
-      if sub.name == "move" and sub.finished then
-         sub = new_action_idle()
-      elseif sub.name == "idle" and sub.t > 60 then
-         a_finalboss.cshoottype = a_flame
-         sub = new_action_shoot(30,"straight")
-      elseif sub.name == "shoot" and sub.t > 120 then --4x
-         a_finalboss.cspeed = 5
-         sub = new_action_move( v2init(56,104) )
-         action.phase = 3
-      end
-   elseif action.phase == 3 then
-      entity.sign = sgn( player_p1.x - entity.p1.x )
-      if sub.finished then
-         a_finalboss.cshoottype = a_wave
-         sub = new_action_shoot(30,"horizontal")
-      elseif sub.name == "shoot" and sub.t > 30 then
-         sub = new_action_move( v2init(56,26) )
-         action.phase = 2
-      end
-   end
-   action.sub = sub
+   -- TEMPORAL!!
+   -- local sub = update_action( entity, action.sub )
+   -- if action.phase == 1 then --intro
+   --    if action.t < 120 then
+   --       --intro uses piano anim, flip sign to animate cheaply
+   --       sub.anm_id = "piano"
+   --       if action.t % 4 == 0 then
+   --          entity.sign *= -1
+   --       end
+   --    elseif action.t < 150 then
+   --       sub.anm_id = "idle"
+   --    else
+   --       action.phase = 2
+   --       sub = new_action_move( v2init(56,26) )
+   --    end
+   -- elseif action.phase == 2 then
+   --    a_finalboss.cdamagebox = caabb_4n1139
+   --    if sub.name == "move" and sub.finished then
+   --       sub = new_action_idle()
+   --    elseif sub.name == "idle" and sub.t > 60 then
+   --       a_finalboss.cshoottype = a_flame
+   --       sub = new_action_shoot(30,"straight")
+   --    elseif sub.name == "shoot" and sub.t > 120 then --4x
+   --       a_finalboss.cspeed = 5
+   --       sub = new_action_move( v2init(56,104) )
+   --       action.phase = 3
+   --    end
+   -- elseif action.phase == 3 then
+   --    entity.sign = sgn( player_p1.x - entity.p1.x )
+   --    if sub.finished then
+   --       a_finalboss.cshoottype = a_wave
+   --       sub = new_action_shoot(30,"horizontal")
+   --    elseif sub.name == "shoot" and sub.t > 30 then
+   --       sub = new_action_move( v2init(56,26) )
+   --       action.phase = 2
+   --    end
+   -- end
+   -- action.sub = sub
    return action
 end
 
@@ -1890,11 +1920,11 @@ end
 function aabb_apply_sign_x( aabb, sign_x )
    if sign_x < 0 then
       if aabb.max.x - aabb.min.y > 8 then
-         return { min = v2init( 15 - aabb.max.x, aabb.min.y ),
-                  max = v2init( 15 - aabb.min.x, aabb.max.y ) }
+         return { min = v2init( 16 - aabb.max.x, aabb.min.y ),
+                  max = v2init( 16 - aabb.min.x, aabb.max.y ) }
       else
-         return { min = v2init( 7 - aabb.max.x, aabb.min.y ),
-                  max = v2init( 7 - aabb.min.x, aabb.max.y ) }
+         return { min = v2init( 8 - aabb.max.x, aabb.min.y ),
+                  max = v2init( 8 - aabb.min.x, aabb.max.y ) }
       end
    end
    return aabb
@@ -2116,22 +2146,22 @@ __gfx__
 08055500008d55400055ddd0000d5000000d55500005d0000000d0050000d0050000555500005550000225200252200000060600000000000000000008888110
 000d0500000d05005500000d000d50000dd000050005d000000d0050000d0050000dd0050000d00500022d2002d2200000060500000000000000000001111000
 00d0055000d005500000000000d05000000000000050d00000d0000000d0000000d0005000dd00050052dd5005dd250000005000000000000000000000000000
-808088800804880000088000000808080000000400888000000090007070707700000000002e00000008880000000dd8f438f000009000000808088000808088
-08488f0408848f04008888000088888000008004455788000000400007070700800000000028e8000082e2800008355883d88d0000090000808888f00888888f
-088445400884454008845f000845f888f448884f454888f400004000707070008800000008828e800028282000d8f345534d5440000900000888540080888540
-008855000088550008455400045548004f487554f548844f00009000070070008888000002828e80000282000d43d3d44d355450000090000080540008005540
-00055000000550000845440040554080000884544d408000000040007000700018888800082e2e2000003b000d3435888d534435000090009a0550499a055049
-000d5500000d55000085500000540000000884544d5080000000900000d070d00118888000e8820000b333b08f354d8f5d3453f80000a000a9995594a9995594
-000d0500000d050000d050000d0500000000854f4d500000000040000d0d2d0d0001111000028000000b30008834355355344388000a9a009a0d05009a0d0500
-00d0500000d050000d005000d005500000008d5445000000000040000d02220d0000000000000000000030004343b4b343b3434b00a9a9a0a0d05000a0d05000
-0000000000000000000000000000000000000d54400000000088900000000020100000010003b000030300300b00b0b000000000777700600777700706660070
-00000000000000000000000000000000000000d4f000000000874500000002201d1001d10003000000300303b0b00b0066666006007770607006770700066007
-000000000000000000000000000000000000000f4000000000844f000020022201dddd10000b3000309499300b94990b00666606077666600066677700666607
-00000000000000000000000000070700000800044008000000885f00022202e201dd1d100000300009899893b909909007657666776556600665567706675667
-00ee0000000000000077700070e7e707000980048009800000085f0002e200e001d1dd100003b000349999400499994b77655660766576606667567006655677
-00e2200000e2e20007e2270007e2e270008a9084989a90800008d50000e000e001dd1d1000030000098888900908809077766600706666006066660006666770
-0e22e8000e2e2e800e22e8000e2e2e8008a9a8a89aa9a8a00000d50000e00e001dd1d1d1000b300030499403b049940b70776007700660006006666606077700
-022eee0002e2eee0022eee0002e2eee0a99aa99aaa9aa99a00000d00002ee2001d1dd1d100003000030030300b0b00b070077770070066600000000006007777
+808088800804880000088000000808080000000400888000000090000020202000000000002e00000008880000000dd8f438f000009000000808088000808088
+08488f0408848f040088880000888880000080044557880000004000000d2d00800000000028e8000082e2800008355883d88d0000090000808888f00888888f
+088445400884454008845f000845f888f448884f454888f40000400000dd2dd08800000008828e800028282000d8f345534d5440000900000888540080888540
+008855000088550008455400045548004f487554f548844f0000900000d222d08888000002828e80000282000d43d3d44d355450000090000080540008005540
+00055000000550000845440040554080000884544d408000000040000dd828dd18888800082e2e2000003b000d3435888d534435000090009a0550499a055049
+000d5500000d55000085500000540000000884544d508000000090000dd222dd0118888000e8820000b333b08f354d8f5d3453f80000a000a9995594a9995594
+000d0500000d050000d050000d0500000000854f4d500000000040000d02020d0001111000028000000b30008834355355344388000a9a009a0d05009a0d0500
+00d0500000d050000d005000d005500000008d544500000000004000000000000000000000000000000030004343b4b343b3434b00a9a9a0a0d05000a0d05000
+0000000000000000000000000000000000000d54400000000088900000000020100000010003b000010100100c0c00c000000000777700600777700706660070
+00000000000000000000000000000000000000d4f000000000874500000002201d1001d1000300000010010100c00c0c66666006007770607006770700066007
+000000000000000000000000000000000000000f4000000000844f000020022201dddd10000b300010011010c00cc0c000666606077666600066677700666607
+00000000000000000000000000070700000800044008000000885f00022202e201dd1d1000003000016776010c67760c07657666776556600665567706675667
+00ee0000000000000077700070e7e707000980048009800000085f0002e200e001d1dd100003b00010707010c07878c077655660766576606667567006655677
+00e2200000e2e20007e2270007e2e270008a9084989a90800008d50000e000e001dd1d1000030000017777100c7777c077766600706666006066660006666770
+0e22e8000e2e2e800e22e8000e2e2e8008a9a8a89aa9a8a00000d50000e00e001dd1d1d1000b300010070701c007070c70776007700660006006666606077700
+022eee0002e2eee0022eee0002e2eee0a99aa99aaa9aa99a00000d00002ee2001d1dd1d1000030000010101000c0c0c070077770070066600000000006007777
 00000000000000000000000000008000000000000000000000000000000000002d2ddd2d2d2ddd2d0000000000000000000200000000000005555aa000000000
 000000000000000000000000000000e0000000000000000000000000000000002dcccc2d2d66662d0000000000022000000e000000000000055aa550000a0000
 00cccc0000cccc000028e000000e00000000000000008e700000000060600000dc6996c2d6dd666200222200002ee200000e00000002000000a555000a000a00
@@ -2140,14 +2170,14 @@ __gfx__
 0c9aa9c00ca99ac00000000000000080e70000000827000000028e8067600707dc6996cdd66ddd6d022ee220002ee200000e000000020000000a000000a05005
 0c6996c00c6aa6c0000000000000e0008e70000082e70000008e777806000000d2cccc2dd266662d0022220000022000000e00000000000000050000a0555500
 00cccc0000cccc000000000000000000082720002e28700002e700070000000022dd2dd222dd2dd200000000000000000002000000000000000a0000055a5aa0
-00000000cdcddcdc00000000d070d0c0c0d0c0000070d0c00000000000022200000233200222000000022000000022000000300000003000009a8777000a8777
-7707c077dddddddd000000000c0c070c070c0000000c0c0d00000000002333200023388223332000002332200002332200033000000330009a88707009a87070
-cc7cc7ccdddddddd00000000d0d0d0d0c0d07000000070d0022200000023883200233332238332000238830000238830094349900943499009a8767699887676
-cccccccc1d1dd1dd000000000c070c0c0c0d0c00000d0c0d2333200000233332000230022333320002333220002333229999949490949904000a8707009a8777
-cdcddcdcd1dd1d1d00000000c0d0c0d0d0c0d00000c0d0c023383200000232020023202002320020023320000233200049499999980990890000006000000000
-dcdccdcc1d1dd1d104444440070d0d0d0d07000000070d0d02333200002320000232000000232000002332000233200099949494999949940000000000000000
-cdcddcdd1111111100400400d0c0c070c0c0c0000000c07023222320023232002323000002323200022233200223320049494994490000940000000000000000
-dddddddd11111111004004000c0d0c0d0c0d0700000c0d0c32323233232323203232000023232320233323322332332004949940049498400000000000000000
+00000000cdcddcdc00000000d070d0c0c0d0c0000070d0c00000000000022200000233200222000000022000000022000000000000000000009a8777000a8777
+7707c077dddddddd000000000c0c070c070c0000000c0c0d00000000002333200023388223332000002332200002332200000000000000009a88707009a87070
+cc7cc7ccdddddddd00000000d0d0d0d0c0d07000000070d0022200000023883200233332238332000238830000238830000000000000000009a8767699887676
+cccccccc1d1dd1dd000000000c070c0c0c0d0c00000d0c0d2333200000233332000230022333320002333220002333220000000000000000000a8707009a8777
+cdcddcdcd1dd1d1d00000000c0d0c0d0d0c0d00000c0d0c023383200000232020023202002320020023320000233200060760700687607000000006000000000
+dcdccdcc1d1dd1d104444440070d0d0d0d07000000070d0d02333200002320000232000000232000002332000233200077700707777007070000000000000000
+cdcddcdd1111111100400400d0c0c070c0c0c0000000c07023222320023232002323000002323200022233200223320070770606787706060000000000000000
+dddddddd11111111004004000c0d0c0d0c0d0700000c0d0c32323233232323203232000023232320233323322332332067706565677065650000000000000000
 2222222222222222111111112222222244444444222222220006660000066600000666000066600000000000000000000505050500000800202020201d1dd1d1
 42929242d26662dd51616151526662554ff44fffd26662dd00688860006888600068886006888600000000000000000050505050008000202202020214444441
 49999244d66662dd5666615556666255ff4ff4f4d66662dd00466860044668600444686044668600000c000000000c0005050505000200036060202047575754
