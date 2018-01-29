@@ -114,10 +114,11 @@ function draw_game()
       end
    end
 
+   -- player
    if player.inv_t % 2 == 0 then
       local anm = g_anim[player.state]
       if game_has_sword then
-         anm = g_anim[player.state+8]
+         anm = g_anim[player.state+8] --todo this needs to be fixed
       end
       local anm_t = 1+player.t%#anm.k
       if anm.no_cycle then
@@ -129,8 +130,9 @@ function draw_game()
            player.sign<0 )
    end
 
+   -- sword
    if game_has_sword then
-      local anm = g_anim[player.state+8]
+      local anm = g_anim[player.state+8] --todo this needs to be fixed
       local anm_t = 1+player.t%#anm.k
       spr( anm.k[anm_t]-1, -- sword sprite left to corresponding player sprite
            player.p1.x - player.sign*8, player.p1.y,
@@ -139,9 +141,9 @@ function draw_game()
    else
       --standalone sword
       spr( 112, --todo explicit frame could be constant or short anim showing "magic"
-           sword_p1.x, sword_p1.y,
+           sword.p1.x, sword.p1.y,
            1,1,
-           sword_sign<0 )
+           sword.sign<0 )
    end
 
    for b in all(room.bullets) do
@@ -166,29 +168,23 @@ function draw_game()
        0x80 )
 
    if debug_mode > 0 then
-      -- temporal
-      -- if player.on_ground then
-      --    spr( 255,
-      --         player.p1.x, player.p1.y,
-      --         1,1,
-      --         player.sign<0 )
-      -- end
       local colors = {10,11,8,12}
-      if player.on_ground then
-         colors[2] = 2
-      end
       for e in all(room.entities) do
          local a = e.a
          local e_p1 = e.p1
          local boxes = {a.cvisualbox,a.cmovebox,a.cdamagebox,a.cattackbox}
          local box = boxes[debug_mode]
+         local col = colors[debug_mode]
          if box != nil then
             box = aabb_apply_sign_x(box,e.sign)
+            if debug_mode == 2 and e.on_ground != nil and e.on_ground then
+               col = 2
+            end
             rect( e_p1.x + box.min.x,
                   e_p1.y + box.min.y,
                   e_p1.x + box.max.x-1,
                   e_p1.y + box.max.y-1,
-                  colors[debug_mode] )
+                  col )
          end
       end
    end
@@ -234,11 +230,12 @@ function init_archetypes()
    a_player =
       {
          table_anm  = _table_anm,
-         cmovebox   = caabb_1177, --caabb_0088 IMPORTANT: MUST be SMALLER than 0088 to fit in single-block holes!
+         --cmovebox   = caabb_1177, --caabb_0088 important: must be smaller than 0088 to fit in single-block holes!
+         cmovebox   = caabb_0088, --important: must be smaller than 0088 to fit in single-block holes!
          cdamagebox = aabb_init( 2, 1, 6, 7 ),
          cattackbox = nil,
-         cspeed = 1,
-         cmaxvel = v2init( 5, 5 ),
+         cspeed     = 1,
+         cmaxvel    = v2init( 5, 5 ),
          table_health = {-1,5,3}
       }
    uncompress_anim( a_player )
@@ -254,6 +251,18 @@ function init_archetypes()
    add( g_anim, _table_anm["hit"] )  --8
    add( g_anim, _table_anm["idle_sword"] )--9
    add( g_anim, _table_anm["walk_sword"] )--10
+
+   a_sword =
+      {
+         table_anm =
+            {
+               idle = {k={112}}
+            },
+         cmovebox   = caabb_0088,
+         cdamagebox = nil,
+         cattackbox = nil,
+         cspeed = 0
+      }
 
    a_spit =
       {
@@ -534,67 +543,6 @@ function init_archetypes()
                idle = {k={201,201,202,202}}
             }
       }
-
-   --bosses
-   a_skullboss =
-      {
-         table_anm =
-            {
-               idle      = {k={138,138,138,140,140,140}},
-               attack    = {k={142}},
-               jump_up   = {k={142}},
-               jump_down = {k={138}}
-            },
-         cvisualbox = caabb_1616,
-         cmovebox   = caabb_1616,
-         cattackbox = caabb_1616,
-         cspeed = 1,
-         chealth = 20,
-         cshootpos = v2init( 10, 6 ),
-         rtoff = v2init(1,0),
-         cshoottype = a_skull,
-         is_large = true
-      }
-
-   a_flameboss =
-      {
-         table_anm =
-            {
-               idle      = {k={170,170,170,172,172,172}},
-               attack    = {k={174}},
-               jump_up   = {k={172}},
-               jump_down = {k={170}}
-            },
-         cvisualbox = caabb_1616,
-         cmovebox   = caabb_1616,
-         cattackbox = caabb_1616,
-         cspeed = 2.5,
-         chealth = 20,
-         cshootpos = v2init( 10, 0 ),
-         rtoff = v2init(1,0),
-         cshoottype = a_flame,
-         is_large = true
-      }
-
-   local a_finalboss_idle_anm = {k={136,136,136,168,168,168}}
-   a_finalboss =
-      {
-         table_anm =
-            {
-               idle   = a_finalboss_idle_anm,
-               move   = a_finalboss_idle_anm,
-               attack = a_finalboss_idle_anm,
-               piano  = {k={10}}
-            },
-         cvisualbox = caabb_1616,
-         cmovebox   = caabb_1616,
-         cattackbox = caabb_1616,
-         cspeed = 2.5,
-         chealth = 20,
-         cshootpos = v2init( 1, 8 ),
-         rtoff = v2init(1,0),
-         is_large = true
-      }
 end
 
 -- game
@@ -617,8 +565,19 @@ function init_game()
          weapon_a = a_blast
       }
 
-   sword_p1 = v2init(0,86)
-   sword_sign = 1
+   sword =
+      {
+         a = a_sword,
+         state = 1,
+         t = 0,
+         p0 = v2zero(),
+         p1 = v2zero(),
+         sign = 1,
+         v = v2zero(),
+         on_ground = false,
+         inv_t = 0,
+         health = 0
+      }
 
    level = {}
    level.room_coords = v2zero()
@@ -640,13 +599,13 @@ function update_player()
    if game_has_sword
       and btnp(2) then --up
          game_has_sword = false
-         sword_p1 = v2add( player.p0, v2init(-8*player.sign,0) )
-         sword_sign =  player.sign
+         sword.p1 = v2add( player.p0, v2init(-8*player.sign,0) )
+         sword.sign = player.sign
    end
    if not game_has_sword
       and btnp(3) then --up
          game_has_sword = true
-         --sword_p1 = v2sub( player.p0, v2init(-8*player.sign,0) )
+         --sword.p1 = v2sub( player.p0, v2init(-8*player.sign,0) )
    end
 
    -- on_ground / on_air
@@ -770,7 +729,7 @@ function update_player()
    local num_hits_map
    -- first handle collisions with solid map
    p1, num_hits_map, player.handled_collisions = advance_ccd_box_vs_map( player.p0, v2add( player.p0, pred_vel ), movebox, 1 )
-   -- then handle collisions with damage map. IMPORTANT: we do it in a
+   -- then handle collisions with damage map. important: we do it in a
    -- second pass to allow non-damage tiles to prevent the player from
    -- hitting damage tiles if already supported/deflected by
    -- non-damage ones
@@ -863,45 +822,27 @@ function update_player()
       player.t = 0
    end
 
-   local room_coords = level.room_coords
    -- update-map
-   if room_boss == nil then --not b_cannot_leave_room then
-      local offset = 16*8
-      if player.v.x > 0
-      and player.p1.x > offset - movebox.max.x then
-         if room_coords.x < a_level_cnumrooms.x-1
-         and room_coords.y != 2 then --not in finalboss room
-            room_coords.x += 1
-            room = new_room( room_coords )
-            player.p1.x = movebox.min.x
-         elseif room_coords.x == 7 and room_coords.y == 0 then
-            -- enter finalboss room
-            room_coords.x = 0
-            room_coords.y = 2
-            room = new_room( room_coords )
-            player.p1.x = movebox.min.x
-         end
-      elseif player.v.x < 0
-            and player.p1.x < movebox.min.x
-            and room_coords.x > 0 then
-         room_coords.x -= 1
-         room = new_room( room_coords )
-         player.p1.x = offset - movebox.max.x
-      elseif player.v.y > 0
-             and player.p1.y > offset - movebox.max.y
-             and room_coords.y < a_level_cnumrooms.y-1 then
-         room_coords.y += 1
-         room = new_room( room_coords )
-         player.p1.y = movebox.min.y
-      elseif player.v.y < 0
-             and player.p1.y < movebox.min.y
-             and room_coords.y > 0 then
-         room_coords.y -= 1
-         room = new_room( room_coords )
-         player.p1.y = offset - movebox.max.y
-      end
-      level.room_coords = room_coords
+   local room_coords = level.room_coords
+   local offset = 16*8
+   if player.v.x > 0 and player.p1.x > offset - movebox.max.x and room_coords.x < a_level_cnumrooms.x-1 then
+      room_coords.x += 1
+      room = new_room( room_coords )
+      player.p1.x = movebox.min.x
+   elseif player.v.x < 0 and player.p1.x < movebox.min.x and room_coords.x > 0 then
+      room_coords.x -= 1
+      room = new_room( room_coords )
+      player.p1.x = offset - movebox.max.x
+   elseif player.v.y > 0 and player.p1.y > offset - movebox.max.y and room_coords.y < a_level_cnumrooms.y-1 then
+      room_coords.y += 1
+      room = new_room( room_coords )
+      player.p1.y = movebox.min.y
+   elseif player.v.y < 0 and player.p1.y < movebox.min.y and room_coords.y > 0 then
+      room_coords.y -= 1
+      room = new_room( room_coords )
+      player.p1.y = offset - movebox.max.y
    end
+   level.room_coords = room_coords
 
    --borders
    player.p1 = apply_borders( player.p1, movebox )
@@ -938,7 +879,7 @@ function advance_ccd_box_vs_map( p0, p1, box, flags )
             -- move up to toi
             p0 = v2add( p0, v2scale( 0.99*c.interval.min, d ) )
             -- clip interval
-            local remaining_fraction = (1-c.interval.min) --interval [min..1] becomes new [0..1]
+            local remaining_fraction = (1.0-c.interval.min) --interval [min..1] becomes new [0..1]
             remaining_time *= remaining_fraction
             -- correct displacement
             d = v2sub( d, v2scale( dn, c.normal ) )
@@ -968,8 +909,9 @@ function new_room( coords )
          bullets = {},
          vfx = {}
       }
-   room_boss = nil
+
    add( r.entities, player )
+   add( r.entities, sword )
    -- temporal!!
    --process static map cells to create entities
    -- for j=0,15 do
@@ -1059,16 +1001,6 @@ function new_room_process_map_cell( r, room_j, room_i, map_j, map_i )
             e = new_entity( a_flame, pos, new_action_idle() )
             e.action.anm_id = "burn" --hack
             e.action.t = flr(rnd(17))
-            --bosses
-         elseif m == 138 and game_is_skub_alive then
-            e = new_entity( a_skullboss, pos, new_action_boss( update_action_skullboss ) )
-            room_boss = e
-         elseif m == 170 and game_is_flab_alive and game_num_orbs == 4 then
-            e = new_entity( a_flameboss, pos, new_action_boss( update_action_flameboss ) )
-            room_boss = e
-         elseif m == 136 and game_is_finb_alive then
-            e = new_entity( a_finalboss, pos, new_action_boss( update_action_finalboss ) )
-            room_boss = e
          end
       end
    end
@@ -1105,21 +1037,6 @@ function kill_entity( e )
    del(room.enemies,e)
    del(room.entities,e)
    add(room.zombies,e)
-   -- kill bosses
-   if e.a == a_skullboss then
-      game_is_skub_alive = false
-      add_message("\x8b\x8b\x8b cemetery door open")
-      mset(3,14,239)
-      room_boss = nil
-   elseif e.a == a_flameboss then
-      game_is_flab_alive = false
-      add_message("\x94\x94\x94 cathedral door open")
-      mset(127,14,255)
-      room_boss = nil
-   elseif e.a == a_finalboss then
-      game_is_finb_alive = false
-      room_boss = nil
-   end
 end
 
 function update_enemies()
@@ -1240,13 +1157,6 @@ function new_action_sinusoid( _pos, _dir, _speed, _amplitude, _period, _phase )
             period = _period,
             phase = _phase,
             update_fn = update_action_sinusoid }
-end
-
-function new_action_boss( _update_fn )
-   return { name = "boss", anm_id = "idle", t = 0, finished = false,
-            sub = new_action_idle(),
-            phase = 1,
-            update_fn = _update_fn }
 end
 
 function update_action( _entity, _action )
@@ -1549,104 +1459,6 @@ function update_action_sinusoid( entity, action )
    return action
 end
 
-function update_action_skullboss( entity, action )
-   local sub = update_action( entity, action.sub )
-   entity.sign = sgn( player.p1.x - entity.p1.x )
-   if action.phase == 1 then --intro
-      if action.t > 60 then
-         action.phase = 2
-      end
-   elseif action.phase == 2 then --combat
-      a_skullboss.cdamagebox = caabb_4n1139
-      if sub.name == "idle" and sub.t > 30 then --1s
-         sub = new_action_shoot(30,"sinusoid")
-      elseif sub.name == "shoot" and sub.t > 120 then --4x shots
-         if entity.p1.x > 100 then
-            sub = new_action_jump_on_ground( v2init(0,104) )
-         else
-            sub = new_action_jump_on_ground( v2init(112,104) )
-         end
-      elseif sub.name == "jong" and sub.finished then
-         sub = new_action_idle()
-      end
-   end
-   action.sub = sub
-   return action
-end
-
-function update_action_flameboss( entity, action )
-   local sub = update_action( entity, action.sub )
-   entity.sign = sgn( player.p1.x - entity.p1.x )
-   if action.phase == 1 then --intro
-      if action.t > 60 then
-         action.phase = 2
-         sub = new_action_jump_on_ground( v2init(104,104) )
-      end
-   elseif action.phase == 2 then --combat
-      a_flameboss.cdamagebox = caabb_4n1139
-      if sub.name == "idle" and sub.t > 30 then --1s
-         if entity.p1.x > 90 then --3s
-            a_flameboss.cshootpos = v2init( 10, 0 )
-            sub = new_action_shoot(15,"parabolic") --6x
-         else
-            a_flameboss.cshootpos = v2init( 1, 7 ) --3x
-            sub = new_action_shoot(30,"horizontal")
-         end
-      elseif sub.name == "shoot" and sub.t > 90 then --3x
-         if entity.p1.x > 90 then
-            sub = new_action_jump_on_ground( v2init(0,104) )
-         else
-            sub = new_action_jump_on_ground( v2init(104,104) )
-         end
-      elseif (sub.name == "jong" or sub.name == "mong") and sub.finished then
-         sub = new_action_idle()
-      end
-   end
-   action.sub = sub
-   return action
-end
-
-function update_action_finalboss( entity, action )
-   local sub = update_action( entity, action.sub )
-   if action.phase == 1 then --intro
-      if action.t < 120 then
-         --intro uses piano anim, flip sign to animate cheaply
-         sub.anm_id = "piano"
-         if action.t % 4 == 0 then
-            entity.sign *= -1
-         end
-      elseif action.t < 150 then
-         sub.anm_id = "idle"
-      else
-         action.phase = 2
-         sub = new_action_move( v2init(56,26) )
-      end
-   elseif action.phase == 2 then
-      a_finalboss.cdamagebox = caabb_4n1139
-      if sub.name == "move" and sub.finished then
-         sub = new_action_idle()
-      elseif sub.name == "idle" and sub.t > 60 then
-         a_finalboss.cshoottype = a_flame
-         sub = new_action_shoot(30,"straight")
-      elseif sub.name == "shoot" and sub.t > 120 then --4x
-         a_finalboss.cspeed = 5
-         sub = new_action_move( v2init(56,104) )
-         action.phase = 3
-      end
-   elseif action.phase == 3 then
-      entity.sign = sgn( player.p1.x - entity.p1.x )
-      if sub.finished then
-         a_finalboss.cshoottype = a_wave
-         sub = new_action_shoot(30,"horizontal")
-      elseif sub.name == "shoot" and sub.t > 30 then
-         sub = new_action_move( v2init(56,26) )
-         action.phase = 2
-      end
-   end
-   action.sub = sub
-   return action
-end
-
 -- bullets
 function new_bullet_blast( _p, _s )
    local b = { a = player.weapon_a,
@@ -1801,6 +1613,7 @@ function v2scale( s, v ) return { x = s*v.x, y = s*v.y } end
 function v2min( v1, v2 ) return { x = min(v1.x,v2.x), y = min(v1.y,v2.y) } end
 function v2max( v1, v2 ) return { x = max(v1.x,v2.x), y = max(v1.y,v2.y) } end
 function v2flr( v ) return { x = flr(v.x), y = flr(v.y) } end
+function v2ceil( v ) return { x = flr(v.x+0.9999), y = flr(v.y+0.9999) } end
 function v2length2( v ) return v2dot( v, v )  end
 function v2length( v ) return sqrt( v2length2( v ) ) end
 function v2perp( v ) return { x = -v.y, y = v.x } end
@@ -1886,7 +1699,8 @@ function ccd_box_vs_aabb( box_pos0, box_pos1, box_aabb,
    local box_aabb_hs = v2scale( 0.5, v2sub( box_aabb.max, box_aabb.min ) )
    local box_mid = v2add( box_pos0, box_aabb_mid )
    local ray_dir = v2sub( box_pos1, box_pos0 )
-   local fat_aabb = aabb_init_2( v2sub( aabb.min, box_aabb_hs ), v2add( aabb.max, box_aabb_hs ) )
+   local fat_aabb = aabb_init_2( v2sub( aabb.min, box_aabb_hs ),
+                                 v2add( aabb.max, box_aabb_hs ) )
    return ray_vs_aabb( box_mid, ray_dir, {min=0,max=1},
                        fat_aabb )
 end
@@ -1898,7 +1712,7 @@ end
 function bp_aabb_vs_map( aabb, flag_mask )
    local overlaps = {}
    local tile_min = v2flr( v2scale( 0.125, aabb.min ) ) --1/8
-   local tile_max = v2flr( v2scale( 0.125, aabb.max ) ) --1/8
+   local tile_max = v2ceil( v2scale( 0.125, aabb.max ) ) --1/8
    --todo avoid accessing out of bounds, revisit rounding
    for j=tile_min.x, tile_max.x do
       for i=tile_min.y, tile_max.y do
@@ -2046,14 +1860,14 @@ d6666ddd566662555666615556666155050505054a494949eeeeeeee676eeeee303bbb83303bbbb2
 dd26662d552666251516161515161615505050504a444944eee28e8e676ee7e70000333000000330085252500852525000020000005005002002442202004544
 dd26666d5526666555166665551666650505050544494449ee8e7778e6eeeeee0000000000000000252525202525252000838000000550000222454002024440
 dd66666d5526666555166665551666650505050549494949e2e7eee7eeeeeeee0000000000000000556565225655565200030000000000000000444400220000
-0555565056556556eeeeeeeede7edeceeeeee777777eeeeeeeeeeeeeeeeebbee000bbb000000bb00000000000000000000020000eeee9eddeeeeeeeeeeeeee8e
-6566656565666565eeeeeeeeecece7eceeee77dd797e77eeeeeeeeeeebeb38beb0b338b00b0b38b0000252000000000000030000eeee19ddeee55eeeeeeeee9e
-5666665556666656eeeeeeeededededeeeee77dd9177777eeeeeeeeebeb333be0b0b33b0b0b333b0002525200002520000020000eee1cd9eee5675eee222292e
-5665656566655566eeeeeeeeece7ececeeeee779dc17777eeeeeeeeeeeebbbee0002bb00000bbb00285252500025252000030000ee1ccc19e5e5675e2ee22222
-5656566556565666eeeeeeeecedecedeeeeee791ccc1777eeeeeeeeeee22333e0022333000223330552525200852525000032000e1ccc1eee5ee565e2ee22225
-5666666556666665e444444ee7edededeeee77771ccc17eeeeeeeeeee225353202253532022535320652565225252520002b20001cdc1eeeee5ee5ee2ee24422
-5566565565665556ee4ee4eedecece7eeeee777771cdc77eeeeeeeeeee23552e00235520002355200000006050525652002b20001dc1eeeeeee55eeee222454e
-0655655056556656ee4ee4eeecedecedeeeee77e771cd77eeeeeeeeeee3ee5ee0030050000300500000000000060600000030000111eeeeeeeeeeeeeeeee4444
+055556505655655622d2d2d22d2d2d22eeeee777777eeeeeeeeeeeeeeeeebbee000bbb000000bb00000000000000000000020000eeee9eddeeeeeeeeeeeeee8e
+6566656565666565002d2d2dd2d2d200eeee77dd797e77eeeeeeeeeeebeb38beb0b338b00b0b38b0000252000000000000030000eeee19ddeee55eeeeeeeee9e
+56666655566666560002d2dddd2d2000eeee77dd9177777eeeeeeeeebeb333be0b0b33b0b0b333b0002525200002520000020000eee1cd9eee5675eee222292e
+566565656665556600002d2dd2d20000eeeee779dc17777eeeeeeeeeeeebbbee0002bb00000bbb00285252500025252000030000ee1ccc19e5e5675e2ee22222
+5656566556565666000002d22d200000eeeee791ccc1777eeeeeeeeeee22333e0022333000223330552525200852525000032000e1ccc1eee5ee565e2ee22225
+56666665566666650000002222000000eeee77771ccc17eeeeeeeeeee225353202253532022535320652565225252520002b20001cdc1eeeee5ee5ee2ee24422
+55665655656655560000000220000000eeee777771cdc77eeeeeeeeeee23552e00235520002355200000006050525652002b20001dc1eeeeeee55eeee222454e
+06556550565566560000000220000000eeeee77e771cd77eeeeeeeeeee3ee5ee0030050000300500000000000060600000030000111eeeeeeeeeeeeeeeee4444
 5000000500000000000000002222222222222222e777777eeeeeeeeeeeeeeeee000bbb000000bb0000000000000000000000033333330000eeeeeeeeeeeeee8e
 5000000500000000000600002d2dd2d22d2dd2d23eee77eeeeeeeeeeeeeeeeeeb0b338b00b0b38b00000333333300000000033b35bb33000eee55eeeeeeeee9e
 5555555500000000060500602dddddd22dddddd2e3eeeeeeeeeeeeeeeeeeeeee0b0b33b0b0b333b000033b35bb33000000033b353b3b3300ee5675eee222292e
@@ -2102,44 +1916,44 @@ c5379e9e9ebc9ebcbc9ebcbe9e9e37c500aebdae00bcbc82f1bcbc00bcbc00bcee111ddd1dd111ee
 0000000000000000000000000000000000000000000000000000000000000000eee2d52ee25d2eeeeeecc1e55ec1eeeeeeecc1e55ecc1eee9ee1cce55ecc1eae
 2626262626262626262626262626262600aebeae000000aebe000000be0000beeeeddd2ee2dddeeeeec111eeee111eeeeec111eeee111eeeeee111eeee111eee
 0000000000000000000000000000000000000000000000000000000000000000ee2dde2ee2edd2eeee11111ee11111eeee11111ee11111eeee1111eeee1111ee
-22d2d2d22d2d2d22000000022000000000000000010000006d2dddd62222255555522dd2eeeeee8ee8eeeeee1d1dd1d1eeeeeeeeeeeeeeeeeeeeceeeee1eeeee
-002d2d2dd2d2d20000000002200000004000100100000104d66dd66ddd2555cc885552d2e8eeee9ee9eeee8e1d1dd1d1eeeeeeeee111111e1eec11eee1eeee1e
-0002d2dddd2d20000000002222000000f40000000001004fd6866c6dd25500ae8aad552d89eee89ee98eee98e1dd1d1eeeeeeeeeeeeeee11ee1c1eee1eeee1ee
-00002d2dd2d20000000002d22d2000004f400000000004f4dd6d26dd25550000abbb55529a9ee99aa99ee9a9e1d1dd1eeeeeeeeeeeeeeeeeee11ceeeeeee1eee
-000002d22d20000000002d2dd2d20000f4f4001001004f4f2d6dd6d225005000ab555552444ee444444ee444e1dd1d1eeeeee11eeeeeeeeeeee11ce1eee1eeee
-00000022220000000002d2dddd2d200044ff40000004ff4fd6b6696d55a00500b55ccc55444ee444444ee444e1d1dd1eeee11ee111eeeeeeeee1c1eeee1eee1e
-0000000220000000002d2d2dd2d2d200ff44f400004f44ffd66dd66d5a00005c55cbbbc5e4eeee4ee4eeee4e1d1dd1d1e11eeeeeeeeeeeee1eec1eeeeeeee1ee
-000000022000000022d2d2d22d2d2d224fff4f4004f4f4f46dddd2d65b0000055cb888b5e4eeee4ee4eeee4e1d1dd1d1eeeeeeeeeeeeeeeeee1ece1eeeee1eee
-04f444f44f444f4000000004400000004f4f4f4004f4fff400555000500000c555baa885eeeeee11eeeeeee11eeeeeeeeeeeeeeeeeeeeeeeeeeeeceeeeeeeee1
-0044f444444f44000000000440000000ff44f400004f44ff0566650000000050c55bba8511eee1eeeeeeee1dd1eeeeeeeeeeeeee11eeeee11eeecee1eeeeee1e
-00004f4444f400000000004444000000f4ff40100004ff440566665000000500bc55ba55ee1e1eeeeeeee1d11d1eeeeeeeeeeeeeee11111eeeeeceeee1eee1ee
-0000044444400000000004f44f400000f4f4000000104f4f06555665000000008bc5bd52eee1eeeeeeee1d1dd1d1eeeeeeeeeeeeeeeeeeeeeeececee1eeeeeee
-000000f44f00000000004444444400004f401000000004f456666565000000008bc555521eee1eeeeee1d1d11d1d1eeeeeeeeeeeeeeeeeeee1ecee1eeeeeeee1
-000000444400000000044f4444f44000f40000000000004f56556665000000008bc5552deee1e1eeee1d1d1dd1d1d1eee11111eeeeeeeeeeeececeeeeeeee1ee
-00000004400000000044f444444f440040000001010000045666666000005cc8bc5552ddee1eee11e1d1d1d11d1d1d1eeeeeee11eeeeeeee1eceeceee1ee1eee
-000000000000000044f444f44f444f44000100000000000036336363000005555552dddd11eeeeee1d1d1d1dd1d1d1d1eeeeeeeeeeeeeeeeeceecece1ee1eeee
-2222222256556556000000004e4e4e4e04f40000f4f4ff4f3b3b43b400000300ee3eeeee1eeeee111d1d1d1dd1d1d1d1eeeee677776eeeeeeeeeceeeeeeeeeee
-0222222265666565000000004e444e44ff4ff4f44f4ff4f433b33b4b00030030ee3eeeeee1eee1eee1d1d1d11d1d1d1eeee6777777776eee1eeeceee4eeeee4e
-0002d2dd5666665600000000444e444e4ff4ffff4f4f4ff44343433b030b3030e3ee3eeeee1e1eeeee1d1d1dd1d1d1eeee677766766776eeee1cece1eeeeeeee
-00002d2d66655566000000204a4e4e4effff4ff44ff4f4fff4444344030300b0e3e3be3eeee1eeeeeee1d1d11d1d1eeee67766777777776eeeececeeeeee4eee
-000002d25656566620000d2da0ae4e4ef4f4ff4ff4ff4f444444f4440b030030ebee3e3eeeee1eeeeeee1d1dd1d1eeeee77777777777777eeecececeeeeeeeee
-0000002256666665d2dd22dd4a444e444ffff4f44f4f4ff44f444444300303b0e3ee3ebeeee1e1eeeeeee1d11d1eeeee67776667777677761ceeceeceeeeeeee
-0000000265665556dd22dd2d444e444ef4f4ffff4f4f4f4f444444f44b33b434eb3e3ee3ee1eee1eeeeeee1dd1eeeeee7766777677776677eeecee1ce4eeeeee
-00000002565566562dd2d2d24e4e4e4e004f4f40f4f4f4f44444f444b43b4343434b33b411eeeee1eeeeeee11eeeeeee7777667777777777e1eeceeeeeeee4ee
-2222222205555650000000002dd2d2d2d2d2d2d2000000000000000000090000eeee9eeeeeee9eeeeeeeeeeeeeeeeeee77777777777777761d1dd1d1eeeee1ee
-2222222065666565000000002dddd2d22dd2d2d2000000000000000000098000eee9aeeeeee8eeeeeeeeee9eeeeeeeee77767777777677761d1dd1d1e1eeeeee
-dd2d200056666655200000022dd2dd202dd2d2dd000000000000000000898000eee8a8eeeee98eeee8eee9ee1eeeeee16777766777767776d1dd1d1deeeeeeee
-d2d2000056656565d222222d02d2dd20d2d2dd2d00080000000000000089a800ee89a8eee8ea9e8eee8ee8eed111111de77777777767777ed1d1dd1deeeeeeee
-2d200000565656652dddddd202dd2d20dddd2d2d0009800000009000009a9a00ee9a99ee8ee98ee8ee8e98ee1d1dd1d1e67767777676776ed1dd1d1deeee1eee
-2200000056666665d2dddd2d02dd2d202d2d2ddd008a90800808980008aaa900ee89aa9e89a9aa98e8a99a8ed1d11d1dee677777777776eed1d1dd1deeeeeeee
-20000000556656552d2dd2d22d2ddd202d2dd2d208a9a8a009a99800089a9800ee8a9a8e899aa9988a9a9a981d1dd1d1eee6777777776eee1d1dd1d11eeeee1e
-2000000006556550ddd22ddd22d2d2d2d2d2d2d2a99aa99a9a8a9a890089a000eee9a8eee889998e89a88989d1d11d1deeeee777766eeeee1d1dd1d1eeeeeeee
+22d2d2d22d2d2d22eeeeeee22eeeeeeeeeeeeeeee1eeeeee6d2dddd62222255555522dd2eeeeee8ee8eeeeee1d1dd1d1eeeeeeeeeeeeeeeeeeeeceeeee1eeeee
+ee2d2d2dd2d2d2eeeeeeeee22eeeeeee4eee1ee1eeeee1e4d66dd66ddd2555cc885552d2e8eeee9ee9eeee8e1d1dd1d1eeeeeeeee111111e1eec11eee1eeee1e
+eee2d2dddd2d2eeeeeeeee2222eeeeeef4eeeeeeeee1ee4fd6866c6dd255eeae8aad552d89eee89ee98eee98e1dd1d1eeeeeeeeeeeeeee11ee1c1eee1eeee1ee
+eeee2d2dd2d2eeeeeeeee2d22d2eeeee4f4eeeeeeeeee4f4dd6d26dd2555eeeeabbb55529a9ee99aa99ee9a9e1d1dd1eeeeeeeeeeeeeeeeeee11ceeeeeee1eee
+eeeee2d22d2eeeeeeeee2d2dd2d2eeeef4f4ee1ee1ee4f4f2d6dd6d225ee5eeeab555552444ee444444ee444e1dd1d1eeeeee11eeeeeeeeeeee11ce1eee1eeee
+eeeeee2222eeeeeeeee2d2dddd2d2eee44ff4eeeeee4ff4fd6b6696d55aee5eeb55ccc55444ee444444ee444e1d1dd1eeee11ee111eeeeeeeee1c1eeee1eee1e
+eeeeeee22eeeeeeeee2d2d2dd2d2d2eeff44f4eeee4f44ffd66dd66d5aeeee5c55cbbbc5e4eeee4ee4eeee4e1d1dd1d1e11eeeeeeeeeeeee1eec1eeeeeeee1ee
+eeeeeee22eeeeeee22d2d2d22d2d2d224fff4f4ee4f4f4f46dddd2d65beeeee55cb888b5e4eeee4ee4eeee4e1d1dd1d1eeeeeeeeeeeeeeeeee1ece1eeeee1eee
+e4f444f44f444f4eeeeeeee44eeeeeee4f4f4f4ee4f4fff4ee555eee5eeeeec555baa885eeeeee11eeeeeee11eeeeeeeeeeeeeeeeeeeeeeeeeeeeceeeeeeeee1
+ee44f444444f44eeeeeeeee44eeeeeeeff44f4eeee4f44ffe56665eeeeeeee5ec55bba8511eee1eeeeeeee1dd1eeeeeeeeeeeeee11eeeee11eeecee1eeeeee1e
+eeee4f4444f4eeeeeeeeee4444eeeeeef4ff4e1eeee4ff44e566665eeeeee5eebc55ba55ee1e1eeeeeeee1d11d1eeeeeeeeeeeeeee11111eeeeeceeee1eee1ee
+eeeee444444eeeeeeeeee4f44f4eeeeef4f4eeeeee1e4f4fe6555665eeeeeeee8bc5bd52eee1eeeeeeee1d1dd1d1eeeeeeeeeeeeeeeeeeeeeeececee1eeeeeee
+eeeeeef44feeeeeeeeee44444444eeee4f4e1eeeeeeee4f456666565eeeeeeee8bc555521eee1eeeeee1d1d11d1d1eeeeeeeeeeeeeeeeeeee1ecee1eeeeeeee1
+eeeeee4444eeeeeeeee44f4444f44eeef4eeeeeeeeeeee4f56556665eeeeeeee8bc5552deee1e1eeee1d1d1dd1d1d1eee11111eeeeeeeeeeeececeeeeeeee1ee
+eeeeeee44eeeeeeeee44f444444f44ee4eeeeee1e1eeeee45666666eeeee5cc8bc5552ddee1eee11e1d1d1d11d1d1d1eeeeeee11eeeeeeee1eceeceee1ee1eee
+eeeeeeeeeeeeeeee44f444f44f444f44eee1eeeeeeeeeeee36336363eeeee5555552dddd11eeeeee1d1d1d1dd1d1d1d1eeeeeeeeeeeeeeeeeceecece1ee1eeee
+2222222256556556eeeeeeee4e4e4e4ee4f4eeeef4f4ff4f3b3b43b4eeeee3eeee3eeeee1eeeee111d1d1d1dd1d1d1d1eeeee677776eeeeeeeeeceeeeeeeeeee
+e222222265666565eeeeeeee4e444e44ff4ff4f44f4ff4f433b33b4beee3ee3eee3eeeeee1eee1eee1d1d1d11d1d1d1eeee6777777776eee1eeeceee4eeeee4e
+eee2d2dd56666656eeeeeeee444e444e4ff4ffff4f4f4ff44343433be3eb3e3ee3ee3eeeee1e1eeeee1d1d1dd1d1d1eeee677766766776eeee1cece1eeeeeeee
+eeee2d2d66655566eeeeee2e4a4e4e4effff4ff44ff4f4fff4444344e3e3eebee3e3be3eeee1eeeeeee1d1d11d1d1eeee67766777777776eeeececeeeeee4eee
+eeeee2d2565656662eeeed2daeae4e4ef4f4ff4ff4ff4f444444f444ebe3ee3eebee3e3eeeee1eeeeeee1d1dd1d1eeeee77777777777777eeecececeeeeeeeee
+eeeeee2256666665d2dd22dd4a444e444ffff4f44f4f4ff44f4444443ee3e3bee3ee3ebeeee1e1eeeeeee1d11d1eeeee67776667777677761ceeceeceeeeeeee
+eeeeeee265665556dd22dd2d444e444ef4f4ffff4f4f4f4f444444f44b33b434eb3e3ee3ee1eee1eeeeeee1dd1eeeeee7766777677776677eeecee1ce4eeeeee
+eeeeeee2565566562dd2d2d24e4e4e4eee4f4f4ef4f4f4f44444f444b43b4343434b33b411eeeee1eeeeeee11eeeeeee7777667777777777e1eeceeeeeeee4ee
+22222222e555565eeeeeeeee2dd2d2d2d2d2d2d2eeeeeeeeeeeeeeeeeee9eeeeeeee9eeeeeee9eeeeeeeeeeeeeeeeeee77777777777777761d1dd1d1eeeee1ee
+2222222e65666565eeeeeeee2dddd2d22dd2d2d2eeeeeeeeeeeeeeeeeee98eeeeee9aeeeeee8eeeeeeeeee9eeeeeeeee77767777777677761d1dd1d1e1eeeeee
+dd2d2eee566666552eeeeee22dd2dd2e2dd2d2ddeeeeeeeeeeeeeeeeee898eeeeee8a8eeeee98eeee8eee9ee1eeeeee16777766777767776d1dd1d1deeeeeeee
+d2d2eeee56656565d222222de2d2dd2ed2d2dd2deee8eeeeeeeeeeeeee89a8eeee89a8eee8ea9e8eee8ee8eed111111de77777777767777ed1d1dd1deeeeeeee
+2d2eeeee565656652dddddd2e2dd2d2edddd2d2deee98eeeeeee9eeeee9a9aeeee9a99ee8ee98ee8ee8e98ee1d1dd1d1e67767777676776ed1dd1d1deeee1eee
+22eeeeee56666665d2dddd2de2dd2d2e2d2d2dddee8a9e8ee8e898eee8aaa9eeee89aa9e89a9aa98e8a99a8ed1d11d1dee677777777776eed1d1dd1deeeeeeee
+2eeeeeee556656552d2dd2d22d2ddd2e2d2dd2d2e8a9a8aee9a998eee89a98eeee8a9a8e899aa9988a9a9a981d1dd1d1eee6777777776eee1d1dd1d11eeeee1e
+2eeeeeeee655655eddd22ddd22d2d2d2d2d2d2d2a99aa99a9a8a9a89ee89aeeeeee9a8eee889998e89a88989d1d11d1deeeee777766eeeee1d1dd1d1eeeeeeee
 
 __gff__
-0000000000000000000000600060600000000000000000000000000000000101010101010101000101008080808080800101010101010101010180808080808001010101810100080202020202020101010100000000000002020202020000000404020101000000020202020202000001010801010101010002020202020202
+0000000000000000000000600060600000000000000000000000000000000101010101010101000101008080808080800101010101010101010180808080808001010101810100080202020202020101010140400000000002020202020000000404020101000000020202020202000001010801010101010002020202020202
 0202020202020202000000000000000002020202020202020000000000000000020202020202020200000000000000000202020202020202000000000000000040404040606040404040404040404000010101016060014040404040404040000101400160600140404040404040404001014040400000020000024040404040
 __map__
-4500700000000000007200000040000000000000000000000000000000000000ffdcffffffffffffffdcffffffffffffffffccffffffffffffffffffffffffffffffffffffffccffffffcdffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff61
+4500000000000000007200000040000000000000000000000000000000000000ffdcffffffffffffffdcffffffffffffffffccffffffffffffffffffffffffffffffffffffffccffffffcdffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff61
 4040400000000060404040000040000000000000000000000000000000000000ffffffccddcdffffffffffffffffffccffffffffffffcdffccffffffffffffddffffffccffffffffffffffffffddffffffffffcdffffffffddffffffffffffcdfffffffffffffffffffffffffffffffffffffffffffffffff2ffffffffffff61
 4000000000000060000000000040000000000000000000000000000000000000ccffffffffffc2f2f2f2f2f2c3ffcdffffdcffffccffffffffcdffffddccffffff635dffffffffff63ffff63ffffffffffffffffffffccffffffcccdffffffffffffffffffffffddffffffffffffdcffffdddcffffffffff65ffffffdc727261
 400000000000006000004d004e40000000000000000000000000000000000000ffffffffffc2c14e0000004ec0c3ffffffffffffffffffffffffffffffffffffff636363ff63ffffffffff4effffffffddffccffffffffffffffffffffccffffffffffccffffffffffdcffffddffffffffccffffffffffe265c3ffffdc616161
@@ -2149,11 +1963,11 @@ __map__
 4000000040404040404040630040404000000000000000000040400000000000f3000000f3000000000000000000f3000000000000f3000000000000f3ffffffff630000000000000000005d630063ffffcdffffffff7060ffffffddffccffffffffffffffffffffddccddfcfddcddffffccffffffddffd7d865ffc0f4ffff61
 402a2b00006a6b00000000000000004000000000000000004040000000000000f3000000f30000000000000000636363f000000000f3000000000000f3ffffffff6300000000636363636363c10063ffffffffffff7060707078ffffffffddffddffffffffdccdffffcddccdffffccffffffdccdffffffff6565e2fff3ffff61
 403a3b00007a7b005b0000000000004000000000000040004000000000000000f3006363630000000000e0f000c0f4c10000000000f3000000000000f3dcffffcd6300000063c10000000000000063ffffffffff607070607060ffffffffffffffffffffffdcdddccddcffddccffffdcccdcdcdddccdffe2656565e2f3ffff61
-404040404040406040400048000040f0000000000040400000000000000000006363634ef300e0f0000000000000f3000000000000f300000000005af30000000063000063c1000000000000000063ffffffffff7060707070706464646464ffffffffcccdffffdcddffffffddccffffffcdffffffffe2656565656565c3ff61
-4000000000000060004c00000040f000000000004040000000000000000000006363c100f3000000000000000000f300000000e06363630000000063c10000000063635c0076006363636300000063ffffffffff70747060746000c5d4ffffffffcdffdcddffffffffffffddffffcdffdccdffffffffc66565c66565ffc0ff61
+40404040404040604040004800004053000000000040400000000000000000006363634ef300e0f0000000000000f3000000000000f300000000005af30000000063000063c1000000000000000063ffffffffff7060707070706464646464ffffffffcccdffffdcddffffffddccffffffcdffffffffe2656565656565c3ff61
+4000000000000060004c000000405300000000004040000000000000000000006363c100f3000000000000000000f300000000e06363630000000063c10000000063635c0076006363636300000063ffffffffff70747060746000c5d4ffffffffcdffdcddffffffffffffddffffcdffdccdffffffffc66565c66565ffc0ff61
 4000000000000060005c000000401e1f0000004040000000400000404000000063c10000f30000005d0000000000f3000000000000f3c063000000000000000000c06363636363c1000000000063c1ffffffff63607070706070c5d40000ffffffffffffffffffffffff63ffffdccdffffffffffffe265c1c0656565e2ffff61
 4000000000000060005c000000442e2f00004040000000000000000000000040f3000000f30000e0f00000000000f3000000000000f300c063000000000000000000f300000000000000000063c1006363e2e2c0706000007060d400000000ffffffffffffffff63dd0000dcff63ffffffffffffff65c18affc0656565ffff61
-4000000000000060000000000000000000404000000040000040400040004000f30037006300000000000063e2c2f4c30000000066f34000c0630000000066636300f300000000000066637575006363636363ff6070005660700000000000f1f1ffffffff5663c10000000000c063ffffe2ffffe265ffffffff656565e2ffe3
+40000000000000600000000000443e3f00404000000040000040400040004000f30037006300000000000063e2c2f4c30000000066f34000c0630000000066636300f300000000000066637575006363636363ff6070005660700000000000f1f1ffffffff5663c10000000000c063ffffe2ffffe265ffffffff656565e2ffe3
 424242424242424242424242424242424242424242424242424242424242424271e6e6e663727272727272636363636362626262626262717171716262626262626262626262626262757575757575626262626262626262626250f1505050626262626262626250505050505050626262626262626262626262626262626262
 eff0efefd0717171717171717171717171717171717171717171717171717171717171716363636363636363636363636363717171717171717171717171717162626262627171717171717171717171717171717171717171515151515151517171717171717171717171717171717171717171717171717171717171717171
 efefefefefd0717171717171717171717171717171717171717171717171d0d1d07171d1eff4c1ffffc0f4efefefefefefefefefefefefefefefefefd071d1efefefefefefd075d1efefefefef4eefefefefefefefd07171715151515151515171717171717171717171717171717171717171717171d1d0d1d071d1d0717171
@@ -2301,3 +2115,4 @@ __music__
 00 41414141
 00 41414141
 00 41414141
+
