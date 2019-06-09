@@ -9,6 +9,7 @@
   - T_5: MFSet_PC_NoRK_LL2u
   - T_6: MFSet_PC_NoRK_LL4u
     - Faster when N >> E
+  - T_7: MFSet_PC_NoRK_LL4u_LE4u
 
   Plot:
     log_2(T_i) en NxE = {1,2,4..2^n} x {1,2,4,..,2^e}

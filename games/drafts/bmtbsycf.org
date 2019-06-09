@@ -12,10 +12,15 @@ Bring me the biggest sword you can find!
 *** Turn
     - Flip sword and move to the other side, but not instantly
     - Req planning as all movement with sword
-* Sword
-  - Own collision/physics
 * Items
-** TODO Key
+** Sword
+   - Own collision/physics
+   - Stuns enemies if dropped
+** Shield
+   - Own cd/dyn
+   - Reflects projectiles
+** Key
+** Lever
 * Enemies
 ** TODO FIXED movement
 ** Cannon
@@ -39,8 +44,8 @@ Bring me the biggest sword you can find!
    - This problem is probably in aabb collision routines using min/max
      differently.
    - IMPORTANT: The MIN pixel is included, but the MAX pixel is NOT,
-     as min/max are length coordinates, NOT pixel coordinates. It an
-     also be seen as a closedd/open interval [min,max) in pixels.
+     as min/max are length coordinates, NOT pixel coordinates. It can
+     also be seen as a closed/open interval [min,max) in pixels.
    - AABB debug drawing already takes this into account to draw the
      outline so that the outer side represents exactly the expected
      solid boundary.

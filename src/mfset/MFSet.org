@@ -193,7 +193,7 @@ DeleteEdge e = (n1,n2)
   - Try to improve it
 * Optimizations
 ** Space
-   - Mergint to smallest-root allows m_Parent to be used as m_Last for
+   - Merging to smallest-root allows m_Parent to be used as m_Last for
      roots, saving additional m_Last attrib
    - Allows embedding root-list and keep node size <= 128b
 ** Cache
