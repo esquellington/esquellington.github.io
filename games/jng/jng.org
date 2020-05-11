@@ -196,10 +196,9 @@ Known bugs in v0.9:
 
     You can get stuck in walls at screen transitions when jumping (move backwards to get unstuck)
     Quite rare missed collisions with ground
-* TODO itch.io
+* DONE itch.io
   - HOWTO post P8 games on itch.io https://www.lexaloffle.com/bbs/?pid=19223
   - Export as html
-  -
 * FW
 ** DONE RLE anims
    - list of key + repetitions

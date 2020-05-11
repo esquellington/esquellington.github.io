@@ -144,6 +144,10 @@ DeleteEdge e = (n1,n2)
   no, fer rebuild local a la sub-CC.
 - DO NOT contract array<Edge>, instead use pred/succ to store empty
   list and reuse
+- CONSIDERAR afegir edges amb una probabilitat 0..1 de que despres
+  s'esborrin, i usar aixo per tractar-les diferent (prob 0 es poden
+  fusionar, prob 1 no s'haurien de fusionar sino mantenir com a
+  MST-edges)
 ** TODO Bridges https://en.wikipedia.org/wiki/Bridge_%28graph_theory%29
    - IDEA: actualitzar el set de bridges entre sub CC (mida fitada,
      total < N-1) tq nomes es faci rebuild quan es trenqui un bridge.
