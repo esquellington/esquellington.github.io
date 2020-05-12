@@ -19,8 +19,7 @@ Emacs hacking and tests
 **** KEEP plain text edit of comments working at ALL TIMES
 **** if cursor is in a formula, disable the preview while there
 
-** TODO laic (latex-in-comments)
-- file:LaTeX/laic.el
+** TODO laic (latex-in-comments) file:LaTeX/laic.el
 *** References
 - texfrag-moode
   - Enable C-c C-p C-p for preview-at-point or preview-region
