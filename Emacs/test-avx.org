@@ -15,7 +15,7 @@ Literary programming exercise: test AVX vs SSE vs Scalar code
 #+BEGIN_SRC elisp :results silent
   (setq org-confirm-babel-evaluate nil)
 #+END_SRC
-* C++ TEST-AVX
+* DONE C++ TEST-AVX
 ** CODE
 -O3 causes auto-vectorization and float1 is equivalent to simd8
 #+name: test-avx
@@ -166,7 +166,7 @@ Literary programming exercise: test AVX vs SSE vs Scalar code
 #+RESULTS:
 [[file:table.png]]
 
-* C++ TEST-AVX-GATHER
+* DONE C++ TEST-AVX-GATHER
 ** CODE
 -O3 causes auto-vectorization and float1 is equivalent to simd8
 #+name: test-avx-gather
@@ -280,7 +280,7 @@ Literary programming exercise: test AVX vs SSE vs Scalar code
 | SIMD4   |      67108864.0 | T | 0.275123 |
 | SIMD8   |      67108864.0 | T | 0.203366 |
 
-* C++ TEST-AVX-GATHER-Vec3f
+* DONE C++ TEST-AVX-GATHER-Vec3f
 ** CODE
 o-O3 causes auto-vectorization and float1 is equivalent to simd8
 #+name: test-avx-gather-vec3f
@@ -375,8 +375,8 @@ o-O3 causes auto-vectorization and float1 is equivalent to simd8
 #+END_SRC
 
 #+RESULTS: test-avx-gather-vec3f
-| FLOAT1 | 77311.179688 | T | 0.123735 |
-| SIMD8  | 77311.179688 | T | 0.147603 |
+| FLOAT1 | 77311.179688 | T | 0.127842 |
+| SIMD8  | 77311.179688 | T | 0.149394 |
 
 ** elisp TANGLE to .cpp
 #+BEGIN_SRC elisp :results silent
@@ -402,3 +402,114 @@ o-O3 causes auto-vectorization and float1 is equivalent to simd8
   faster than SIMD8.
 - Looking at the assembly, FLOAT1 seems to unroll the loop heavily (8
   iter?), while SIMD8 is almost a direct translation of the intrinsic code.
+* TODO C++ Pointer aliasing/restrict
+- Check HOW array-processing funcs like Combine( int count, float* dst,
+  const float* src1, const float* src2 ) that have guaranteed
+  no-aliasing and benefit from __restrict__
+- Compare with same Combine() when receiving std::vector or std::span
+  and see if they can be restricted in any way to yield the same
+  assembly
+- This article is interesting https://travisdowns.github.io/blog/2019/08/26/vector-inc.html
+** CODE
+#+name: test-restrict
+#+BEGIN_SRC C++ :tangle test-restrict.cpp :flags -std=c++14 -O3 -march=native
+  #include <stdio.h>
+  #include <chrono>
+  #include <vector>
+  using namespace std;
+  const int cNumEntries(100000000);
+  __attribute__ ((noinline))
+  void Lerp_Vector( std::vector<float>& dst, float lambda01, const std::vector<float>& src1, const std::vector<float>& src2 )
+  {
+      const float w1( 1.0f - lambda01 ); const float w2( lambda01 ); const int count( dst.size() );
+      auto s = chrono::system_clock::now();
+      for( int i=0; i<count; ++i )
+      {
+          dst[i] = w1*src1[i] + w2*src2[count-1-i];
+          dst[i] += src1[i] + src2[i];
+          dst[i] -= src1[count-1-i/2] + src2[count-1-i/2];
+      }
+      auto e = chrono::system_clock::now();
+      float acc(0.0f); for( auto v : dst ) acc += v;
+      printf( "LerpV  %1.6f %e\n", chrono::duration<float>(e-s).count(), acc);
+  }
+  __attribute__ ((noinline))
+  void Lerp_NoRestrict( float* dst, int count, float lambda01, const float* src1, const float* src2 )
+  {
+      const float w1( 1.0f - lambda01 ); const float w2( lambda01 );
+      auto s = chrono::system_clock::now();
+      for( int i=0; i<count; ++i )
+      {
+          dst[i] = w1*src1[i] + w2*src2[count-1-i];
+          dst[i] += src1[i] + src2[i];
+          dst[i] -= src1[count-1-i/2] + src2[count-1-i/2];
+      }
+      auto e = chrono::system_clock::now();
+      float acc(0.0f); for( int i=0; i<count; ++i ) acc += dst[i];
+      printf( "LerpNR %1.6f %e\n", chrono::duration<float>(e-s).count(), acc);
+  }
+  __attribute__ ((noinline))
+  void Lerp_Restrict( float* __restrict__ dst, int count, float lambda01, const float* __restrict__ src1, const float* __restrict__ src2 )
+  {
+      const float w1( 1.0f - lambda01 ); const float w2( lambda01 );
+      auto s = chrono::system_clock::now();
+      for( int i=0; i<count; ++i )
+      {
+          dst[i] = w1*src1[i] + w2*src2[count-1-i];
+          dst[i] += src1[i] + src2[i];
+          dst[i] -= src1[count-1-i/2] + src2[count-1-i/2];
+      }
+      auto e = chrono::system_clock::now();
+      float acc(0.0f); for( int i=0; i<count; ++i ) acc += dst[i];
+      printf( "LerpR  %1.6f %e\n", chrono::duration<float>(e-s).count(), acc);
+  }
+  int main()
+  {
+      // Alloc and init/warmup all memory
+      std::vector<float> src1( cNumEntries, 0.0f );
+      std::vector<float> src2( cNumEntries, 1.0f );
+      std::vector<float> dst( cNumEntries, 0.5f );
+      // Profile with no aliasing
+      Lerp_Vector( dst, 0.5f, src1, src2 );
+      Lerp_NoRestrict( &dst[0], cNumEntries, 0.5f, &src1[0], &src2[0] );
+      Lerp_Restrict( &dst[0], cNumEntries, 0.5f, &src1[0], &src2[0] );
+      // Profile with aliasing
+      for( int i=0; i<cNumEntries; ++i ) dst[i] = float(i)/(cNumEntries-1);
+      Lerp_Vector( dst, 0.33f, dst, dst );
+      for( int i=0; i<cNumEntries; ++i ) dst[i] = float(i)/(cNumEntries-1);
+      Lerp_NoRestrict( &dst[0], cNumEntries, 0.33f, &dst[0], &dst[0] );
+      for( int i=0; i<cNumEntries; ++i ) dst[i] = float(i)/(cNumEntries-1);
+      Lerp_Restrict( &dst[0], cNumEntries, 0.33f, &dst[0], &dst[0] );
+      return 0;
+  }
+#+END_SRC
+
+#+RESULTS: test-restrict
+| LerpV  | 0.328719 | 8.388608e+06 |
+| LerpNR | 0.322881 | 8.388608e+06 |
+| LerpR  | 0.210487 | 8.388608e+06 |
+| LerpV  |  0.25215 | 3.359361e+07 |
+| LerpNR | 0.251189 | 3.359361e+07 |
+| LerpR  | 0.186163 | 3.098080e+07 |
+** Analysis
+- These results (unplugged) show that LerpR is 50% faster BUT yield
+  incorrect results when wrongly called on repeated input/output
+  pointers, while std::vector LerpV and non-restricted LerpNR ptr
+  versions are essentially equivalent
+- Speedup surely depends on the amount of work done inside the loop,
+  but this is quite significant, so the answer is RESTRICT ALL THE THINGS
+RESULTS: unplugged
+| LerpV  | 0.389423 | 8.388608e+06 |
+| LerpNR | 0.387801 | 8.388608e+06 |
+| LerpR  | 0.255761 | 8.388608e+06 |
+| LerpV  | 0.369636 | 3.359361e+07 |
+| LerpNR | 0.371537 | 3.359361e+07 |
+| LerpR  | 0.248428 | 3.098080e+07 |
+
+RESULTS: plugged
+| LerpV  | 0.328719 | 8.388608e+06 |
+| LerpNR | 0.322881 | 8.388608e+06 |
+| LerpR  | 0.210487 | 8.388608e+06 |
+| LerpV  |  0.25215 | 3.359361e+07 |
+| LerpNR | 0.251189 | 3.359361e+07 |
+| LerpR  | 0.186163 | 3.098080e+07 |

@@ -2,6 +2,7 @@
 
 Emacs hacking and tests
 
+* [[file:~/.emacs.d/init.el][init.el]]
 * org-mode stuff: file:advanced_org_features.org
 * Literary programming exercise: file:test-avx.org
 * Preview LaTeX formulas code comments
@@ -18,8 +19,8 @@ Emacs hacking and tests
 *** 0-interference
 **** KEEP plain text edit of comments working at ALL TIMES
 **** if cursor is in a formula, disable the preview while there
-
-** TODO laic (latex-in-comments) file:LaTeX/laic.el
+** TODO laic (latex-in-comments)
+- file:LaTeX/laic.el
 *** References
 - texfrag-moode
   - Enable C-c C-p C-p for preview-at-point or preview-region
@@ -98,7 +99,17 @@ Emacs hacking and tests
 - Could it happen on stuff not in screen only? not sure how to repro it
 - If we stick to "in-comments" version, then we could just get the
   color from comment font lock properties
+** TODO use [[Unicode in Emacs]] to write nicer comments??
+* Unicode in Emacs
+- http://ergoemacs.org/emacs/emacs_n_unicode.html
+- M-x insert character OR C-x 8 RET
+  - can be found by name, a bit cumbersome but works (ex NABLA ∇)
+- M-x describe-char shows info of char under cursor
+- λ ∇
+  // C++11 UTF-8 string literals are awesome
+  printf( "%s\n", u8"Δx = ∇y" );
 * Magit mode HowTo
+- https://magit.vc/manual/magit/
 - C-x g runs magit-status
 - On status buffer
   - tab toggles per-file diff
@@ -108,6 +119,35 @@ Emacs hacking and tests
     "unmerged"
   - 'P' and then 'p' pushes commits to "master" (remote) branch after
     asking for username/password.
+  - 'R' to Rename a file
+* Debugging in Emacs
+** GUD
+- Builtin... ugly but works
+** realgud
+- Seems to have more features than GUD
+** dap-mode
+- New thing using DAP extensions for VSCode... seems hard to install,
+  I'll pass
 * Pico8-mode
 - Consider custom mode for easy code section narrowing of .p8 files,
   syntax highlight, re-launching game, etc...
+* ORG-PAPERS
+- Organize ALL papers in an org-based scheme
+- All .PDF in the SAME directory, with systematic YEAR_Name.pdf
+- Subdir /org holds 1 YEAR_Name.org per paper, with bib details, etc
+- Global Papers.org with refs to all papers, sorted by year, and with
+  TAGS
+- Current /Papers subdirs would be come tags/nested tags, same
+  tag-based view would be possible, but could also org per multiple tags
+- Maybe there's some workflow/mode that already does this using paper
+  .bib files or similar...
+- I'd like the .org per paper to write custom notes, there's an
+  annotations mode in org for that I think
+- This seems the ONLY way to ever add/organize all post-PhD papers the
+  same as during-PhD ones... and can be done incrementally
+- Maybe could use a database for this, with per-paper
+  fields/annotations stored with paper-name as key, and query it from
+  org somehow??
+** Org-babel + SQL https://orgmode.org/worg/org-contrib/babel/languages/ob-doc-sql.html
+** emacsql https://kitchingroup.cheme.cmu.edu/blog/2017/01/03/Find-stuff-in-org-mode-anywhere/
+** org-sql, but it's the other way around https://github.com/ndwarshuis/org-sql
