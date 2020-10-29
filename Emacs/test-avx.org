@@ -485,12 +485,12 @@ o-O3 causes auto-vectorization and float1 is equivalent to simd8
 #+END_SRC
 
 #+RESULTS: test-restrict
-| LerpV  | 0.328719 | 8.388608e+06 |
-| LerpNR | 0.322881 | 8.388608e+06 |
-| LerpR  | 0.210487 | 8.388608e+06 |
-| LerpV  |  0.25215 | 3.359361e+07 |
-| LerpNR | 0.251189 | 3.359361e+07 |
-| LerpR  | 0.186163 | 3.098080e+07 |
+| LerpV  | 0.455969 | 8.388608e+06 |
+| LerpNR | 0.462095 | 8.388608e+06 |
+| LerpR  | 0.256006 | 8.388608e+06 |
+| LerpV  | 0.371413 | 3.359361e+07 |
+| LerpNR | 0.372052 | 3.359361e+07 |
+| LerpR  | 0.249513 | 3.098080e+07 |
 ** Analysis
 - These results (unplugged) show that LerpR is 50% faster BUT yield
   incorrect results when wrongly called on repeated input/output
