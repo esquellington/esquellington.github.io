@@ -151,27 +151,18 @@ Emacs hacking and tests
 ** Org-babel + SQL https://orgmode.org/worg/org-contrib/babel/languages/ob-doc-sql.html
 ** emacsql https://kitchingroup.cheme.cmu.edu/blog/2017/01/03/Find-stuff-in-org-mode-anywhere/
 ** org-sql, but it's the other way around https://github.com/ndwarshuis/org-sql
-* DOODLES in org-mode
-- Make a combo, open a drawing program, draw a doodle and save it in
-  same dir /org-doodles and link it from the .org automatically
-- Draw with finger on Dynamic
-- gnome-paint is barebones, no text, extremely simplistic but fast
-- Xournalapp https://github.com/xournalpp/xournalpp
-  - Very cool, and boots fast (appimage)
-  - Allows layers, moving stuff and text, best I've seen so far
-  - Touchscreen painting works but requires reassigning inputs in
-    Edit/Preferences/Input (make Touchscreen device be considered as Mouse)
-  - Not sure if it can be called/integrated easily to export .png and
-    quit from emacs itself
-  - Ex: [[file:tests/ContactVV.png]]
-  - Trim whitespace with
-    - convert input.png -trim output.png
-    - must change background to Plain first, no notebook horizontal
-      lines as default
-  - Scale/Rotate handles are too small for finger use, could rebuild
-    from source and make them larger I guess
-- org-krita https://github.com/lepisma/org-krita
-  - seems Wip, but is basically what I wanted
-  - plans to support other painting programs
-  - uses custom org-mode links (interesting, did that for p4/bugstar already)
-  - Could look at code and maybe adapt it
+* Sketches in org-mode file:OrgSketch/OrgSketch.org
+* ORG custom links
+- Run commandline for custom:link links
+** Simple link abbreviation way:
+- See https://orgmode.org/manual/Link-Abbreviations.html#Link-Abbreviations
+- Add new linktype with "customize-var org-link-abbrev-alist"
+  - Add linktype:linktag and "shell:program " that will be called as
+    "program tag"
+  - [[sketch:tests/ContactVV.png]]
+** Full new hyperlink type way:
+- Custom code for link open, export, etc...
+- Maybe visualization too? Seems so, there's a ":display" param in
+  org-link-parameters so I guess it can be overwritten to do the same
+  as inline image viz?
+- See https://orgmode.org/manual/Adding-Hyperlink-Types.html#Adding-Hyperlink-Types
