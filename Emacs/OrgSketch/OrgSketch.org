@@ -53,7 +53,6 @@
 - default show inline images should work, nothing else required
 - NO overlays, just simple image link
 *** Tests
-
 *** DONE Using gnome-paing
 *** DONE Using Xournal++
 **** DONE Create .xopp template
@@ -61,15 +60,16 @@
 *** TODO make "package"
 ** Advanced (org-sketch-mode?)
 - minor mode, inspired in org-krita
-- More func than standalone function
+- More features than standalone function
   - custom link type [sketch:name] that opens tool and allows
     creating/editing new/existing sketch on access, but also displays
     image as usual org-toggle-inline-images
   - customize empty template (org-sketch-tempalte-file)
   - custom sketch dir rel to .org file (ex ./sketches)
-  - custom resolution (or finite sizes, small, medium, large)
+  - custom resolution (or select sizes: small, medium, large)
   - custom background colors/transparency
   - org exporting
-  - overlays, toggle each indidivually, etc...
+  - overlays, toggle each indidivually, etc... display just added by
+    default (customizable)
+  - Delete sketch: when link is deleted, image file is deleted too
   - Sketch database or directory, etc...
-  - Delete sketch (when link is deleted, image file is deleted too)?

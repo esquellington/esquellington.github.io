@@ -31,6 +31,7 @@
 
 ;;--------------------------------
 ;;---- TOOL = xournalpp
+;;TODO SOME OF THESE SHOULD BE defvar and customizable I guess
 (defun org-sketch-tool-command ()
   "Return tool-specific command."
   "./xournalpp-1.0.19-x86_64.AppImage "
@@ -52,7 +53,7 @@
                            "<xournal creator=\"Xournal++ 1.0.19\" fileversion=\"4\">"
                            "<title>Xournal++ document - see https://github.com/xournalpp/xournalpp</title>"
                            "<preview/>"
-                           "<page width=\"900.0\" height=\"450.0\">"
+                           "<page width=\"900.0\" height=\"450.0\">" ;;16/9
                            "<background type=\"solid\" color=\"#ffffffff\" style=\"plain\"/>"
                            "<layer/>"
                            "</page>"
@@ -73,12 +74,16 @@
 (defun org-sketch-insert ( skname &optional width height )
   "Insert sketch SKNAME at point, with optional WIDTH/HEIGHT in pixels."
   (interactive "sSketch Name:") ;"sXXXX" prompts user for string param SKNAME
-  ;; Default params, if empty/nil
+
+  ;; Default params if empty/nil
   (when (string-empty-p skname) (setq skname "UNNAMED_SKETCH"))
-  (when (eq width nil) (setq width 300))
-  (when (eq height nil) (setq height 300))
+  (when (eq width nil) (setq width 600))
+  (when (eq height nil) (setq height 400))
+
   (let (skname_ext skname_png skname_timestamp)
+
     (setq skname_png (concat skname ".png"))
+
     ;; Avoid overwriting silently
     (when (or (not (file-exists-p skname_png))
               (yes-or-no-p "Sketch exists! Overwrite? "))
@@ -96,15 +101,15 @@
 
       ;; Check if tool file was saved, continue processing if it was, delete and exit if not
       (when (file-newer-than-file-p skname_ext skname_timestamp)
+
         ;; Export to .PNG
         (org-sketch-tool-export-png skname_ext skname_png)
 
-        ;; Trim empty space
-        ;; TODO could -resize WIDTHxHEIGHT at the same time we -trim
+        ;; Trim empty space and resize
         (shell-command (concat "convert -trim"
                                " -resize " (format "%dx%d" width height)
-                               " " skname_png
-                               " " skname_png
+                               " " skname_png ;input
+                               " " skname_png ;output
                                " > /dev/null"))
 
         ;; Insert org link
