@@ -1,0 +1,71 @@
+#+STARTUP: indent
+- Make a combo, open a drawing program, draw a doodle and save it in
+  same dir /org-doodles and link it from the .org automatically
+- Draw with finger on Dynamic
+* Xournalapp https://github.com/xournalpp/xournalpp
+- Very cool note taking and sketching app, and boots fast (appimage)
+- Allows layers, moving stuff and text, best I've seen so far
+- Touchscreen painting works but requires reassigning inputs in
+  Edit/Preferences/Input (make Touchscreen device be considered as Mouse)
+- Not sure if it can be called/integrated easily to export .png and
+  quit from emacs itself
+  - YES, xournalpp file.xopp -i file.png exports png
+  - calling xournalpp file.xopp requires file.xopp to exist, so would
+    need to be created first, and not sure it can be empty, so we
+    probably need a template file to open/modify/save from
+- Ex: [[file:tests/ContactVV.png]]
+- Trim PNG whitespace with
+  - convert input.png -trim output.png
+  - must change background to Plain first, no notebook horizontal
+    lines as default
+- Scale/Rotate handles are too small for finger use, could rebuild
+  from source and make them larger I guess
+* org-krita https://github.com/lepisma/org-krita
+- seems Wip, but is basically what I wanted
+- plans to support other painting programs
+- uses custom org-mode links (interesting, did that for p4/bugstar already)
+- Could look at code and maybe adapt it
+- Krita is quite heavyweight and seems pencil-oriented and complex,
+  not sure how easy it is to move stuff around, etc...
+- UI seems complex
+* org-sketch file:org-sketch.el
+** Basic (org-sketch-insert)
+- org-sketch-insert (optional name)
+- Opens org-sketch-tool
+  - Open with tool native empty template file name.ext
+  - Ideally template.ext file is implicit, not required on disk (maybe
+    can be created from elisp itself?)
+- Blocks until tool is closed
+  - WAIT on shell command... probably the default behaviour?
+  - yes it is! ex: shell:gnome-paint blocks until closed
+- When tool is closedÑ
+  - If file name.ext was saved, it calls tool again to export name.ext into name.png
+    - Insert name.png as basic file link at point, unconditionally, with "name"
+    - Maybe better prompt name before insertion, but default to
+      ./org-sketckes/sketchNN.png if optional param was nil, so that
+      we ALWAYS have a custom name for the sketch. and allow
+      cancelling
+  - If name.ext was not save (so remains empty), delete it
+- The main objective is that with a SINGLE command we get the tool
+  open and on save we have the sketch image inserted, 0 friction, no
+  prompts to query name or any params
+- default show inline images should work, nothing else required
+- NO overlays, just simple image link
+*** Tests
+
+[[file:prova1.png]]
+
+[[file:kaksdsads.png]]
+
+[[file:prova1.png]]
+
+
+** Advanced (org-sketch-mode?)
+- minor mode, inspired in org-krita
+- More func than standalone function
+  - custom link [sketch:name] that on click opens tool and allows creating/editing new/existing sketch
+  - customize empty template (org-sketch-tempalte-file)
+  - custom sketch dirs, resolution, format, background colors...
+  - org exporting
+  - overlays, toggle each indidivually, etc...
+  - Sketch database or directory, etc...
