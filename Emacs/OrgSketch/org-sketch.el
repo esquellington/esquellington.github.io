@@ -21,7 +21,7 @@
 )
 (defun org-sketch-tool-template-file ()
   "Return tool-specific template file."
-  ;;TODO CREATE IF not found
+  ;;TODO empty .JPG with correct sizes if not found
   "template.jpg"
 )
 (defun org-sketch-tool-export-png ( input output )
@@ -41,9 +41,28 @@
 )
 (defun org-sketch-tool-template-file ()
   "Return tool-specific template file."
-  ;;TODO CREATE IF not found
-  "template.xopp"
-)
+  ;; Check empty template, create if not available
+  (when (not (file-exists-p "template_genearted.xopp"))
+    ;; Empty .xopp is XML compressed with gzip
+    ;; TODO could parametrize template sizes and colors, but better
+    ;; keep it simple and have a unique base template and
+    ;; resize/modify individual outputs instead
+    (shell-command (concat "echo '"
+                           "<?xml version=\"1.0\" standalone=\"no\"?>"
+                           "<xournal creator=\"Xournal++ 1.0.19\" fileversion=\"4\">"
+                           "<title>Xournal++ document - see https://github.com/xournalpp/xournalpp</title>"
+                           "<preview/>"
+                           "<page width=\"900.0\" height=\"450.0\">"
+                           "<background type=\"solid\" color=\"#ffffffff\" style=\"plain\"/>"
+                           "<layer/>"
+                           "</page>"
+                           "</xournal>"
+                           "' | gzip > template_generated.xopp" ))
+      )
+  ;; Return
+  "template_generated.xopp"
+  )
+
 (defun org-sketch-tool-export-png ( input output )
   "Export/Convert native INPUT to OUTPUT image."
   (shell-command (concat (org-sketch-tool-command) " " input " -i " output " > /dev/null"))
@@ -51,9 +70,13 @@
 
 ;;--------------------------------
 ;; Interactive functions
-(defun org-sketch-insert ( skname )
-  "Insert sketch SKNAME at point."
-  (interactive "sSketch Name: ") ;"sXXXX" prompts user for string param SKNAME
+(defun org-sketch-insert ( skname &optional width height )
+  "Insert sketch SKNAME at point, with optional WIDTH/HEIGHT in pixels."
+  (interactive "sSketch Name:") ;"sXXXX" prompts user for string param SKNAME
+  ;; Default params, if empty/nil
+  (when (string-empty-p skname) (setq skname "UNNAMED_SKETCH"))
+  (when (eq width nil) (setq width 300))
+  (when (eq height nil) (setq height 300))
   (let (skname_ext skname_png skname_timestamp)
     (setq skname_png (concat skname ".png"))
     ;; Avoid overwriting silently
@@ -77,14 +100,20 @@
         (org-sketch-tool-export-png skname_ext skname_png)
 
         ;; Trim empty space
-        (shell-command (concat "convert -trim " skname_png " " skname_png " > /dev/null"))
+        ;; TODO could -resize WIDTHxHEIGHT at the same time we -trim
+        (shell-command (concat "convert -trim"
+                               " -resize " (format "%dx%d" width height)
+                               " " skname_png
+                               " " skname_png
+                               " > /dev/null"))
 
         ;; Insert org link
-        ;; NOTE: We insert a plain bracket link [[file:skname_png]] insteaad
-        ;; of a described link [[file:skname_png][description]] one so that
-        ;; it can to be displayed with default org-toggle-inline-images
-        ;; params. To display image links with description, a non-nil prefix
-        ;; argument must be passed
+        ;; NOTE: We insert a plain bracket link [[file:skname_png]]
+        ;; without description, insteaad of a described link
+        ;; [[file:skname_png][description]] so that it can to be
+        ;; displayed with default org-toggle-inline-images params (C-c
+        ;; C-v C-x). To display image links with description a
+        ;; non-nil prefix argument must be passed (C-u C-c C-v C-x)
         (org-insert-link nil (concat "file:" skname_png) nil)
         (message (concat "inserted sketch " skname) )
         )

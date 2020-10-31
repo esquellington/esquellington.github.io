@@ -30,8 +30,8 @@
 - UI seems complex
 * org-sketch file:org-sketch.el
 ** Basic (org-sketch-insert)
-- org-sketch-insert (name)
 *** Idea
+- org-sketch-insert (name)
 - Open org-sketch-tool
   - Open with tool native empty template file name.ext
   - Ideally template.ext file is implicit, not required on disk (maybe
@@ -39,7 +39,7 @@
 - Blocks until tool is closed
   - WAIT on shell command... probably the default behaviour?
   - yes it is! ex: shell:gnome-paint blocks until closed
-- When tool is closedÑ
+- When tool is closed
   - If file name.ext was saved, it calls tool again to export name.ext into name.png
     - Insert name.png as basic file link at point, unconditionally, with "name"
     - Maybe better prompt name before insertion, but default to
@@ -53,29 +53,23 @@
 - default show inline images should work, nothing else required
 - NO overlays, just simple image link
 *** Tests
-[[file:prova1.png]]
-[[file:kaksdsads.png]]
-[[file:prova1.png]]
 
-[[file:abcd.png]]
-
-[[file:gdgfgf.png]]
-
-[[file:xour.png]]
-
-[[file:kfldskfsdlfkd.png]]
-
-
-*** TODO Using Xournal++
-**** TODO Create .xopp template
-**** TODO Convert .xopp to .png
+*** DONE Using gnome-paing
+*** DONE Using Xournal++
+**** DONE Create .xopp template
+**** DONE Convert .xopp to .png
 *** TODO make "package"
 ** Advanced (org-sketch-mode?)
 - minor mode, inspired in org-krita
 - More func than standalone function
-  - custom link [sketch:name] that on click opens tool and allows creating/editing new/existing sketch
+  - custom link type [sketch:name] that opens tool and allows
+    creating/editing new/existing sketch on access, but also displays
+    image as usual org-toggle-inline-images
   - customize empty template (org-sketch-tempalte-file)
-  - custom sketch dirs, resolution, format, background colors...
+  - custom sketch dir rel to .org file (ex ./sketches)
+  - custom resolution (or finite sizes, small, medium, large)
+  - custom background colors/transparency
   - org exporting
   - overlays, toggle each indidivually, etc...
   - Sketch database or directory, etc...
+  - Delete sketch (when link is deleted, image file is deleted too)?
