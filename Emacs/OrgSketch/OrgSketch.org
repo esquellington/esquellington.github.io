@@ -30,8 +30,9 @@
 - UI seems complex
 * org-sketch file:org-sketch.el
 ** Basic (org-sketch-insert)
-- org-sketch-insert (optional name)
-- Opens org-sketch-tool
+- org-sketch-insert (name)
+*** Idea
+- Open org-sketch-tool
   - Open with tool native empty template file name.ext
   - Ideally template.ext file is implicit, not required on disk (maybe
     can be created from elisp itself?)
@@ -52,14 +53,23 @@
 - default show inline images should work, nothing else required
 - NO overlays, just simple image link
 *** Tests
-
 [[file:prova1.png]]
-
 [[file:kaksdsads.png]]
-
 [[file:prova1.png]]
 
+[[file:abcd.png]]
 
+[[file:gdgfgf.png]]
+
+[[file:xour.png]]
+
+[[file:kfldskfsdlfkd.png]]
+
+
+*** TODO Using Xournal++
+**** TODO Create .xopp template
+**** TODO Convert .xopp to .png
+*** TODO make "package"
 ** Advanced (org-sketch-mode?)
 - minor mode, inspired in org-krita
 - More func than standalone function
