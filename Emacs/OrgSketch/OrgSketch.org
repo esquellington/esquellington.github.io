@@ -2,32 +2,6 @@
 - Make a combo, open a drawing program, draw a doodle and save it in
   same dir /sketches and link it from the .org automatically
 - Draw with finger on Dynamic
-* Xournalapp https://github.com/xournalpp/xournalpp
-- Very cool note taking and sketching app, and boots fast (appimage)
-- Allows layers, moving stuff and text, best I've seen so far
-- Touchscreen painting works but requires reassigning inputs in
-  Edit/Preferences/Input (make Touchscreen device be considered as Mouse)
-- Not sure if it can be called/integrated easily to export .png and
-  quit from emacs itself
-  - YES, xournalpp file.xopp -i file.png exports png
-  - calling xournalpp file.xopp requires file.xopp to exist, so would
-    need to be created first, and not sure it can be empty, so we
-    probably need a template file to open/modify/save from
-- Ex: [[file:tests/ContactVV.png]]
-- Trim PNG whitespace with
-  - convert input.png -trim output.png
-  - must change background to Plain first, no notebook horizontal
-    lines as default
-- Scale/Rotate handles are too small for finger use, could rebuild
-  from source and make them larger I guess
-* org-krita https://github.com/lepisma/org-krita
-- seems Wip, but is basically what I wanted
-- plans to support other painting programs
-- uses custom org-mode links (interesting, did that for p4/bugstar already)
-- Could look at code and maybe adapt it
-- Krita is quite heavyweight and seems pencil-oriented and complex,
-  not sure how easy it is to move stuff around, etc...
-- UI seems complex
 * org-sketch file:org-sketch.el
 ** DONE Basic (org-sketch-insert)
 *** Idea
@@ -121,15 +95,16 @@
 - sketch dir
 - default width/height
 - TOOL paths
+  - Maybe alist with tool-name and tool-exe or similar
+*** TODO Add Windows/MSPaint support
+**** TODO Add Paint TOOL
+**** TODO Modify paths and /dev/null for Windows
+- org-sketch-null-output-sink
 *** TODO org-sketch-insert variants
 - Insert with automatic name and sizes (FAST)
 - Insert with explicit name
 - Insert with explicit name and sizes
 - Insert both exported and TOOL file (do not delete it)
-*** TODO Add Windows/MSPaint support
-**** TODO Add Paint TOOL
-**** TODO Modify paths and /dev/null for Windows
-- org-sketch-null-output-sink
 *** TODO Add GIMP TOOL
 *** TODO Add Inkscape TOOL
 *** TODO Detect available TOOLs and choose "best"
@@ -146,3 +121,30 @@
   Emacs itself, without having to open external programs explicitly,
   adding links, etc...
 [[file:sketches/prova.png]]
+* Xournalapp https://github.com/xournalpp/xournalpp
+- Very cool note taking and sketching app, and boots fast (appimage)
+- Allows layers, moving stuff and text, best I've seen so far
+- Touchscreen painting works but requires reassigning inputs in
+  Edit/Preferences/Input (make Touchscreen device be considered as Mouse)
+- Not sure if it can be called/integrated easily to export .png and
+  quit from emacs itself
+  - YES, xournalpp file.xopp -i file.png exports png
+  - calling xournalpp file.xopp requires file.xopp to exist, so would
+    need to be created first, and not sure it can be empty, so we
+    probably need a template file to open/modify/save from
+- Ex: [[file:tests/ContactVV.png]]
+- Trim PNG whitespace with
+  - convert input.png -trim output.png
+  - must change background to Plain first, no notebook horizontal
+    lines as default
+- Scale/Rotate handles are too small for finger use, could rebuild
+  from source and make them larger I guess
+* org-krita https://github.com/lepisma/org-krita
+- seems Wip, but is very similar to what I wanted
+- plans to support other painting programs
+- uses custom org-mode links
+- Krita is quite heavyweight and seems pencil-oriented and complex,
+  not sure how easy it is to move stuff around, etc, and the UI seems
+  complex
+* fdsdf
+[[file:sketches/fdfsd.png]]
