@@ -1,6 +1,10 @@
 ;;; org-sketch --- WIP WIP WIP
 ;;
 ;;
+
+;; Org-mode commands to insert sketches on at the point by invoking an
+;; external drawing tool modally
+;;
 ;;; Commentary:
 ;;
 ;;  All shell-command issued with "> /dev/null" to avoid output buffer
@@ -37,8 +41,9 @@
   :type '(choice (const :tag "Best Available" nil)
                  (const :tag "gnome-paint" gnome-paint)
                  (const :tag "xournal++" xournalpp)
-                 ;;(const :tag "gimp" gimp)
+                 (const :tag "gimp" gimp)
                  ;;(const :tag "inkscape" inkscape)
+                 (const :tag "mspaint" mspaint) ;TODO WINDOWS ONLY, try to add conditionally?
                  ))
 
 ;;--------------------------------
@@ -53,12 +58,20 @@
   "Compute sketch height, func so that can be context-sensitive at point."
   org-sketch-default-output-height)
 
+(defvar org-sketch-commandline-null-sink
+  (cond ((eq system-type 'gnu/linux) ;windows-nt...
+         " > /dev/null ")
+        ((eq system-type 'windows-nt)
+         " > NUL ")
+        (t ""))
+  "OS-specific commandline args to redirect output to null sink.")
+
 ;;--------------------------------
 ;; TOOL: gnome-paint
 ;;--------------------------------
 (defun org-sketch-tool-command--GP ()
   "Return tool-specific command."
-  "gnome-paint ")
+  "gnome-paint")
 (defun org-sketch-tool-ext--GP ()
   "Return tool-specific file extension."
   ".png")
@@ -68,18 +81,39 @@
   (let (template_file)
     (setq template_file (concat org-sketch-output-dir "/org-sketch-template.png"))
     (when (not (file-exists-p template_file))
-      (shell-command (concat "convert -size 900x450 xc:white " template_file " > /dev/null")))
+      (shell-command (concat "convert -size 900x450 xc:white " template_file org-sketch-commandline-null-sink)))
     template_file))
 (defun org-sketch-tool-export-png--GP ( input output )
   "Export/Convert native INPUT to OUTPUT image."
-  (shell-command (concat "convert " input " " output " > /dev/null")))
+  (shell-command (concat "convert " input " " output org-sketch-commandline-null-sink)))
+
+;;--------------------------------
+;; TOOL: MSPaint
+;;--------------------------------
+(defun org-sketch-tool-command--MSP ()
+  "Return tool-specific command."
+  "paint.exe")
+(defun org-sketch-tool-ext--MSP ()
+  "Return tool-specific file extension."
+  ".png")
+(defun org-sketch-tool-template-file--MSP ()
+  "Return tool-specific template file."
+  ;; Check empty template, create blank .PNG if none
+  (let (template_file)
+    (setq template_file (concat org-sketch-output-dir "/org-sketch-template.png"))
+    (when (not (file-exists-p template_file))
+      (shell-command (concat "convert -size 900x450 xc:white " template_file org-sketch-commandline-null-sink)))
+    template_file))
+(defun org-sketch-tool-export-png--MSP ( input output )
+  "Export/Convert native INPUT to OUTPUT image."
+  (shell-command (concat "convert " input " " output org-sketch-commandline-null-sink)))
 
 ;;--------------------------------
 ;; TOOL: xournalpp
 ;;--------------------------------
 (defun org-sketch-tool-command--XPP ()
   "Return tool-specific command."
-  "~/Escriptori/esquellington/ext/bin/xournalpp-1.0.19-x86_64.AppImage ")
+  "~/Escriptori/esquellington/ext/bin/xournalpp-1.0.19-x86_64.AppImage")
 ;;  "./xournalpp-1.0.19-x86_64.AppImage ")
 (defun org-sketch-tool-ext--XPP ()
   "Return tool-specific file extension."
@@ -112,7 +146,32 @@
     template_file))
 (defun org-sketch-tool-export-png--XPP ( input output )
   "Export/Convert native INPUT to OUTPUT image."
-  (shell-command (concat (org-sketch-tool-command) " " input " -i " output " > /dev/null")))
+  (shell-command (concat (org-sketch-tool-command--XPP) " " input " -i " output org-sketch-commandline-null-sink)))
+
+;;--------------------------------
+;; TOOL: GIMP
+;;--------------------------------
+;; (defun org-sketch-tool-command--GIMP ()
+;;   "Return tool-specific command."
+;;   "gimp")
+;; (defun org-sketch-tool-ext--GIMP ()
+;;   "Return tool-specific file extension."
+;;   ".xcf")
+;; (defun org-sketch-tool-template-file--GIMP ()
+;;   "Return tool-specific template file."
+;;   ;; Check empty template, create blank .XCF if none
+;;   (let (template_file)
+;;     (setq template_file_png (concat org-sketch-output-dir "/org-sketch-template-GIMP.png"))
+;;     (setq template_file (concat org-sketch-output-dir "/org-sketch-template.xcf"))
+;;     (when (not (file-exists-p template_file))
+;;       ;; Create blank .PNG and convert to .XCF (ImageMagik cannot create .XCF directly)
+;;       (shell-command (concat "convert -size 900x450 xc:white " template_file_png org-sketch-commandline-null-sink))
+;;       (shell-command (concat "convert " template_file_png " " template_file org-sketch-commandline-null-sink)))
+;;     template_file))
+;; (defun org-sketch-tool-export-png--GIMP ( input output )
+;;   "Export/Convert native INPUT to OUTPUT image."
+;;   ;; ImageMagik seems supports convertint to/from .XCF
+;;   (shell-command (concat "convert " input " " output org-sketch-commandline-null-sink)))
 
 ;;--------------------------------
 ;; Interactive functions
@@ -133,19 +192,29 @@
          (fset 'org-sketch-tool-ext 'org-sketch-tool-ext--XPP)
          (fset 'org-sketch-tool-template-file 'org-sketch-tool-template-file--XPP)
          (fset 'org-sketch-tool-export-png 'org-sketch-tool-export-png--XPP)
-         (message "XOURNAL++"))
+         ;;(message "XOURNAL++")
+         )
         ((eq org-sketch-tool 'gnome-paint)
          (fset 'org-sketch-tool-command 'org-sketch-tool-command--GP)
          (fset 'org-sketch-tool-ext 'org-sketch-tool-ext--GP)
          (fset 'org-sketch-tool-template-file 'org-sketch-tool-template-file--GP)
          (fset 'org-sketch-tool-export-png 'org-sketch-tool-export-png--GP)
-         (message "GNOME-PAINT"))
+         ;;(message "GNOME-PAINT")
+         )
+        ;; ((eq org-sketch-tool 'gimp)
+        ;;  (fset 'org-sketch-tool-command 'org-sketch-tool-command--GIMP)
+        ;;  (fset 'org-sketch-tool-ext 'org-sketch-tool-ext--GIMP)
+        ;;  (fset 'org-sketch-tool-template-file 'org-sketch-tool-template-file--GIMP)
+        ;;  (fset 'org-sketch-tool-export-png 'org-sketch-tool-export-png--GIMP)
+        ;;  ;;(message "GIMP")
+        ;;  )
         (t ;;default covers nil (best available) case too, by now
          (fset 'org-sketch-tool-command 'org-sketch-tool-command--GP)
          (fset 'org-sketch-tool-ext 'org-sketch-tool-ext--GP)
          (fset 'org-sketch-tool-template-file 'org-sketch-tool-template-file--GP)
          (fset 'org-sketch-tool-export-png 'org-sketch-tool-export-png--GP)
-         (message "DEFAULT")))
+         ;;(message "DEFAULT"))
+         ))
 
   (let (skname_tmp_ext skname_png skname_timestamp)
 
@@ -162,13 +231,13 @@
       ;; Create sketch tool empty file from template
       (setq skname_tmp_ext (concat org-sketch-output-dir "/" skname "_tmp" (org-sketch-tool-ext)))
       (setq skname_timestamp (concat org-sketch-output-dir "/" skname ".timestamp"))
-      (shell-command (concat "cp " (org-sketch-tool-template-file) " " skname_tmp_ext " > /dev/null"))
+      (shell-command (concat "cp " (org-sketch-tool-template-file) " " skname_tmp_ext org-sketch-commandline-null-sink))
 
       ;; Create timestamp file afterwards, to detect if skname_tmp_ext is overwritten by tool
-      (shell-command (concat "touch " skname_timestamp " > /dev/null"))
+      (shell-command (concat "touch " skname_timestamp org-sketch-commandline-null-sink))
 
       ;; Open sketch tool on empty file and wait for close/exit
-      (shell-command (concat (org-sketch-tool-command) skname_tmp_ext " > /dev/null"))
+      (shell-command (concat (org-sketch-tool-command) " " skname_tmp_ext org-sketch-commandline-null-sink))
 
       ;; Check if tool-specific temp file was saved (thus newer than
       ;; timestamp) and continue processing if so
@@ -182,7 +251,7 @@
                                " -resize " (format "%dx%d" width height)
                                " " skname_png ;input
                                " " skname_png ;output
-                               " > /dev/null"))
+                               org-sketch-commandline-null-sink))
 
         ;; Insert org link
         ;; NOTE: We insert a plain bracket link [[file:skname_png]]
@@ -195,7 +264,7 @@
         )
 
       ;; Delete temp
-      (shell-command (concat "rm " skname_tmp_ext " " skname_timestamp " > /dev/null"))
+      (shell-command (concat "rm " skname_tmp_ext " " skname_timestamp org-sketch-commandline-null-sink))
       )
     )
   )

@@ -80,7 +80,7 @@
 
 [[file:dffdfd.png]]
 
-** TODO Install Xxournal++
+** DONE Install Xxournal++
 - How to install so that it's globally accessible?
 - Set as default (now it's gnome-paint)
 ** TODO make "package"
@@ -91,15 +91,17 @@
 *** DONE Require or load or whatever in init.el
 - Require on org hook
 - Set keybindings on org hook
-*** TODO Customization vars
+*** DONE Customization vars
 - sketch dir
 - default width/height
 - TOOL paths
   - Maybe alist with tool-name and tool-exe or similar
 *** TODO Add Windows/MSPaint support
-**** TODO Add Paint TOOL
-**** TODO Modify paths and /dev/null for Windows
+**** DONE Modify paths and /dev/null for Windows
 - org-sketch-null-output-sink
+**** TODO Modify or adapt commandline programs
+- cp, touch, rm
+**** TODO Add MSPaint TOOL
 *** TODO org-sketch-insert variants
 - Insert with automatic name and sizes (FAST)
 - Insert with explicit name
@@ -109,19 +111,8 @@
 *** TODO Add Inkscape TOOL
 *** TODO Detect available TOOLs and choose "best"
 - Best is the fastest to load, I guess, but allow custom ordering
-* Other resource types for org "note-taking"
-- The idea of "insert something here that needs to run an external
-  program modally" could be generalized to other resources
-  - Record voice
-  - Insert screenshot (desktop or window)
-  - Insert picture
-- This fits pretty well with the idea of using org files as
-  interactive notes, even incremental note-taking, where text can be
-  added natively, and images/sound can be inserted on the spot from
-  Emacs itself, without having to open external programs explicitly,
-  adding links, etc...
-[[file:sketches/prova.png]]
-* Xournalapp https://github.com/xournalpp/xournalpp
+* Sketching tools
+** Xournalapp https://github.com/xournalpp/xournalpp
 - Very cool note taking and sketching app, and boots fast (appimage)
 - Allows layers, moving stuff and text, best I've seen so far
 - Touchscreen painting works but requires reassigning inputs in
@@ -139,6 +130,18 @@
     lines as default
 - Scale/Rotate handles are too small for finger use, could rebuild
   from source and make them larger I guess
+* Other resource types for org "note-taking"
+- The idea of "insert something here that needs to run an external
+  program modally" could be generalized to other resources
+  - Record voice
+  - Insert screenshot (desktop or window)
+  - Insert picture
+- This fits pretty well with the idea of using org files as
+  interactive notes, even incremental note-taking, where text can be
+  added natively, and images/sound can be inserted on the spot from
+  Emacs itself, without having to open external programs explicitly,
+  adding links, etc...
+[[file:sketches/prova.png]]
 * org-krita https://github.com/lepisma/org-krita
 - seems Wip, but is very similar to what I wanted
 - plans to support other painting programs
@@ -146,5 +149,3 @@
 - Krita is quite heavyweight and seems pencil-oriented and complex,
   not sure how easy it is to move stuff around, etc, and the UI seems
   complex
-* fdsdf
-[[file:sketches/fdfsd.png]]
