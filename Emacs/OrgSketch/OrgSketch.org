@@ -29,7 +29,7 @@
   not sure how easy it is to move stuff around, etc...
 - UI seems complex
 * org-sketch file:org-sketch.el
-** Basic (org-sketch-insert)
+** DONE Basic (org-sketch-insert)
 *** Idea
 - org-sketch-insert (name)
 - Open org-sketch-tool
@@ -54,24 +54,13 @@
 - NO overlays, just simple image link
 *** Tests
 
-[[file:whatevs.png]]
+[[file:sketches/dir.png]]
 
 *** DONE Using gnome-paing
 *** DONE Using Xournal++
 **** DONE Create .xopp template
 **** DONE Convert .xopp to .png
-*** DONE make "package"
-- Do all standard stuff
-  - (provide 'packaganame) seems to be enough
-- Install in appropriate place
-  - .emacs.d/lisp and add to load-path
-- Require or load or whatever in init.el
-  - Require on org hook
-  - Set keybindings on org hook
-*** TODO Install Xxournal++
-- How to install so that it's globally accessible?
-- Set as default (now it's gnome-paint)
-** Advanced (org-sketch-mode?)
+** TODO Advanced (org-sketch-mode?)
 - minor mode, inspired in org-krita
 - More features than standalone function
   - custom link type [sketch:name] that opens tool and allows
@@ -86,14 +75,7 @@
     default (customizable)
   - Delete sketch: when link is deleted, image file is deleted too
   - Sketch database or directory, etc...
-*** TODO Add GIMP TOOL
-*** TODO Add Inkscape TOOL
-*** TODO Add Windows support
-**** TODO Add Paint TOOL
-**** TODO Modify paths and /dev/null for Windows
-*** TODO Detect available TOOLs and choose "best"
-- Best is the fastest to load, I guess, but allow custom ordering
-** Examples
+** Usage examples
 *** Game Design
 **** Character
 - [[file:prota.png]]
@@ -117,8 +99,42 @@
 [[file:edgeedge.png]]
 **** Collision Response
 [[file:response.png]]
+*** Misc
+[[file:fdjsfd.png]]
 
-* Other resource types for "note-taking"
+[[file:fdfdfd.png]]
+
+[[file:dffdfd.png]]
+
+** TODO Install Xxournal++
+- How to install so that it's globally accessible?
+- Set as default (now it's gnome-paint)
+** TODO make "package"
+*** TODO Standard install/structure
+- (provide 'packaganame) seems to be enough
+*** DONE Install in appropriate place
+- .emacs.d/lisp and add to load-path
+*** DONE Require or load or whatever in init.el
+- Require on org hook
+- Set keybindings on org hook
+*** TODO Customization vars
+- sketch dir
+- default width/height
+- TOOL paths
+*** TODO org-sketch-insert variants
+- Insert with automatic name and sizes (FAST)
+- Insert with explicit name
+- Insert with explicit name and sizes
+- Insert both exported and TOOL file (do not delete it)
+*** TODO Add Windows/MSPaint support
+**** TODO Add Paint TOOL
+**** TODO Modify paths and /dev/null for Windows
+- org-sketch-null-output-sink
+*** TODO Add GIMP TOOL
+*** TODO Add Inkscape TOOL
+*** TODO Detect available TOOLs and choose "best"
+- Best is the fastest to load, I guess, but allow custom ordering
+* Other resource types for org "note-taking"
 - The idea of "insert something here that needs to run an external
   program modally" could be generalized to other resources
   - Record voice
@@ -129,3 +145,4 @@
   added natively, and images/sound can be inserted on the spot from
   Emacs itself, without having to open external programs explicitly,
   adding links, etc...
+[[file:sketches/prova.png]]

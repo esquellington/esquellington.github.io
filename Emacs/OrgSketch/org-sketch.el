@@ -10,7 +10,42 @@
 ;;; Code:
 
 ;;--------------------------------
-;;---- TOOL = gnome-paint
+;; Customization
+;;--------------------------------
+
+(defgroup org-sketch nil "Draw sketches and insert them as org mode links."
+  :group 'org)
+
+(defcustom org-sketch-output-dir "sketches"
+  "Default sketch output directory, relative to .org file."
+  :group 'org-sketch
+  :type 'directory)
+
+(defcustom org-sketch-default-output-width 300
+  "Default sketch width."
+  :group 'org-sketch
+  :type 'integer)
+
+(defcustom org-sketch-default-output-height 300
+  "Default sketch height."
+  :group 'org-sketch
+  :type 'integer)
+
+;;--------------------------------
+;; Basic helpers
+;;--------------------------------
+
+(defun org-sketch-output-width ()
+  "Compute sketch width, func so that it can be context-sensitive at point."
+  org-sketch-default-output-width)
+
+(defun org-sketch-output-height ()
+  "Compute sketch height, func so that can be context-sensitive at point."
+  org-sketch-default-output-height)
+
+;;--------------------------------
+;; TOOL: gnome-paint
+;;--------------------------------
 (defun org-sketch-tool-command ()
   "Return tool-specific command."
   "gnome-paint "
@@ -33,10 +68,12 @@
 )
 
 ;;--------------------------------
-;;---- TOOL = xournalpp
+;; TOOL: xournalpp
+;;--------------------------------
 ;;TODO SOME OF THESE SHOULD BE defvar and customizable I guess
 ;; (defun org-sketch-tool-command ()
 ;;   "Return tool-specific command."
+;;TODO PROPER GLOBAL PATH ~/Escriptori/esquellington/ext/Xournal/xournalpp-1.0.19-x86_64.AppImage
 ;;   "./xournalpp-1.0.19-x86_64.AppImage "
 ;; )
 ;; (defun org-sketch-tool-ext ()
@@ -75,26 +112,31 @@
 
 ;;--------------------------------
 ;; Interactive functions
+;;--------------------------------
 (defun org-sketch-insert ( skname &optional width height )
   "Insert sketch SKNAME at point, with optional WIDTH/HEIGHT in pixels."
   (interactive "sSketch Name:") ;"sXXXX" prompts user for string param SKNAME
 
   ;; Default params if empty/nil
-  (when (string-empty-p skname) (setq skname "UNNAMED_SKETCH"))
-  (when (eq width nil) (setq width 600))
-  (when (eq height nil) (setq height 400))
+  (when (string-empty-p skname) (setq skname "UNNAMED_SKETCH")) ;TODO find unique name
+  (when (eq width nil) (setq width (org-sketch-output-width)))
+  (when (eq height nil) (setq height (org-sketch-output-height)))
 
   (let (skname_tmp_ext skname_png skname_timestamp)
 
-    (setq skname_png (concat skname ".png"))
+    ;; Create output dir if required
+    (when (not (file-directory-p org-sketch-output-dir))
+      (make-directory org-sketch-output-dir))
+
+    (setq skname_png (concat org-sketch-output-dir "/" skname ".png"))
 
     ;; Avoid overwriting silently
     (when (or (not (file-exists-p skname_png))
               (yes-or-no-p "Sketch exists! Overwrite? "))
 
       ;; Create sketch tool empty file from template
-      (setq skname_tmp_ext (concat skname "_tmp" (org-sketch-tool-ext)))
-      (setq skname_timestamp (concat skname ".timestamp"))
+      (setq skname_tmp_ext (concat org-sketch-output-dir skname "_tmp" (org-sketch-tool-ext)))
+      (setq skname_timestamp (concat org-sketch-output-dir skname ".timestamp"))
       (shell-command (concat "cp " (org-sketch-tool-template-file) " " skname_tmp_ext " > /dev/null"))
 
       ;; Create timestamp file afterwards, to detect if skname_tmp_ext is overwritten by tool
@@ -134,5 +176,8 @@
     )
   )
 
+;;--------------------------------
+;; Package setup
+;;--------------------------------
 (provide 'org-sketch)
 ;;; org-sketch.el ends here
