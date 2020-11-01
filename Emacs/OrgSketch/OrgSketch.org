@@ -1,6 +1,6 @@
 #+STARTUP: indent
 - Make a combo, open a drawing program, draw a doodle and save it in
-  same dir /org-doodles and link it from the .org automatically
+  same dir /sketches and link it from the .org automatically
 - Draw with finger on Dynamic
 * Xournalapp https://github.com/xournalpp/xournalpp
 - Very cool note taking and sketching app, and boots fast (appimage)
@@ -68,6 +68,9 @@
 - Require or load or whatever in init.el
   - Require on org hook
   - Set keybindings on org hook
+*** TODO Install Xxournal++
+- How to install so that it's globally accessible?
+- Set as default (now it's gnome-paint)
 ** Advanced (org-sketch-mode?)
 - minor mode, inspired in org-krita
 - More features than standalone function
@@ -90,3 +93,39 @@
 **** TODO Modify paths and /dev/null for Windows
 *** TODO Detect available TOOLs and choose "best"
 - Best is the fastest to load, I guess, but allow custom ordering
+** Examples
+*** Game Design
+**** Character
+- [[file:prota.png]]
+- the main character bla bla bla
+**** Actions
+- [[file:actions_prota.png]]
+- character can perform several actions bla bla bla
+***** Walk [[file:walk.png]]
+***** Jump [[file:salta.png]]
+**** Environment
+- explore different environments with their own createures
+***** Forest [[file:bosc.png]]
+****** Spider [[file:spider.png]]
+****** Snail [[file:cargol.png]]
+***** Cave [[file:cova.png]]
+****** Bat [[file:bat.png]]
+***** Beach [[file:platja.png]]
+****** Crag [[file:crab.png]]
+*** Tech Doc
+**** Collision Detection
+[[file:edgeedge.png]]
+**** Collision Response
+[[file:response.png]]
+
+* Other resource types for "note-taking"
+- The idea of "insert something here that needs to run an external
+  program modally" could be generalized to other resources
+  - Record voice
+  - Insert screenshot (desktop or window)
+  - Insert picture
+- This fits pretty well with the idea of using org files as
+  interactive notes, even incremental note-taking, where text can be
+  added natively, and images/sound can be inserted on the spot from
+  Emacs itself, without having to open external programs explicitly,
+  adding links, etc...
