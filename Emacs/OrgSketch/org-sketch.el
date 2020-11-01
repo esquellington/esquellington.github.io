@@ -21,8 +21,8 @@
 )
 (defun org-sketch-tool-template-file ()
   "Return tool-specific template file."
-   ;; Check empty template, create if not available
-  (when (not (file-exists-p "template_genearted.xopp"))
+  ;; Check empty template, create if not available
+  (when (not (file-exists-p "template_genearted.png"))
     ;; Create blank .PNG
     (shell-command (concat "convert -size 900x450 xc:white org-sketch-template.png > /dev/null")))
   "org-sketch-template.png"
@@ -47,7 +47,8 @@
 ;;   "Return tool-specific template file."
 ;;   ;; Check empty template, create if not available
 ;;   (when (not (file-exists-p "template_genearted.xopp"))
-;;     ;; Empty .xopp is XML compressed with gzip
+;;     ;; The .xopp files are XML compressed with gzip, so I
+;;     ;; uncompressed an empty canvas .xopp and pasted the XML here
 ;;     ;; TODO could parametrize template sizes and colors, but better
 ;;     ;; keep it simple and have a unique base template and
 ;;     ;; resize/modify individual outputs instead
@@ -102,7 +103,8 @@
       ;; Open sketch tool on empty file and wait for close/exit
       (shell-command (concat (org-sketch-tool-command) skname_tmp_ext " > /dev/null"))
 
-      ;; Check if tool file was saved, continue processing if it was, delete and exit if not
+      ;; Check if tool-specific temp file was saved (thus newer than
+      ;; timestamp) and continue processing if so
       (when (file-newer-than-file-p skname_tmp_ext skname_timestamp)
 
         ;; Export to .PNG
@@ -123,7 +125,7 @@
         ;; C-v C-x). To display image links with description a
         ;; non-nil prefix argument must be passed (C-u C-c C-v C-x)
         (org-insert-link nil (concat "file:" skname_png) nil)
-        (message (concat "inserted sketch " skname) )
+        ;(message (concat "inserted sketch " skname) )
         )
 
       ;; Delete temp
