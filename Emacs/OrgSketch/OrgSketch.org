@@ -53,11 +53,21 @@
 - default show inline images should work, nothing else required
 - NO overlays, just simple image link
 *** Tests
+
+[[file:whatevs.png]]
+
 *** DONE Using gnome-paing
 *** DONE Using Xournal++
 **** DONE Create .xopp template
 **** DONE Convert .xopp to .png
-*** TODO make "package"
+*** DONE make "package"
+- Do all standard stuff
+  - (provide 'packaganame) seems to be enough
+- Install in appropriate place
+  - .emacs.d/lisp and add to load-path
+- Require or load or whatever in init.el
+  - Require on org hook
+  - Set keybindings on org hook
 ** Advanced (org-sketch-mode?)
 - minor mode, inspired in org-krita
 - More features than standalone function
@@ -73,3 +83,10 @@
     default (customizable)
   - Delete sketch: when link is deleted, image file is deleted too
   - Sketch database or directory, etc...
+*** TODO Add GIMP TOOL
+*** TODO Add Inkscape TOOL
+*** TODO Add Windows support
+**** TODO Add Paint TOOL
+**** TODO Modify paths and /dev/null for Windows
+*** TODO Detect available TOOLs and choose "best"
+- Best is the fastest to load, I guess, but allow custom ordering
