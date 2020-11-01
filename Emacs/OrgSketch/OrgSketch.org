@@ -86,7 +86,7 @@
   - Maybe alist with tool-name and tool-exe or similar
 *** DONE Add GIMP TOOL
 *** DONE Add Inkscape TOOL
-*** TODO Add Windows/MSPaint support
+*** TODO Add Windows support
 **** DONE Add MSPaint TOOL
 **** DONE Modify paths and /dev/null for Windows
 - org-sketch-null-output-sink
@@ -94,42 +94,53 @@
 - cp, touch, rm
 **** TODO Ensure imagemagick/convert works
 - will probably need customized path or similar
+*** TODO Share (Angel?)
+- Angel betatest would be cool
+*** TODO Publish?
+- Github + Twitter
+- MELPA?
 ** TODO Advanced (org-sketch-mode?)
-- minor mode, inspired in org-krita
-- More features than standalone function
-  - custom link type [sketch:name] that opens tool and allows
-    creating/editing new/existing sketch on access, but also displays
-    image as usual org-toggle-inline-images
-    - If org-sketch-insert is called when on an existing link, we'll
-      edit, instead of add it, keep it simple
-  - customize empty template file for custom backgrounds, paper, etc...
-  - custom resolution presets (or select sizes: small, medium, large)
-  - custom background colors/transparency
-  - org exporting support
-  - overlays, toggle each indidivually, etc... display just added by
-    default (customizable)
-  - Delete sketch: when link is deleted, image file is deleted too
-    - Or maybe org-sketch-purge that does thisa utomatically for the
-      whole .org file... BUT beware because same /sketches dir may
-      contain sketches from different .org files
-    - So purgue command would need to open and analyze ALL .org in
-      this directory that share the same /sketches dir
-    - AND if /sketches has been customized it may be shared by OTHER
-      .org in different paths, so just forget it, no purgue, just try
-      to delete when delete link by explicitly calling
-      org-sketch-delete under point
-  - Sketch database or directory, etc...
 *** TODO org-sketch-insert variants
 - Insert with explicit name, default sizes (standard)
 - Insert with default name and sizes (FAST)
 - Insert with explicit name and sizes (full control)
 - Insert both exported and TOOL file and do not delete it
 - All can be internally done in a single func with params
+*** TODO Minor mode + custom link type [sketch:name]
+- minor mode, inspired in org-krita
+- More features than standalone function, can have persistent state,
+  react to inputs, etc
+- Opens tool and allows creating/editing new/existing sketch on
+  access, but also displays image as usual org-toggle-inline-images
+- If org-sketch-insert is called when on an existing link, we'll
+  edit, instead of add it, keep it simple
+**** TODO overlays
+- toggle each indidivually, etc... display just added by default (customizable)
+**** TODO org export support
+*** TODO sketch management (delete, purge)
+- Delete sketch: when link is deleted, image file is deleted too
+- Or maybe org-sketch-purge that does thisa utomatically for the
+  whole .org file... BUT beware because same /sketches dir may
+  contain sketches from different .org files
+  - So purgue command would need to open and analyze ALL .org in
+    this directory that share the same /sketches dir
+  - AND if /sketches has been customized it may be shared by OTHER
+    .org in different paths, so just forget it, no purgue, just try
+    to delete when delete link by explicitly calling
+    org-sketch-delete under point
+- Sketch database or directory, etc...
+*** TODO Template customization
+- Explicity template file, optional
+- Template resolution as blank page
+- Template background colors/transparency
+*** TODO Crop customization
+- Enable/disable output crop, maybe
 *** TODO Detect available TOOLs and choose "best"
 - not sure about this... adding code to detect existing exes is
   cumbersome, just let the user choose/customize it
 - Best is the fastest to load, I guess, but allow custom ordering
-
+*** TODO TOOL Paint.NET
+*** TODO TOOL krita
 * Sketching tools
 ** Xournalapp https://github.com/xournalpp/xournalpp
 - Very cool note taking and sketching app, and boots fast (appimage)

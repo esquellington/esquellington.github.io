@@ -1,4 +1,4 @@
-;;; org-sketch --- draw instant sketches and insert them in org-mode -*- lexical-binding: t; -*-
+;;; org-sketch --- Draw instant sketches and insert them as org-mode links -*- lexical-binding: t; -*-
 ;;
 ;; Copyright (C) 2020 Oscar Civit Flores
 ;; Author: Oscar Civit Flores
@@ -12,14 +12,22 @@
 ;;
 ;; Provides org-mode functions to insert sketches on at the point by
 ;; invoking an external drawing tool modally.
-;; - Calling the interactive function `org-sketch-insert' prompts for a
-;;   sketch name, opens drawing tool and on save converts it to .PNG and
-;;   inserts an org link at the point.
-;; - Sketches are stored in the `org-sketch-output-dir' relative to
-;;   current org file path
-;; Installation: add (require 'org-sketch) to your org-mode-hook, and
-;; setup a local keybinding (suggested "C-c s") to call the provided
-;; function `org-sketch-insert'
+;;
+;; Functionality:
+;; - Calling the interactive function `org-sketch-insert' prompts for
+;;   a sketch name and opens a drawing tool with a blank sketch
+;;   template.When the tool is closed the sketch is converted to .PNG
+;;   and inserted an org link at the point.
+;; - Sketches are stored in the customizable `org-sketch-output-dir'
+;;   relative to current org file path.
+;; - The drawing tool can be customized with `org-sketch-tool'
+;; - The sketch resolution can be customized with
+;;   `org-sketch-default-output-width' and `org-sketch-default-output-height'
+;;
+;; Installation:
+;; - Add (require 'org-sketch) to your org-mode-hook.
+;; - Optionally add a local keybinding (suggested "C-c s") to call
+;;   the provided function `org-sketch-insert' to insert a sketch
 ;;
 ;;; License:
 ;;
@@ -42,7 +50,8 @@
 ;; Customization
 ;;--------------------------------
 
-(defgroup org-sketch nil "Draw sketches and insert them as org mode links."
+(defgroup org-sketch nil
+  "Draw sketches and insert them as org mode links."
   :group 'org)
 
 (defcustom org-sketch-output-dir "sketches"
@@ -60,6 +69,9 @@
   :group 'org-sketch
   :type 'integer)
 
+;; TODO Some tools are OS-specific, try to add them conditionally
+;; depending on system-type, or even build the choice list differently
+;; per-OS and/or tool availability in the system
 (defcustom org-sketch-tool nil
   "Default sketch tool."
   :group 'org-sketch
@@ -67,9 +79,8 @@
                  (const :tag "gimp" gimp)
                  (const :tag "gnome-paint" gnome-paint)
                  (const :tag "inkscape" inkscape)
-                 (const :tag "mspaint" mspaint) ;TODO WINDOWS ONLY, try to add conditionally?
-                 (const :tag "xournal++" xournalpp)
-                 ))
+                 (const :tag "mspaint" mspaint)
+                 (const :tag "xournal++" xournalpp)))
 
 (defcustom org-sketch-convert-command "convert"
   "Default command for ImageMagick convert."
@@ -89,7 +100,7 @@
   org-sketch-default-output-height)
 
 (defvar org-sketch-commandline-null-sink
-  (cond ((eq system-type 'gnu/linux) ;windows-nt...
+  (cond ((eq system-type 'gnu/linux)
          " > /dev/null ")
         ((eq system-type 'windows-nt)
          " > NUL ")
@@ -382,10 +393,10 @@
         ;; Insert org link
         ;; NOTE: We insert a plain bracket link [[file:skname_png]]
         ;; without description, insteaad of a described link
-        ;; [[file:skname_png][description]] so that it can to be
+        ;; [[file:skname_png][description]] so that it can be
         ;; displayed with default org-toggle-inline-images params (C-c
-        ;; C-v C-x). To display image links with description a
-        ;; non-nil prefix argument must be passed (C-u C-c C-v C-x)
+        ;; C-v C-x). To display image links with description a non-nil
+        ;; prefix argument must be passed (C-u C-c C-v C-x)
         (org-insert-link nil (concat "file:" skname_png) nil)
         )
 
