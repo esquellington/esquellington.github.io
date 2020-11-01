@@ -1,5 +1,4 @@
-#+STARTU
-P: indent
+#+STARTUP: indent
 - Make a combo, open a drawing program, draw a doodle and save it in
   same dir /sketches and link it from the .org automatically
 - Draw with finger on Dynamic
@@ -93,31 +92,42 @@ P: indent
 - org-sketch-null-output-sink
 **** TODO Modify or adapt commandline programs
 - cp, touch, rm
-*** TODO org-sketch-insert variants
-- Insert with explicit name, default sizes (standard)
-- Insert with default name and sizes (FAST)
-- Insert with explicit name and sizes (full control)
-- Insert both exported and TOOL file and do not delete it, for persistence
-- All can be internally done in a single func with params
-*** TODO Detect available TOOLs and choose "best"
-- not sure about this... adding code to detect existing exes is
-  cumbersome, just let the user choose/customize it
-- Best is the fastest to load, I guess, but allow custom ordering
 ** TODO Advanced (org-sketch-mode?)
 - minor mode, inspired in org-krita
 - More features than standalone function
   - custom link type [sketch:name] that opens tool and allows
     creating/editing new/existing sketch on access, but also displays
     image as usual org-toggle-inline-images
-  - customize empty template (org-sketch-tempalte-file)
-  - custom sketch dir rel to .org file (ex ./sketches)
-  - custom resolution (or select sizes: small, medium, large)
+    - If org-sketch-insert is called when on an existing link, we'll
+      edit, instead of add it, keep it simple
+  - customize empty template file for custom backgrounds, paper, etc...
+  - custom resolution presets (or select sizes: small, medium, large)
   - custom background colors/transparency
-  - org exporting
+  - org exporting support
   - overlays, toggle each indidivually, etc... display just added by
     default (customizable)
   - Delete sketch: when link is deleted, image file is deleted too
+    - Or maybe org-sketch-purge that does thisa utomatically for the
+      whole .org file... BUT beware because same /sketches dir may
+      contain sketches from different .org files
+    - So purgue command would need to open and analyze ALL .org in
+      this directory that share the same /sketches dir
+    - AND if /sketches has been customized it may be shared by OTHER
+      .org in different paths, so just forget it, no purgue, just try
+      to delete when delete link by explicitly calling
+      org-sketch-delete under point
   - Sketch database or directory, etc...
+*** TODO org-sketch-insert variants
+- Insert with explicit name, default sizes (standard)
+- Insert with default name and sizes (FAST)
+- Insert with explicit name and sizes (full control)
+- Insert both exported and TOOL file and do not delete it
+- All can be internally done in a single func with params
+*** TODO Detect available TOOLs and choose "best"
+- not sure about this... adding code to detect existing exes is
+  cumbersome, just let the user choose/customize it
+- Best is the fastest to load, I guess, but allow custom ordering
+
 * Sketching tools
 ** Xournalapp https://github.com/xournalpp/xournalpp
 - Very cool note taking and sketching app, and boots fast (appimage)
