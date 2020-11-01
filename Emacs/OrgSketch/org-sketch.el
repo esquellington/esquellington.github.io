@@ -1,15 +1,40 @@
-;;; org-sketch --- WIP WIP WIP
+;;; org-sketch --- draw instant sketches and insert them in org-mode -*- lexical-binding: t; -*-
 ;;
-;;
-
-;; Org-mode commands to insert sketches on at the point by invoking an
-;; external drawing tool modally
+;; Copyright (C) 2020 Oscar Civit Flores
+;; Author: Oscar Civit Flores
+;; Keywords: org
+;; Package-Version: ???????????
+;; URL: https://github.com/??????????'
+;; Version: 0.1
+;; Package-Requires: ((emacs "27"))
 ;;
 ;;; Commentary:
 ;;
-;;  All shell-command issued with "> /dev/null" to avoid output buffer
-;;  (> NUL in Windows)
+;; Provides org-mode functions to insert sketches on at the point by
+;; invoking an external drawing tool modally.
+;; - Calling the interactive function `org-sketch-insert' prompts for a
+;;   sketch name, opens drawing tool and on save converts it to .PNG and
+;;   inserts an org link at the point.
+;; - Sketches are stored in the `org-sketch-output-dir' relative to
+;;   current org file path
+;; Installation: add (require 'org-sketch) to your org-mode-hook, and
+;; setup a local keybinding (suggested "C-c s") to call the provided
+;; function `org-sketch-insert'
 ;;
+;;; License:
+;;
+;; This file is not a part of GNU Emacs.
+;;
+;; This program is free software; you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+;; This program is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
+;; You should have received a copy of the GNU General Public License
+;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ;;
 ;;; Code:
 
@@ -25,7 +50,7 @@
   :group 'org-sketch
   :type 'directory)
 
-(defcustom org-sketch-default-output-width 300
+(defcustom org-sketch-default-output-width 400
   "Default sketch width."
   :group 'org-sketch
   :type 'integer)
@@ -260,6 +285,7 @@
 ;;--------------------------------
 ;; Interactive functions
 ;;--------------------------------
+;;;###autoload
 (defun org-sketch-insert ( skname &optional width height )
   "Insert sketch SKNAME at point, with optional WIDTH/HEIGHT in pixels."
   (interactive "sSketch Name:") ;"sXXXX" prompts user for string param SKNAME
