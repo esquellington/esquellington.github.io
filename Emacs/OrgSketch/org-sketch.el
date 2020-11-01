@@ -67,6 +67,31 @@
   "OS-specific commandline args to redirect output to null sink.")
 
 ;;--------------------------------
+;; TOOL: gimp
+;;--------------------------------
+(defun org-sketch-tool-command--GIMP ()
+  "Return tool-specific command."
+  "gimp")
+(defun org-sketch-tool-ext--GIMP ()
+  "Return tool-specific file extension."
+  ".xcf")
+(defun org-sketch-tool-template-file--GIMP ()
+  "Return tool-specific template file."
+  ;; Check empty template, create blank .XCF if none
+  (let (template_file)
+    (setq template_file_png (concat org-sketch-output-dir "/org-sketch-template-GIMP.png"))
+    (setq template_file (concat org-sketch-output-dir "/org-sketch-template--GIMP.xcf"))
+    (when (not (file-exists-p template_file))
+      ;; Create blank .PNG and convert to .XCF (ImageMagik cannot create .XCF directly)
+      (shell-command (concat "convert -size 900x450 xc:white " template_file_png org-sketch-commandline-null-sink))
+      (shell-command (concat "convert " template_file_png " " template_file org-sketch-commandline-null-sink)))
+    template_file))
+(defun org-sketch-tool-export-png--GIMP ( input output )
+  "Export/Convert native INPUT to OUTPUT .PNG image."
+  ;; ImageMagik seems supports converting to/from .XCF
+  (shell-command (concat "convert " input " " output org-sketch-commandline-null-sink)))
+
+;;--------------------------------
 ;; TOOL: gnome-paint
 ;;--------------------------------
 (defun org-sketch-tool-command--GP ()
@@ -86,6 +111,89 @@
 (defun org-sketch-tool-export-png--GP ( input output )
   "Export/Convert native INPUT to OUTPUT .PNG image."
   (shell-command (concat "convert " input " " output org-sketch-commandline-null-sink)))
+
+;;--------------------------------
+;; TOOL: inkscape
+;;--------------------------------
+(defun org-sketch-tool-command--INK ()
+  "Return tool-specific command."
+  "inkscape")
+;;  "./xournalpp-1.0.19-x86_64.AppImage ")
+(defun org-sketch-tool-ext--INK ()
+  "Return tool-specific file extension."
+  ".svg")
+(defun org-sketch-tool-template-file--INK ()
+  "Return tool-specific template file."
+  ;; Check empty template, create if not available
+  ;; NOTE: Inkscape blank .svg is long and ugly, but there seems to be
+  ;; no way to generate it automatically using inkscape commandline
+  (let (template_file)
+    (setq template_file (concat org-sketch-output-dir "/org-sketch-template--INK.svg"))
+    (when (not (file-exists-p template_file))
+      (shell-command (concat "echo '"
+                             "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>
+                              <!-- Created with Inkscape (http://www.inkscape.org/) -->
+                              <svg
+                                 xmlns:dc=\"http://purl.org/dc/elements/1.1/\"
+                                 xmlns:cc=\"http://creativecommons.org/ns#\"
+                                 xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"
+                                 xmlns:svg=\"http://www.w3.org/2000/svg\"
+                                 xmlns=\"http://www.w3.org/2000/svg\"
+                                 xmlns:sodipodi=\"http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd\"
+                                 xmlns:inkscape=\"http://www.inkscape.org/namespaces/inkscape\"
+                                 width=\"210mm\"
+                                 height=\"297mm\"
+                                 viewBox=\"0 0 744.09448819 1052.3622047\"
+                                 id=\"svg2\"
+                                 version=\"1.1\"
+                                 inkscape:version=\"0.91 r13725\"
+                                 sodipodi:docname=\"org-sketch-template--INK.svg\">
+                                 <defs
+                                    id=\"defs4\" />
+                                 <sodipodi:namedview
+                                    id=\"base\"
+                                    pagecolor=\"#ffffff\"
+                                    bordercolor=\"#666666\"
+                                    borderopacity=\"1.0\"
+                                    inkscape:pageopacity=\"1\"
+                                    inkscape:pageshadow=\"2\"
+                                    inkscape:zoom=\"0.35\"
+                                    inkscape:cx=\"375\"
+                                    inkscape:cy=\"528.57143\"
+                                    inkscape:document-units=\"px\"
+                                    inkscape:current-layer=\"layer1\"
+                                    showgrid=\"false\"
+                                    inkscape:window-width=\"1920\"
+                                    inkscape:window-height=\"1056\"
+                                    inkscape:window-x=\"0\"
+                                    inkscape:window-y=\"24\"
+                                    inkscape:window-maximized=\"1\" />
+                                 <metadata
+                                    id=\"metadata7\">
+                                    <rdf:RDF>
+                                     <cc:Work
+                                        rdf:about=\"\">
+                                       <dc:format>image/svg+xml</dc:format>
+                                       <dc:type
+                                          rdf:resource=\"http://purl.org/dc/dcmitype/StillImage\" />
+                                       <dc:title></dc:title>
+                                     </cc:Work>
+                                    </rdf:RDF>
+                                 </metadata>
+                                 <g
+                                    inkscape:label=\"Capa 1\"
+                                    inkscape:groupmode=\"layer\"
+                                    id=\"layer1\" />
+                              </svg>"
+                             "' > "
+                             template_file ))
+      )
+    ;; Return
+    template_file))
+(defun org-sketch-tool-export-png--INK ( input output )
+  "Export/Convert native INPUT to OUTPUT .PNG image."
+  ;; inkscape -e exports to .PNG
+  (shell-command (concat (org-sketch-tool-command--INK) " " input " -e " output org-sketch-commandline-null-sink)))
 
 ;;--------------------------------
 ;; TOOL: mspaint
@@ -148,73 +256,6 @@
   "Export/Convert native INPUT to OUTPUT .PNG image."
   ;; xournalpp -i exports to .PNG
   (shell-command (concat (org-sketch-tool-command--XPP) " " input " -i " output org-sketch-commandline-null-sink)))
-
-;;--------------------------------
-;; TOOL: inkscape
-;;--------------------------------
-(defun org-sketch-tool-command--INK ()
-  "Return tool-specific command."
-  "inkscape")
-;;  "./xournalpp-1.0.19-x86_64.AppImage ")
-(defun org-sketch-tool-ext--INK ()
-  "Return tool-specific file extension."
-  ".svg")
-(defun org-sketch-tool-template-file--INK ()
-  "Return tool-specific template file."
-  ;; Check empty template, create if not available
-  (let (template_file)
-    (setq template_file (concat org-sketch-output-dir "/org-sketch-template--INK.svg"))
-    ;; TODO GEN .svg on the fly!?
-    ;; (when (not (file-exists-p template_file))
-    ;;   ;; The .xopp files are XML compressed with gzip, so I
-    ;;   ;; uncompressed an empty canvas .xopp and pasted the XML here
-    ;;   ;; TODO could parametrize template sizes and colors, but better
-    ;;   ;; keep it simple and have a unique base template and
-    ;;   ;; resize/modify individual outputs instead
-    ;;   (shell-command (concat "echo '"
-    ;;                          "<?xml version=\"1.0\" standalone=\"no\"?>"
-    ;;                          "<xournal creator=\"Xournal++ 1.0.19\" fileversion=\"4\">"
-    ;;                          "<title>Xournal++ document - see https://github.com/xournalpp/xournalpp</title>"
-    ;;                          "<preview/>"
-    ;;                          "<page width=\"900.0\" height=\"450.0\">" ;;16/9
-    ;;                          "<background type=\"solid\" color=\"#ffffffff\" style=\"plain\"/>"
-    ;;                          "<layer/>"
-    ;;                          "</page>"
-    ;;                          "</xournal>"
-    ;;                          "' | gzip > "
-    ;;                          template_file ))
-    ;;   )
-    ;; Return
-    template_file))
-(defun org-sketch-tool-export-png--INK ( input output )
-  "Export/Convert native INPUT to OUTPUT .PNG image."
-  ;; inkscape -e exports to .PNG
-  (shell-command (concat (org-sketch-tool-command--INK) " " input " -e " output org-sketch-commandline-null-sink)))
-
-;;--------------------------------
-;; TOOL: gimp
-;;--------------------------------
-(defun org-sketch-tool-command--GIMP ()
-  "Return tool-specific command."
-  "gimp")
-(defun org-sketch-tool-ext--GIMP ()
-  "Return tool-specific file extension."
-  ".xcf")
-(defun org-sketch-tool-template-file--GIMP ()
-  "Return tool-specific template file."
-  ;; Check empty template, create blank .XCF if none
-  (let (template_file)
-    (setq template_file_png (concat org-sketch-output-dir "/org-sketch-template-GIMP.png"))
-    (setq template_file (concat org-sketch-output-dir "/org-sketch-template--GIMP.xcf"))
-    (when (not (file-exists-p template_file))
-      ;; Create blank .PNG and convert to .XCF (ImageMagik cannot create .XCF directly)
-      (shell-command (concat "convert -size 900x450 xc:white " template_file_png org-sketch-commandline-null-sink))
-      (shell-command (concat "convert " template_file_png " " template_file org-sketch-commandline-null-sink)))
-    template_file))
-(defun org-sketch-tool-export-png--GIMP ( input output )
-  "Export/Convert native INPUT to OUTPUT .PNG image."
-  ;; ImageMagik seems supports converting to/from .XCF
-  (shell-command (concat "convert " input " " output org-sketch-commandline-null-sink)))
 
 ;;--------------------------------
 ;; Interactive functions
