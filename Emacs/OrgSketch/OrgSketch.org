@@ -92,6 +92,8 @@
 - org-sketch-null-output-sink
 **** TODO Modify or adapt commandline programs
 - cp, touch, rm
+**** TODO Ensure imagemagick/convert works
+- will probably need customized path or similar
 ** TODO Advanced (org-sketch-mode?)
 - minor mode, inspired in org-krita
 - More features than standalone function

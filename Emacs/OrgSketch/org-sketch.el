@@ -71,6 +71,11 @@
                  (const :tag "xournal++" xournalpp)
                  ))
 
+(defcustom org-sketch-convert-command "convert"
+  "Default command for ImageMagick convert."
+  :group 'org-sketch
+  :type 'file)
+
 ;;--------------------------------
 ;; Basic helpers
 ;;--------------------------------
@@ -91,6 +96,10 @@
         (t ""))
   "OS-specific commandline args to redirect output to null sink.")
 
+(defun org-sketch-convert ( args )
+  "Run convert on ARGS argument string."
+  (shell-command (concat org-sketch-convert-command " " args)))
+
 ;;--------------------------------
 ;; TOOL: gimp
 ;;--------------------------------
@@ -107,13 +116,13 @@
     (setq template_file_png (concat org-sketch-output-dir "/org-sketch-template-GIMP.png"))
     (setq template_file (concat org-sketch-output-dir "/org-sketch-template--GIMP.xcf"))
     (when (not (file-exists-p template_file))
-      ;; Create blank .PNG and convert to .XCF (ImageMagik cannot create .XCF directly)
+      ;; Create blank .PNG and convert to .XCF (ImageMagick cannot create .XCF directly)
       (shell-command (concat "convert -size 900x450 xc:white " template_file_png org-sketch-commandline-null-sink))
       (shell-command (concat "convert " template_file_png " " template_file org-sketch-commandline-null-sink)))
     template_file))
 (defun org-sketch-tool-export-png--GIMP ( input output )
   "Export/Convert native INPUT to OUTPUT .PNG image."
-  ;; ImageMagik seems supports converting to/from .XCF
+  ;; ImageMagick seems supports converting to/from .XCF
   (shell-command (concat "convert " input " " output org-sketch-commandline-null-sink)))
 
 ;;--------------------------------
@@ -363,12 +372,17 @@
         ;; Export to .PNG
         (org-sketch-tool-export-png skname_tmp_ext skname_png)
 
-        ;; Trim empty space and resize
-        (shell-command (concat "convert -trim"
-                               " -resize " (format "%dx%d" width height)
-                               " " skname_png ;input
-                               " " skname_png ;output
-                               org-sketch-commandline-null-sink))
+        ;; Convert: Trim empty space and resize
+        (org-sketch-convert (concat " -trim"
+                                    " -resize " (format "%dx%d" width height)
+                                    " " skname_png ;input
+                                    " " skname_png ;output
+                                    org-sketch-commandline-null-sink))
+        ;; (shell-command (concat "convert -trim"
+        ;;                        " -resize " (format "%dx%d" width height)
+        ;;                        " " skname_png ;input
+        ;;                        " " skname_png ;output
+        ;;                        org-sketch-commandline-null-sink))
 
         ;; Insert org link
         ;; NOTE: We insert a plain bracket link [[file:skname_png]]
