@@ -1,4 +1,5 @@
-#+STARTUP: indent
+#+STARTU
+P: indent
 - Make a combo, open a drawing program, draw a doodle and save it in
   same dir /sketches and link it from the .org automatically
 - Draw with finger on Dynamic
@@ -69,7 +70,7 @@
 - How to install so that it's globally accessible?
 - Set as default (now it's gnome-paint)
 ** TODO make "package"
-*** TODO Standard install/structure
+*** DONE Standard install/structure
 - (provide 'packagename)
 - ;;;###autoload
   - Seems to speedup package loading
