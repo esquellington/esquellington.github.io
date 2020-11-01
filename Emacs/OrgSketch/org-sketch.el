@@ -105,7 +105,7 @@
 ;;--------------------------------
 (defun org-sketch-tool-command--GIMP ()
   "Return tool-specific command."
-  "gimp")
+  "gimp --no-splash")
 (defun org-sketch-tool-ext--GIMP ()
   "Return tool-specific file extension."
   ".xcf")
@@ -113,17 +113,17 @@
   "Return tool-specific template file."
   ;; Check empty template, create blank .XCF if none
   (let (template_file)
-    (setq template_file_png (concat org-sketch-output-dir "/org-sketch-template-GIMP.png"))
+    (setq template_file_png (concat org-sketch-output-dir "/org-sketch-template--GIMP.png"))
     (setq template_file (concat org-sketch-output-dir "/org-sketch-template--GIMP.xcf"))
     (when (not (file-exists-p template_file))
       ;; Create blank .PNG and convert to .XCF (ImageMagick cannot create .XCF directly)
-      (shell-command (concat "convert -size 900x450 xc:white " template_file_png org-sketch-commandline-null-sink))
-      (shell-command (concat "convert " template_file_png " " template_file org-sketch-commandline-null-sink)))
+      (org-sketch-convert (concat "-size 900x450 xc:white " template_file_png org-sketch-commandline-null-sink))
+      (org-sketch-convert (concat template_file_png " " template_file org-sketch-commandline-null-sink)))
     template_file))
 (defun org-sketch-tool-export-png--GIMP ( input output )
   "Export/Convert native INPUT to OUTPUT .PNG image."
   ;; ImageMagick seems supports converting to/from .XCF
-  (shell-command (concat "convert " input " " output org-sketch-commandline-null-sink)))
+  (org-sketch-convert (concat input " " output org-sketch-commandline-null-sink)))
 
 ;;--------------------------------
 ;; TOOL: gnome-paint
@@ -140,11 +140,11 @@
   (let (template_file)
     (setq template_file (concat org-sketch-output-dir "/org-sketch-template--GP.png"))
     (when (not (file-exists-p template_file))
-      (shell-command (concat "convert -size 900x450 xc:white " template_file org-sketch-commandline-null-sink)))
+      (org-sketch-convert (concat "-size 900x450 xc:white " template_file org-sketch-commandline-null-sink)))
     template_file))
 (defun org-sketch-tool-export-png--GP ( input output )
   "Export/Convert native INPUT to OUTPUT .PNG image."
-  (shell-command (concat "convert " input " " output org-sketch-commandline-null-sink)))
+  (org-sketch-convert (concat input " " output org-sketch-commandline-null-sink)))
 
 ;;--------------------------------
 ;; TOOL: inkscape
@@ -244,11 +244,11 @@
   (let (template_file)
     (setq template_file (concat org-sketch-output-dir "/org-sketch-template--MSP.png"))
     (when (not (file-exists-p template_file))
-      (shell-command (concat "convert -size 900x450 xc:white " template_file org-sketch-commandline-null-sink)))
+      (org-sketch-convert (concat "-size 900x450 xc:white " template_file org-sketch-commandline-null-sink)))
     template_file))
 (defun org-sketch-tool-export-png--MSP ( input output )
   "Export/Convert native INPUT to OUTPUT .PNG image."
-  (shell-command (concat "convert " input " " output org-sketch-commandline-null-sink)))
+  (org-sketch-convert (concat input " " output org-sketch-commandline-null-sink)))
 
 ;;--------------------------------
 ;; TOOL: xournalpp
@@ -378,11 +378,6 @@
                                     " " skname_png ;input
                                     " " skname_png ;output
                                     org-sketch-commandline-null-sink))
-        ;; (shell-command (concat "convert -trim"
-        ;;                        " -resize " (format "%dx%d" width height)
-        ;;                        " " skname_png ;input
-        ;;                        " " skname_png ;output
-        ;;                        org-sketch-commandline-null-sink))
 
         ;; Insert org link
         ;; NOTE: We insert a plain bracket link [[file:skname_png]]
