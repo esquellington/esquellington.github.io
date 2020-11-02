@@ -86,14 +86,28 @@
   - Maybe alist with tool-name and tool-exe or similar
 *** DONE Add GIMP TOOL
 *** DONE Add Inkscape TOOL
-*** TODO Add Windows support
+*** DONE Add Windows support
 **** DONE Add MSPaint TOOL
+- Mspaint instead of paint.exe
+- Add MSP to cond select
 **** DONE Modify paths and /dev/null for Windows
 - org-sketch-null-output-sink
-**** TODO Modify or adapt commandline programs
-- cp, touch, rm
-**** TODO Ensure imagemagick/convert works
+**** DONE Ensure imagemagick/convert works
 - will probably need customized path or similar
+**** DONE Modify or adapt commandline programs
+- ImageMagick convert needs custom path, but works perfectly
+- Backslashes instead of /
+  - use
+- cp -> copy-file
+- rm -> delete-file
+- touch -> make-empty-file
+*** TODO Allow customize no convert
+- So that it's not required, and we'll not crop/resize sketches and
+  won't support some tools, but still allow quick .png edit with
+  mspaint / gnomepaint and others that can use png as format, or
+  export to it natively (ex xournal)
+- Factor all convert ops into func and make it do nothing if not
+  available
 *** TODO Share (Angel?)
 - Angel betatest would be cool
 *** TODO Publish?
@@ -106,12 +120,13 @@
 - Insert with explicit name and sizes (full control)
 - Insert both exported and TOOL file and do not delete it
 - All can be internally done in a single func with params
-*** TODO Minor mode + custom link type [sketch:name]
+*** TODO Minor mode org-sketch-mode
 - minor mode, inspired in org-krita
 - More features than standalone function, can have persistent state,
   react to inputs, etc
 - Opens tool and allows creating/editing new/existing sketch on
   access, but also displays image as usual org-toggle-inline-images
+**** TODO Custom link type [sketch:name]
 - If org-sketch-insert is called when on an existing link, we'll
   edit, instead of add it, keep it simple
 **** TODO overlays
@@ -163,7 +178,7 @@
 * Other resource types for org "note-taking"
 - The idea of "insert something here that needs to run an external
   program modally" could be generalized to other resources
-  - Record voice
+  - Record voice note
   - Insert screenshot (desktop or window)
   - Insert picture
 - This fits pretty well with the idea of using org files as
@@ -171,7 +186,6 @@
   added natively, and images/sound can be inserted on the spot from
   Emacs itself, without having to open external programs explicitly,
   adding links, etc...
-[[file:sketches/prova.png]]
 * org-krita https://github.com/lepisma/org-krita
 - seems Wip, but is very similar to what I wanted
 - plans to support other painting programs
