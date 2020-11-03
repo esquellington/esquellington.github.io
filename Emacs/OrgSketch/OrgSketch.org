@@ -96,24 +96,22 @@
 - will probably need customized path or similar
 **** DONE Modify or adapt commandline programs
 - ImageMagick convert needs custom path, but works perfectly
-- Backslashes instead of /
-  - use
 - cp -> copy-file
 - rm -> delete-file
-- touch -> make-empty-file
-*** TODO Allow customize no convert
-- So that it's not required, and we'll not crop/resize sketches and
-  won't support some tools, but still allow quick .png edit with
-  mspaint / gnomepaint and others that can use png as format, or
-  export to it natively (ex xournal)
-- Factor all convert ops into func and make it do nothing if not
-  available
+**** DONE touch
+- make-empty-file does not seem to work, may need extra package?
+**** TODO Using \ instead of /
+- It would seem from the docs that file-name-as-directory should
+  change / into \ but it does NOT, so we need to do it explicitly
+- Can use (subst-char-in-string ?/ ?\\ skname_tmp_ext) that
+  replaces / with \
 *** TODO Share (Angel?)
 - Angel betatest would be cool
 *** TODO Publish?
+- MELPA howto?
 - Github + Twitter
-- MELPA?
 ** TODO Advanced (org-sketch-mode?)
+*** TODO Customize tool paths
 *** TODO org-sketch-insert variants
 - Insert with explicit name, default sizes (standard)
 - Insert with default name and sizes (FAST)
@@ -156,6 +154,14 @@
 - Best is the fastest to load, I guess, but allow custom ordering
 *** TODO TOOL Paint.NET
 *** TODO TOOL krita
+*** TODO Allow customize no convert
+- So that it's not required, and we'll not crop/resize sketches and
+  won't support some tools, but still allow quick .png edit with
+  mspaint / gnomepaint and others that can use png as format, or
+  export to it natively (ex xournal)
+- Factor all convert ops into func and make it do nothing if not
+  available
+- Not worth it really... will just make code uglier
 * Sketching tools
 ** Xournalapp https://github.com/xournalpp/xournalpp
 - Very cool note taking and sketching app, and boots fast (appimage)
@@ -193,16 +199,3 @@
 - Krita is quite heavyweight and seems pencil-oriented and complex,
   not sure how easy it is to move stuff around, etc, and the UI seems
   complex
-[[file:sketches/xpp.png]]
-
-[[file:sketches/kkkkk.png]]
-
-[[file:sketches/kkkkkk.png]]
-
-[[file:sketches/fdifdjdfsjk.png]]
-
-[[file:sketches/gp.png]]
-
-[[file:sketches/ikkksk.png]]
-
-[[file:sketches/xooooop.png]]

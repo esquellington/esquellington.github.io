@@ -95,7 +95,6 @@
 ;;--------------------------------
 ;; Basic helpers
 ;;--------------------------------
-
 (defun org-sketch-output-width ()
   "Compute sketch width, func so that it can be context-sensitive at point."
   org-sketch-default-output-width)
@@ -104,17 +103,34 @@
   "Compute sketch height, func so that can be context-sensitive at point."
   org-sketch-default-output-height)
 
-(defvar org-sketch-commandline-null-sink
-  (cond ((eq system-type 'gnu/linux)
-         " > /dev/null ")
-        ((eq system-type 'windows-nt)
+;;--------------------------------
+;; OS-specific
+;;--------------------------------
+(defvar org-sketch-OS-null-sink
+  (cond ((eq system-type 'windows-nt)
          " > NUL ")
+        (t ;;else 'gnu/linux, 'darwin, etc...
+         " > /dev/null ")
         (t ""))
   "OS-specific commandline args to redirect output to null sink.")
 
+(defun org-sketch-OS-touch-file ( filename )
+  "OS-specific touch FILENAME to update its timestamp."
+  (shell-command (concat "touch " filename " " org-sketch-OS-null-sink)))
+
+(defun org-sketch-OS-dir ( path )
+  "OS-specific file-name-as-directory to convert PATH with \ to / if necessary."
+  (cond ((eq system-type 'windows-nt)
+         (subst-char-in-string ?/ ?\\ (file-name-as-directory path)))
+        (t ;;else 'gnu/linux, 'darwin, etc...
+         (file-name-as-directory path))))
+
+;;--------------------------------
+;; CONVERT
+;;--------------------------------
 (defun org-sketch-convert ( args )
   "Run convert on ARGS argument string."
-  (shell-command (concat org-sketch-convert-command " " args org-sketch-commandline-null-sink)))
+  (shell-command (concat org-sketch-convert-command " " args org-sketch-OS-null-sink)))
 
 ;;--------------------------------
 ;; TOOL: gimp
@@ -129,8 +145,8 @@
   "Return tool-specific template file."
   ;; Check empty template, create blank .XCF if none
   (let (template_file)
-    (setq template_file_png (concat (file-name-as-directory org-sketch-output-dir) "org-sketch-template--GIMP.png"))
-    (setq template_file (concat (file-name-as-directory org-sketch-output-dir) "org-sketch-template--GIMP.xcf"))
+    (setq template_file_png (concat (org-sketch-OS-dir org-sketch-output-dir) "org-sketch-template--GIMP.png"))
+    (setq template_file (concat (org-sketch-OS-dir org-sketch-output-dir) "org-sketch-template--GIMP.xcf"))
     (when (not (file-exists-p template_file))
       ;; Create blank .PNG and convert to .XCF (ImageMagick cannot create .XCF directly)
       (org-sketch-convert (concat "-size 900x450 xc:white " template_file_png))
@@ -154,7 +170,7 @@
   "Return tool-specific template file."
   ;; Check empty template, create blank .PNG if none
   (let (template_file)
-    (setq template_file (concat (file-name-as-directory org-sketch-output-dir) "org-sketch-template--GP.png"))
+    (setq template_file (concat (org-sketch-OS-dir org-sketch-output-dir) "org-sketch-template--GP.png"))
     (when (not (file-exists-p template_file))
       (org-sketch-convert (concat "-size 900x450 xc:white " template_file)))
     template_file))
@@ -178,7 +194,7 @@
   ;; NOTE: Inkscape blank .svg is long and ugly, but there seems to be
   ;; no way to generate it automatically using inkscape commandline
   (let (template_file)
-    (setq template_file (concat (file-name-as-directory org-sketch-output-dir) "org-sketch-template--INK.svg"))
+    (setq template_file (concat (org-sketch-OS-dir org-sketch-output-dir) "org-sketch-template--INK.svg"))
     (when (not (file-exists-p template_file))
       (shell-command (concat "echo '"
                              "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>
@@ -243,7 +259,7 @@
 (defun org-sketch-tool-export-png--INK ( input output )
   "Export/Convert native INPUT to OUTPUT .PNG image."
   ;; inkscape -e exports to .PNG
-  (shell-command (concat (org-sketch-tool-command--INK) " " input " -e " output org-sketch-commandline-null-sink)))
+  (shell-command (concat (org-sketch-tool-command--INK) " " input " -e " output org-sketch-OS-null-sink)))
 
 ;;--------------------------------
 ;; TOOL: mspaint
@@ -258,7 +274,7 @@
   "Return tool-specific template file."
   ;; Check empty template, create blank .PNG if none
   (let (template_file)
-    (setq template_file (concat (file-name-as-directory org-sketch-output-dir) "org-sketch-template--MSP.png"))
+    (setq template_file (concat (org-sketch-OS-dir org-sketch-output-dir) "org-sketch-template--MSP.png"))
     (when (not (file-exists-p template_file))
       (org-sketch-convert (concat "-size 900x450 xc:white " template_file)))
     template_file))
@@ -280,7 +296,7 @@
   "Return tool-specific template file."
   ;; Check empty template, create if not available
   (let (template_file)
-    (setq template_file (concat (file-name-as-directory org-sketch-output-dir) "org-sketch-template--XPP.xopp"))
+    (setq template_file (concat (org-sketch-OS-dir org-sketch-output-dir) "org-sketch-template--XPP.xopp"))
     (when (not (file-exists-p template_file))
       ;; The .xopp files are XML compressed with gzip, so I
       ;; uncompressed an empty canvas .xopp and pasted the XML here
@@ -305,7 +321,7 @@
 (defun org-sketch-tool-export-png--XPP ( input output )
   "Export/Convert native INPUT to OUTPUT .PNG image."
   ;; xournalpp -i exports to .PNG
-  (shell-command (concat (org-sketch-tool-command--XPP) " " input " -i " output org-sketch-commandline-null-sink)))
+  (shell-command (concat (org-sketch-tool-command--XPP) " " input " -i " output org-sketch-OS-null-sink)))
 
 ;;--------------------------------
 ;; Interactive functions
@@ -371,23 +387,23 @@
     (when (not (file-directory-p org-sketch-output-dir))
       (make-directory org-sketch-output-dir))
 
-    ;; file-name-as-directory is OS-independent and adds either / or \ as required
-    (setq skname_png (concat (file-name-as-directory org-sketch-output-dir) skname ".png"))
+    ;; org-sketch-OS-dir is OS-independent and adds either / or \ as required
+    (setq skname_png (concat (org-sketch-OS-dir org-sketch-output-dir) skname ".png"))
 
     ;; Avoid overwriting silently
     (when (or (not (file-exists-p skname_png))
               (yes-or-no-p "Sketch exists! Overwrite? "))
 
       ;; Create sketch tool empty file from template
-      (setq skname_tmp_ext (concat (file-name-as-directory org-sketch-output-dir) skname "_tmp" (org-sketch-tool-ext)))
-      (setq skname_timestamp (concat (file-name-as-directory org-sketch-output-dir) skname ".timestamp"))
+      (setq skname_tmp_ext (concat (org-sketch-OS-dir org-sketch-output-dir) skname "_tmp" (org-sketch-tool-ext)))
+      (setq skname_timestamp (concat (org-sketch-OS-dir org-sketch-output-dir) skname ".timestamp"))
       (copy-file (org-sketch-tool-template-file) skname_tmp_ext)
 
       ;; Create empty timestamp file afterwards, to detect if skname_tmp_ext is overwritten by tool
-      (make-empty-file skname_timestamp)
+      (org-sketch-OS-touch-file skname_timestamp)
 
       ;; Open sketch tool on empty file and wait for close/exit
-      (shell-command (concat (org-sketch-tool-command) " " skname_tmp_ext org-sketch-commandline-null-sink))
+      (shell-command (concat (org-sketch-tool-command) " " skname_tmp_ext org-sketch-OS-null-sink))
 
       ;; Check if tool-specific temp file was saved (thus newer than
       ;; timestamp) and continue processing if so
