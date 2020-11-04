@@ -20,7 +20,8 @@
 ;;   and inserted an org link at the point.
 ;; - Sketches are stored in the customizable `org-sketch-output-dir'
 ;;   relative to current org file path.
-;; - The drawing tool can be customized with `org-sketch-tool'
+;; - The drawing tool can be customized with `org-sketch-tool' and the
+;;   corresponding `org-sketch-command-TOOL' path.
 ;; - The sketch resolution can be customized with
 ;;   `org-sketch-default-output-width' and `org-sketch-default-output-height'
 ;;
@@ -87,10 +88,31 @@
                  (const :tag "mspaint" mspaint)
                  (const :tag "xournal++" xournalpp)))
 
-(defcustom org-sketch-convert-command "convert"
+;; TOOL commands/paths
+(defcustom org-sketch-command-convert "convert"
   "Default command for ImageMagick convert."
   :group 'org-sketch
   :type 'file)
+(defcustom org-sketch-command-GIMP "gimp"
+  "GIMP command."
+  :group 'org-sketch
+  :type 'string)
+(defcustom org-sketch-command-GP "gnome-paint"
+  "Gnome-paint command."
+  :group 'org-sketch
+  :type 'string)
+(defcustom org-sketch-command-INK "inkscape"
+  "Inkscape command."
+  :group 'org-sketch
+  :type 'string)
+(defcustom org-sketch-command-MSP "mspaint.exe"
+  "MS-Paint command."
+  :group 'org-sketch
+  :type 'string)
+(defcustom org-sketch-command-XPP "xournalpp"
+  "Xournal++ command."
+  :group 'org-sketch
+  :type 'string)
 
 ;;--------------------------------
 ;; Basic helpers
@@ -130,12 +152,11 @@
 ;;--------------------------------
 (defun org-sketch-convert ( args )
   "Run convert on ARGS argument string."
-  (shell-command (concat org-sketch-convert-command " " args org-sketch-OS-null-sink)))
+  (shell-command (concat org-sketch-command-convert " " args org-sketch-OS-null-sink)))
 
 ;;--------------------------------
 ;; TOOL: gimp
 ;;--------------------------------
-(defvar org-sketch-tool-command--GIMP "gimp --no-splash" "GIMP command.")
 (defvar org-sketch-tool-extension--GIMP ".xcf" "GIMP native file extension.")
 (defun org-sketch-tool-template-file--GIMP ()
   "Return tool-specific template file."
@@ -150,7 +171,7 @@
     template_file))
 (defun org-sketch-tool-edit--GIMP ( file )
   "Edit FILE with GIMP."
-  (shell-command (concat org-sketch-tool-command--GIMP " " file org-sketch-OS-null-sink)))
+  (shell-command (concat org-sketch-command-GIMP " --no-splash " file org-sketch-OS-null-sink)))
 (defun org-sketch-tool-export-png--GIMP ( input output )
   "Export/Convert native INPUT to OUTPUT .PNG image."
   ;; ImageMagick supports converting to/from .XCF
@@ -159,7 +180,6 @@
 ;;--------------------------------
 ;; TOOL: gnome-paint
 ;;--------------------------------
-(defvar org-sketch-tool-command--GP "gnome-paint" "Gnome-paint command.")
 (defvar org-sketch-tool-extension--GP ".png" "Gnome-paint native file extension.")
 (defun org-sketch-tool-template-file--GP ()
   "Return tool-specific template file."
@@ -171,7 +191,7 @@
     template_file))
 (defun org-sketch-tool-edit--GP ( file )
   "Edit FILE with gnome-paint."
-  (shell-command (concat org-sketch-tool-command--GP " " file org-sketch-OS-null-sink)))
+  (shell-command (concat org-sketch-command-GP " " file org-sketch-OS-null-sink)))
 (defun org-sketch-tool-export-png--GP ( input output )
   "Export/Convert native INPUT to OUTPUT .PNG image."
   (org-sketch-convert (concat input " " output)))
@@ -179,7 +199,6 @@
 ;;--------------------------------
 ;; TOOL: inkscape
 ;;--------------------------------
-(defvar org-sketch-tool-command--INK "inkscape" "Inkscape command." )
 (defvar org-sketch-tool-extension--INK ".svg" "Inkscape native file extension.")
 (defun org-sketch-tool-template-file--INK ()
   "Return tool-specific template file."
@@ -251,16 +270,15 @@
     template_file))
 (defun org-sketch-tool-edit--INK ( file )
   "Edit FILE with Inkscape."
-  (shell-command (concat org-sketch-tool-command--INK " " file org-sketch-OS-null-sink)))
+  (shell-command (concat org-sketch-command-INK " " file org-sketch-OS-null-sink)))
 (defun org-sketch-tool-export-png--INK ( input output )
   "Export/Convert native INPUT to OUTPUT .PNG image."
   ;; inkscape -e exports to .PNG
-  (shell-command (concat (org-sketch-tool-command--INK) " " input " -e " output org-sketch-OS-null-sink)))
+  (shell-command (concat org-sketch-command-INK " " input " -e " output org-sketch-OS-null-sink)))
 
 ;;--------------------------------
 ;; TOOL: mspaint
 ;;--------------------------------
-(defvar org-sketch-tool-command--MSP "mspaint.exe" "MS-Paint command.")
 (defvar org-sketch-tool-extension--MSP ".png" "MS-Paint native file extension.")
 (defun org-sketch-tool-template-file--MSP ()
   "Return tool-specific template file."
@@ -272,7 +290,7 @@
     template_file))
 (defun org-sketch-tool-edit--MSP ( file )
   "Edit FILE with MS Paint."
-  (shell-command (concat org-sketch-tool-command--MSP " " file org-sketch-OS-null-sink)))
+  (shell-command (concat org-sketch-command-MSP " " file org-sketch-OS-null-sink)))
 (defun org-sketch-tool-export-png--MSP ( input output )
   "Export/Convert native INPUT to OUTPUT .PNG image."
   (org-sketch-convert (concat input " " output)))
@@ -280,7 +298,6 @@
 ;;--------------------------------
 ;; TOOL: xournalpp
 ;;--------------------------------
-(defvar org-sketch-tool-command--XPP "~/Escriptori/esquellington/ext/bin/xournalpp-1.0.19-x86_64.AppImage" "Xournal++ command.")
 (defvar org-sketch-tool-extension--XPP ".xopp" "Xournal++ native file extension.")
 (defun org-sketch-tool-template-file--XPP ()
   "Return tool-specific template file."
@@ -310,11 +327,11 @@
     template_file))
 (defun org-sketch-tool-edit--XPP ( file )
   "Edit FILE with Xournal++."
-  (shell-command (concat org-sketch-tool-command--XPP " " file org-sketch-OS-null-sink)))
+  (shell-command (concat org-sketch-command-XPP " " file org-sketch-OS-null-sink)))
 (defun org-sketch-tool-export-png--XPP ( input output )
   "Export/Convert native INPUT to OUTPUT .PNG image."
   ;; xournalpp -i exports to .PNG
-  (shell-command (concat (org-sketch-tool-command--XPP) " " input " -i " output org-sketch-OS-null-sink)))
+  (shell-command (concat org-sketch-command-XPP " " input " -i " output org-sketch-OS-null-sink)))
 
 ;;--------------------------------
 ;; Interactive functions
@@ -332,28 +349,28 @@
   ;; Select tool
   ;; TODO Try to do this only once on startup or similar
   (cond ((eq org-sketch-tool 'gimp)
-         (setq org-sketch-tool-ext 'org-sketch-tool-extension--GIMP)
+         (setq org-sketch-tool-ext org-sketch-tool-extension--GIMP)
          (fset 'org-sketch-tool-template-file 'org-sketch-tool-template-file--GIMP)
          (fset 'org-sketch-tool-edit 'org-sketch-tool-edit--GIMP)
          (fset 'org-sketch-tool-export-png 'org-sketch-tool-export-png--GIMP)
          ;;(message "GIMP")
          )
         ((eq org-sketch-tool 'gnome-paint)
-         (setq org-sketch-tool-ext 'org-sketch-tool-extension--GP)
+         (setq org-sketch-tool-ext org-sketch-tool-extension--GP)
          (fset 'org-sketch-tool-template-file 'org-sketch-tool-template-file--GP)
          (fset 'org-sketch-tool-edit 'org-sketch-tool-edit--GP)
          (fset 'org-sketch-tool-export-png 'org-sketch-tool-export-png--GP)
          ;;(message "GNOME-PAINT")
          )
         ((eq org-sketch-tool 'inkscape)
-         (setq org-sketch-tool-ext 'org-sketch-tool-extension--INK)
+         (setq org-sketch-tool-ext org-sketch-tool-extension--INK)
          (fset 'org-sketch-tool-template-file 'org-sketch-tool-template-file--INK)
          (fset 'org-sketch-tool-edit 'org-sketch-tool-edit--INK)
          (fset 'org-sketch-tool-export-png 'org-sketch-tool-export-png--INK)
          ;;(message "INKSCAPE")
          )
         ((eq org-sketch-tool 'mspaint)
-         (setq org-sketch-tool-ext 'org-sketch-tool-extension--MSP)
+         (setq org-sketch-tool-ext org-sketch-tool-extension--MSP)
          (fset 'org-sketch-tool-template-file 'org-sketch-tool-template-file--MSP)
          (fset 'org-sketch-tool-edit 'org-sketch-tool-edit--MSP)
          (fset 'org-sketch-tool-export-png 'org-sketch-tool-export-png--MSP)
@@ -367,7 +384,7 @@
          ;;(message "XOURNAL++")
          )
         (t ;;default covers nil (best available) case too, by now
-         (setq org-sketch-tool-ext 'org-sketch-tool-extension--GP)
+         (setq org-sketch-tool-ext org-sketch-tool-extension--GP)
          (fset 'org-sketch-tool-template-file 'org-sketch-tool-template-file--GP)
          (fset 'org-sketch-tool-edit 'org-sketch-tool-edit--GP)
          (fset 'org-sketch-tool-export-png 'org-sketch-tool-export-png--GP)
