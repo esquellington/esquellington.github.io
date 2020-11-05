@@ -68,7 +68,7 @@
 ** DONE Install Xxournal++
 - How to install so that it's globally accessible?
 - Set as default (now it's gnome-paint)
-** TODO make "package"
+** TODO Make package
 *** DONE Standard install/structure
 - (provide 'packagename)
 - ;;;###autoload
@@ -120,16 +120,16 @@ Customize individual org-sketch-tool-command--???, as var, not as func
   list of selectable tools?
 - Xournal is at
   "~/Escriptori/esquellington/ext/bin/xournalpp-1.0.19-x86_64.AppImage"
-*** TODO Publish?
-- MELPA howto?
-- Github + Twitter
-*** TODO Error reporting when tools fail
-**** TODO Convert tool not available in specified path
+*** DONE Error reporting when tools fail
+**** DONE Convert tool not available in specified path
 - Path may be global, just check it's there and fail if not
-**** TODO Selected TOOL not available in specified path
+**** DONE Selected TOOL not available in specified path?
 - Path may be global, just check it's there and fail if not
 - Re-check if tool available using executable-find in
   org-sketch-insert, and fail if not there
+*** TODO Publish?
+- MELPA howto?
+- Github + Twitter
 ** TODO Advanced (org-sketch-mode?)
 *** TODO org-sketch-insert variants
 - Insert with explicit name, default sizes (standard)

@@ -352,6 +352,10 @@
   "Insert sketch SKNAME at point, with optional WIDTH/HEIGHT in pixels."
   (interactive "sSketch Name:") ;"sXXXX" prompts user for string param SKNAME
 
+  (unless (executable-find org-sketch-command-convert)
+    (error "Could not run ImageMagick convert as '%s', please install and/or customize org-sketch-command-convert"
+           org-sketch-command-convert))
+
   ;; Default params if empty/nil
   (when (string-empty-p skname) (setq skname "UNNAMED_SKETCH")) ;TODO find unique name
   (when (eq width nil) (setq width (org-sketch-output-width)))
@@ -360,6 +364,7 @@
   ;; Select tool
   ;; TODO Try to do this only once on startup or similar, and maybe move into separate func?
   (cond ((eq org-sketch-tool 'gimp)
+         (unless (executable-find org-sketch-command-GIMP) (error "Could not run GIMP as '%s'") org-sketch-command-GIMP)
          (setq org-sketch-tool-ext org-sketch-tool-extension--GIMP)
          (fset 'org-sketch-tool-template-file 'org-sketch-tool-template-file--GIMP)
          (fset 'org-sketch-tool-edit 'org-sketch-tool-edit--GIMP)
@@ -367,6 +372,7 @@
          ;;(message "GIMP")
          )
         ((eq org-sketch-tool 'gnome-paint)
+         (unless (executable-find org-sketch-command-GP) (error "Could not run gnome-paint as '%s'" org-sketch-command-GP))
          (setq org-sketch-tool-ext org-sketch-tool-extension--GP)
          (fset 'org-sketch-tool-template-file 'org-sketch-tool-template-file--GP)
          (fset 'org-sketch-tool-edit 'org-sketch-tool-edit--GP)
@@ -374,6 +380,7 @@
          ;;(message "GNOME-PAINT")
          )
         ((eq org-sketch-tool 'inkscape)
+         (unless (executable-find org-sketch-command-INK) (error "Could not run Inkscape as '%s'" org-sketch-command-INK))
          (setq org-sketch-tool-ext org-sketch-tool-extension--INK)
          (fset 'org-sketch-tool-template-file 'org-sketch-tool-template-file--INK)
          (fset 'org-sketch-tool-edit 'org-sketch-tool-edit--INK)
@@ -381,6 +388,7 @@
          ;;(message "INKSCAPE")
          )
         ((eq org-sketch-tool 'mspaint)
+         (unless (executable-find org-sketch-command-MSP) (error "Could not run MS-Paint as '%s'" org-sketch-command-MSP))
          (setq org-sketch-tool-ext org-sketch-tool-extension--MSP)
          (fset 'org-sketch-tool-template-file 'org-sketch-tool-template-file--MSP)
          (fset 'org-sketch-tool-edit 'org-sketch-tool-edit--MSP)
@@ -388,6 +396,7 @@
          ;;(message "MSPAINT")
          )
         ((eq org-sketch-tool 'xournalpp)
+         (unless (executable-find org-sketch-command-XPP) (error "Could not run Xournal++ as '%s'" org-sketch-command-XPP))
          (setq org-sketch-tool-ext org-sketch-tool-extension--XPP)
          (fset 'org-sketch-tool-template-file 'org-sketch-tool-template-file--XPP)
          (fset 'org-sketch-tool-edit 'org-sketch-tool-edit--XPP)
@@ -395,6 +404,7 @@
          ;;(message "XOURNAL++")
          )
         (t ;;default covers nil (best available) case too, by now
+         (unless (executable-find org-sketch-command-GP) (error "Could not run gnome-paint as '%s'" org-sketch-command-GP))
          (setq org-sketch-tool-ext org-sketch-tool-extension--GP)
          (fset 'org-sketch-tool-template-file 'org-sketch-tool-template-file--GP)
          (fset 'org-sketch-tool-edit 'org-sketch-tool-edit--GP)
