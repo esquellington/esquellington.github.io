@@ -107,6 +107,19 @@
   replaces / with \
 *** DONE Share (Angel?)
 - Angel betatest would be cool
+*** DONE Customize tool paths
+Customize individual org-sketch-tool-command--???, as var, not as func
+*** DONE Detect available TOOLs and choose "best", in order
+- not sure about this... adding code to detect existing exes is
+  cumbersome, just let the user choose/customize it
+- Best is the fastest to load, I guess, but allow custom ordering
+- Can use (executable-find) to determine if a given tool is available,
+  but this would require it to be in the path
+- BUT this is cool, if we customize the path/commandline for each
+  tool, we could just "executable-find" them and if available, add to
+  list of selectable tools?
+- Xournal is at
+  "~/Escriptori/esquellington/ext/bin/xournalpp-1.0.19-x86_64.AppImage"
 *** TODO Publish?
 - MELPA howto?
 - Github + Twitter
@@ -115,10 +128,9 @@
 - Path may be global, just check it's there and fail if not
 **** TODO Selected TOOL not available in specified path
 - Path may be global, just check it's there and fail if not
-
+- Re-check if tool available using executable-find in
+  org-sketch-insert, and fail if not there
 ** TODO Advanced (org-sketch-mode?)
-*** TODO Customize tool paths
-Customize individual org-sketch-tool-command--???, as var, not as func
 *** TODO org-sketch-insert variants
 - Insert with explicit name, default sizes (standard)
 - Insert with default name and sizes (FAST)
@@ -160,12 +172,13 @@ Customize individual org-sketch-tool-command--???, as var, not as func
 - Template background colors/transparency
 *** TODO Crop customization
 - Enable/disable output crop, maybe
-*** TODO Detect available TOOLs and choose "best", in order
-- not sure about this... adding code to detect existing exes is
-  cumbersome, just let the user choose/customize it
-- Best is the fastest to load, I guess, but allow custom ordering
-*** TODO TOOL Paint.NET
 *** TODO TOOL krita
+*** TODO TOOL Paint.NET
+- Seems popular
+*** TODO TOOL MyPaint http://mypaint.org/
+- Looks very cool actually, very wacom-oriented though
+- Uses PNG or similar, no custom
+*** TODO TOOL Kolourpaint
 *** TODO Allow customize no convert
 - So that it's not required, and we'll not crop/resize sketches and
   won't support some tools, but still allow quick .png edit with
@@ -204,10 +217,33 @@ Customize individual org-sketch-tool-command--???, as var, not as func
   added natively, and images/sound can be inserted on the spot from
   Emacs itself, without having to open external programs explicitly,
   adding links, etc...
-* org-krita https://github.com/lepisma/org-krita
+* Similar Emacs packages
+** org-krita https://github.com/lepisma/org-krita
 - seems Wip, but is very similar to what I wanted
 - plans to support other painting programs
 - uses custom org-mode links
 - Krita is quite heavyweight and seems pencil-oriented and complex,
   not sure how easy it is to move stuff around, etc, and the UI seems
   complex
+** org-screenshot https://github.com/dfeich/org-screenshot
+** org-notebook https://github.com/Rahi374/org-notebook
+- Basically THE SAME IDEA, not sure about implementation or
+  customizability though
+- Generates file name automatically, incrementally /img/imgN.png
+- Creates image and inserts link even if not saved in TOOL, so there's
+  no "cancel"
+- Supports kolourpaint, mypaint, krita, gimp
+- Tried changing mypaint to gimp but it doesn't work
+- Seems to pick 1st tool available automatically, using this
+  defcustom, where the "cond" just sets the 1st available by default,
+  but still allows overwriting it
+(defcustom org-notebook-drawing-program (cond
+                                         ((executable-find "kolourpaint") "kolourpaint")
+                                         ((executable-find "mypaint") "mypaint")
+                                         ((executable-find "krita") "krita")
+                                         ((executable-find "gimp") "gimp"))
+  "Drawing program to be used"
+  :type 'string
+  :group 'org-notebook)
+- No custom commandline per program or support for native to PNG
+  conversion though

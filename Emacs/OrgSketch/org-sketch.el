@@ -75,22 +75,9 @@
   :group 'org-sketch
   :type 'integer)
 
-;; TODO Some tools are OS-specific, try to add them conditionally
-;; depending on system-type, or even build the choice list differently
-;; per-OS and/or tool availability in the system
-(defcustom org-sketch-tool nil
-  "Default sketch tool."
-  :group 'org-sketch
-  :type '(choice (const :tag "Best Available" nil)
-                 (const :tag "gimp" gimp)
-                 (const :tag "gnome-paint" gnome-paint)
-                 (const :tag "inkscape" inkscape)
-                 (const :tag "mspaint" mspaint)
-                 (const :tag "xournal++" xournalpp)))
-
 ;; TOOL commands/paths
 (defcustom org-sketch-command-convert "convert"
-  "Default command for ImageMagick convert."
+  "ImageMagick convert command."
   :group 'org-sketch
   :type 'file)
 (defcustom org-sketch-command-GIMP "gimp"
@@ -113,6 +100,30 @@
   "Xournal++ command."
   :group 'org-sketch
   :type 'string)
+
+;; TOOL select
+;; We use `executable-find' function to search for potentially-customized
+;; tool paths/executables, and pick the first one that exists, unless
+;; the choice is customized.
+;; IMPORTANT: Any customization of org-sketch-command-TOOL seems to be
+;; applied BEFORE `org-sketch-tool' customization executes, so
+;; `executable-find' DOES correctly search for the customized
+;; org-sketch-command-TOOL path, not for the default one.
+(defcustom org-sketch-tool (cond ;; Options in preference order
+                            ((executable-find org-sketch-command-XPP) 'xournalpp)
+                            ((executable-find org-sketch-command-MSP) 'mspaint)
+                            ((executable-find org-sketch-command-GP) 'gnome-paint)
+                            ((executable-find org-sketch-command-GIMP) 'gimp)
+                            ((executable-find org-sketch-command-INK) 'inkscape)
+                            (t nil))
+  "Sketch tool."
+  :group 'org-sketch
+  ;; Choice in alphabetic order
+  :type '(choice (const :tag "gimp" gimp)
+                 (const :tag "gnome-paint" gnome-paint)
+                 (const :tag "inkscape" inkscape)
+                 (const :tag "mspaint" mspaint)
+                 (const :tag "xournal++" xournalpp)))
 
 ;;--------------------------------
 ;; Basic helpers
@@ -347,7 +358,7 @@
   (when (eq height nil) (setq height (org-sketch-output-height)))
 
   ;; Select tool
-  ;; TODO Try to do this only once on startup or similar
+  ;; TODO Try to do this only once on startup or similar, and maybe move into separate func?
   (cond ((eq org-sketch-tool 'gimp)
          (setq org-sketch-tool-ext org-sketch-tool-extension--GIMP)
          (fset 'org-sketch-tool-template-file 'org-sketch-tool-template-file--GIMP)
