@@ -51,6 +51,7 @@
 ;; Dependencies
 ;;--------------------------------
 (eval-when-compile (require 'subr-x)) ;for string-empty-p
+(require 'org) ;for org-display-inline-images
 
 ;;--------------------------------
 ;; Customization
@@ -345,21 +346,22 @@
   (shell-command (concat org-sketch-command-XPP " " input " -i " output org-sketch-OS-null-sink)))
 
 ;;--------------------------------
-;; Interactive functions
+;; Main sketch creation
 ;;--------------------------------
-;;;###autoload
-(defun org-sketch-insert ( skname &optional width height )
-  "Insert sketch SKNAME at point, with optional WIDTH/HEIGHT in pixels."
-  (interactive "sSketch Name:") ;"sXXXX" prompts user for string param SKNAME
-
-  (unless (executable-find org-sketch-command-convert)
-    (error "Could not run ImageMagick convert as '%s', please install and/or customize org-sketch-command-convert"
-           org-sketch-command-convert))
+(defun org-sketch-create ( skname &optional width height )
+  "Create sketch SKNAME with given WIDTH/HEIGHT in pixels."
 
   ;; Default params if empty/nil
   (when (string-empty-p skname) (setq skname "UNNAMED_SKETCH")) ;TODO find unique name
   (when (eq width nil) (setq width (org-sketch-output-width)))
   (when (eq height nil) (setq height (org-sketch-output-height)))
+
+  (unless (executable-find org-sketch-command-convert)
+    (error "Could not run ImageMagick convert as '%s', please install and/or customize org-sketch-command-convert"
+           org-sketch-command-convert))
+
+  ;; Result, either nil or a valid expanded filename
+  (setq result_file nil)
 
   ;; Select tool
   ;; TODO Try to do this only once on startup or similar, and maybe move into separate func?
@@ -448,23 +450,51 @@
                                     " -resize " (format "%dx%d" width height)
                                     " " skname_png   ;input
                                     " " skname_png)) ;output
-
-        ;; Insert org link
-        ;; NOTE: We insert a plain bracket link [[file:skname_png]]
-        ;; without description, insteaad of a described link
-        ;; [[file:skname_png][description]] so that it can be
-        ;; displayed with default org-toggle-inline-images params (C-c
-        ;; C-v C-x). To display image links with description a non-nil
-        ;; prefix argument must be passed (C-u C-c C-v C-x)
-        (org-insert-link nil (concat "file:" skname_png) nil)
-        )
+        (setq result_file skname_png))
 
       ;; Delete temp
       (delete-file skname_tmp_ext)
       (delete-file skname_timestamp)
       )
     )
+  result_file
   )
+
+;;--------------------------------
+;; Interactive functions
+;;--------------------------------
+;;;###autoload
+(defun org-sketch-insert ( skname &optional width height )
+  "Insert sketch SKNAME with WIDTH/HEIGHT resolution and display it immediately."
+  (interactive "sSketch Name:") ;"sXXXX" prompts user for string param SKNAME
+  (let (sketch_filename)
+    (setq sketch_filename (org-sketch-create skname width height))
+    (when (not (eq sketch_filename nil))
+      ;; Insert org link
+      ;; NOTE: We insert a plain bracket link [[file:skname_png]]
+      ;; without description, insteaad of a described link
+      ;; [[file:skname_png][description]] so that it can be
+      ;; displayed with default org-toggle-inline-images params (C-c
+      ;; C-v C-x). To display image links with description a non-nil
+      ;; prefix argument must be passed (C-u C-c C-v C-x)
+      (org-insert-link nil (concat "file:" sketch_filename) nil))))
+
+;;;###autoload
+(defun org-sketch-insert-and-display ( skname &optional width height )
+  "Insert sketch SKNAME with WIDTH/HEIGHT resolution and display it immediately."
+  (interactive "sSketch Name:") ;"sXXXX" prompts user for string param SKNAME
+  (let (sketch_filename)
+    (setq sketch_filename (org-sketch-create skname width height))
+    (when (not (eq sketch_filename nil))
+      ;; Insert org link
+      ;; NOTE: We insert a plain bracket link [[file:skname_png]]
+      ;; without description, insteaad of a described link
+      ;; [[file:skname_png][description]] so that it can be
+      ;; displayed with default org-toggle-inline-images params (C-c
+      ;; C-v C-x). To display image links with description a non-nil
+      ;; prefix argument must be passed (C-u C-c C-v C-x)
+      (org-insert-link nil (concat "file:" sketch_filename) nil)
+      (org-display-inline-images)))) ;;TODO display only this image, not all of them
 
 ;;--------------------------------
 ;; Package setup
