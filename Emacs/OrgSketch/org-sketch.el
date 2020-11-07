@@ -142,9 +142,9 @@
 ;;--------------------------------
 (defvar org-sketch-OS-null-sink
   (cond ((eq system-type 'windows-nt)
-         " > NUL ")
+         " > NUL 2> osk_errors.txt")
         (t ;;else 'gnu/linux, 'darwin, etc...
-         " > /dev/null ")
+         " > /dev/null 2> osk_errors.txt")
         (t ""))
   "OS-specific commandline args to redirect output to null sink.")
 

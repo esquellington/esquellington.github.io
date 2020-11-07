@@ -128,7 +128,6 @@ Customize individual org-sketch-tool-command--???, as var, not as func
 *** TODO Publish?
 - Github + Twitter
 - MELPA howto?
-
 ** TODO Advanced (org-sketch-mode?)
 *** TODO org-sketch-insert variants
 - Insert with explicit name, default sizes (standard)
