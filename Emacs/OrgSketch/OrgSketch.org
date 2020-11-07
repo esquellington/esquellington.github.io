@@ -26,49 +26,7 @@
   prompts to query name or any params
 - default show inline images should work, nothing else required
 - NO overlays, just simple image link
-*** Tests
-
-[[file:sketches/dir.png]]
-
-*** DONE Using gnome-paing
-*** DONE Using Xournal++
-**** DONE Create .xopp template
-**** DONE Convert .xopp to .png
-** Usage examples
-*** Game Design
-**** Character
-- [[file:prota.png]]
-- the main character bla bla bla
-**** Actions
-- [[file:actions_prota.png]]
-- character can perform several actions bla bla bla
-***** Walk [[file:walk.png]]
-***** Jump [[file:salta.png]]
-**** Environment
-- explore different environments with their own createures
-***** Forest [[file:bosc.png]]
-****** Spider [[file:spider.png]]
-****** Snail [[file:cargol.png]]
-***** Cave [[file:cova.png]]
-****** Bat [[file:bat.png]]
-***** Beach [[file:platja.png]]
-****** Crag [[file:crab.png]]
-*** Tech Doc
-**** Collision Detection
-[[file:edgeedge.png]]
-**** Collision Response
-[[file:response.png]]
-*** Misc
-[[file:fdjsfd.png]]
-
-[[file:fdfdfd.png]]
-
-[[file:dffdfd.png]]
-
-** DONE Install Xxournal++
-- How to install so that it's globally accessible?
-- Set as default (now it's gnome-paint)
-** TODO Make package
+** DONE Make package
 *** DONE Standard install/structure
 - (provide 'packagename)
 - ;;;###autoload
@@ -84,6 +42,10 @@
 - default width/height
 - TOOL paths
   - Maybe alist with tool-name and tool-exe or similar
+*** DONE gnome-paint TOOL
+*** DONE Xournal++ TOOL
+**** DONE Create .xopp template
+**** DONE Convert .xopp to .png
 *** DONE Add GIMP TOOL
 *** DONE Add Inkscape TOOL
 *** DONE Add Windows support
@@ -125,27 +87,36 @@ Customize individual org-sketch-tool-command--???, as var, not as func
 - Path may be global, just check it's there and fail if not
 - Re-check if tool available using executable-find in
   org-sketch-insert, and fail if not there
-*** TODO Publish?
-- Github + Twitter
-- MELPA howto?
+** TODO Publish?
+- Github
+- MELPA?
 ** TODO Advanced (org-sketch-mode?)
+*** DONE org-sketch-insert-and-display
+- Different func to add org-display-inline-images instantly
 *** TODO org-sketch-insert variants
+- Insert both exported and TOOL file and do not delete it
+  - FOR NOW just leave it there, besides exported one, not linked in
+    the .org, but not _TMP anymore, just reopen if exists instead of
+    copying template on it
 - Insert with explicit name, default sizes (standard)
 - Insert with default name and sizes (FAST)
 - Insert with explicit name and sizes (full control)
 - All can be internally done in a single func with params
-- Insert both exported and TOOL file and do not delete it
-  - FOR NOW just leave it there, besides exported one, not linked in
-    the .org, but not _TMP anymore
-**** DONE org-sketch-insert-and-display
-- Different func to add org-display-inline-images instantly
-[[file:sketches/inksksks.png]]
-
-
-[[file:sketches/goooood.png]]
+- Edit with specific (available) program, instead of customized one
 *** TODO org-sketch-edit
-- Internal method to editing osk link under point, on native file (if
+- Internal method to edit osk link under point, on native file (if
   available), or exported one if not
+- How do we discriminate regular image links from osk links?
+- How do we handle native files in different formats? MIME-like assoc
+  to available drawing tools?
+- Maybe we don't need to, once inserted, a link is a link, that's it,
+  use standard func on it, nothing fancy. If you want to re-edit
+  natively and re-export, do it manually
+- Maybe just offer a command that given a link, tries to match the
+  native/exported files, opens native using org-file-apps, and on save
+  reexports, but keep it minimal.
+**** TODO org-file-apps associates files with programs
+- External applications for opening ‘file:path’ items in a document
 *** TODO Minor mode org-sketch-mode
 - minor mode, inspired in org-krita
 - More features than standalone function, can have persistent state,
@@ -158,7 +129,7 @@ Customize individual org-sketch-tool-command--???, as var, not as func
 **** TODO overlays
 - toggle each indidivually, etc... display just added by default (customizable)
 **** TODO org export support
-*** TODO sketch management (delete, purge)
+*** TODO Manage sketches/DB (delete, purge)
 - Delete sketch: when link is deleted, image file is deleted too
 - Or maybe org-sketch-purge that does thisa utomatically for the
   whole .org file... BUT beware because same /sketches dir may
@@ -184,8 +155,7 @@ Customize individual org-sketch-tool-command--???, as var, not as func
 - Looks very cool actually, very wacom-oriented though
 - Uses PNG or similar, no custom
 *** TODO TOOL Kolourpaint
-* Sketching tools
-** Xournalapp https://github.com/xournalpp/xournalpp
+* Xournalapp https://github.com/xournalpp/xournalpp
 - Very cool note taking and sketching app, and boots fast (appimage)
 - Allows layers, moving stuff and text, best I've seen so far
 - Touchscreen painting works but requires reassigning inputs in
@@ -201,8 +171,8 @@ Customize individual org-sketch-tool-command--???, as var, not as func
   - convert input.png -trim output.png
   - must change background to Plain first, no notebook horizontal
     lines as default
-- Scale/Rotate handles are too small for finger use, could rebuild
-  from source and make them larger I guess
+** TODO Scale/Rotate handles are too small for finger use
+- Could rebuild from source and make them larger I guess
 * Other resource types for org "note-taking"
 - The idea of "insert something here that needs to run an external
   program modally" could be generalized to other resources
