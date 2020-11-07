@@ -94,14 +94,15 @@ Customize individual org-sketch-tool-command--???, as var, not as func
 *** DONE org-sketch-insert-and-display
 - Different func to add org-display-inline-images instantly
 *** TODO org-sketch-insert variants
-- Insert both exported and TOOL file and do not delete it
-  - FOR NOW just leave it there, besides exported one, not linked in
-    the .org, but not _TMP anymore, just reopen if exists instead of
-    copying template on it
-- Insert with explicit name, default sizes (standard)
-- Insert with default name and sizes (FAST)
-- Insert with explicit name and sizes (full control)
 - All can be internally done in a single func with params
+**** DONE org-sketch-insert-with-sizes
+- Insert with explicit name and sizes (full control)
+**** TODO org-sketch-insert-with-source
+- Insert both exported and TOOL file and do not delete it
+- FOR NOW just leave it there, besides exported one, not linked in
+  the .org, but not _TMP anymore, just reopen if exists instead of
+  copying template on it
+**** TODO org-sketch-insert-with-tool
 - Edit with specific (available) program, instead of customized one
 *** TODO org-sketch-edit
 - Internal method to edit osk link under point, on native file (if

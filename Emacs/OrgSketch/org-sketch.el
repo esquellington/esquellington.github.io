@@ -465,38 +465,41 @@
 ;;--------------------------------
 ;; Interactive functions
 ;;--------------------------------
+;;
+;; NOTE: We insert a plain bracket org links without description such
+;; as [[file:skname_png]], insteaad of links with description as
+;; [[file:skname_png][description]] so that it can be displayed with
+;; default org-toggle-inline-images params (C-c C-v C-x). To display
+;; image links with description a non-nil prefix argument needs to be
+;; passed (C-u C-c C-v C-x)
+;;--------------------------------
 ;;;###autoload
-(defun org-sketch-insert ( skname &optional width height )
+(defun org-sketch-insert ( skname )
   "Insert sketch SKNAME with WIDTH/HEIGHT resolution and display it immediately."
-  (interactive "sSketch Name:") ;"sXXXX" prompts user for string param SKNAME
+  (interactive "sSketch Name:")
   (let (sketch_filename)
-    (setq sketch_filename (org-sketch-create skname width height))
+    (setq sketch_filename (org-sketch-create skname nil nil))
     (when (not (eq sketch_filename nil))
-      ;; Insert org link
-      ;; NOTE: We insert a plain bracket link [[file:skname_png]]
-      ;; without description, insteaad of a described link
-      ;; [[file:skname_png][description]] so that it can be
-      ;; displayed with default org-toggle-inline-images params (C-c
-      ;; C-v C-x). To display image links with description a non-nil
-      ;; prefix argument must be passed (C-u C-c C-v C-x)
       (org-insert-link nil (concat "file:" sketch_filename) nil))))
 
 ;;;###autoload
-(defun org-sketch-insert-and-display ( skname &optional width height )
+(defun org-sketch-insert-and-display ( skname )
   "Insert sketch SKNAME with WIDTH/HEIGHT resolution and display it immediately."
-  (interactive "sSketch Name:") ;"sXXXX" prompts user for string param SKNAME
+  (interactive "sSketch Name:")
   (let (sketch_filename)
     (setq sketch_filename (org-sketch-create skname width height))
     (when (not (eq sketch_filename nil))
-      ;; Insert org link
-      ;; NOTE: We insert a plain bracket link [[file:skname_png]]
-      ;; without description, insteaad of a described link
-      ;; [[file:skname_png][description]] so that it can be
-      ;; displayed with default org-toggle-inline-images params (C-c
-      ;; C-v C-x). To display image links with description a non-nil
-      ;; prefix argument must be passed (C-u C-c C-v C-x)
       (org-insert-link nil (concat "file:" sketch_filename) nil)
       (org-display-inline-images)))) ;;TODO display only this image, not all of them
+
+;;;###autoload
+(defun org-sketch-insert-with-sizes ( skname width height )
+  "Insert sketch SKNAME with WIDTH/HEIGHT resolution and display it immediately."
+  (interactive "sSketch Name: \nnWidth: \nnHeight: ")
+  (let (sketch_filename)
+    (setq sketch_filename (org-sketch-create skname width height))
+    (when (not (eq sketch_filename nil))
+      (org-insert-link nil (concat "file:" sketch_filename) nil))))
 
 ;;--------------------------------
 ;; Package setup
