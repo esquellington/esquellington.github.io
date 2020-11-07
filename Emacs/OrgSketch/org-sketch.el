@@ -150,7 +150,7 @@
 
 (defun org-sketch-OS-touch-file ( filename )
   "OS-specific touch FILENAME to create it or update its timestamp."
-  (shell-command (concat "touch " filename " " org-sketch-OS-null-sink)))
+  (call-process "touch" nil nil nil filename))
 
 (defun org-sketch-OS-dir ( path )
   "OS-specific file-name-as-directory to convert PATH with \ to / if necessary."
@@ -165,6 +165,7 @@
 (defun org-sketch-convert ( args )
   "Run convert on ARGS argument string."
   (shell-command (concat org-sketch-command-convert " " args org-sketch-OS-null-sink)))
+;; (call-process org-sketch-command-convert nil nil nil args)) TODO this does not work, maybe because args is complex?
 
 ;;--------------------------------
 ;; TOOL: gimp
@@ -183,7 +184,8 @@
     template_file))
 (defun org-sketch-tool-edit--GIMP ( file )
   "Edit FILE with GIMP."
-  (shell-command (concat org-sketch-command-GIMP " --no-splash " file org-sketch-OS-null-sink)))
+  (call-process org-sketch-command-GIMP nil nil nil "--no-splash" file))
+
 (defun org-sketch-tool-export-png--GIMP ( input output )
   "Export/Convert native INPUT to OUTPUT .PNG image."
   ;; ImageMagick supports converting to/from .XCF
@@ -203,7 +205,7 @@
     template_file))
 (defun org-sketch-tool-edit--GP ( file )
   "Edit FILE with gnome-paint."
-  (shell-command (concat org-sketch-command-GP " " file org-sketch-OS-null-sink)))
+  (call-process org-sketch-command-GP nil nil nil file))
 (defun org-sketch-tool-export-png--GP ( input output )
   "Export/Convert native INPUT to OUTPUT .PNG image."
   (org-sketch-convert (concat input " " output)))
@@ -282,11 +284,11 @@
     template_file))
 (defun org-sketch-tool-edit--INK ( file )
   "Edit FILE with Inkscape."
-  (shell-command (concat org-sketch-command-INK " " file org-sketch-OS-null-sink)))
+  (call-process org-sketch-command-INK nil nil nil file))
 (defun org-sketch-tool-export-png--INK ( input output )
   "Export/Convert native INPUT to OUTPUT .PNG image."
   ;; inkscape -e exports to .PNG
-  (shell-command (concat org-sketch-command-INK " " input " -e " output org-sketch-OS-null-sink)))
+  (call-process org-sketch-command-INK nil nil nil input "-e" output))
 
 ;;--------------------------------
 ;; TOOL: mspaint
@@ -303,6 +305,7 @@
 (defun org-sketch-tool-edit--MSP ( file )
   "Edit FILE with MS Paint."
   (shell-command (concat org-sketch-command-MSP " " file org-sketch-OS-null-sink)))
+  ;;(call-process org-sketch-command-MSP nil nil nil file)) ;;TODO test in Win, not sure call-process will work there
 (defun org-sketch-tool-export-png--MSP ( input output )
   "Export/Convert native INPUT to OUTPUT .PNG image."
   (org-sketch-convert (concat input " " output)))
@@ -339,11 +342,11 @@
     template_file))
 (defun org-sketch-tool-edit--XPP ( file )
   "Edit FILE with Xournal++."
-  (shell-command (concat org-sketch-command-XPP " " file org-sketch-OS-null-sink)))
+  (call-process org-sketch-command-XPP nil nil nil file))
 (defun org-sketch-tool-export-png--XPP ( input output )
   "Export/Convert native INPUT to OUTPUT .PNG image."
   ;; xournalpp -i exports to .PNG
-  (shell-command (concat org-sketch-command-XPP " " input " -i " output org-sketch-OS-null-sink)))
+  (call-process org-sketch-command-XPP nil nil nil input "-i" output))
 
 ;;--------------------------------
 ;; Main sketch creation
@@ -352,7 +355,7 @@
   "Create sketch SKNAME with given WIDTH/HEIGHT in pixels."
 
   ;; Default params if empty/nil
-  (when (string-empty-p skname) (setq skname "UNNAMED_SKETCH")) ;TODO find unique name
+  (when (string-empty-p skname) (setq skname "UNNAMED_SKETCH")) ;TODO generate unique name
   (when (eq width nil) (setq width (org-sketch-output-width)))
   (when (eq height nil) (setq height (org-sketch-output-height)))
 
@@ -414,13 +417,13 @@
          ;;(message "DEFAULT"))
          ))
 
+  ;; Create output dir if required
+  (when (not (file-directory-p org-sketch-output-dir))
+    (make-directory org-sketch-output-dir))
+
+  ;; Try to create sketch
   (let (skname_tmp_ext skname_png skname_timestamp)
 
-    ;; Create output dir if required
-    (when (not (file-directory-p org-sketch-output-dir))
-      (make-directory org-sketch-output-dir))
-
-    ;; org-sketch-OS-dir is OS-independent and adds either / or \ as required
     (setq skname_png (concat (org-sketch-OS-dir org-sketch-output-dir) skname ".png"))
 
     ;; Avoid overwriting silently
@@ -454,11 +457,10 @@
 
       ;; Delete temp
       (delete-file skname_tmp_ext)
-      (delete-file skname_timestamp)
-      )
-    )
-  result_file
-  )
+      (delete-file skname_timestamp)))
+
+  ;; return result
+  result_file)
 
 ;;--------------------------------
 ;; Interactive functions

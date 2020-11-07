@@ -128,6 +128,7 @@ Customize individual org-sketch-tool-command--???, as var, not as func
 *** TODO Publish?
 - Github + Twitter
 - MELPA howto?
+
 ** TODO Advanced (org-sketch-mode?)
 *** TODO org-sketch-insert variants
 - Insert with explicit name, default sizes (standard)
@@ -137,9 +138,12 @@ Customize individual org-sketch-tool-command--???, as var, not as func
 - Insert both exported and TOOL file and do not delete it
   - FOR NOW just leave it there, besides exported one, not linked in
     the .org, but not _TMP anymore
-**** TODO org-sketch-insert-and-display
+**** DONE org-sketch-insert-and-display
 - Different func to add org-display-inline-images instantly
+[[file:sketches/inksksks.png]]
 
+
+[[file:sketches/goooood.png]]
 *** TODO org-sketch-edit
 - Internal method to editing osk link under point, on native file (if
   available), or exported one if not
