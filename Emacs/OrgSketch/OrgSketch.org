@@ -215,3 +215,4 @@ Customize individual org-sketch-tool-command--???, as var, not as func
 - No custom commandline per program or support for native to PNG
   conversion though
 ** org-screenshot https://github.com/dfeich/org-screenshot
+[[file:sketches/jjdd.png]]

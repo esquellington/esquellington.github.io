@@ -66,12 +66,12 @@
   :group 'org-sketch
   :type 'directory)
 
-(defcustom org-sketch-default-output-width 400
+(defcustom org-sketch-default-output-width 1000
   "Default sketch width."
   :group 'org-sketch
   :type 'integer)
 
-(defcustom org-sketch-default-output-height 300
+(defcustom org-sketch-default-output-height 600
   "Default sketch height."
   :group 'org-sketch
   :type 'integer)
@@ -179,7 +179,7 @@
     (setq template_file (concat (org-sketch-OS-dir org-sketch-output-dir) "org-sketch-template--GIMP.xcf"))
     (when (not (file-exists-p template_file))
       ;; Create blank .PNG and convert to .XCF (ImageMagick cannot create .XCF directly)
-      (org-sketch-convert (concat "-size 900x450 xc:white " template_file_png))
+      (org-sketch-convert (concat "-size 1600x1000 xc:white " template_file_png))
       (org-sketch-convert (concat template_file_png " " template_file)))
     template_file))
 (defun org-sketch-tool-edit--GIMP ( file )
@@ -201,7 +201,7 @@
   (let (template_file)
     (setq template_file (concat (org-sketch-OS-dir org-sketch-output-dir) "org-sketch-template--GP.png"))
     (when (not (file-exists-p template_file))
-      (org-sketch-convert (concat "-size 900x450 xc:white " template_file)))
+      (org-sketch-convert (concat "-size 1600x1000 xc:white " template_file)))
     template_file))
 (defun org-sketch-tool-edit--GP ( file )
   "Edit FILE with gnome-paint."
@@ -300,7 +300,7 @@
   (let (template_file)
     (setq template_file (concat (org-sketch-OS-dir org-sketch-output-dir) "org-sketch-template--MSP.png"))
     (when (not (file-exists-p template_file))
-      (org-sketch-convert (concat "-size 900x450 xc:white " template_file)))
+      (org-sketch-convert (concat "-size 1600x1000 xc:white " template_file)))
     template_file))
 (defun org-sketch-tool-edit--MSP ( file )
   "Edit FILE with MS Paint."
@@ -330,7 +330,7 @@
                              "<xournal creator=\"Xournal++ 1.0.19\" fileversion=\"4\">"
                              "<title>Xournal++ document - see https://github.com/xournalpp/xournalpp</title>"
                              "<preview/>"
-                             "<page width=\"900.0\" height=\"450.0\">" ;;16/9
+                             "<page width=\"1600.0\" height=\"1000.0\">" ;;16/9
                              "<background type=\"solid\" color=\"#ffffffff\" style=\"plain\"/>"
                              "<layer/>"
                              "</page>"
@@ -476,7 +476,7 @@
 ;;;###autoload
 (defun org-sketch-insert ( skname )
   "Insert sketch SKNAME with WIDTH/HEIGHT resolution and display it immediately."
-  (interactive "sSketch Name:")
+  (interactive "sSketch Name: ")
   (let (sketch_filename)
     (setq sketch_filename (org-sketch-create skname nil nil))
     (when (not (eq sketch_filename nil))
@@ -485,12 +485,13 @@
 ;;;###autoload
 (defun org-sketch-insert-and-display ( skname )
   "Insert sketch SKNAME with WIDTH/HEIGHT resolution and display it immediately."
-  (interactive "sSketch Name:")
+  (interactive "sSketch Name: ")
   (let (sketch_filename)
-    (setq sketch_filename (org-sketch-create skname width height))
+    (setq sketch_filename (org-sketch-create skname nil nil))
     (when (not (eq sketch_filename nil))
       (org-insert-link nil (concat "file:" sketch_filename) nil)
-      (org-display-inline-images)))) ;;TODO display only this image, not all of them
+      (insert-image (create-image (expand-file-name sketch_filename)))))) ;;Display new image transiently
+      ;;(org-display-inline-images)))) ;;NOTE this would display ALL images, not just the new one
 
 ;;;###autoload
 (defun org-sketch-insert-with-sizes ( skname width height )
