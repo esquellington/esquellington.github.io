@@ -3,6 +3,9 @@
 Emacs hacking and tests
 
 * [[file:~/.emacs.d/init.el][init.el]]
+* Remapping CAPS_LOCK to CTRL
+- setxkbmap -layout es,us -option ctrl:nocaps
+- Transient, add it to .bashrc to do it on startup
 * org-mode stuff: file:advanced_org_features.org
 * Literary programming exercise: file:test-avx.org
 * Preview LaTeX formulas code comments
