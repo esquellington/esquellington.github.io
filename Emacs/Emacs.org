@@ -4,10 +4,44 @@ Emacs hacking and tests
 
 * [[file:~/.emacs.d/init.el][init.el]]
 * Remapping CAPS_LOCK to CTRL
-- setxkbmap -layout es,us -option ctrl:nocaps
-- Transient, add it to .bashrc to do it on startup
+- setxkbmap -option ctrl:nocaps (OR BETTER -option caps:ctrl_modifier)
+- setxkbmap -option (empty options list, to remove ALL previously set options)
+- Transient change, add it to file:~/.bashrc to do it on startup
+- List of relevant option values (https://gist.github.com/jatcwang/ae3b7019f219b8cdc6798329108c9aee)
+  - CTRL
+    ctrl:nocaps          Caps Lock as Ctrl
+    ctrl:lctrl_meta      Left Ctrl as Meta
+    ctrl:swapcaps        Swap Ctrl and Caps Lock
+    ctrl:ac_ctrl         At left of 'A'
+    ctrl:aa_ctrl         At bottom left
+    ctrl:rctrl_ralt      Right Ctrl as Right Alt
+    ctrl:menu_rctrl      Menu as Right Ctrl
+    ctrl:swap_lalt_lctl  Swap Left Alt key with Left Ctrl key
+    ctrl:swap_lwin_lctl  Swap Left Win key with Left Ctrl key
+    ctrl:swap_rwin_rctl  Swap Right Win key with Right Ctrl key
+    ctrl:swap_lalt_lctl_lwin Left Alt as Ctrl, Left Ctrl as Win, Left Win as Alt
+  - CAPS_LOCK
+    caps:internal        Caps Lock uses internal capitalization; Shift "pauses" Caps Lock
+    caps:internal_nocancel Caps Lock uses internal capitalization; Shift doesn't affect Caps Lock
+    caps:shift           Caps Lock acts as Shift with locking; Shift "pauses" Caps Lock
+    caps:shift_nocancel  Caps Lock acts as Shift with locking; Shift doesn't affect Caps Lock
+    caps:capslock        Caps Lock toggles normal capitalization of alphabetic characters
+    caps:shiftlock       Caps Lock toggles ShiftLock (affects all keys)
+    caps:swapescape      Swap ESC and Caps Lock
+    caps:escape          Make Caps Lock an additional ESC
+    caps:backspace       Make Caps Lock an additional Backspace
+    caps:super           Make Caps Lock an additional Super
+    caps:hyper           Make Caps Lock an additional Hyper
+    caps:menu            Make Caps Lock an additional Menu key
+    caps:numlock         Make Caps Lock an additional Num Lock
+    caps:ctrl_modifier   Caps Lock is also a Ctrl
+    caps:none            Caps Lock is disabled
+  --> Super and Hyper are the "windows key" sadly, so not useful
+- Other remaps are possible, what could we use CAPS_LOCK for in Emacs?
+  - I don't think I need CTRL there
+  - Maybe ESC, but I rarely use it...
 * org-mode stuff: file:advanced_org_features.org
-* Literary programming exercise: file:test-avx.org
+* Literary programming howto/exercise: file:test-avx.org
 * Preview LaTeX formulas code comments
 ** DONE Requirements for EASY LaTeX math preview in C/C++ comments
 *** Should work like texfrag-region/document, but for whole comments/functions/files
@@ -128,9 +162,10 @@ Emacs hacking and tests
 - Builtin... ugly but works
 ** realgud
 - Seems to have more features than GUD
-** dap-mode
+** dap-mode https://www.youtube.com/watch?v=0bilcQVSlbM
 - New thing using DAP extensions for VSCode... seems hard to install,
   I'll pass
+- WATCH the video, maybe it's simpler than I thought
 * Pico8-mode
 - Consider custom mode for easy code section narrowing of .p8 files,
   syntax highlight, re-launching game, etc...
@@ -169,3 +204,6 @@ Emacs hacking and tests
   org-link-parameters so I guess it can be overwritten to do the same
   as inline image viz?
 - See https://orgmode.org/manual/Adding-Hyperlink-Types.html#Adding-Hyperlink-Types
+* ORG-mode presentations https://www.youtube.com/watch?v=vz9aLmxYJB0
+https://www.youtube.com/watch?v=E-NAM9U5JYE
+* LSP mode https://www.youtube.com/watch?v=E-NAM9U5JYE
