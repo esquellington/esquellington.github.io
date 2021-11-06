@@ -157,19 +157,21 @@ Emacs hacking and tests
 * Magit mode HowTo
 - User manual: https://magit.vc/manual/magit/
 - Visual intro: https://magit.vc/screenshots/
-- magit-status (C-x g)
-  - On status buffer
-    - tab toggles per-file diff
-    - 's' on "unstaged" changes toggles them to "staged"
-    - 'c' and then 'c' opens commit buffer for "staged" changes, input commit
-      description and then press C-c to perform commit. Files become
-      "unmerged"
-    - 'P' and then 'p' pushes commits to "master" (remote) branch after
-      asking for username/password.
-    - 'R' to Rename a file
-- M-x magit-log --> commit history with branches
-  - press b for all branches
-- M-x magit-pull --> get remote commits
+- magit-status (C-x g), and then:
+  - tab toggles per-file diff
+  - 's' on "unstaged" changes toggles them to "staged"
+  - 'c' and then 'c' opens commit buffer for "staged" changes, input commit
+    description and then press C-c to perform commit. Files become
+    "unmerged"
+  - 'P' and then 'p' pushes commits to "master" (remote) branch after
+    asking for username/password.
+  - 'F' for magit-pull and then 'p' for pushremote (== fetch + merge, simpler)
+  - 'f' for magit-fetch and then 'a' for pushremote (gets all branches, but
+    does not merge)
+  - 'm' for magit-merge, anywhere or on top of specific commit (if done after
+    fetch, you can see unpulled remote changes)
+  - 'l' for magit-log, and then 'b' to see see commit history for all branches
+  - 'R' to Rename a file
 * Debugging in Emacs
 ** GUD
 - Builtin... ugly but works
