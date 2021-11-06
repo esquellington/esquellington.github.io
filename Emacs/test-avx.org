@@ -402,7 +402,7 @@ o-O3 causes auto-vectorization and float1 is equivalent to simd8
   faster than SIMD8.
 - Looking at the assembly, FLOAT1 seems to unroll the loop heavily (8
   iter?), while SIMD8 is almost a direct translation of the intrinsic code.
-* TODO C++ Pointer aliasing/restrict
+* DONE C++ Pointer aliasing/restrict
 - Check HOW array-processing funcs like Combine( int count, float* dst,
   const float* src1, const float* src2 ) that have guaranteed
   no-aliasing and benefit from __restrict__
