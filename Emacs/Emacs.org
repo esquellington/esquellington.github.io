@@ -2,6 +2,15 @@
 
 Emacs hacking and tests
 
+* Build Emacs from source
+- Get source from http://git.savannah.gnu.org/cgit/emacs.git
+- git clone -b BRANCH git://git.sv.gnu.org/emacs.git
+  - BRANCH = master for latest, but sometimes buggy
+  - BRANCH = emacs-28 for next release
+- ./autoconf
+- ./configure
+- make bootstrap
+- make
 * [[file:~/.emacs.d/init.el][init.el]]
 * org-mode stuff: file:advanced_org_features.org
 * Literary programming exercise: file:test-avx.org
@@ -109,17 +118,21 @@ Emacs hacking and tests
   // C++11 UTF-8 string literals are awesome
   printf( "%s\n", u8"Δx = ∇y" );
 * Magit mode HowTo
-- https://magit.vc/manual/magit/
-- C-x g runs magit-status
-- On status buffer
-  - tab toggles per-file diff
-  - 's' on "unstaged" changes toggles them to "staged"
-  - 'c' and then 'c' opens commit buffer for "staged" changes, input commit
-    description and then press C-c to perform commit. Files become
-    "unmerged"
-  - 'P' and then 'p' pushes commits to "master" (remote) branch after
-    asking for username/password.
-  - 'R' to Rename a file
+- User manual: https://magit.vc/manual/magit/
+- Visual intro: https://magit.vc/screenshots/
+- magit-status (C-x g)
+  - On status buffer
+    - tab toggles per-file diff
+    - 's' on "unstaged" changes toggles them to "staged"
+    - 'c' and then 'c' opens commit buffer for "staged" changes, input commit
+      description and then press C-c to perform commit. Files become
+      "unmerged"
+    - 'P' and then 'p' pushes commits to "master" (remote) branch after
+      asking for username/password.
+    - 'R' to Rename a file
+- M-x magit-log --> commit history with branches
+  - press b for all branches
+- M-x magit-pull --> get remote commits
 * Debugging in Emacs
 ** GUD
 - Builtin... ugly but works
