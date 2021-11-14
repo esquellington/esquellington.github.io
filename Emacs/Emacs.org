@@ -170,7 +170,8 @@ Emacs hacking and tests
     does not merge)
   - 'm' for magit-merge, anywhere or on top of specific commit (if done after
     fetch, you can see unpulled remote changes)
-  - 'l' for magit-log, and then 'b' to see see commit history for all branches
+  - 'l' for magit-log, and then 'a' or 'b' to see see commit history for all
+    references or branches
   - 'R' to Rename a file
 * Debugging in Emacs
 ** GUD
