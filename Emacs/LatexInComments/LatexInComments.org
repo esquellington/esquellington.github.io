@@ -1,0 +1,99 @@
+#+STARTUP: indent
+
+file:laic.el
+
+* laic
+** References
+- texfrag-moode
+  - Enable C-c C-p C-p for preview-at-point or preview-region
+  - Remove with preview-clearout-buffer
+  - See file:latex.cpp for inline math in comments
+  - DOES NOT WORK
+    - Same issue as here https://latex.org/forum/viewtopic.php?t=27378
+- See [[https://github.com/mneri/pnglatex][pnglatex]], works very well
+  - Could do the same ops from elisp
+  - Support math-environment as part of formula text, no point in
+    having to specify it explicitly
+- See http://mazack.org/unix/tex2png.php, also useful
+- This explains how to create overlays and image tooltips
+  http://kitchingroup.cheme.cmu.edu/blog/2016/03/21/Displaying-image-overlays-on-image-filenames-in-Emacs/
+** DONE Requirements
+   EASY LaTeX math preview in C/C++ comments
+*** Should work like texfrag-region/document, but for whole comments/functions/files
+- See texfrag code, looks complex and uses auctex, which DOES NOT WORK IN
+  WINDOWS
+- It also uses preview for intermediate steps, which seems to be a
+  generic way to do this in emacs
+*** 0-config, work by default
+**** Avoid dependencies, try to invoke latex/dvips directly and display overlay
+**** NO need to flag latex blocks, just look for $x$, $$x$$, \[x\] and \begin{}\end{} pairs like texfrag does
+**** Automatic scaling of formulas to font size (should be readable by default)
+*** 0-interference
+**** KEEP plain text edit of comments working at ALL TIMES
+**** if cursor is in a formula, disable the preview while there
+** DONE Call latex*dvipng to get formula image .png
+- Autogen temp .tex with proper document class and includes
+- Generate proper size image
+- latex/dvipng/convert -trim also works for any latex "page"
+- .tex must have simple structure
+- .tex should have \pagestyle{empty} to avoid page number at bottom
+  from stopping convert -trim
+** DONE Insert .png image in Emacs buffer
+- As overlay??
+- Toggle between text/formula
+** DONE Name it --> laic
+- laic = latex-in-comments
+- love = latex-overlay
+- loverlay
+- overlaytex
+- clover = comments latex overlay
+- glasstex? put them on and see formulas?
+- greekvision? geek/greek vision
+** DONE Set proper colors
+- Set fore/background color to proper values from Emacs theme at 1st
+  latex block delimiter
+** DONE Extend to all formulas in a region or buffer
+- Use regexp to match all delimiter pairs, and gather points begin,end
+- Gen overlay image for each match
+- match only in comments, not everywhere?
+  - texfrag has texfrag-comments-only
+** DONE Optionally run in comments only
+** TODO Find text in formula delimiters around point
+*** DONE \[ \]
+*** TODO Other delimiters
+- Explicit \begin/end equation,eqnarray,align, and non-numbered versions,
+  useful but require non-trivial matching of text inside {}
+- $ and $$,$$ will be tricky because they're symmetric begin/end
+- texfrag probably does this, check code
+  - texfrag-next-frag-function
+- Regexp to match region?
+  - SO it seems regex CANNOT match balanced structs, so \[a\] \[b\]
+    are matched as a SINGLE string, instead of 2 groups
+  - Thus, we should only match the MATH_BEGIN and from there match the first
+    MATH_END forward
+- Probably the best commands would be
+  - "convert closest not yet converted"
+    - So, search back and if there's a BEGIN closer than an END, then
+      search forward for an END
+  - "toggle closest"
+  - closest = begin/end region containing cursor, otherwise immediate next
+** TODO Package as a minor mode with keybindings
+- keybindings
+  - See/toggle closest to point
+  - See all
+  - Clear all
+- use org-sketch as template
+** TODO Consider ov package for overlay niceties
+** TODO Consider tooltip instead of overlay
+- Less intrusive
+- Optional, would work the similarly, but only inside begin/end, and render as
+  tooltip, ideally of any size
+** TODO Syntax-highlight latex blocks in comments
+- Highlight subtly even when no overlay has been created, ideally
+  subtly different shade of comment color, I think Org does something similar
+** TODO BUGS
+*** TODO Foreground color is sometimes wrong
+- Background is always correct though
+- Could it happen on stuff not in screen only? not sure how to repro it
+- If we stick to "in-comments" version, then we could just get the
+  color from comment font lock properties
