@@ -60,7 +60,7 @@ Emacs hacking and tests
   generic way to do this in emacs
 *** 0-config, work by default
 **** Avoid dependencies, try to invoke latex/dvips directly and display overlay
-**** NO need to flag latex blocks, just look for $, $$, \[ and \begin{} pairs like texfrag does
+**** NO need to flag latex blocks, just look for $x$, $$x$$, \[x\] and \begin{}\end{} pairs like texfrag does
 **** Automatic scaling of formulas to font size (should be readable by default)
 *** 0-interference
 **** KEEP plain text edit of comments working at ALL TIMES
@@ -111,7 +111,7 @@ Emacs hacking and tests
 *** TODO Find text in formula delimiters around point
 **** DONE \[ \]
 **** TODO Other delimiters
-- \begin/end equation,eqnarray,align, and non-numbered versions,
+- Explicit \begin/end equation,eqnarray,align, and non-numbered versions,
   useful but require non-trivial matching of text inside {}
 - $ and $$ will be tricky because they're symmetric begin/end
 - texfrag probably does this, check code
@@ -119,23 +119,25 @@ Emacs hacking and tests
 - Regexp to match region?
   - SO it seems regex CANNOT match balanced structs, so \[a\] \[b\]
     are matched as a SINGLE string, instead of 2 groups
-  - Thus, we should only match the beginnings \[ and FROM THERE,
-    match the first \]
+  - Thus, we should only match the MATH_BEGIN and from there match the first
+    MATH_END forward
 - Probably the best commands would be
   - "convert closest not yet converted"
     - So, search back and if there's a BEGIN closer than an END, then
       search forward for an END
   - "toggle closest"
-  - prioritize begin/end region containing cursor, otherwise go forward?
+  - closest = begin/end region containing cursor, otherwise immediate next
 *** TODO Package as a minor mode with keybindings
 - keybindings
   - See/toggle closest to point
   - See all
   - Clear all
+- use org-sketch as template
 *** TODO Consider ov package for overlay niceties
 *** TODO Consider tooltip instead of overlay
 - Less intrusive
-- Optional?
+- Optional, would work the similarly, but only inside begin/end, and render as
+  tooltip, ideally of any size
 *** TODO Syntax-highlight latex blocks in comments
 - Highlight subtly even when no overlay has been created, ideally
   subtly different shade of comment color, I think Org does something similar

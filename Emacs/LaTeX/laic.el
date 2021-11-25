@@ -40,7 +40,7 @@
   ;; Create an image from latex string with given dpi and bg/fg colors and return it
   (interactive)
   (let (tmpfilename tmpfilename_tex tmpfilename_dvi tmpfilename_png prefix suffix fullcode img)
-    ;; Create temporary filename using Uniz epoch in seconds
+    ;; Create temporary filename using Unix epoch in seconds
     (setq tmpfilename (format "tmp-%d" (* 1000 (float-time))))
     (setq tmpfilename_tex (expand-file-name (concat tmpfilename ".tex")))
     (setq tmpfilename_dvi (expand-file-name (concat tmpfilename ".dvi")))
@@ -82,14 +82,12 @@
     img
     ))
 
-;; \[ \text{curl} \vec f = \nabla \times \vec f\]
-
 ;; TEST Insert image at point
-(insert-image (laic-create-image-from-latex
-               "$$\\alpha=\\theta$$"
-               (laic-get-dpi) ;dpi
-               (background-color-at-point)
-               (foreground-color-at-point)))
+;; (insert-image (laic-create-image-from-latex
+;;                "$$\\alpha=\\theta$$"
+;;                (laic-get-dpi) ;dpi
+;;                (background-color-at-point)
+;;                (foreground-color-at-point)))
 
 ;; TODO find first match in {$, $$, \[, \begin{REGEXP!}}
 (defun laic-search-forward-latex-begin ()
@@ -148,12 +146,12 @@
   (interactive)
   (save-excursion
     (let (pt beginpt endpt)
-      (setq pt (point)) ;;get current point
-      (setq beginpt (laic-search-backward-latex-begin)) ;;find prev begin
-      (when beginpt ;;non-nil begin
-        (goto-char beginpt) ;;move to begin
-        (setq endpt (laic-search-forward-latex-end)) ;;find next end
-        (when (and endpt (< pt endpt)) ;;non-nil end and after current
+      (setq pt (point)) ;get current point
+      (setq beginpt (laic-search-backward-latex-begin)) ;find prev begin
+      (when beginpt ;non-nil begin
+        (goto-char beginpt) ;move to begin
+        (setq endpt (laic-search-forward-latex-end)) ;find next end
+        (when (and endpt (< pt endpt)) ;non-nil end and after current
           (laic-create-overlay-from-latex-block
            beginpt endpt ;begin/end
            (laic-get-dpi) ;dpi
