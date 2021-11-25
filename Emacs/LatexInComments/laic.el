@@ -1,18 +1,44 @@
-;;; laic --- LateX in comments -*- lexical-binding: t; -*-
+;;; laic --- Render LateX in comments -*- lexical-binding: t; -*-
 ;;
+;; Copyright (C) 2021 Oscar Civit Flores
+;; Author: Oscar Civit Flores
+;; Keywords: LaTeX
+;; Package-Version: ???????????
+;; URL: https://github.com/??????????'
+;; Version: 0.1
+;; Package-Requires: ((emacs "27"))
+;;
+;;; Commentary:
+;;
+;; Provides functions to BLA BLA BLA
+;;
+;; Functionality:
+;; - Calling the interactive function `laic-create-overlay-from-latex-forward' BLA BLA BLA
+;; - Temporary files are stored in the customizable `org-sketch-output-dir'
+;;   relative to current file path.
+;;
+;; Installation:
+;; - Add (require 'laic) to your mode hook.
+;; - Optionally add a local keybinding (suggested "C-c l") to call the provided
+;;   functions `laic-create-overlay-from-latex-forward' and/or
+;;   `laic-create-overlay-from-latex-inside'
+;;
+;;; License:
+;;
+;; This file is not a part of GNU Emacs.
+;;
+;; This program is free software; you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+;; This program is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
+;; You should have received a copy of the GNU General Public License
+;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ;;
 ;;; Code:
-
-;;--------------------------------
-;; WIP
-;;--------------------------------
-;; Eval whole buffer with M-x eval-buffer
-
-;;--------------------------------
-;; Dependencies TODO NONE!?
-;;--------------------------------
-;;(eval-when-compile (require 'subr-x)) ;for string-empty-p
-;;(require 'org) ;for org-display-inline-images
 
 ;;--------------------------------
 ;; Customization
@@ -28,7 +54,12 @@
   :type 'directory)
 
 (defcustom laic-command-convert "convert"
-  "ImageMagick convert command."
+  "Command for ImageMagick convert."
+  :group 'laic
+  :type 'file)
+
+(defcustom laic-command-dvipng "dvipng"
+  "Command for dvipng."
   :group 'laic
   :type 'file)
 
@@ -65,7 +96,6 @@
        ;; output "rgb r g b" with r,g,b \in [0..1]
        (format "rgb %f %f %f" (/ rnum 255.0) (/ gnum 255.0) (/ bnum 255.0))))
 
-
 ;;--------------------------------
 ;; OS-specific
 ;; NOTE: same as in org-sketch.el
@@ -88,6 +118,17 @@
          (subst-char-in-string ?/ ?\\ (file-name-as-directory path)))
         (t ;;else 'gnu/linux, 'darwin, etc...
          (file-name-as-directory path))))
+
+;;--------------------------------
+;; CONVERT
+;;--------------------------------
+(defun laic-convert ( args )
+  "Run convert on ARGS argument string."
+  (shell-command (concat laic-command-convert " " args laic-OS-null-sink)))
+
+(defun laic-dvipng ( args )
+  "Run dvipng on ARGS argument string."
+  (shell-command (concat laic-command-dvipng " " args laic-OS-null-sink)))
 
 (defun laic-create-image-from-latex ( code dpi bgcolor fgcolor )
   "Create an image from latex string with given dpi and bg/fg colors and return it."
@@ -119,39 +160,27 @@
     (write-region fullcode nil tmpfilename_tex)
 
     ;; Run latex on tmp file with no output
-    ;;   > /dev/null to avoid output buffer (> NUL in Windows)
-    ;; TODO instead of cd, could we force latex output to specific dir? -o maybe?
-    (shell-command (concat "cd " (laic-OS-dir laic-output-dir) "; latex " tmpfilename_tex " > /dev/null"))
+    ;; TODO laic-latex command (also, instead of cd, could we force latex output to specific dir? -o maybe?)
+    (shell-command (concat "cd " (laic-OS-dir laic-output-dir) "; latex " tmpfilename_tex laic-OS-null-sink))
 
     ;; Run dvipng
     ;;   -bg \"rgb 0.13 0.13 0.13\" using double quotes is required for Windows (Linux also supports single quotes '..')
     ;;   -bg Transparent works, but Emacs seems to ignore transparency
-    ;;   > /dev/null to avoid output buffer in Linux (> NUL in Windows)
     ;; TODO:
     ;; - Retrieve DPI programmatically and pass as -D argument
-    ;; TODO DVIPNG COMMAND
-    (shell-command (concat "dvipng"
-                           " -D " (number-to-string dpi) ;DPI
-                           " -bg \"" (laic-convert-color-to-dvipng-arg bgcolor) "\"" ;background color
-                           " -fg \"" (laic-convert-color-to-dvipng-arg fgcolor) "\"" ;foreground color
-                           " " tmpfilename_dvi ;input
-                           " -o " tmpfilename_png ;output
-                           " > /dev/null"))
+    (laic-dvipng (concat " -D " (number-to-string dpi) ;DPI
+                         " -bg \"" (laic-convert-color-to-dvipng-arg bgcolor) "\"" ;background color
+                         " -fg \"" (laic-convert-color-to-dvipng-arg fgcolor) "\"" ;foreground color
+                         " " tmpfilename_dvi ;input
+                         " -o " tmpfilename_png)) ;output
 
-    ;; Trim image
-    ;;   > /dev/null to avoid output buffer
-    ;; TODO CONVERT COMMAND
-    (shell-command (concat "convert -trim "
-                           tmpfilename_png ;input
-                           " " tmpfilename_png ;output
-                           " > /dev/null"))
+    ;; Convert: Trim empty space
+    (laic-convert (concat " -trim " tmpfilename_png " " tmpfilename_png))
 
     ;; Create image object, expand-file-name is requied
-    ;(setq img (create-image (expand-file-name (concat tmpfilename ".png")))) OLD
     (setq img (create-image tmpfilename_png))
 
     ;; Cleanup temporary files, but not .png required to insert/overlay later!
-    ;; (shell-command (concat "rm " tmpfilename ".tex " tmpfilename ".dvi " tmpfilename ".aux " tmpfilename ".log ")) OLD
     (delete-file tmpfilename_tex)
     (delete-file tmpfilename_dvi)
     (delete-file (expand-file-name (concat (laic-OS-dir laic-output-dir) tmpfilename ".aux")))

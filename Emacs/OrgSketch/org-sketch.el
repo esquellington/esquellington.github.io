@@ -165,7 +165,6 @@
 (defun org-sketch-convert ( args )
   "Run convert on ARGS argument string."
   (shell-command (concat org-sketch-command-convert " " args org-sketch-OS-null-sink)))
-;; (call-process org-sketch-command-convert nil nil nil args)) TODO this does not work, maybe because args is complex?
 
 ;;--------------------------------
 ;; TOOL: gimp

@@ -2,8 +2,7 @@
 
 file:laic.el
 
-* laic
-** References
+* References
 - texfrag-moode
   - Enable C-c C-p C-p for preview-at-point or preview-region
   - Remove with preview-clearout-buffer
@@ -17,31 +16,31 @@ file:laic.el
 - See http://mazack.org/unix/tex2png.php, also useful
 - This explains how to create overlays and image tooltips
   http://kitchingroup.cheme.cmu.edu/blog/2016/03/21/Displaying-image-overlays-on-image-filenames-in-Emacs/
-** DONE Requirements
+* DONE Requirements
    EASY LaTeX math preview in C/C++ comments
-*** Should work like texfrag-region/document, but for whole comments/functions/files
+** Should work like texfrag-region/document, but for whole comments/functions/files
 - See texfrag code, looks complex and uses auctex, which DOES NOT WORK IN
   WINDOWS
 - It also uses preview for intermediate steps, which seems to be a
   generic way to do this in emacs
-*** 0-config, work by default
-**** Avoid dependencies, try to invoke latex/dvips directly and display overlay
-**** NO need to flag latex blocks, just look for $x$, $$x$$, \[x\] and \begin{}\end{} pairs like texfrag does
-**** Automatic scaling of formulas to font size (should be readable by default)
-*** 0-interference
-**** KEEP plain text edit of comments working at ALL TIMES
-**** if cursor is in a formula, disable the preview while there
-** DONE Call latex*dvipng to get formula image .png
+** 0-config, work by default
+*** Avoid dependencies, try to invoke latex/dvips directly and display overlay
+*** NO need to flag latex blocks, just look for $x$, $$x$$, \[x\] and \begin{}\end{} pairs like texfrag does
+*** Automatic scaling of formulas to font size (should be readable by default)
+** 0-interference
+*** KEEP plain text edit of comments working at ALL TIMES
+*** if cursor is in a formula, disable the preview while there
+* DONE Call latex*dvipng to get formula image .png
 - Autogen temp .tex with proper document class and includes
 - Generate proper size image
 - latex/dvipng/convert -trim also works for any latex "page"
 - .tex must have simple structure
 - .tex should have \pagestyle{empty} to avoid page number at bottom
   from stopping convert -trim
-** DONE Insert .png image in Emacs buffer
+* DONE Insert .png image in Emacs buffer
 - As overlay??
 - Toggle between text/formula
-** DONE Name it --> laic
+* DONE Name it --> laic
 - laic = latex-in-comments
 - love = latex-overlay
 - loverlay
@@ -49,26 +48,38 @@ file:laic.el
 - clover = comments latex overlay
 - glasstex? put them on and see formulas?
 - greekvision? geek/greek vision
-** DONE Set proper colors
+* DONE Set proper colors
 - Set fore/background color to proper values from Emacs theme at 1st
   latex block delimiter
-** DONE Extend to all formulas in a region or buffer
+* DONE Extend to all formulas in a region or buffer
 - Use regexp to match all delimiter pairs, and gather points begin,end
 - Gen overlay image for each match
 - match only in comments, not everywhere?
   - texfrag has texfrag-comments-only
-** DONE Optionally run in comments only
-** TODO Package as a minor mode with keybindings
-*** TODO Use org-sketch niceties
-**** DONE create dir /laic separate form current, create temporaries there
-**** DONE delete-file
-**** TODO executable-find
-*** TODO public functions
-** TODO Find text in formula delimiters around point
-*** DONE \[ \]
-*** TODO Other delimiters
-- Explicit \begin/end equation,eqnarray,align, and non-numbered versions,
-  useful but require non-trivial matching of text inside {}
+* DONE Optionally run in comments only
+* TODO Package as a minor mode with keybindings
+** DONE Use org-sketch niceties
+*** DONE create dir /laic separate form current, create temporaries there
+*** DONE delete-file
+*** DONE executable-find
+** DONE public functions
+** TODO install in /lisp
+- require in init.el
+- setup keybindings in init.el
+- maybe only in cc mode now?
+** TODO Header comment block
+* TODO Save laic owned overlay list
+** TODO toggle all on/off, if possible
+** TODO laic-remove-overlays ONLY owned overlays
+** TODO laic-remove-overlay-inside/forward
+- remove 1 overlay
+* TODO Find latex blocks
+- HARDCODED is fine
+** DONE \[ \]
+** TODO \begin,end equation/*
+** TODO \begin,end eqnarray/*
+** TODO \begin,end align/*
+** TODO Others?
 - $ and $$,$$ will be tricky because they're symmetric begin/end
 - texfrag probably does this, check code
   - texfrag-next-frag-function
@@ -83,16 +94,19 @@ file:laic.el
       search forward for an END
   - "toggle closest"
   - closest = begin/end region containing cursor, otherwise immediate next
-** TODO Consider ov package for overlay niceties
-** TODO Consider tooltip instead of overlay
+* TODO Add custom package list to latex header
+* TODO Consider ov package for overlay niceties
+* TODO Consider tooltip instead of overlay
 - Less intrusive
 - Optional, would work the similarly, but only inside begin/end, and render as
   tooltip, ideally of any size
-** TODO Syntax-highlight latex blocks in comments
+- Ideally create image the SAME way, but only show it as overlay
+- MUST cache it or it'll be very slow
+* TODO Syntax-highlight latex blocks in comments
 - Highlight subtly even when no overlay has been created, ideally
   subtly different shade of comment color, I think Org does something similar
-** TODO BUGS
-*** TODO Foreground color is sometimes wrong
+* TODO BUGS
+** TODO Foreground color is sometimes wrong
 - Background is always correct though
 - Could it happen on stuff not in screen only? not sure how to repro it
 - If we stick to "in-comments" version, then we could just get the
