@@ -58,6 +58,12 @@ file:laic.el
 - match only in comments, not everywhere?
   - texfrag has texfrag-comments-only
 ** DONE Optionally run in comments only
+** TODO Package as a minor mode with keybindings
+*** TODO Use org-sketch niceties
+**** TODO create dir /laic separate form current, create temporaries there
+**** TODO delete-file
+**** TODO executable-find
+*** TODO public functions
 ** TODO Find text in formula delimiters around point
 *** DONE \[ \]
 *** TODO Other delimiters
@@ -77,12 +83,6 @@ file:laic.el
       search forward for an END
   - "toggle closest"
   - closest = begin/end region containing cursor, otherwise immediate next
-** TODO Package as a minor mode with keybindings
-- keybindings
-  - See/toggle closest to point
-  - See all
-  - Clear all
-- use org-sketch as template
 ** TODO Consider ov package for overlay niceties
 ** TODO Consider tooltip instead of overlay
 - Less intrusive

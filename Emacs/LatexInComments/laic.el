@@ -1,9 +1,31 @@
-; laic = latex-in-comments
-;; TODO convert into proper package?
-;; - Eval whole buffer with M-x eval-buffer
+;;; laic --- LateX in comments -*- lexical-binding: t; -*-
+;;
+;;
+;;; Code:
+
+;;--------------------------------
+;; WIP
+;;--------------------------------
+;; Eval whole buffer with M-x eval-buffer
+
+;;--------------------------------
+;; Dependencies TODO NONE!?
+;;--------------------------------
+;;(eval-when-compile (require 'subr-x)) ;for string-empty-p
+;;(require 'org) ;for org-display-inline-images
+
+;;--------------------------------
+;; Customization
+;;--------------------------------
+
+;; TODO
+
+;;--------------------------------
+;; Internal implementation
+;;--------------------------------
 
 (defun laic-is-point-in-comment-p()
-  ;; Return true if point is in comment, nil otherwise
+  "Return non-nil if point is in comment, nil otherwise."
   ;; NOTE: comment-beginning returns nil if point not inside comment,
   ;; which seems to work, as opposed to (comment-only-p begin end),
   ;; which returns inconsistent results
@@ -11,7 +33,7 @@
   (not (eq (comment-beginning) nil)))
 
 (defun laic-get-dpi()
-  ;; Return text DPI at point
+  "Return text DPI at point."
   200)
   ;; This is the proper way, but requires finding physical screen size
   ;; in inches, on the XPS13 it's 170dpi
@@ -20,7 +42,7 @@
 ;;     13.0)) ;TODO (physical-screen-diagonal-size-in-inches)))
 
 (defun laic-convert-color-to-dvipng-arg( color )
-  ;; Convert emacs color string "#RRGGBB" to dvipng argument string
+  "Convert Emacs COLOR string \"#RRGGBB\" to dvipng argument string."
   ;; "rgb r g b" with r,g,b \in [0..1]
   (let (rsub gsub bsub rnum gnum bnum)
        (setq rsub (substring color 1 3)) ;get RR
@@ -32,30 +54,30 @@
        (setq bnum (string-to-number bsub 16)) ;base 16
        ;;(format "%d %d %d" rnum gnum bnum)
        (format "rgb %f %f %f" (/ rnum 255.0) (/ gnum 255.0) (/ bnum 255.0))))
-;;TEST
-;;(laic-convert-color-to-dvipng-arg "#112233")
 
-;;----------------------------------------------
 (defun laic-create-image-from-latex ( code dpi bgcolor fgcolor )
-  ;; Create an image from latex string with given dpi and bg/fg colors and return it
+  "Create an image from latex string with given dpi and bg/fg colors and return it."
   (interactive)
   (let (tmpfilename tmpfilename_tex tmpfilename_dvi tmpfilename_png prefix suffix fullcode img)
+
     ;; Create temporary filename using Unix epoch in seconds
     (setq tmpfilename (format "tmp-%d" (* 1000 (float-time))))
     (setq tmpfilename_tex (expand-file-name (concat tmpfilename ".tex")))
     (setq tmpfilename_dvi (expand-file-name (concat tmpfilename ".dvi")))
     (setq tmpfilename_png (expand-file-name (concat tmpfilename ".png")))
+
     ;; Compose latex code into temporary file
     ;;(setq prefix "\\documentclass{article}\n\\pagestyle{empty}\n\\usepackage{amsmath,amsfonts}\n\\begin{document}\n")
     (setq prefix "\\documentclass{article}\n\\pagestyle{empty}\n\\usepackage{amsmath,amsfonts,physics}\n\\begin{document}\n")
     (setq suffix "\\end{document}\n")
     (setq fullcode (concat prefix code "\n" suffix))
     (write-region fullcode nil tmpfilename_tex)
+
     ;; Run latex on tmp file
     ;;   > /dev/null to avoid output buffer (> NUL in Windows)
     (shell-command (concat "latex " tmpfilename_tex " > /dev/null"))
     ;; Run dvipng
-    ;;   -bg \"rgb 0.13 0.13 0.13\" using double quotes is required for Windows (Linux also supports single quotes '..'
+    ;;   -bg \"rgb 0.13 0.13 0.13\" using double quotes is required for Windows (Linux also supports single quotes '..')
     ;;   -bg Transparent works, but Emacs seems to ignore transparency
     ;;   > /dev/null to avoid output buffer in Linux (> NUL in Windows)
     ;; TODO:
@@ -75,36 +97,30 @@
                            " > /dev/null"))
     ;; Create image object, expand-file-name is requied
     (setq img (create-image (expand-file-name (concat tmpfilename ".png"))))
-    ;; Cleanup temporary files
-    ;;   TODO this would delete .png required to insert/overlay later! (shell-command (concat "rm " tmpfilename ".*"))
+    ;; Cleanup temporary files, but not .png required to insert/overlay later!
+    ;; TODO USE (delete-file filename) instead
     (shell-command (concat "rm " tmpfilename ".tex " tmpfilename ".dvi " tmpfilename ".aux " tmpfilename ".log "))
+
     ;; Return image
     img
     ))
 
-;; TEST Insert image at point
-;; (insert-image (laic-create-image-from-latex
-;;                "$$\\alpha=\\theta$$"
-;;                (laic-get-dpi) ;dpi
-;;                (background-color-at-point)
-;;                (foreground-color-at-point)))
-
-;; TODO find first match in {$, $$, \[, \begin{REGEXP!}}
+;; TODO support \[\], \begin\end{equation,eqnarray,align} and starred versions
 (defun laic-search-forward-latex-begin ()
-  ;; Search forward latex block begin, return point
+  "Search forward latex block begin, return point."
   (search-forward "\\[" nil t))
 (defun laic-search-forward-latex-end ()
-  ;; Search forward latex block end, return point
+  "Search forward latex block end, return point."
   (search-forward "\\]" nil t))
 (defun laic-search-backward-latex-begin ()
-  ;; Search backward latex block begin, return point
+  "Search backward latex block begin, return point."
   (search-backward "\\[" nil t))
 (defun laic-search-backward-latex-end ()
-  ;; Search backward latex block end, return point
+  "Search backward latex block end, return point."
   (search-backward "\\]" nil t))
 
 (defun laic-search-forward-latex-block ()
-  ;; Find begin/end latex block forward
+  "Find begin/end latex block forward."
   (save-excursion
     (let (begin end)
       (setq begin (laic-search-forward-latex-begin))
@@ -117,8 +133,9 @@
              (list (- begin 2) end) ;returns (begin . end) points
              )))))
 
+;; TODO return overlay
 (defun laic-create-overlay-from-latex-block ( begin end dpi bgcolor fgcolor )
-  ;; Create latex overlay from buffer begin..end region and return it
+  "Create latex overlay from buffer BEGIN..END region and return it."
   (interactive)
   (let (regioncode ov img)
     (setq regioncode (buffer-substring-no-properties begin end))
@@ -126,8 +143,65 @@
     (setq img (laic-create-image-from-latex regioncode dpi bgcolor fgcolor))
     (overlay-put ov 'display img)))
 
+;;--------------------------------
+;; Region functionality
+;;--------------------------------
+
+(defun laic-gather-latex-blocks( begin end )
+  "Gather all latex blocks inside BEGIN/END points, return as list of pairs."
+  (save-excursion
+    (let (lb be)
+      (setq lb ()) ;empty
+      (goto-char begin) ;goto of range
+      (setq be (laic-search-forward-latex-block)) ;1st block
+      (while (and be (<= (nth 1 be) end)) ;non-empty and be.end < end
+        (push be lb) ;save block
+        (goto-char (nth 1 be)) ;skip block
+        (setq be (laic-search-forward-latex-block))) ;next block
+      (reverse lb))))
+
+(defun laic-gather-latex-blocks-in-comments( begin end )
+  "Gather all latex blocks inside BEGIN/END points, return as list of pairs."
+  (save-excursion
+    (let (lb be)
+      (setq lb ()) ;empty
+      (goto-char begin) ;goto of range
+      (setq be (laic-search-forward-latex-block)) ;1st block
+      (while (and be (<= (nth 1 be) end)) ;non-empty and be.end < end
+        (let ((b (nth 0 be))
+              (e (nth 1 be)))
+          ;;DEBUG (message "be = %d %d = %s" b e (buffer-substring-no-properties b e))
+          (goto-char b) ;move to block begin
+          ;;(when (comment-only-p b e) ;block is inside comment
+          (when (laic-is-point-in-comment-p) ;block in comment
+            ;;DEBUG (message "COMMENT in %d %d" b e)
+            (push be lb)) ;save block
+          (goto-char e) ;skip to block end
+          (setq be (laic-search-forward-latex-block)))) ;next block
+      (reverse lb))))
+
+;; TODO Return listoverlays
+(defun laic-create-overlays-from-blocks( listblocks )
+  "Create overlays eack block in the LISTBLOCKS."
+  (interactive)
+  (save-excursion
+    (let (lb be)
+      (setq lb listblocks)
+      (while lb
+        (setq be (pop lb))
+        (goto-char (nth 0 be)) ;move to begin
+        (laic-create-overlay-from-latex-block
+         (nth 0 be) (nth 1 be) ;begin/end
+         (laic-get-dpi) ;dpi
+         (background-color-at-point) (foreground-color-at-point)))))) ;bg/fg colors
+
+;;--------------------------------
+;; Main interactive functionality
+;;--------------------------------
+
+;;;###autoload
 (defun laic-create-overlay-from-latex-forward ()
-  ;; Find next latex block, create overlay and place point at end
+  "Find next latex block, create overlay and place point at end."
   (interactive)
   (let (be)
     (setq be (laic-search-forward-latex-block))
@@ -141,8 +215,9 @@
             (background-color-at-point) (foreground-color-at-point)) ;bg/fg colors
            (goto-char (nth 1 be)))))) ;move to end
 
+;;;###autoload
 (defun laic-create-overlay-from-latex-inside ()
-  ;; If we're inside a latex block create overlay and place point at end
+  "If we're point is inside a latex block, create overlay and place point at end."
   (interactive)
   (save-excursion
     (let (pt beginpt endpt)
@@ -158,20 +233,68 @@
            (foreground-color-at-point) (background-color-at-point)) ;bg/fg colors TODO INVERTED to tell from -forward version
           )))))
 
-;; TODO Should only remove overlays added by laic, saved in a buffer-local laic-overlays?
+;; TODO Should only remove overlays added by laic, saved in a buffer-local variable laic--overlays?
+;;;###autoload
 (defun laic-remove-overlays ()
-  ;;Remove all overlays
+  "Remove all overlays."
   (interactive)
   (remove-overlays))
 
-(message "Configuring keybindings")
+;;----------------------------------------------------------------
+;; Buffer/Region interactive functionality
+;;----------------------------------------------------------------
+
+;;;###autoload
+(defun laic-create-overlays-from-buffer()
+  "Create image overlays for all blocks in the buffer."
+  (interactive)
+  (laic-create-overlays-from-blocks (laic-gather-latex-blocks (point-min) (point-max))))
+
+;;;###autoload
+(defun laic-create-overlays-from-buffer-comments()
+  "Create image overlays for all blocks in the buffer comments."
+  (interactive)
+  (laic-create-overlays-from-blocks (laic-gather-latex-blocks-in-comments (point-min) (point-max))))
+
+;;;###autoload
+(defun laic-create-overlays-from-region()
+  "Create image overlays for all blocks in the region."
+  (interactive)
+  (laic-create-overlays-from-blocks (laic-gather-latex-blocks (region-beginning) (region-end))))
+
+;;;###autoload
+(defun laic-create-overlays-from-region-comments()
+  "Create image overlays for all blocks in active region comments."
+  (interactive)
+  (laic-create-overlays-from-blocks (laic-gather-latex-blocks-in-comments (region-beginning) (region-end))))
+
+;; Keybindings
 (global-set-key (kbd "C-c r") 'laic-remove-overlays)
 (global-set-key (kbd "C-c l") 'laic-create-overlay-from-latex-inside)
 (global-set-key (kbd "C-c p") 'laic-create-overlay-from-latex-forward)
 
+(global-set-key (kbd "C-c L") 'laic-create-overlays-from-buffer)
+(global-set-key (kbd "C-c R") 'laic-create-overlays-from-region)
+(global-set-key (kbd "C-c C") 'laic-create-overlays-from-region-comments)
+(global-set-key (kbd "C-c B") 'laic-create-overlays-from-buffer-comments)
+
+;;--------------------------------
+;; Package setup
+;;--------------------------------
+(provide 'laic)
+;;; laic.el ends here
+
 ;;----------------------------------------------------------------
 ;; Tests
+;;
+;; REQUIRES physics package (apt-get install texlive-science), see
+;; https://ctan.org/pkg/physics and PDF manual linked there
 ;;----------------------------------------------------------------
+
+;; \[ \bra{a} \ket{b} \]
+;; \[ \dd[2]{x} \]
+;; \[ \dv{f}{x} \qq{text} \pdv[2]{f}{x}{y} \qand \var{F} \]
+;; \[ \div f \qand \curl f \qand \laplacian \]
 
 ;;---- Simple blocks
 ;; IMPORTANT: Comment prefix does not matter here
@@ -202,102 +325,3 @@
 ;;(push bb ll)
 ;;(push cc ll)
 ;;(reverse ll)
-
-(defun laic-gather-latex-blocks( begin end )
-  ;; Gather all latex blocks inside begin/end points, return as list of pairs
-  (save-excursion
-    (let (lb be)
-      (setq lb ()) ;empty
-      (goto-char begin) ;goto of range
-      (setq be (laic-search-forward-latex-block)) ;1st block
-      (while (and be (<= (nth 1 be) end)) ;non-empty and be.end < end
-        (push be lb) ;save block
-        (goto-char (nth 1 be)) ;skip block
-        (setq be (laic-search-forward-latex-block))) ;next block
-      (reverse lb))))
-
-(defun laic-gather-latex-blocks-in-comments( begin end )
-  ;; Gather all latex blocks inside begin/end points, return as list of pairs
-  (save-excursion
-    (let (lb be)
-      (setq lb ()) ;empty
-      (goto-char begin) ;goto of range
-      (setq be (laic-search-forward-latex-block)) ;1st block
-      (while (and be (<= (nth 1 be) end)) ;non-empty and be.end < end
-        (let ((b (nth 0 be))
-              (e (nth 1 be)))
-          ;;DEBUG (message "be = %d %d = %s" b e (buffer-substring-no-properties b e))
-          (goto-char b) ;move to block begin
-          ;;(when (comment-only-p b e) ;block is inside comment
-          (when (laic-is-point-in-comment-p) ;block in comment
-            ;;DEBUG (message "COMMENT in %d %d" b e)
-            (push be lb)) ;save block
-          (goto-char e) ;skip to block end
-          (setq be (laic-search-forward-latex-block)))) ;next block
-      (reverse lb))))
-
-;(defun laic-test()
-;  (interactive)
-;  (laic-gather-latex-blocks-in-comments (region-beginning) (region-end)))
-;(global-set-key (kbd "C-c o") 'laic-test)
-
-;; (laic-gather-latex-blocks (point) (point-max))
-;; \[ \text{curl} \vec f = \nabla \times \vec f\]
-;; (laic-gather-latex-blocks (region-beginning) (region-end))
-
-;; (point)fdfd(point)
-;; \[ \vec f \]
-;;fddf
-
-(defun laic-create-overlays-from-blocks( listblocks )
-  ;; Create overlays eack block in the list
-  ;; TODO Return listoverlays
-  (interactive)
-  (save-excursion
-    (let (lb be)
-      (setq lb listblocks)
-      (while lb
-        (setq be (pop lb))
-        (goto-char (nth 0 be)) ;move to begin
-        (laic-create-overlay-from-latex-block
-         (nth 0 be) (nth 1 be) ;begin/end
-         (laic-get-dpi) ;dpi
-         (background-color-at-point) (foreground-color-at-point)))))) ;bg/fg colors
-
-;;----------------------------------------------
-;; Top-level functions
-;;----------------------------------------------
-(defun laic-create-overlays-from-buffer()
-  ;; Create image overlays for all blocks in the buffer
-  (interactive)
-  (laic-create-overlays-from-blocks (laic-gather-latex-blocks (point-min) (point-max))))
-
-(defun laic-create-overlays-from-buffer-comments()
-  ;; Create image overlays for all blocks in the buffer comments
-  (interactive)
-  (laic-create-overlays-from-blocks (laic-gather-latex-blocks-in-comments (point-min) (point-max))))
-
-(defun laic-create-overlays-from-region()
-  ;; Create image overlays for all blocks in the region
-  (interactive)
-  (laic-create-overlays-from-blocks (laic-gather-latex-blocks (region-beginning) (region-end))))
-
-(defun laic-create-overlays-from-region-comments()
-  ;; Create image overlays for all blocks in active region comments
-  (interactive)
-  (laic-create-overlays-from-blocks (laic-gather-latex-blocks-in-comments (region-beginning) (region-end))))
-
-;; \[ \text{curl} \vec f = \nabla \times \vec f\]
-
-(global-set-key (kbd "C-c L") 'laic-create-overlays-from-buffer)
-(global-set-key (kbd "C-c R") 'laic-create-overlays-from-region)
-(global-set-key (kbd "C-c C") 'laic-create-overlays-from-region-comments)
-(global-set-key (kbd "C-c B") 'laic-create-overlays-from-buffer-comments)
-
-;; \[ \text{curl} \vec f = \nabla \times \vec f\] fdfdfd
-
-;; REQUIRES physics package (apt-get install texlive-science), see https://ctan.org/pkg/physics and PDF manual linked there
-;; \[ \bra{a} \ket{b} \]
-;; \[ \dd[2]{x} \]
-;; \[ \dv{f}{x} \qq{text} \pdv[2]{f}{x}{y} \qand \var{F} \]
-;; \[ \div f \qand \curl f \qand \laplacian \]
