@@ -18,70 +18,118 @@
 ;; Customization
 ;;--------------------------------
 
-;; TODO
+(defgroup laic nil
+  "Render LaTeX blocks in comments."
+  :group 'org) ;;TODO WHAT GROUP!!
+
+(defcustom laic-output-dir "laic-tmp"
+  "Default tmp output directory, relative to current file."
+  :group 'laic
+  :type 'directory)
+
+(defcustom laic-command-convert "convert"
+  "ImageMagick convert command."
+  :group 'laic
+  :type 'file)
 
 ;;--------------------------------
 ;; Internal implementation
 ;;--------------------------------
 
+;; NOTE: comment-beginning returns nil if point not inside comment,
+;; which seems to work, as opposed to (comment-only-p begin end),
+;; which returns inconsistent results
 (defun laic-is-point-in-comment-p()
   "Return non-nil if point is in comment, nil otherwise."
-  ;; NOTE: comment-beginning returns nil if point not inside comment,
-  ;; which seems to work, as opposed to (comment-only-p begin end),
-  ;; which returns inconsistent results
   (comment-normalize-vars)
   (not (eq (comment-beginning) nil)))
 
-(defun laic-get-dpi()
-  "Return text DPI at point."
-  200)
-  ;; This is the proper way, but requires finding physical screen size
-  ;; in inches, on the XPS13 it's 170dpi
+;; This would be the proper way, but requires finding physical screen size in
+;; inches, on the XPS13 it's 170dpi... for now we just return 200dpi
 ;;  (/ (sqrt (+ (* (display-pixel-width) (display-pixel-width))
 ;;              (* (display-pixel-height) (display-pixel-height))))
 ;;     13.0)) ;TODO (physical-screen-diagonal-size-in-inches)))
+(defun laic-get-dpi()
+  "Return text DPI at point."
+  200)
 
 (defun laic-convert-color-to-dvipng-arg( color )
   "Convert Emacs COLOR string \"#RRGGBB\" to dvipng argument string."
-  ;; "rgb r g b" with r,g,b \in [0..1]
   (let (rsub gsub bsub rnum gnum bnum)
        (setq rsub (substring color 1 3)) ;get RR
        (setq gsub (substring color 3 5)) ;get GG
        (setq bsub (substring color 5 7)) ;get BB
-       ;;(format "%s %s %s" rsub gsub bsub)
        (setq rnum (string-to-number rsub 16)) ;base 16
        (setq gnum (string-to-number gsub 16)) ;base 16
        (setq bnum (string-to-number bsub 16)) ;base 16
-       ;;(format "%d %d %d" rnum gnum bnum)
+       ;; output "rgb r g b" with r,g,b \in [0..1]
        (format "rgb %f %f %f" (/ rnum 255.0) (/ gnum 255.0) (/ bnum 255.0))))
+
+
+;;--------------------------------
+;; OS-specific
+;; NOTE: same as in org-sketch.el
+;;--------------------------------
+(defvar laic-OS-null-sink
+  (cond ((eq system-type 'windows-nt)
+         " > NUL 2> laic_errors.txt")
+        (t ;;else 'gnu/linux, 'darwin, etc...
+         " > /dev/null 2> laic_errors.txt")
+        (t ""))
+  "OS-specific commandline args to redirect output to null sink.")
+
+(defun laic-OS-touch-file ( filename )
+  "OS-specific touch FILENAME to create it or update its timestamp."
+  (call-process "touch" nil nil nil filename))
+
+(defun laic-OS-dir ( path )
+  "OS-specific file-name-as-directory to convert PATH with \ to / if necessary."
+  (cond ((eq system-type 'windows-nt)
+         (subst-char-in-string ?/ ?\\ (file-name-as-directory path)))
+        (t ;;else 'gnu/linux, 'darwin, etc...
+         (file-name-as-directory path))))
 
 (defun laic-create-image-from-latex ( code dpi bgcolor fgcolor )
   "Create an image from latex string with given dpi and bg/fg colors and return it."
   (interactive)
+
+  ;; Ensure convert exists
+  (unless (executable-find laic-command-convert)
+    (error "Could not run ImageMagick convert as '%s', please install and/or customize laic-command-convert"
+           laic-command-convert))
+
+  ;; Create output dir if required
+  (when (not (file-directory-p laic-output-dir))
+    (make-directory laic-output-dir))
+
+  ;; Try to create image
   (let (tmpfilename tmpfilename_tex tmpfilename_dvi tmpfilename_png prefix suffix fullcode img)
 
     ;; Create temporary filename using Unix epoch in seconds
     (setq tmpfilename (format "tmp-%d" (* 1000 (float-time))))
-    (setq tmpfilename_tex (expand-file-name (concat tmpfilename ".tex")))
-    (setq tmpfilename_dvi (expand-file-name (concat tmpfilename ".dvi")))
-    (setq tmpfilename_png (expand-file-name (concat tmpfilename ".png")))
+    (setq tmpfilename_tex (expand-file-name (concat (laic-OS-dir laic-output-dir) tmpfilename ".tex")))
+    (setq tmpfilename_dvi (expand-file-name (concat (laic-OS-dir laic-output-dir) tmpfilename ".dvi")))
+    (setq tmpfilename_png (expand-file-name (concat (laic-OS-dir laic-output-dir) tmpfilename ".png")))
 
     ;; Compose latex code into temporary file
-    ;;(setq prefix "\\documentclass{article}\n\\pagestyle{empty}\n\\usepackage{amsmath,amsfonts}\n\\begin{document}\n")
+    ;; TODO Add customizable list of packages
     (setq prefix "\\documentclass{article}\n\\pagestyle{empty}\n\\usepackage{amsmath,amsfonts,physics}\n\\begin{document}\n")
     (setq suffix "\\end{document}\n")
     (setq fullcode (concat prefix code "\n" suffix))
     (write-region fullcode nil tmpfilename_tex)
 
-    ;; Run latex on tmp file
+    ;; Run latex on tmp file with no output
     ;;   > /dev/null to avoid output buffer (> NUL in Windows)
-    (shell-command (concat "latex " tmpfilename_tex " > /dev/null"))
+    ;; TODO instead of cd, could we force latex output to specific dir? -o maybe?
+    (shell-command (concat "cd " (laic-OS-dir laic-output-dir) "; latex " tmpfilename_tex " > /dev/null"))
+
     ;; Run dvipng
     ;;   -bg \"rgb 0.13 0.13 0.13\" using double quotes is required for Windows (Linux also supports single quotes '..')
     ;;   -bg Transparent works, but Emacs seems to ignore transparency
     ;;   > /dev/null to avoid output buffer in Linux (> NUL in Windows)
     ;; TODO:
     ;; - Retrieve DPI programmatically and pass as -D argument
+    ;; TODO DVIPNG COMMAND
     (shell-command (concat "dvipng"
                            " -D " (number-to-string dpi) ;DPI
                            " -bg \"" (laic-convert-color-to-dvipng-arg bgcolor) "\"" ;background color
@@ -89,17 +137,25 @@
                            " " tmpfilename_dvi ;input
                            " -o " tmpfilename_png ;output
                            " > /dev/null"))
+
     ;; Trim image
     ;;   > /dev/null to avoid output buffer
+    ;; TODO CONVERT COMMAND
     (shell-command (concat "convert -trim "
                            tmpfilename_png ;input
                            " " tmpfilename_png ;output
                            " > /dev/null"))
+
     ;; Create image object, expand-file-name is requied
-    (setq img (create-image (expand-file-name (concat tmpfilename ".png"))))
+    ;(setq img (create-image (expand-file-name (concat tmpfilename ".png")))) OLD
+    (setq img (create-image tmpfilename_png))
+
     ;; Cleanup temporary files, but not .png required to insert/overlay later!
-    ;; TODO USE (delete-file filename) instead
-    (shell-command (concat "rm " tmpfilename ".tex " tmpfilename ".dvi " tmpfilename ".aux " tmpfilename ".log "))
+    ;; (shell-command (concat "rm " tmpfilename ".tex " tmpfilename ".dvi " tmpfilename ".aux " tmpfilename ".log ")) OLD
+    (delete-file tmpfilename_tex)
+    (delete-file tmpfilename_dvi)
+    (delete-file (expand-file-name (concat (laic-OS-dir laic-output-dir) tmpfilename ".aux")))
+    (delete-file (expand-file-name (concat (laic-OS-dir laic-output-dir) tmpfilename ".log")))
 
     ;; Return image
     img

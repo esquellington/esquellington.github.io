@@ -359,6 +359,7 @@
   (when (eq width nil) (setq width (org-sketch-output-width)))
   (when (eq height nil) (setq height (org-sketch-output-height)))
 
+  ;; Ensure convert exists
   (unless (executable-find org-sketch-command-convert)
     (error "Could not run ImageMagick convert as '%s', please install and/or customize org-sketch-command-convert"
            org-sketch-command-convert))
