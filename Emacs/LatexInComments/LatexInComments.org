@@ -57,17 +57,17 @@ file:laic.el
 - match only in comments, not everywhere?
   - texfrag has texfrag-comments-only
 * DONE Optionally run in comments only
-* TODO Package as a minor mode with keybindings
+* DONE Package as a minor mode with keybindings
+** DONE public functions
 ** DONE Use org-sketch niceties
 *** DONE create dir /laic separate form current, create temporaries there
 *** DONE delete-file
 *** DONE executable-find
-** DONE public functions
-** TODO install in /lisp
+** DONE install in /lisp
 - require in init.el
 - setup keybindings in init.el
-- maybe only in cc mode now?
-** TODO Header comment block
+- only in prog-mode-hook
+** DONE Header comment block
 * TODO Save laic owned overlay list
 ** TODO toggle all on/off, if possible
 ** TODO laic-remove-overlays ONLY owned overlays

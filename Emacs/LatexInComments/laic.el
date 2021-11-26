@@ -354,14 +354,14 @@
   (laic-create-overlays-from-blocks (laic-gather-latex-blocks-in-comments (region-beginning) (region-end))))
 
 ;; Keybindings
-(global-set-key (kbd "C-c r") 'laic-remove-overlays)
-(global-set-key (kbd "C-c l") 'laic-create-overlay-from-latex-inside)
-(global-set-key (kbd "C-c p") 'laic-create-overlay-from-latex-forward)
-
-(global-set-key (kbd "C-c L") 'laic-create-overlays-from-buffer)
-(global-set-key (kbd "C-c R") 'laic-create-overlays-from-region)
-(global-set-key (kbd "C-c C") 'laic-create-overlays-from-region-comments)
-(global-set-key (kbd "C-c B") 'laic-create-overlays-from-buffer-comments)
+;; (global-set-key (kbd "C-c l") 'laic-create-overlay-from-latex-forward)
+;; (global-set-key (kbd "C-c i") 'laic-create-overlay-from-latex-inside)
+;; (global-set-key (kbd "C-c r") 'laic-remove-overlays)
+;;
+;; (global-set-key (kbd "C-c L") 'laic-create-overlays-from-buffer)
+;; (global-set-key (kbd "C-c R") 'laic-create-overlays-from-region)
+;; (global-set-key (kbd "C-c C") 'laic-create-overlays-from-region-comments)
+;; (global-set-key (kbd "C-c B") 'laic-create-overlays-from-buffer-comments)
 
 ;;--------------------------------
 ;; Package setup
