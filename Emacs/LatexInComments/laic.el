@@ -301,22 +301,57 @@
            (goto-char (nth 1 be)))))) ;move to end
 
 ;;;###autoload
+;(defun laic-create-overlay-from-latex-inside ()
+;  "If point is inside a latex block, create overlay and keep point unchanged."
+;  (interactive)
+;  (save-excursion
+;    (let (pt beginpt endpt)
+;      (setq pt (point)) ;get current point
+;      (setq beginpt (laic-search-backward-latex-begin)) ;find prev begin
+;      (when beginpt ;non-nil begin
+;        (goto-char beginpt) ;move to begin
+;        (setq endpt (laic-search-forward-latex-end)) ;find next end
+;        (when (and endpt (< pt endpt)) ;non-nil end and after current
+;          (laic-create-overlay-from-latex-block
+;           beginpt endpt ;begin/end
+;           (laic-get-dpi) ;dpi
+;           (background-color-at-point) (foreground-color-at-point))))))) ;bg/fg colors
+
 (defun laic-create-overlay-from-latex-inside ()
-  "If we're point is inside a latex block, create overlay and place point at end."
+  "If point is inside a latex block, create overlay and keep point unchanged."
   (interactive)
-  (save-excursion
-    (let (pt beginpt endpt)
-      (setq pt (point)) ;get current point
+  (let (pt beginpt endpt)
+    (setq pt (point)) ;get current point
+    (save-excursion
       (setq beginpt (laic-search-backward-latex-begin)) ;find prev begin
       (when beginpt ;non-nil begin
         (goto-char beginpt) ;move to begin
-        (setq endpt (laic-search-forward-latex-end)) ;find next end
-        (when (and endpt (< pt endpt)) ;non-nil end and after current
-          (laic-create-overlay-from-latex-block
-           beginpt endpt ;begin/end
-           (laic-get-dpi) ;dpi
-           (foreground-color-at-point) (background-color-at-point)) ;bg/fg colors TODO INVERTED to tell from -forward version
-          )))))
+        (setq endpt (laic-search-forward-latex-end)))) ;find next end
+
+    (when (and beginpt endpt (< pt endpt)) ;non-nil begin and end + end after current
+      (laic-create-overlay-from-latex-block
+       beginpt endpt ;begin/end
+       (laic-get-dpi) ;dpi
+       (background-color-at-point) (foreground-color-at-point)) ;bg/fg colors
+      (goto-char endpt)))) ;move to end
+
+;;;###autoload
+(defun laic-create-overlay-from-latex-inside-or-forward ()
+  "If point is inside a latex block create overlay its overlay, otherwise find next latex block."
+  (interactive)
+    (let (beginpt endpt)
+      (save-excursion ;avoid changing point
+        (setq beginpt (laic-search-backward-latex-begin))) ;find prev begin
+      (when beginpt ;non-nil prev begin
+        (save-excursion ;avoid changing point
+          (setq endpt (laic-search-backward-latex-end)))) ;find prev end
+      ;;if no begin, or prev end is before prev begin --> point is outside begin/end
+      (cond ((or
+              (eq beginpt nil)
+              (and endpt (< beginpt endpt)))
+             (laic-create-overlay-from-latex-forward))
+            (t ;otherwise, point is inside begin/end
+             (laic-create-overlay-from-latex-inside)))))
 
 ;; TODO Should only remove overlays added by laic, saved in a buffer-local variable laic--overlays?
 ;;;###autoload
@@ -353,7 +388,16 @@
   (interactive)
   (laic-create-overlays-from-blocks (laic-gather-latex-blocks-in-comments (region-beginning) (region-end))))
 
+;;--------------------------------
+;; Package setup
+;;--------------------------------
+(provide 'laic)
+;;; laic.el ends here
+
+
+;;--------------------------------
 ;; Keybindings
+;;--------------------------------
 ;; (global-set-key (kbd "C-c l") 'laic-create-overlay-from-latex-forward)
 ;; (global-set-key (kbd "C-c i") 'laic-create-overlay-from-latex-inside)
 ;; (global-set-key (kbd "C-c r") 'laic-remove-overlays)
@@ -362,12 +406,6 @@
 ;; (global-set-key (kbd "C-c R") 'laic-create-overlays-from-region)
 ;; (global-set-key (kbd "C-c C") 'laic-create-overlays-from-region-comments)
 ;; (global-set-key (kbd "C-c B") 'laic-create-overlays-from-buffer-comments)
-
-;;--------------------------------
-;; Package setup
-;;--------------------------------
-(provide 'laic)
-;;; laic.el ends here
 
 ;;----------------------------------------------------------------
 ;; Tests
