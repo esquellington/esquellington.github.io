@@ -187,8 +187,7 @@
     (delete-file (expand-file-name (concat (laic-OS-dir laic-output-dir) tmpfilename ".log")))
 
     ;; Return image
-    img
-    ))
+    img))
 
 ;; TODO support \[\], \begin\end{equation,eqnarray,align} and starred versions
 (defun laic-search-forward-latex-begin ()
@@ -214,19 +213,17 @@
              (message "NOT FOUND")
              nil) ;returns nil
             (t
-             ;;(message "FOUND")
-             (list (- begin 2) end) ;returns (begin . end) points
-             )))))
+             (list (- begin 2) end) ))))) ;returns (begin . end) points
 
-;; TODO return overlay
 (defun laic-create-overlay-from-latex-block ( begin end dpi bgcolor fgcolor )
-  "Create latex overlay from buffer BEGIN..END region and return it."
+  "Create latex overlay from BEGIN..END region with DPI, BGCOLOR, FGCOLOR and return it."
   (interactive)
   (let (regioncode ov img)
     (setq regioncode (buffer-substring-no-properties begin end))
     (setq ov (make-overlay begin end))
     (setq img (laic-create-image-from-latex regioncode dpi bgcolor fgcolor))
-    (overlay-put ov 'display img)))
+    (overlay-put ov 'display img) ;sets image to be displayed in overlay
+    ov ))
 
 ;;--------------------------------
 ;; Region functionality
@@ -243,7 +240,7 @@
         (push be lb) ;save block
         (goto-char (nth 1 be)) ;skip block
         (setq be (laic-search-forward-latex-block))) ;next block
-      (reverse lb))))
+      (reverse lb) )))
 
 (defun laic-gather-latex-blocks-in-comments( begin end )
   "Gather all latex blocks inside BEGIN/END points, return as list of pairs."
@@ -263,7 +260,7 @@
             (push be lb)) ;save block
           (goto-char e) ;skip to block end
           (setq be (laic-search-forward-latex-block)))) ;next block
-      (reverse lb))))
+      (reverse lb) )))
 
 ;; TODO Return listoverlays
 (defun laic-create-overlays-from-blocks( listblocks )
@@ -278,7 +275,7 @@
         (laic-create-overlay-from-latex-block
          (nth 0 be) (nth 1 be) ;begin/end
          (laic-get-dpi) ;dpi
-         (background-color-at-point) (foreground-color-at-point)))))) ;bg/fg colors
+         (background-color-at-point) (foreground-color-at-point)) )))) ;bg/fg colors
 
 ;;--------------------------------
 ;; Main interactive functionality
@@ -298,24 +295,7 @@
             (nth 0 be) (nth 1 be) ;begin/end
             (laic-get-dpi) ;dpi
             (background-color-at-point) (foreground-color-at-point)) ;bg/fg colors
-           (goto-char (nth 1 be)))))) ;move to end
-
-;;;###autoload
-;(defun laic-create-overlay-from-latex-inside ()
-;  "If point is inside a latex block, create overlay and keep point unchanged."
-;  (interactive)
-;  (save-excursion
-;    (let (pt beginpt endpt)
-;      (setq pt (point)) ;get current point
-;      (setq beginpt (laic-search-backward-latex-begin)) ;find prev begin
-;      (when beginpt ;non-nil begin
-;        (goto-char beginpt) ;move to begin
-;        (setq endpt (laic-search-forward-latex-end)) ;find next end
-;        (when (and endpt (< pt endpt)) ;non-nil end and after current
-;          (laic-create-overlay-from-latex-block
-;           beginpt endpt ;begin/end
-;           (laic-get-dpi) ;dpi
-;           (background-color-at-point) (foreground-color-at-point))))))) ;bg/fg colors
+           (goto-char (nth 1 be)) )))) ;move to end
 
 (defun laic-create-overlay-from-latex-inside ()
   "If point is inside a latex block, create overlay and keep point unchanged."
@@ -333,7 +313,7 @@
        beginpt endpt ;begin/end
        (laic-get-dpi) ;dpi
        (background-color-at-point) (foreground-color-at-point)) ;bg/fg colors
-      (goto-char endpt)))) ;move to end
+      (goto-char endpt) ))) ;move to end
 
 ;;;###autoload
 (defun laic-create-overlay-from-latex-inside-or-forward ()
@@ -351,7 +331,7 @@
               (and endpt (< beginpt endpt)))
              (laic-create-overlay-from-latex-forward))
             (t ;otherwise, point is inside begin/end
-             (laic-create-overlay-from-latex-inside)))))
+             (laic-create-overlay-from-latex-inside)) )))
 
 ;; TODO Should only remove overlays added by laic, saved in a buffer-local variable laic--overlays?
 ;;;###autoload

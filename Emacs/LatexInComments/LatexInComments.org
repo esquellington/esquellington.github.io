@@ -69,10 +69,14 @@ file:laic.el
 - only in prog-mode-hook
 ** DONE Header comment block
 * TODO Save laic owned overlay list
-** TODO toggle all on/off, if possible
-** TODO laic-remove-overlays ONLY owned overlays
+** TODO Save in list OR assign specific property to identify laic-created overlays
+** TODO Find current/closest/next overlay with https://www.gnu.org/software/emacs/manual/html_node/elisp/Finding-Overlays.html
+** TODO Toggle all on/off, if possible
+** TODO laic-remove-overlays --> ONLY owned overlays
 ** TODO laic-remove-overlay-inside/forward
 - remove 1 overlay
+** TODO laic-toggle-overlay-inside/forward
+- toggle current/next
 * TODO Find latex blocks
 - HARDCODED is fine
 ** DONE \[ \]
