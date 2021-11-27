@@ -132,8 +132,6 @@
 
 (defun laic-create-image-from-latex ( code dpi bgcolor fgcolor )
   "Create an image from latex string with given dpi and bg/fg colors and return it."
-  (interactive)
-
   ;; Ensure convert exists
   (unless (executable-find laic-command-convert)
     (error "Could not run ImageMagick convert as '%s', please install and/or customize laic-command-convert"
@@ -189,7 +187,7 @@
     ;; Return image
     img))
 
-;; TODO support \[\], \begin\end{equation,eqnarray,align} and starred versions
+;; TODO Find CLOSEST among \[\], \begin\end{equation,eqnarray,align} and starred versions
 (defun laic-search-forward-latex-begin ()
   "Search forward latex block begin, return point."
   (search-forward "\\[" nil t))
@@ -217,7 +215,6 @@
 
 (defun laic-create-overlay-from-latex-block ( begin end dpi bgcolor fgcolor )
   "Create latex overlay from BEGIN..END region with DPI, BGCOLOR, FGCOLOR and return it."
-  (interactive)
   (let (regioncode ov img)
     (setq regioncode (buffer-substring-no-properties begin end))
     (setq ov (make-overlay begin end))
@@ -265,7 +262,6 @@
 ;; TODO Return listoverlays
 (defun laic-create-overlays-from-blocks( listblocks )
   "Create overlays eack block in the LISTBLOCKS."
-  (interactive)
   (save-excursion
     (let (lb be)
       (setq lb listblocks)
@@ -349,13 +345,6 @@
   "Create image overlays for all blocks in the buffer."
   (interactive)
   (laic-create-overlays-from-blocks (laic-gather-latex-blocks (point-min) (point-max))))
-
-;;;###autoload
-(defun laic-create-overlays-from-buffer-comments()
-  "Create image overlays for all blocks in the buffer comments."
-  (interactive)
-  (laic-create-overlays-from-blocks (laic-gather-latex-blocks-in-comments (point-min) (point-max))))
-
 ;;;###autoload
 (defun laic-create-overlays-from-region()
   "Create image overlays for all blocks in the region."
@@ -363,10 +352,26 @@
   (laic-create-overlays-from-blocks (laic-gather-latex-blocks (region-beginning) (region-end))))
 
 ;;;###autoload
+(defun laic-create-overlays-from-buffer-comments()
+  "Create image overlays for all blocks in the buffer comments."
+  (interactive)
+  (laic-create-overlays-from-blocks (laic-gather-latex-blocks-in-comments (point-min) (point-max))))
+;;;###autoload
 (defun laic-create-overlays-from-region-comments()
   "Create image overlays for all blocks in active region comments."
   (interactive)
   (laic-create-overlays-from-blocks (laic-gather-latex-blocks-in-comments (region-beginning) (region-end))))
+
+;;;###autoload
+(defun laic-create-overlays-from-comment-inside()
+  "Create image overlays for all blocks in the current comment around point."
+  (interactive)
+  (when (laic-is-point-in-comment-p) ;we're inside a comment
+    (save-excursion ;avoid changing point
+      (let (bc ec)
+        (setq bc (comment-search-backward nil t))
+        (setq ec (comment-search-forward nil t))
+        (laic-create-overlays-from-blocks (laic-gather-latex-blocks bc ec))))))
 
 ;;--------------------------------
 ;; Package setup
@@ -374,13 +379,12 @@
 (provide 'laic)
 ;;; laic.el ends here
 
-
 ;;--------------------------------
-;; Keybindings
+;; Suggested Keybindings
 ;;--------------------------------
-;; (global-set-key (kbd "C-c l") 'laic-create-overlay-from-latex-forward)
-;; (global-set-key (kbd "C-c i") 'laic-create-overlay-from-latex-inside)
-;; (global-set-key (kbd "C-c r") 'laic-remove-overlays)
+;; (local-set-key (kbd "C-c l") 'laic-create-overlay-from-latex-inside-or-forward)
+;; (local-set-key (kbd "C-c c") 'laic-create-overlays-from-comment-inside)
+;; (local-set-key (kbd "C-c r") 'laic-remove-overlays)
 ;;
 ;; (global-set-key (kbd "C-c L") 'laic-create-overlays-from-buffer)
 ;; (global-set-key (kbd "C-c R") 'laic-create-overlays-from-region)
