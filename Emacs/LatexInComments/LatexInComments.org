@@ -70,16 +70,13 @@ file:laic.el
 ** DONE Header comment block
 * DONE laic-create-overlays-from-comment-inside
 - All blocks in surrounding comment
-* TODO laic-remove-overlays --> ONLY owned overlays
-** TODO Save in list OR assign specific property to identify laic-created overlays
-** TODO Find current/closest/next overlay with https://www.gnu.org/software/emacs/manual/html_node/elisp/Finding-Overlays.html
 * TODO Find other latex block types
 - HARDCODED is fine
 ** DONE \[ \]
 ** TODO \begin,end equation/*
 ** TODO \begin,end eqnarray/*
 ** TODO \begin,end align/*
-** TODO maybe custom environments in an alist?
+** TODO maybe custom \begin,end{XXX} environments in an alist?
 ** TODO Others?
 - $ and $$,$$ will be tricky because they're symmetric begin/end
 - texfrag probably does this, check code
@@ -96,7 +93,11 @@ file:laic.el
   - "toggle closest"
   - closest = begin/end region containing cursor, otherwise immediate next
 * TODO Add custom package list to latex header
-* TODO Consider ov package for overlay niceties
+* TODO Better overlays
+** TODO laic-remove-overlays --> ONLY owned overlays
+*** TODO Save in list OR assign specific property to identify laic-created overlays
+*** TODO Find current/closest/next overlay with https://www.gnu.org/software/emacs/manual/html_node/elisp/Finding-Overlays.html
+** TODO Consider ov package for overlay niceties
 * TODO Consider tooltip instead of overlay
 - Less intrusive
 - Optional, would work the similarly, but only inside begin/end, and render as

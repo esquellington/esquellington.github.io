@@ -187,20 +187,41 @@
     ;; Return image
     img))
 
-;; TODO Find CLOSEST among \[\], \begin\end{equation,eqnarray,align} and starred versions
+;; TODO Find CLOSEST among \[\], \begin\end{equation,eqnarray,align} and starred
+;; versions
+;;
+;; TODO POINT should always be returned at begin/end of block delimiter and
+;; avoid subtracting 2 (for \[\]) in laic-search-forward-latex-block
+;; the problem is that searching FORWARD for BEGIN returns the end of that
+;; match, and we want to keep the whole match, same with BACKWARD and END
 (defun laic-search-forward-latex-begin ()
-  "Search forward latex block begin, return point."
+  "Search forward latex block begin, return point at begin."
   (search-forward "\\[" nil t))
 (defun laic-search-forward-latex-end ()
-  "Search forward latex block end, return point."
+  "Search forward latex block end, return point at end."
   (search-forward "\\]" nil t))
 (defun laic-search-backward-latex-begin ()
-  "Search backward latex block begin, return point."
+  "Search backward latex block begin, return point at begin."
   (search-backward "\\[" nil t))
 (defun laic-search-backward-latex-end ()
-  "Search backward latex block end, return point."
+  "Search backward latex block end, return point at end."
   (search-backward "\\]" nil t))
 
+;; This fails due to the point being placed at the end -2 of latex block begin word
+;;(defun laic-search-forward-latex-begin ()
+;;  "Search forward latex block begin, return point."
+;;  (search-forward "\\begin{equation}" nil t))
+;;(defun laic-search-forward-latex-end ()
+;;  "Search forward latex block end, return point."
+;;  (search-forward "\\end{equation}" nil t))
+;;(defun laic-search-backward-latex-begin ()
+;;  "Search backward latex block begin, return point."
+;;  (search-backward "\\begin{equation}" nil t))
+;;(defun laic-search-backward-latex-end ()
+;;  "Search backward latex block end, return point."
+;;  (search-backward "\\end{equation}" nil t))
+
+;; TODO THE -2 is A HACK
 (defun laic-search-forward-latex-block ()
   "Find begin/end latex block forward."
   (save-excursion
@@ -220,6 +241,7 @@
     (setq ov (make-overlay begin end))
     (setq img (laic-create-image-from-latex regioncode dpi bgcolor fgcolor))
     (overlay-put ov 'display img) ;sets image to be displayed in overlay
+    (message "LCOFLB be = %d %d = %s" begin end (buffer-substring-no-properties begin end))
     ov ))
 
 ;;--------------------------------
@@ -369,8 +391,9 @@
   (when (laic-is-point-in-comment-p) ;we're inside a comment
     (save-excursion ;avoid changing point
       (let (bc ec)
-        (setq bc (comment-search-backward nil t))
-        (setq ec (comment-search-forward nil t))
+        (setq bc (comment-search-backward nil t)) ;comment begin
+        (setq ec (comment-search-forward nil t)) ;comment end
+        ;;DEBUG (message "be = %d %d = %s" bc ec (buffer-substring-no-properties bc ec))
         (laic-create-overlays-from-blocks (laic-gather-latex-blocks bc ec))))))
 
 ;;--------------------------------
