@@ -187,41 +187,41 @@
     ;; Return image
     img))
 
-;; TODO Find CLOSEST among \[\], \begin\end{equation,eqnarray,align} and starred
-;; versions
-;;
-;; TODO POINT should always be returned at begin/end of block delimiter and
-;; avoid subtracting 2 (for \[\]) in laic-search-forward-latex-block
-;; the problem is that searching FORWARD for BEGIN returns the end of that
-;; match, and we want to keep the whole match, same with BACKWARD and END
+(defvar laic--latex-begin
+  "\\["
+  ;;"\\begin{equation*}"
+  "Latex begin block specifier.")
+(defvar laic--latex-end
+  "\\]"
+  ;;"\\end{equation*}"
+  "Latex end block specifier.")
+
+;; Return point at the beginning of BEGIN-block, and at the end of END-block
+;; TODO Find CLOSEST among \[\], \begin\end{equation,eqnarray,align} and starred versions
+;; TODO Support point being inside BEGIN or END block? otherwise we don't match properly
 (defun laic-search-forward-latex-begin ()
-  "Search forward latex block begin, return point at begin."
-  (search-forward "\\[" nil t))
+  "Search forward latex block begin, return point at beginning."
+  (let (begin)
+    (setq begin (search-forward laic--latex-begin nil t))
+    (cond ((not (eq begin nil))
+           (match-beginning 0)) ;point at beginning of match
+          (t
+           nil))))
 (defun laic-search-forward-latex-end ()
-  "Search forward latex block end, return point at end."
-  (search-forward "\\]" nil t))
+  "Search forward latex block end, return point at ending."
+  (search-forward laic--latex-end nil t))
 (defun laic-search-backward-latex-begin ()
-  "Search backward latex block begin, return point at begin."
-  (search-backward "\\[" nil t))
+  "Search backward latex block begin, return point at beginning."
+  (search-backward laic--latex-begin nil t))
 (defun laic-search-backward-latex-end ()
-  "Search backward latex block end, return point at end."
-  (search-backward "\\]" nil t))
+  "Search backward latex block end, return point at ending."
+  (let (end)
+    (setq end (search-backward laic--latex-end nil t))
+    (cond ((not (eq end nil))
+           (match-end 0)) ;point at end of match
+          (t
+           nil))))
 
-;; This fails due to the point being placed at the end -2 of latex block begin word
-;;(defun laic-search-forward-latex-begin ()
-;;  "Search forward latex block begin, return point."
-;;  (search-forward "\\begin{equation}" nil t))
-;;(defun laic-search-forward-latex-end ()
-;;  "Search forward latex block end, return point."
-;;  (search-forward "\\end{equation}" nil t))
-;;(defun laic-search-backward-latex-begin ()
-;;  "Search backward latex block begin, return point."
-;;  (search-backward "\\begin{equation}" nil t))
-;;(defun laic-search-backward-latex-end ()
-;;  "Search backward latex block end, return point."
-;;  (search-backward "\\end{equation}" nil t))
-
-;; TODO THE -2 is A HACK
 (defun laic-search-forward-latex-block ()
   "Find begin/end latex block forward."
   (save-excursion
@@ -232,7 +232,7 @@
              (message "NOT FOUND")
              nil) ;returns nil
             (t
-             (list (- begin 2) end) ))))) ;returns (begin . end) points
+             (list begin end) ))))) ;returns (begin . end) points
 
 (defun laic-create-overlay-from-latex-block ( begin end dpi bgcolor fgcolor )
   "Create latex overlay from BEGIN..END region with DPI, BGCOLOR, FGCOLOR and return it."
