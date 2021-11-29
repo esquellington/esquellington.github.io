@@ -189,7 +189,7 @@
     ;; Return image
     img))
 
-(defun laic-create-overlay-from-latex-block ( begin end dpi bgcolor fgcolor )
+(defun laic-create-overlay-from-block ( begin end dpi bgcolor fgcolor )
   "Create latex overlay from BEGIN..END region with DPI, BGCOLOR, FGCOLOR and return it."
   (let (regioncode ov img)
     (setq regioncode (buffer-substring-no-properties begin end))
@@ -202,11 +202,11 @@
 ;;--------------------------------
 ;; LaTeX block searches
 ;;--------------------------------
-(defvar laic--latex-begin
+(defvar laic--block-begin
   "\\["
   ;;"\\begin{equation*}"
   "Latex begin block specifier.")
-(defvar laic--latex-end
+(defvar laic--block-end
   "\\]"
   ;;"\\end{equation*}"
   "Latex end block specifier.")
@@ -215,41 +215,41 @@
 ;; TODO
 ;; - Find CLOSEST among \[\], \begin\end{equation,eqnarray,align} and starred versions
 ;; - Support point being inside BEGIN or END block? otherwise we don't match properly
-(defun laic-search-forward-latex-begin ()
+(defun laic-search-forward-block-begin ()
   "Search forward latex block begin, return point at beginning."
   (save-excursion
     (let (begin)
-      (setq begin (search-forward laic--latex-begin nil t))
+      (setq begin (search-forward laic--block-begin nil t))
       (cond ((not (eq begin nil))
              (match-beginning 0)) ;point at beginning of match
             (t
              nil)))))
-(defun laic-search-forward-latex-end ()
+(defun laic-search-forward-block-end ()
   "Search forward latex block end, return point at ending."
   (save-excursion
-    (search-forward laic--latex-end nil t)))
-(defun laic-search-backward-latex-begin ()
+    (search-forward laic--block-end nil t)))
+(defun laic-search-backward-block-begin ()
   "Search backward latex block begin, return point at beginning."
   (save-excursion
-    (search-backward laic--latex-begin nil t)))
-(defun laic-search-backward-latex-end ()
+    (search-backward laic--block-begin nil t)))
+(defun laic-search-backward-block-end ()
   "Search backward latex block end, return point at ending."
   (save-excursion
     (let (end)
-      (setq end (search-backward laic--latex-end nil t))
+      (setq end (search-backward laic--block-end nil t))
       (cond ((not (eq end nil))
              (match-end 0)) ;point at end of match
             (t
              nil)))))
 
-(defun laic-search-forward-latex-block ()
+(defun laic-search-forward-block ()
   "Find begin/end latex block forward."
   (save-excursion
     (let (begin end)
-      (setq begin (laic-search-forward-latex-begin))
+      (setq begin (laic-search-forward-block-begin))
       (when begin
         (goto-char begin)) ;move point to begin
-      (setq end (laic-search-forward-latex-end))
+      (setq end (laic-search-forward-block-end))
       (cond ((or (eq begin nil) (eq end nil))
              (message "NOT FOUND")
              nil) ;returns nil
@@ -260,26 +260,26 @@
 ;; Region functionality
 ;;--------------------------------
 
-(defun laic-gather-latex-blocks( begin end )
+(defun laic-gather-blocks( begin end )
   "Gather all latex blocks inside BEGIN/END points, return as list of pairs."
   (save-excursion
     (let (lb be)
       (setq lb ()) ;empty
       (goto-char begin)
-      (setq be (laic-search-forward-latex-block)) ;1st block
+      (setq be (laic-search-forward-block)) ;1st block
       (while (and be (<= (nth 1 be) end)) ;non-empty and be.end < end
         (push be lb) ;save block
         (goto-char (nth 1 be)) ;skip block
-        (setq be (laic-search-forward-latex-block))) ;next block
+        (setq be (laic-search-forward-block))) ;next block
       (reverse lb) )))
 
-(defun laic-gather-latex-blocks-in-comments( begin end )
+(defun laic-gather-blocks-in-comments( begin end )
   "Gather all latex blocks inside BEGIN/END points, return as list of pairs."
   (save-excursion
     (let (lb be)
       (setq lb ()) ;empty
       (goto-char begin)
-      (setq be (laic-search-forward-latex-block)) ;1st block
+      (setq be (laic-search-forward-block)) ;1st block
       (while (and be (<= (nth 1 be) end)) ;non-empty and be.end < end
         (let ((b (nth 0 be))
               (e (nth 1 be)))
@@ -290,7 +290,7 @@
             ;;DEBUG (message "COMMENT in %d %d" b e)
             (push be lb)) ;save block
           (goto-char e) ;skip to block end
-          (setq be (laic-search-forward-latex-block)))) ;next block
+          (setq be (laic-search-forward-block)))) ;next block
       (reverse lb) )))
 
 ;; TODO Return listoverlays
@@ -302,9 +302,9 @@
       (while lb
         (setq be (pop lb))
         (goto-char (nth 0 be)) ;move to begin
-        (laic-create-overlay-from-latex-block (nth 0 be) (nth 1 be) ;begin/end
-                                              (laic-get-dpi) ;dpi
-                                              (background-color-at-point) (foreground-color-at-point)) )))) ;bg/fg colors
+        (laic-create-overlay-from-block (nth 0 be) (nth 1 be) ;begin/end
+                                        (laic-get-dpi) ;dpi
+                                        (background-color-at-point) (foreground-color-at-point)) )))) ;bg/fg colors
 
 ;;----------------------------------------------------------------
 ;; Main interactive functionality
@@ -318,13 +318,13 @@
   "Find next latex block, create overlay and move point to end."
   (interactive)
   (let (be)
-    (setq be (laic-search-forward-latex-block))
+    (setq be (laic-search-forward-block))
     (cond ((eq be nil)
            (message "LaTeX block not found"))
           (t
-           (laic-create-overlay-from-latex-block (nth 0 be) (nth 1 be) ;begin/end
-                                                 (laic-get-dpi) ;dpi
-                                                 (background-color-at-point) (foreground-color-at-point)) ;bg/fg colors
+           (laic-create-overlay-from-block (nth 0 be) (nth 1 be) ;begin/end
+                                           (laic-get-dpi) ;dpi
+                                           (background-color-at-point) (foreground-color-at-point)) ;bg/fg colors
            (goto-char (nth 1 be)) )))) ;move to end
 
 ;;;###autoload
@@ -333,15 +333,15 @@
   (interactive)
   (let (pt beginpt endpt)
     (setq pt (point)) ;get current point
-    (setq beginpt (laic-search-backward-latex-begin)) ;find prev begin
+    (setq beginpt (laic-search-backward-block-begin)) ;find prev begin
     (when beginpt ;non-nil begin
       (goto-char beginpt) ;move to begin
-      (setq endpt (laic-search-forward-latex-end))) ;find next end
+      (setq endpt (laic-search-forward-block-end))) ;find next end
     ;; Create if found
     (when (and beginpt endpt (< pt endpt)) ;non-nil begin and end + end after current
-      (laic-create-overlay-from-latex-block beginpt endpt ;begin/end
-                                            (laic-get-dpi) ;dpi
-                                            (background-color-at-point) (foreground-color-at-point)) ;bg/fg colors
+      (laic-create-overlay-from-block beginpt endpt ;begin/end
+                                      (laic-get-dpi) ;dpi
+                                      (background-color-at-point) (foreground-color-at-point)) ;bg/fg colors
       (goto-char endpt) ))) ;move to end
 
 ;;;###autoload
@@ -349,9 +349,9 @@
   "If point is inside a latex block create overlay overlay, otherwise find next latex block, and move point to end."
   (interactive)
     (let (beginpt endpt)
-      (setq beginpt (laic-search-backward-latex-begin)) ;find prev begin wrt point
+      (setq beginpt (laic-search-backward-block-begin)) ;find prev begin wrt point
       (when beginpt ;non-nil prev begin
-        (setq endpt (laic-search-backward-latex-end))) ;find prev end wrt point
+        (setq endpt (laic-search-backward-block-end))) ;find prev end wrt point
       ;;if no begin, or prev end is before prev begin --> point is outside begin/end
       (cond ((or
               (eq beginpt nil)
@@ -375,23 +375,23 @@
 (defun laic-create-overlays-from-buffer()
   "Create image overlays for all blocks in the buffer."
   (interactive)
-  (laic-create-overlays-from-blocks (laic-gather-latex-blocks (point-min) (point-max))))
+  (laic-create-overlays-from-blocks (laic-gather-blocks (point-min) (point-max))))
 ;;;###autoload
 (defun laic-create-overlays-from-region()
   "Create image overlays for all blocks in the region."
   (interactive)
-  (laic-create-overlays-from-blocks (laic-gather-latex-blocks (region-beginning) (region-end))))
+  (laic-create-overlays-from-blocks (laic-gather-blocks (region-beginning) (region-end))))
 
 ;;;###autoload
 (defun laic-create-overlays-from-buffer-comments()
   "Create image overlays for all blocks in the buffer comments."
   (interactive)
-  (laic-create-overlays-from-blocks (laic-gather-latex-blocks-in-comments (point-min) (point-max))))
+  (laic-create-overlays-from-blocks (laic-gather-blocks-in-comments (point-min) (point-max))))
 ;;;###autoload
 (defun laic-create-overlays-from-region-comments()
   "Create image overlays for all blocks in active region comments."
   (interactive)
-  (laic-create-overlays-from-blocks (laic-gather-latex-blocks-in-comments (region-beginning) (region-end))))
+  (laic-create-overlays-from-blocks (laic-gather-blocks-in-comments (region-beginning) (region-end))))
 
 ;;;###autoload
 (defun laic-create-overlays-from-comment-inside()
@@ -403,7 +403,7 @@
         (setq bc (comment-search-backward nil t)) ;comment begin, moves point
         (setq ec (comment-search-forward nil t)) ;comment end, from previously moved point at begin
         ;;DEBUG (message "be = %d %d = %s" bc ec (buffer-substring-no-properties bc ec))
-        (laic-create-overlays-from-blocks (laic-gather-latex-blocks bc ec))))))
+        (laic-create-overlays-from-blocks (laic-gather-blocks bc ec))))))
 
 ;;--------------------------------
 ;; Package setup
