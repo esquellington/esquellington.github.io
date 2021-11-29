@@ -63,9 +63,10 @@
   :group 'laic
   :type 'file)
 
-;;--------------------------------
+;;------------------------------------------------------------------------------------------------
 ;; Internal implementation
-;;--------------------------------
+;; IMPORTANT: No function moves the point (all use save-excursion when required)
+;;------------------------------------------------------------------------------------------------
 
 ;; NOTE: comment-beginning returns nil if point not inside comment,
 ;; which seems to work, as opposed to (comment-only-p begin end),
@@ -121,7 +122,7 @@
          (file-name-as-directory path))))
 
 ;;--------------------------------
-;; CONVERT
+;; LaTeX + Image processing
 ;;--------------------------------
 (defun laic-convert ( args )
   "Run convert on ARGS argument string."
@@ -188,6 +189,19 @@
     ;; Return image
     img))
 
+(defun laic-create-overlay-from-latex-block ( begin end dpi bgcolor fgcolor )
+  "Create latex overlay from BEGIN..END region with DPI, BGCOLOR, FGCOLOR and return it."
+  (let (regioncode ov img)
+    (setq regioncode (buffer-substring-no-properties begin end))
+    (setq ov (make-overlay begin end))
+    (setq img (laic-create-image-from-latex regioncode dpi bgcolor fgcolor))
+    (overlay-put ov 'display img) ;sets image to be displayed in overlay
+    ;;(message "LCOFLB be = %d %d = %s" begin end (buffer-substring-no-properties begin end))
+    ov ))
+
+;;--------------------------------
+;; LaTeX block searches
+;;--------------------------------
 (defvar laic--latex-begin
   "\\["
   ;;"\\begin{equation*}"
@@ -198,30 +212,35 @@
   "Latex end block specifier.")
 
 ;; Return point at the beginning of BEGIN-block, and at the end of END-block
-;; TODO Find CLOSEST among \[\], \begin\end{equation,eqnarray,align} and starred versions
-;; TODO Support point being inside BEGIN or END block? otherwise we don't match properly
+;; TODO
+;; - Find CLOSEST among \[\], \begin\end{equation,eqnarray,align} and starred versions
+;; - Support point being inside BEGIN or END block? otherwise we don't match properly
 (defun laic-search-forward-latex-begin ()
   "Search forward latex block begin, return point at beginning."
-  (let (begin)
-    (setq begin (search-forward laic--latex-begin nil t))
-    (cond ((not (eq begin nil))
-           (match-beginning 0)) ;point at beginning of match
-          (t
-           nil))))
+  (save-excursion
+    (let (begin)
+      (setq begin (search-forward laic--latex-begin nil t))
+      (cond ((not (eq begin nil))
+             (match-beginning 0)) ;point at beginning of match
+            (t
+             nil)))))
 (defun laic-search-forward-latex-end ()
   "Search forward latex block end, return point at ending."
-  (search-forward laic--latex-end nil t))
+  (save-excursion
+    (search-forward laic--latex-end nil t)))
 (defun laic-search-backward-latex-begin ()
   "Search backward latex block begin, return point at beginning."
-  (search-backward laic--latex-begin nil t))
+  (save-excursion
+    (search-backward laic--latex-begin nil t)))
 (defun laic-search-backward-latex-end ()
   "Search backward latex block end, return point at ending."
-  (let (end)
-    (setq end (search-backward laic--latex-end nil t))
-    (cond ((not (eq end nil))
-           (match-end 0)) ;point at end of match
-          (t
-           nil))))
+  (save-excursion
+    (let (end)
+      (setq end (search-backward laic--latex-end nil t))
+      (cond ((not (eq end nil))
+             (match-end 0)) ;point at end of match
+            (t
+             nil)))))
 
 (defun laic-search-forward-latex-block ()
   "Find begin/end latex block forward."
@@ -236,16 +255,6 @@
              nil) ;returns nil
             (t
              (list begin end) ))))) ;returns (begin . end) points
-
-(defun laic-create-overlay-from-latex-block ( begin end dpi bgcolor fgcolor )
-  "Create latex overlay from BEGIN..END region with DPI, BGCOLOR, FGCOLOR and return it."
-  (let (regioncode ov img)
-    (setq regioncode (buffer-substring-no-properties begin end))
-    (setq ov (make-overlay begin end))
-    (setq img (laic-create-image-from-latex regioncode dpi bgcolor fgcolor))
-    (overlay-put ov 'display img) ;sets image to be displayed in overlay
-    ;;(message "LCOFLB be = %d %d = %s" begin end (buffer-substring-no-properties begin end))
-    ov ))
 
 ;;--------------------------------
 ;; Region functionality
@@ -297,9 +306,12 @@
                                               (laic-get-dpi) ;dpi
                                               (background-color-at-point) (foreground-color-at-point)) )))) ;bg/fg colors
 
-;;--------------------------------
+;;----------------------------------------------------------------
 ;; Main interactive functionality
-;;--------------------------------
+;;
+;; These functions may move point to their "intuitive" position,
+;; if any overlays are created
+;;----------------------------------------------------------------
 
 ;;;###autoload
 (defun laic-create-overlay-from-latex-forward ()
@@ -321,11 +333,10 @@
   (interactive)
   (let (pt beginpt endpt)
     (setq pt (point)) ;get current point
-    (save-excursion
-      (setq beginpt (laic-search-backward-latex-begin)) ;find prev begin MOVES POINT, but irrelevant because we goto-char after
-      (when beginpt ;non-nil begin
-        (goto-char beginpt) ;move to begin
-        (setq endpt (laic-search-forward-latex-end)))) ;find next end
+    (setq beginpt (laic-search-backward-latex-begin)) ;find prev begin
+    (when beginpt ;non-nil begin
+      (goto-char beginpt) ;move to begin
+      (setq endpt (laic-search-forward-latex-end))) ;find next end
     ;; Create if found
     (when (and beginpt endpt (< pt endpt)) ;non-nil begin and end + end after current
       (laic-create-overlay-from-latex-block beginpt endpt ;begin/end
@@ -338,11 +349,9 @@
   "If point is inside a latex block create overlay overlay, otherwise find next latex block, and move point to end."
   (interactive)
     (let (beginpt endpt)
-      (save-excursion ;avoid changing point TODO SHOULD NOT BE NECESSARY if search-fwd did not change point
-        (setq beginpt (laic-search-backward-latex-begin))) ;find prev begin
+      (setq beginpt (laic-search-backward-latex-begin)) ;find prev begin wrt point
       (when beginpt ;non-nil prev begin
-        (save-excursion ;avoid changing point TODO SHOULD NOT BE NECESSARY if search-bwrd did not change point
-          (setq endpt (laic-search-backward-latex-end)))) ;find prev end
+        (setq endpt (laic-search-backward-latex-end))) ;find prev end wrt point
       ;;if no begin, or prev end is before prev begin --> point is outside begin/end
       (cond ((or
               (eq beginpt nil)
