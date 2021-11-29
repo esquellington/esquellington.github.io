@@ -70,6 +70,10 @@ file:laic.el
 ** DONE Header comment block
 * DONE laic-create-overlays-from-comment-inside
 - All blocks in surrounding comment
+* TODO Ensure non-interactive funcs do NOT CHANGE POINT
+- This is a mess, many funcs change point, and we don't want to have implicit
+  behaviour, so we'll save-excursion in ALL of them, and place point explicitly
+  when required
 * TODO Find other latex block types
 - HARDCODED is fine
 ** DONE \[ \]

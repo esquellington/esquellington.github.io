@@ -69,11 +69,12 @@
 
 ;; NOTE: comment-beginning returns nil if point not inside comment,
 ;; which seems to work, as opposed to (comment-only-p begin end),
-;; which returns inconsistent results
+;; which returns inconsistent results.
 (defun laic-is-point-in-comment-p()
   "Return non-nil if point is in comment, nil otherwise."
-  (comment-normalize-vars)
-  (not (eq (comment-beginning) nil)))
+  (save-excursion ;reverts comment-beginning moving point
+    (comment-normalize-vars)
+    (not (eq (comment-beginning) nil))))
 
 ;; This would be the proper way, but requires finding physical screen size in
 ;; inches, on the XPS13 it's 170dpi... for now we just return 200dpi
@@ -227,6 +228,8 @@
   (save-excursion
     (let (begin end)
       (setq begin (laic-search-forward-latex-begin))
+      (when begin
+        (goto-char begin)) ;move point to begin
       (setq end (laic-search-forward-latex-end))
       (cond ((or (eq begin nil) (eq end nil))
              (message "NOT FOUND")
@@ -241,7 +244,7 @@
     (setq ov (make-overlay begin end))
     (setq img (laic-create-image-from-latex regioncode dpi bgcolor fgcolor))
     (overlay-put ov 'display img) ;sets image to be displayed in overlay
-    (message "LCOFLB be = %d %d = %s" begin end (buffer-substring-no-properties begin end))
+    ;;(message "LCOFLB be = %d %d = %s" begin end (buffer-substring-no-properties begin end))
     ov ))
 
 ;;--------------------------------
@@ -253,7 +256,7 @@
   (save-excursion
     (let (lb be)
       (setq lb ()) ;empty
-      (goto-char begin) ;goto of range
+      (goto-char begin)
       (setq be (laic-search-forward-latex-block)) ;1st block
       (while (and be (<= (nth 1 be) end)) ;non-empty and be.end < end
         (push be lb) ;save block
@@ -266,7 +269,7 @@
   (save-excursion
     (let (lb be)
       (setq lb ()) ;empty
-      (goto-char begin) ;goto of range
+      (goto-char begin)
       (setq be (laic-search-forward-latex-block)) ;1st block
       (while (and be (<= (nth 1 be) end)) ;non-empty and be.end < end
         (let ((b (nth 0 be))
@@ -290,10 +293,9 @@
       (while lb
         (setq be (pop lb))
         (goto-char (nth 0 be)) ;move to begin
-        (laic-create-overlay-from-latex-block
-         (nth 0 be) (nth 1 be) ;begin/end
-         (laic-get-dpi) ;dpi
-         (background-color-at-point) (foreground-color-at-point)) )))) ;bg/fg colors
+        (laic-create-overlay-from-latex-block (nth 0 be) (nth 1 be) ;begin/end
+                                              (laic-get-dpi) ;dpi
+                                              (background-color-at-point) (foreground-color-at-point)) )))) ;bg/fg colors
 
 ;;--------------------------------
 ;; Main interactive functionality
@@ -301,47 +303,45 @@
 
 ;;;###autoload
 (defun laic-create-overlay-from-latex-forward ()
-  "Find next latex block, create overlay and place point at end."
+  "Find next latex block, create overlay and move point to end."
   (interactive)
   (let (be)
     (setq be (laic-search-forward-latex-block))
     (cond ((eq be nil)
            (message "LaTeX block not found"))
           (t
-           (goto-char (nth 0 be)) ;move to begin
-           (laic-create-overlay-from-latex-block
-            (nth 0 be) (nth 1 be) ;begin/end
-            (laic-get-dpi) ;dpi
-            (background-color-at-point) (foreground-color-at-point)) ;bg/fg colors
+           (laic-create-overlay-from-latex-block (nth 0 be) (nth 1 be) ;begin/end
+                                                 (laic-get-dpi) ;dpi
+                                                 (background-color-at-point) (foreground-color-at-point)) ;bg/fg colors
            (goto-char (nth 1 be)) )))) ;move to end
 
+;;;###autoload
 (defun laic-create-overlay-from-latex-inside ()
-  "If point is inside a latex block, create overlay and keep point unchanged."
+  "If point is inside a latex block create overlay and move point to end."
   (interactive)
   (let (pt beginpt endpt)
     (setq pt (point)) ;get current point
     (save-excursion
-      (setq beginpt (laic-search-backward-latex-begin)) ;find prev begin
+      (setq beginpt (laic-search-backward-latex-begin)) ;find prev begin MOVES POINT, but irrelevant because we goto-char after
       (when beginpt ;non-nil begin
         (goto-char beginpt) ;move to begin
         (setq endpt (laic-search-forward-latex-end)))) ;find next end
-
+    ;; Create if found
     (when (and beginpt endpt (< pt endpt)) ;non-nil begin and end + end after current
-      (laic-create-overlay-from-latex-block
-       beginpt endpt ;begin/end
-       (laic-get-dpi) ;dpi
-       (background-color-at-point) (foreground-color-at-point)) ;bg/fg colors
+      (laic-create-overlay-from-latex-block beginpt endpt ;begin/end
+                                            (laic-get-dpi) ;dpi
+                                            (background-color-at-point) (foreground-color-at-point)) ;bg/fg colors
       (goto-char endpt) ))) ;move to end
 
 ;;;###autoload
 (defun laic-create-overlay-from-latex-inside-or-forward ()
-  "If point is inside a latex block create overlay its overlay, otherwise find next latex block."
+  "If point is inside a latex block create overlay overlay, otherwise find next latex block, and move point to end."
   (interactive)
     (let (beginpt endpt)
-      (save-excursion ;avoid changing point
+      (save-excursion ;avoid changing point TODO SHOULD NOT BE NECESSARY if search-fwd did not change point
         (setq beginpt (laic-search-backward-latex-begin))) ;find prev begin
       (when beginpt ;non-nil prev begin
-        (save-excursion ;avoid changing point
+        (save-excursion ;avoid changing point TODO SHOULD NOT BE NECESSARY if search-bwrd did not change point
           (setq endpt (laic-search-backward-latex-end)))) ;find prev end
       ;;if no begin, or prev end is before prev begin --> point is outside begin/end
       (cond ((or
@@ -391,8 +391,8 @@
   (when (laic-is-point-in-comment-p) ;we're inside a comment
     (save-excursion ;avoid changing point
       (let (bc ec)
-        (setq bc (comment-search-backward nil t)) ;comment begin
-        (setq ec (comment-search-forward nil t)) ;comment end
+        (setq bc (comment-search-backward nil t)) ;comment begin, moves point
+        (setq ec (comment-search-forward nil t)) ;comment end, from previously moved point at begin
         ;;DEBUG (message "be = %d %d = %s" bc ec (buffer-substring-no-properties bc ec))
         (laic-create-overlays-from-blocks (laic-gather-latex-blocks bc ec))))))
 
