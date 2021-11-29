@@ -77,10 +77,10 @@ file:laic.el
 * TODO Find other latex block types
 - HARDCODED is fine for now
 ** DONE \[ \]
-** TODO \begin,end equation/*
-** TODO \begin,end eqnarray/*
-** TODO \begin,end align/*
-** TODO maybe custom \begin,end{XXX} environments in an alist?
+** TODO Custom list of begin/end delimiters
+*** DONE Custom list
+*** TODO For search begin/end, find closest wrt point and return list or values
+- just keep MAX if backwards, and MIN if forward
 ** TODO Others?
 - $ and $$,$$ will be tricky because they're symmetric begin/end
 - texfrag probably does this, check code

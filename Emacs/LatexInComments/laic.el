@@ -46,7 +46,7 @@
 
 (defgroup laic nil
   "Render LaTeX blocks in comments."
-  :group 'org) ;;TODO WHAT GROUP!!
+  :group 'tex)
 
 (defcustom laic-output-dir "laic-tmp"
   "Default tmp output directory, relative to current file."
@@ -62,6 +62,15 @@
   "Command for dvipng."
   :group 'laic
   :type 'file)
+
+(defcustom laic-block-delimiter-pairs (list (list "\\[" "\\]")
+                                            (list "\\begin{equation*}" "\\end{equation*}")
+                                            (list "\\begin{equation}" "\\end{equation}")
+                                            (list "\\begin{align}" "\\end{align}")
+                                            (list "\\begin{align*}" "\\end{align*}"))
+  "List of delimiter pairs."
+  :group 'laic
+  :type 'list)
 
 ;;------------------------------------------------------------------------------------------------
 ;; Internal implementation
@@ -202,15 +211,6 @@
 ;;--------------------------------
 ;; LaTeX block searches
 ;;--------------------------------
-(defvar laic--block-begin
-  "\\["
-  ;;"\\begin{equation*}"
-  "Latex begin block specifier.")
-(defvar laic--block-end
-  "\\]"
-  ;;"\\end{equation*}"
-  "Latex end block specifier.")
-
 ;; Return point at the beginning of BEGIN-block, and at the end of END-block
 ;; TODO
 ;; - Find CLOSEST among \[\], \begin\end{equation,eqnarray,align} and starred versions
@@ -219,7 +219,7 @@
   "Search forward latex block begin, return point at beginning."
   (save-excursion
     (let (begin)
-      (setq begin (search-forward laic--block-begin nil t))
+      (setq begin (search-forward (nth 0 (nth 0 laic-block-delimiter-pairs)) nil t))
       (cond ((not (eq begin nil))
              (match-beginning 0)) ;point at beginning of match
             (t
@@ -227,23 +227,23 @@
 (defun laic-search-forward-block-end ()
   "Search forward latex block end, return point at ending."
   (save-excursion
-    (search-forward laic--block-end nil t)))
+    (search-forward (nth 1 (nth 0 laic-block-delimiter-pairs)) nil t)))
 (defun laic-search-backward-block-begin ()
   "Search backward latex block begin, return point at beginning."
   (save-excursion
-    (search-backward laic--block-begin nil t)))
+    (search-backward (nth 0 (nth 0 laic-block-delimiter-pairs)) nil t)))
 (defun laic-search-backward-block-end ()
   "Search backward latex block end, return point at ending."
   (save-excursion
     (let (end)
-      (setq end (search-backward laic--block-end nil t))
+      (setq end (search-backward (nth 1 (nth 0 laic-block-delimiter-pairs)) nil t))
       (cond ((not (eq end nil))
              (match-end 0)) ;point at end of match
             (t
              nil)))))
 
 (defun laic-search-forward-block ()
-  "Find begin/end latex block forward."
+  "Find matching begin/end latex block forward."
   (save-excursion
     (let (begin end)
       (setq begin (laic-search-forward-block-begin))
@@ -251,7 +251,7 @@
         (goto-char begin)) ;move point to begin
       (setq end (laic-search-forward-block-end))
       (cond ((or (eq begin nil) (eq end nil))
-             (message "NOT FOUND")
+             ;;(message "laic-search-forward-block() no LaTeX block found!")
              nil) ;returns nil
             (t
              (list begin end) ))))) ;returns (begin . end) points
@@ -320,7 +320,7 @@
   (let (be)
     (setq be (laic-search-forward-block))
     (cond ((eq be nil)
-           (message "LaTeX block not found"))
+           (message "laic-create-overlay-from-latex-forward() no LaTeX block found!"))
           (t
            (laic-create-overlay-from-block (nth 0 be) (nth 1 be) ;begin/end
                                            (laic-get-dpi) ;dpi
