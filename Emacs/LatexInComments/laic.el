@@ -441,8 +441,8 @@
 (defun laic-create-overlays-from-comment-inside()
   "Create image overlays for all blocks in the current comment around point."
   (interactive)
-  (message "LAIC took %f seconds"
-           (benchmark-elapse ;IMPORTANT (require 'benchmark)
+;;  (message "LAIC took %f seconds"
+;;           (benchmark-elapse ;IMPORTANT (require 'benchmark)
              (when (laic-is-point-in-comment-p) ;we're inside a comment
                (save-excursion ;avoid changing point
                  (let (bc ec)
@@ -450,7 +450,7 @@
                    (setq ec (comment-search-forward nil t)) ;comment end, from previously moved point at begin
                    ;;DEBUG (message "be = %d %d = %s" bc ec (buffer-substring-no-properties bc ec))
                    (laic-create-overlays-from-blocks (laic-gather-blocks bc ec))))))
-             ))
+;;             ))
 
 ;;--------------------------------
 ;; Package setup
