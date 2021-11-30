@@ -74,14 +74,14 @@ file:laic.el
 - This is a mess, many funcs change point, and we don't want to have implicit
   behaviour, so we'll save-excursion in ALL of them, and place point explicitly
   when required
-* TODO Find other latex block types
+* DONE Find other latex block types
 - HARDCODED is fine for now
 ** DONE \[ \]
-** TODO Custom list of begin/end delimiters
+** DONE Custom list of begin/end delimiters
 *** DONE Custom list
-*** TODO For search begin/end, find closest wrt point and return list or values
+*** DONE For search begin/end, find closest wrt point and return list or values
 - just keep MAX if backwards, and MIN if forward
-** TODO Others?
+** DONE Others? --> DON'T BOTHER
 - $ and $$,$$ will be tricky because they're symmetric begin/end
 - texfrag probably does this, check code
   - texfrag-next-frag-function
@@ -96,6 +96,33 @@ file:laic.el
       search forward for an END
   - "toggle closest"
   - closest = begin/end region containing cursor, otherwise immediate next
+* TODO Optimization
+- it's a bit slow, so make it faster
+** DONE Limit search to current best not buffer point min/max
+- works but not significantly faster
+** TODO Also stop searching executables for every single create overlay
+** TODO Try single shell call for all exes chained, separated by ;
+** org preview is SLOW first time, but FASTER successive times
+
+Run with C-c C-x C-l (inside block for single, outside bloc for whole section)
+
+\[ C=\|p_0-p_1\| = 0 \]
+\[ \grad C = \begin{bmatrix} \pdv{C}{p_0} & \pdv{C}{p_1} \end{bmatrix} \]
+\[
+   \dd[4]{x} = \begin{bmatrix} a & b \\ c & d \end{bmatrix}
+\]
+Equation
+             \begin{equation} x=y \end{equation}
+Equation*
+             \begin{equation*}
+               \alpha = \beta
+             \end{equation*}
+Align*
+             \begin{align*}
+               \alpha &= \beta \\
+               \gamma &= \delta
+             \end{align*}
+
 * TODO Add custom package list to latex header
 * TODO Better overlays
 ** TODO laic-remove-overlays --> ONLY owned overlays
@@ -103,6 +130,8 @@ file:laic.el
 *** TODO Find current/closest/next overlay with https://www.gnu.org/software/emacs/manual/html_node/elisp/Finding-Overlays.html
 ** TODO Consider ov package for overlay niceties
 * TODO Consider tooltip instead of overlay
+- This explains how to create overlays and image tooltips
+  http://kitchingroup.cheme.cmu.edu/blog/2016/03/21/Displaying-image-overlays-on-image-filenames-in-Emacs/
 - Less intrusive
 - Optional, would work the similarly, but only inside begin/end, and render as
   tooltip, ideally of any size

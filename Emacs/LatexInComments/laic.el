@@ -135,11 +135,11 @@
 ;;--------------------------------
 (defun laic-convert ( args )
   "Run convert on ARGS argument string."
-  (shell-command (concat laic-command-convert " " args laic-OS-null-sink)))
+  (shell-command (concat laic-command-convert " " args laic-OS-null-sink) nil nil))
 
 (defun laic-dvipng ( args )
   "Run dvipng on ARGS argument string."
-  (shell-command (concat laic-command-dvipng " " args laic-OS-null-sink)))
+  (shell-command (concat laic-command-dvipng " " args laic-OS-null-sink) nil nil))
 
 (defun laic-create-image-from-latex ( code dpi bgcolor fgcolor )
   "Create an image from latex string with given dpi and bg/fg colors and return it."
@@ -170,7 +170,7 @@
 
     ;; Run latex on tmp file with no output
     ;; TODO laic-latex command (also, instead of cd, could we force latex output to specific dir? -o maybe?)
-    (shell-command (concat "cd " (laic-OS-dir laic-output-dir) "; latex " tmpfilename_tex laic-OS-null-sink))
+    (shell-command (concat "cd " (laic-OS-dir laic-output-dir) "; latex " tmpfilename_tex laic-OS-null-sink) nil nil)
 
     ;; Run dvipng
     ;;   -bg \"rgb 0.13 0.13 0.13\" using double quotes is required for Windows (Linux also supports single quotes '..')
@@ -216,73 +216,73 @@
 ;; `laic-block-delimiter-pairs'
 (defun laic-search-forward-block-begin ()
   "Search forward closest latex block begin, return point at beginning."
-  (let (begin b ld d)
-    (setq begin (point-max)) ;init to end of buffer
+  (let (best b ld d)
+    (setq best (point-max)) ;init to end of buffer
     (setq ld laic-block-delimiter-pairs)
     ;; search for all delimiters
     (while ld
       (setq d (pop ld))
       (save-excursion
-        (setq b (search-forward (nth 0 d) nil t))) ;find begin delimiter
-      (when (and b (< b begin))
-        (setq begin (match-beginning 0)))) ;point at beginning of match
+        (setq b (search-forward (nth 0 d) best t))) ;find begin delimiter, if closer than best
+      (when (and b (< b best))
+        (setq best (match-beginning 0)))) ;point at beginning of match
     ;; return closest delimiter
-    (cond ((and begin (< begin (point-max)))
-           begin)
+    (cond ((and best (< best (point-max)))
+           best)
           (t
            nil))))
 
 (defun laic-search-forward-block-end ()
   "Search forward closest latex block end, return point at end."
-  (let (end e ld d)
-    (setq end (point-max)) ;init to end of buffer
+  (let (best e ld d)
+    (setq best (point-max)) ;init to end of buffer
     (setq ld laic-block-delimiter-pairs)
     ;; search for all delimiters
     (while ld
       (setq d (pop ld))
       (save-excursion
-        (setq e (search-forward (nth 1 d) nil t))) ;find end delimiter
-      (when (and e (< e end))
-        (setq end (match-end 0)))) ;point at end of match
+        (setq e (search-forward (nth 1 d) best t))) ;find end delimiter, if closer than best
+      (when (and e (< e best))
+        (setq best (match-end 0)))) ;point at end of match
     ;; return closest delimiter
-    (cond ((and end (< end (point-max)))
-           end)
+    (cond ((and best (< best (point-max)))
+           best)
           (t
            nil))))
 
 (defun laic-search-backward-block-begin ()
   "Search forward closest latex block begin, return point at begin."
-  (let (begin e ld d)
-    (setq begin (point-min)) ;init to begin of buffer
+  (let (best e ld d)
+    (setq best (point-min)) ;init to begin of buffer
     (setq ld laic-block-delimiter-pairs)
     ;; search for all delimiters
     (while ld
       (setq d (pop ld))
       (save-excursion
-        (setq e (search-backward (nth 0 d) nil t))) ;find begin delimiter
-      (when (and e (> e begin))
-        (setq begin (match-beginning 0)))) ;point at begin of match
+        (setq e (search-backward (nth 0 d) best t))) ;find begin delimiter, if closer than best
+      (when (and e (> e best))
+        (setq best (match-beginning 0)))) ;point at begin of match
     ;; return closest delimiter
-    (cond ((and begin (> begin (point-min)))
-           begin)
+    (cond ((and best (> best (point-min)))
+           best)
           (t
            nil))))
 
 (defun laic-search-backward-block-end ()
   "Search forward closest latex block end, return point at end."
-  (let (end e ld d)
-    (setq end (point-min)) ;init to begin of buffer
+  (let (best e ld d)
+    (setq best (point-min)) ;init to begin of buffer
     (setq ld laic-block-delimiter-pairs)
     ;; search for all delimiters
     (while ld
       (setq d (pop ld))
       (save-excursion
-        (setq e (search-backward (nth 1 d) nil t))) ;find end delimiter
-      (when (and e (> e end))
-        (setq end (match-end 0)))) ;point at end of match
+        (setq e (search-backward (nth 1 d) best t))) ;find end delimiter, if closer than best
+      (when (and e (> e best))
+        (setq best (match-end 0)))) ;point at end of match
     ;; return closest delimiter
-    (cond ((and end (> end (point-min)))
-           end)
+    (cond ((and best (> best (point-min)))
+           best)
           (t
            nil))))
 
@@ -441,13 +441,16 @@
 (defun laic-create-overlays-from-comment-inside()
   "Create image overlays for all blocks in the current comment around point."
   (interactive)
-  (when (laic-is-point-in-comment-p) ;we're inside a comment
-    (save-excursion ;avoid changing point
-      (let (bc ec)
-        (setq bc (comment-search-backward nil t)) ;comment begin, moves point
-        (setq ec (comment-search-forward nil t)) ;comment end, from previously moved point at begin
-        ;;DEBUG (message "be = %d %d = %s" bc ec (buffer-substring-no-properties bc ec))
-        (laic-create-overlays-from-blocks (laic-gather-blocks bc ec))))))
+  (message "LAIC took %f seconds"
+           (benchmark-elapse ;IMPORTANT (require 'benchmark)
+             (when (laic-is-point-in-comment-p) ;we're inside a comment
+               (save-excursion ;avoid changing point
+                 (let (bc ec)
+                   (setq bc (comment-search-backward nil t)) ;comment begin, moves point
+                   (setq ec (comment-search-forward nil t)) ;comment end, from previously moved point at begin
+                   ;;DEBUG (message "be = %d %d = %s" bc ec (buffer-substring-no-properties bc ec))
+                   (laic-create-overlays-from-blocks (laic-gather-blocks bc ec))))))
+             ))
 
 ;;--------------------------------
 ;; Package setup
