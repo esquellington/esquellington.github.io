@@ -96,12 +96,15 @@ file:laic.el
       search forward for an END
   - "toggle closest"
   - closest = begin/end region containing cursor, otherwise immediate next
-* TODO Optimization
+* DONE Optimization --> not easy... org-latex-preview is ALSO slow, only caching halps
 - it's a bit slow, so make it faster
 ** DONE Limit search to current best not buffer point min/max
 - works but not significantly faster
-** TODO Also stop searching executables for every single create overlay
-** TODO Try single shell call for all exes chained, separated by ;
+** DONE Also stop searching executables for every single create overlay
+- NO difference at all
+** DONE Try single shell call for all exes chained, separated by ;
+- May not make any difference... I tried benchmarking 4x shell-command calls vs
+  1x doing 4x commands sparated by ;, and difference is negligible
 ** org preview is SLOW first time, but FASTER successive times
 
 Run with C-c C-x C-l (inside block for single, outside bloc for whole section)
