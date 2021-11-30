@@ -220,7 +220,7 @@
   (save-excursion
     (let (begin)
       (setq begin (search-forward (nth 0 (nth 0 laic-block-delimiter-pairs)) nil t))
-      (cond ((not (eq begin nil))
+      (cond (begin
              (match-beginning 0)) ;point at beginning of match
             (t
              nil)))))
@@ -237,7 +237,7 @@
   (save-excursion
     (let (end)
       (setq end (search-backward (nth 1 (nth 0 laic-block-delimiter-pairs)) nil t))
-      (cond ((not (eq end nil))
+      (cond (end
              (match-end 0)) ;point at end of match
             (t
              nil)))))
@@ -257,6 +257,97 @@
              (list begin end) ))))) ;returns (begin . end) points
 
 ;;--------------------------------
+;; LaTeX block multi searches
+;;--------------------------------
+;; Return point at the beginning of BEGIN-block, and at the end of END-block
+;; - Find CLOSEST among delimiters in `laic-block-delimiter-pairs'
+(defun laic-search-forward-block-begin-multi ()
+  "Search forward closest latex block begin, return point at beginning."
+  (let (begin b ld d)
+    (setq begin (point-max)) ;init to end of buffer
+    (setq ld laic-block-delimiter-pairs)
+    ;; search for all delimiters
+    (while ld
+      (setq d (pop ld))
+      (save-excursion
+        (setq b (search-forward (nth 0 d) nil t))) ;find begin delimiter
+      (when (and b (< b begin))
+        (setq begin (match-beginning 0)))) ;point at beginning of match
+    ;; return closest delimiter
+    (cond ((and begin (< begin (point-max)))
+           begin)
+          (t
+           nil))))
+
+(defun laic-search-forward-block-end-multi ()
+  "Search forward closest latex block end, return point at end."
+  (let (end e ld d)
+    (setq end (point-max)) ;init to end of buffer
+    (setq ld laic-block-delimiter-pairs)
+    ;; search for all delimiters
+    (while ld
+      (setq d (pop ld))
+      (save-excursion
+        (setq e (search-forward (nth 1 d) nil t))) ;find end delimiter
+      (when (and e (< e end))
+        (setq end (match-end 0)))) ;point at end of match
+    ;; return closest delimiter
+    (cond ((and end (< end (point-max)))
+           end)
+          (t
+           nil))))
+
+(defun laic-search-backward-block-begin-multi ()
+  "Search forward closest latex block begin, return point at begin."
+  (let (begin e ld d)
+    (setq begin (point-min)) ;init to begin of buffer
+    (setq ld laic-block-delimiter-pairs)
+    ;; search for all delimiters
+    (while ld
+      (setq d (pop ld))
+      (save-excursion
+        (setq e (search-backward (nth 0 d) nil t))) ;find begin delimiter
+      (when (and e (> e begin))
+        (setq begin (match-beginning 0)))) ;point at begin of match
+    ;; return closest delimiter
+    (cond ((and begin (> begin (point-min)))
+           begin)
+          (t
+           nil))))
+
+(defun laic-search-backward-block-end-multi ()
+  "Search forward closest latex block end, return point at end."
+  (let (end e ld d)
+    (setq end (point-min)) ;init to begin of buffer
+    (setq ld laic-block-delimiter-pairs)
+    ;; search for all delimiters
+    (while ld
+      (setq d (pop ld))
+      (save-excursion
+        (setq e (search-backward (nth 1 d) nil t))) ;find end delimiter
+      (when (and e (> e end))
+        (setq end (match-end 0)))) ;point at end of match
+    ;; return closest delimiter
+    (cond ((and end (> end (point-min)))
+           end)
+          (t
+           nil))))
+
+(defun laic-search-forward-block-multi ()
+  "Find matching begin/end latex block forward."
+  (save-excursion
+    (let (begin end)
+      (setq begin (laic-search-forward-block-begin-multi))
+      (when begin
+        (goto-char begin)) ;move point to begin
+      (setq end (laic-search-forward-block-end-multi))
+      (cond ((or (eq begin nil) (eq end nil))
+             ;;(message "laic-search-forward-block() no LaTeX block found!")
+             nil) ;returns nil
+            (t
+             (list begin end) )))))
+
+;;--------------------------------
 ;; Region functionality
 ;;--------------------------------
 
@@ -266,11 +357,11 @@
     (let (lb be)
       (setq lb ()) ;empty
       (goto-char begin)
-      (setq be (laic-search-forward-block)) ;1st block
+      (setq be (laic-search-forward-block-multi)) ;first block
       (while (and be (<= (nth 1 be) end)) ;non-empty and be.end < end
         (push be lb) ;save block
         (goto-char (nth 1 be)) ;skip block
-        (setq be (laic-search-forward-block))) ;next block
+        (setq be (laic-search-forward-block-multi))) ;next block
       (reverse lb) )))
 
 (defun laic-gather-blocks-in-comments( begin end )
@@ -279,7 +370,7 @@
     (let (lb be)
       (setq lb ()) ;empty
       (goto-char begin)
-      (setq be (laic-search-forward-block)) ;1st block
+      (setq be (laic-search-forward-block-multi)) ;1st block
       (while (and be (<= (nth 1 be) end)) ;non-empty and be.end < end
         (let ((b (nth 0 be))
               (e (nth 1 be)))
@@ -290,7 +381,7 @@
             ;;DEBUG (message "COMMENT in %d %d" b e)
             (push be lb)) ;save block
           (goto-char e) ;skip to block end
-          (setq be (laic-search-forward-block)))) ;next block
+          (setq be (laic-search-forward-block-multi)))) ;next block
       (reverse lb) )))
 
 ;; TODO Return listoverlays
@@ -318,7 +409,7 @@
   "Find next latex block, create overlay and move point to end."
   (interactive)
   (let (be)
-    (setq be (laic-search-forward-block))
+    (setq be (laic-search-forward-block-multi))
     (cond ((eq be nil)
            (message "laic-create-overlay-from-latex-forward() no LaTeX block found!"))
           (t
@@ -333,10 +424,10 @@
   (interactive)
   (let (pt beginpt endpt)
     (setq pt (point)) ;get current point
-    (setq beginpt (laic-search-backward-block-begin)) ;find prev begin
+    (setq beginpt (laic-search-backward-block-begin-multi)) ;find prev begin
     (when beginpt ;non-nil begin
       (goto-char beginpt) ;move to begin
-      (setq endpt (laic-search-forward-block-end))) ;find next end
+      (setq endpt (laic-search-forward-block-end-multi))) ;find next end
     ;; Create if found
     (when (and beginpt endpt (< pt endpt)) ;non-nil begin and end + end after current
       (laic-create-overlay-from-block beginpt endpt ;begin/end
@@ -349,9 +440,9 @@
   "If point is inside a latex block create overlay overlay, otherwise find next latex block, and move point to end."
   (interactive)
     (let (beginpt endpt)
-      (setq beginpt (laic-search-backward-block-begin)) ;find prev begin wrt point
+      (setq beginpt (laic-search-backward-block-begin-multi)) ;find prev begin wrt point
       (when beginpt ;non-nil prev begin
-        (setq endpt (laic-search-backward-block-end))) ;find prev end wrt point
+        (setq endpt (laic-search-backward-block-end-multi))) ;find prev end wrt point
       ;;if no begin, or prev end is before prev begin --> point is outside begin/end
       (cond ((or
               (eq beginpt nil)
