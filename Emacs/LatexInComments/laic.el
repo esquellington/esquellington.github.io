@@ -61,7 +61,8 @@
   :group 'laic
   :type 'file)
 
-(defcustom laic-block-delimiter-pairs (list (list "\\[" "\\]")
+(defcustom laic-block-delimiter-pairs (list (list "\\(" "\\)")
+                                            (list "\\[" "\\]")
                                             (list "\\begin{equation*}" "\\end{equation*}")
                                             (list "\\begin{equation}" "\\end{equation}")
                                             (list "\\begin{align}" "\\end{align}")
@@ -70,8 +71,10 @@
   :group 'laic
   :type 'list)
 
-(defcustom laic-extra-packages "physics"
-  "List of extra packages separated by commas (no params supported yet)."
+(defcustom laic-extra-packages ""
+  "List of extra package names, separated by commas.  Packages
+amsmath,amsfonts are included by default. NOTE: Adding extra
+packages may significantly slow preview generation down."
   :group 'laic
   :type 'string)
 

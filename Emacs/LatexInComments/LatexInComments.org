@@ -125,6 +125,7 @@ Align*
                \alpha &= \beta \\
                \gamma &= \delta
              \end{align*}
+** DONE MUCH FASTER without \usepackage{physics}
 * DONE Add custom package list to latex header
 - Just a string of comma-separated package names, for now
 * TODO Single command/keybinding C-c C-x C-l "DWIM" like org-latex-preview
@@ -132,6 +133,13 @@ Align*
 - If outside block, preview all blocks
 - SEPARATE command to preview current-or-next?
   \[ a+b =c \]
+* TODO LaTeX packages for diff eq
+- physics seems criticised and slow, consider alternatives
+- diffcoeff looks good
+  https://www.ctan.org/texarchive/macros/latex/contrib/diffcoeff, last version
+  is from 2019
+- this one is also recommended and newer https://www.ctan.org/pkg/derivative,
+  last version is from 2021. Macros look nicer/simpler than diffcoeff
 * TODO WON'T DO
 ** TODO Better overlays
 *** TODO laic-remove-overlays --> ONLY owned overlays
