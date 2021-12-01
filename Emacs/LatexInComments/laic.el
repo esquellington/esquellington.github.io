@@ -10,18 +10,16 @@
 ;;
 ;;; Commentary:
 ;;
-;; Provides functions to BLA BLA BLA
-;;
 ;; Functionality:
-;; - Calling the interactive function `laic-create-overlay-from-latex-forward' BLA BLA BLA
-;; - Temporary files are stored in the customizable `org-sketch-output-dir'
-;;   relative to current file path.
+;; - The interactive function `laic-create-overlay-from-latex-inside-or-forward' creates preview for current/next block
+;; - The interactive function `laic-create-overlays-from-comment-inside' creates for all blocks in current comment
+;; - Temporary files are stored in the customizable `laic-output-dir' relative to current file path.
 ;;
 ;; Installation:
-;; - Add (require 'laic) to your mode hook.
-;; - Optionally add a local keybinding (suggested "C-c l") to call the provided
-;;   functions `laic-create-overlay-from-latex-forward' and/or
-;;   `laic-create-overlay-from-latex-inside'
+;; - Add (require 'laic) to your (programming) mode hook.
+;; - Optionally add a local keybinding (suggested "C-c C-x C-l") to call
+;;   functions `laic-create-overlay-from-latex-inside-or-forward' and/or
+;;   `laic-create-overlays-from-comment-inside'
 ;;
 ;;; License:
 ;;
@@ -71,6 +69,11 @@
   "List of delimiter pairs."
   :group 'laic
   :type 'list)
+
+(defcustom laic-extra-packages "physics"
+  "List of extra packages separated by commas (no params supported yet)."
+  :group 'laic
+  :type 'string)
 
 ;;------------------------------------------------------------------------------------------------
 ;; Internal implementation
@@ -153,7 +156,9 @@
     (make-directory laic-output-dir))
 
   ;; Try to create image
-  (let (tmpfilename tmpfilename_tex tmpfilename_dvi tmpfilename_png prefix suffix fullcode img)
+  (let (tmpfilename tmpfilename_tex tmpfilename_dvi tmpfilename_png
+        prefix defaultpackages extrapackages fullcode
+        img)
 
     ;; Create temporary filename using Unix epoch in seconds
     (setq tmpfilename (format "tmp-%d" (* 1000 (float-time))))
@@ -162,10 +167,16 @@
     (setq tmpfilename_png (expand-file-name (concat (laic-OS-dir laic-output-dir) tmpfilename ".png")))
 
     ;; Compose latex code into temporary file
-    ;; TODO Add customizable list of packages
-    (setq prefix "\\documentclass{article}\n\\pagestyle{empty}\n\\usepackage{amsmath,amsfonts,physics}\n\\begin{document}\n")
-    (setq suffix "\\end{document}\n")
-    (setq fullcode (concat prefix code "\n" suffix))
+    (setq prefix "\\documentclass{article}\n\\pagestyle{empty}\n")
+    (setq defaultpackages "\\usepackage{amsmath,amsfonts}\n")
+    (setq extrapackages (concat "\\usepackage{" laic-extra-packages "}\n"))
+    (setq fullcode (concat
+                    prefix
+                    defaultpackages
+                    extrapackages
+                    "\\begin{document}\n"
+                    code
+                    "\n\\end{document}\n"))
     (write-region fullcode nil tmpfilename_tex)
 
     ;; Run latex on tmp file with no output
@@ -400,7 +411,7 @@
       (cond ((or
               (eq beginpt nil)
               (and endpt (< beginpt endpt)))
-             (laic-create-overlay-from-latex-forward))
+             (laic-create-overlay-from-latex-forward)) ;;TODO Alternatively, could convert whole comment IFF inside comment
             (t ;otherwise, point is inside begin/end
              (laic-create-overlay-from-latex-inside)) )))
 
