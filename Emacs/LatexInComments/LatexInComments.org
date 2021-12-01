@@ -127,12 +127,13 @@ Align*
              \end{align*}
 
 * TODO Add custom package list to latex header
-* TODO Better overlays
-** TODO laic-remove-overlays --> ONLY owned overlays
-*** TODO Save in list OR assign specific property to identify laic-created overlays
-*** TODO Find current/closest/next overlay with https://www.gnu.org/software/emacs/manual/html_node/elisp/Finding-Overlays.html
-** TODO Consider ov package for overlay niceties
-* TODO Consider tooltip instead of overlay
+* TODO WON'T DO
+** TODO Better overlays
+*** TODO laic-remove-overlays --> ONLY owned overlays
+**** TODO Save in list OR assign specific property to identify laic-created overlays
+**** TODO Find current/closest/next overlay with https://www.gnu.org/software/emacs/manual/html_node/elisp/Finding-Overlays.html
+*** TODO Consider ov package for overlay niceties
+** TODO Consider tooltip instead of overlay
 - This explains how to create overlays and image tooltips
   http://kitchingroup.cheme.cmu.edu/blog/2016/03/21/Displaying-image-overlays-on-image-filenames-in-Emacs/
 - Less intrusive
@@ -140,7 +141,7 @@ Align*
   tooltip, ideally of any size
 - Ideally create image the SAME way, but only show it as overlay
 - MUST cache it or it'll be very slow
-* TODO Syntax-highlight latex blocks in comments
+** TODO Syntax-highlight latex blocks in comments
 - Highlight subtly even when no overlay has been created, ideally subtly
   different shade of comment color, I think Org does something similar
 * TODO BUGS
