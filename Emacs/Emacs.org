@@ -52,6 +52,8 @@ Emacs hacking and tests
 * org-mode stuff: file:advanced_org_features.org
 * Literary programming howto/exercise: file:test-avx.org
 * Latex in comments file:LatexInComments/LatexInComments.org
+* Avy advanded usage
+https://karthinks.com/software/avy-can-do-anything/
 * Unicode in Emacs
 - http://ergoemacs.org/emacs/emacs_n_unicode.html
 - M-x insert character OR C-x 8 RET
