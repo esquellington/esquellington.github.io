@@ -98,8 +98,14 @@ packages may significantly slow preview generation down."
 ;;              (* (display-pixel-height) (display-pixel-height))))
 ;;     13.0)) ;TODO (physical-screen-diagonal-size-in-inches)))
 (defun laic-get-dpi()
-  "Return text DPI at point."
+  "Return screen DPI."
   200)
+
+;; From org--get-display-dpi(), but yields tiny formulas!
+;; (defun laic-get-dpi ()
+;;   "Return screen DPI."
+;;   (round (/ (display-pixel-height)
+;;             (/ (display-mm-height) 25.4))))
 
 (defun laic-convert-color-to-dvipng-arg( color )
   "Convert Emacs COLOR string \"#RRGGBB\" to dvipng argument string."
@@ -170,7 +176,7 @@ packages may significantly slow preview generation down."
     (setq tmpfilename_png (expand-file-name (concat (laic-OS-dir laic-output-dir) tmpfilename ".png")))
 
     ;; Compose latex code into temporary file
-    (setq prefix "\\documentclass{article}\n\\pagestyle{empty}\n") ;minimal docuument class also works, slightly faster
+    (setq prefix "\\documentclass{article}\n\\pagestyle{empty}\n") ;minimal docuument class 10% faster, but limited
     (setq packages "\\usepackage{amsmath,amsfonts}\n") ;amsfonts adds \( \approx 0 \)  overhead, so add it
     (setq packages (concat packages "\\usepackage{" laic-extra-packages "}\n")) ;works even if empty
     (setq fullcode (concat
@@ -454,8 +460,8 @@ packages may significantly slow preview generation down."
 (defun laic-create-overlays-from-comment-inside()
   "Create image overlays for all blocks in the current comment around point."
   (interactive)
-  (message "LAIC took %f seconds"
-           (benchmark-elapse ;IMPORTANT (require 'benchmark)
+;;  (message "LAIC took %f seconds"
+;;           (benchmark-elapse ;IMPORTANT (require 'benchmark)
              (when (laic-is-point-in-comment-p) ;we're inside a comment
                (save-excursion ;avoid changing point
                  (let (bc ec)
@@ -463,7 +469,7 @@ packages may significantly slow preview generation down."
                    (setq ec (comment-search-forward nil t)) ;comment end, from previously moved point at begin
                    ;;DEBUG (message "be = %d %d = %s" bc ec (buffer-substring-no-properties bc ec))
                    (laic-create-overlays-from-blocks (laic-gather-blocks bc ec))))))
-             ))
+;;             ))
 
 ;;--------------------------------
 ;; Package setup
