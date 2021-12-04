@@ -122,14 +122,25 @@ packages may significantly slow preview generation down."
 ;;--------------------------------
 ;; OS-specific
 ;; NOTE: same as in org-sketch.el
+;; OPTIMIZATION: It may be faster to send both to /dev/null
 ;;--------------------------------
 (defvar laic-OS-null-sink
   (cond ((eq system-type 'windows-nt)
          " > NUL 2> laic_errors.txt")
         (t ;;else 'gnu/linux, 'darwin, etc...
-         " > /dev/null 2> laic_errors.txt")
+         (concat " > /dev/null 2> " (laic-OS-dir laic-output-dir) "laic_errors.txt" ))
         (t ""))
   "OS-specific commandline args to redirect output to null sink.")
+
+;; TODO should be buffer-local!!
+(defvar laic--list-temp-files
+  ()
+  "List of temporary files that were created and should be later deleted.")
+
+;; TODO should be buffer-local!!
+(defvar laic--list-overlays
+  ()
+  "List of laic-created overlays.")
 
 (defun laic-OS-touch-file ( filename )
   "OS-specific touch FILENAME to create it or update its timestamp."
@@ -189,7 +200,7 @@ packages may significantly slow preview generation down."
     ;; the latex block with desired fg/bg colours
     ;;
     ;; NOTE:
-    ;; - latex must run in the same dir as the .tex, so we cd into it
+    ;; - latex reads .tex and outputs .dvi/.log/.aux files in working dir, so we must cd into it
     ;; - dvipng
     ;;   -bg \"rgb 0.13 0.13 0.13\" using double quotes is required for Windows (Linux also supports single quotes '..')
     ;;   -bg Transparent works, but Emacs seems to ignore transparency
@@ -231,11 +242,14 @@ packages may significantly slow preview generation down."
     ;; Create image object, expand-file-name is requied
     (setq img (create-image tmpfilename_png))
 
-    ;; Cleanup temp files, but not .png as it's required to insert/overlay later
+    ;; Cleanup temp files
     (delete-file tmpfilename_tex)
     (delete-file tmpfilename_dvi)
     (delete-file (expand-file-name (concat (laic-OS-dir laic-output-dir) tmpfilename ".aux")))
     (delete-file (expand-file-name (concat (laic-OS-dir laic-output-dir) tmpfilename ".log")))
+
+    ;; Save .png for future deletion, as it's required while overlay is visible
+    (push tmpfilename_png laic--list-temp-files)
 
     ;; Return image
     img))
@@ -248,6 +262,7 @@ packages may significantly slow preview generation down."
     (setq img (laic-create-image-from-latex regioncode dpi bgcolor fgcolor))
     (overlay-put ov 'display img) ;sets image to be displayed in overlay
     ;;(message "LCOFLB be = %d %d = %s" begin end (buffer-substring-no-properties begin end))
+    (push ov laic--list-overlays)
     ov ))
 
 ;;--------------------------------
@@ -446,12 +461,17 @@ packages may significantly slow preview generation down."
             (t ;otherwise, point is inside begin/end
              (laic-create-overlay-from-latex-inside)) )))
 
-;; TODO Should only remove overlays added by laic, saved in a buffer-local variable laic--overlays?
+;; TODO Should only remove overlays added by laic, which would be automatic if laic--list* vars were buffer-local
+;; TODO CAN remove only overlays in BEGIN END region
 ;;;###autoload
 (defun laic-remove-overlays ()
-  "Remove all overlays."
+  "Remove all overlays and delete all temporary files."
   (interactive)
-  (remove-overlays))
+  ;;(remove-overlays) ; Would remove ALL overlays in a buffer, not just laic ones
+  (while laic--list-overlays
+    (delete-overlay (pop laic--list-overlays)))
+  (while laic--list-temp-files
+    (delete-file (pop laic--list-temp-files))))
 
 ;;----------------------------------------------------------------
 ;; Buffer/Region interactive functionality

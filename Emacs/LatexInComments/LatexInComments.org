@@ -96,6 +96,8 @@ file:laic.el
       search forward for an END
   - "toggle closest"
   - closest = begin/end region containing cursor, otherwise immediate next
+* DONE Add custom package list to latex header
+- Just a string of comma-separated package names, for now
 * DONE Optimization --> not easy... org-latex-preview is ALSO slow, only caching halps
 - it's a bit slow, so make it faster
 ** DONE Limit search to current best not buffer point min/max
@@ -133,20 +135,31 @@ Align*
 - timings over (article)
 - SO, could we just generate smaller .dvi or .png and skip convert -trim?
 - YESS! "dvipng -T tight" is almost free and produces already trimmed .png!
-* DONE Add custom package list to latex header
-- Just a string of comma-separated package names, for now
-* TODO Single command/keybinding C-c C-x C-l "DWIM" like org-latex-preview
-- If inside block, preview it
-- If outside block, preview all blocks
-- SEPARATE command to preview current-or-next?
-  \[ a+b =c \]
-* TODO LaTeX packages for diff eq
-- physics seems criticised and slow, consider alternatives
+** DONE Merging all commands into single shell-command is slightly faster
+** DONE Consider sending latex output to dvipng through pipe --> THiS is just yak shaving, DO NOT DO IT
+- dvipng has a --follow option that seems to read while latex is outputting and
+  may be faster
+- profile latex + dvipng with:
+  shell > time latex --interaction=batchmode PROVA.tex; time dvipng -q -D 200 -T tight -bg "rgb 1 0 0" -fg "rgb 0 1 0" PROVA.dvi -o PROVA.png
+* DONE LaTeX packages for diff eq --> Cool but let's keep it simple, adding extra packages makes laic commands MUCH SLOWER
+- physics seems criticised and VERY slow (3x slower than just
+  amsmath+amsfonts!), consider alternatives
 - diffcoeff looks good
   https://www.ctan.org/texarchive/macros/latex/contrib/diffcoeff, last version
   is from 2019
 - this one is also recommended and newer https://www.ctan.org/pkg/derivative,
   last version is from 2021. Macros look nicer/simpler than diffcoeff
+* DONE Cleanup .png images after showing overlay!
+- For some reason if .png is deleted after creating img, it does not display
+- BUT if I create overlay and then delete the .png manually, it shows correctly
+- SO, we should delay .png deletion
+* TODO Remove only overlays created by laic
+\[ \alpha = \beta \]
+* TODO Single command/keybinding C-c C-x C-l "DWIM" like org-latex-preview
+- If inside block, preview it
+- If outside block, preview all blocks
+- SEPARATE command to preview current-or-next?
+  \[ a+b =c \]
 * TODO WON'T DO
 ** TODO Better overlays
 *** TODO laic-remove-overlays --> ONLY owned overlays
@@ -164,6 +177,10 @@ Align*
 ** TODO Syntax-highlight latex blocks in comments
 - Highlight subtly even when no overlay has been created, ideally subtly
   different shade of comment color, I think Org does something similar
+** TODO LatexInCode > LaterInComments
+- Instead of just converting comments to latex, consider converting come code
+  text (variables) into LaTeX, ex "alpha" --> "\alpha", subindices, etc
+- This is probably useless, forget it
 * TODO BUGS
 ** TODO Foreground color is sometimes wrong
 - Background is always correct though
