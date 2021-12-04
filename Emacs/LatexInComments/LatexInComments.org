@@ -129,6 +129,10 @@ Align*
 ** DONE 10% faster using \documentclass{minimal} instead of {article}
 - BUT minimal is not recommended because it lacks support for font sizes, and
   some basic func... so better avoid it
+** DONE Skipping convert -trim saves 40%! (1.1->0.66) --> using "dvipng -T tight" 0.7!
+- timings over (article)
+- SO, could we just generate smaller .dvi or .png and skip convert -trim?
+- YESS! "dvipng -T tight" is almost free and produces already trimmed .png!
 * DONE Add custom package list to latex header
 - Just a string of comma-separated package names, for now
 * TODO Single command/keybinding C-c C-x C-l "DWIM" like org-latex-preview

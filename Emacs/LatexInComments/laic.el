@@ -145,20 +145,18 @@ packages may significantly slow preview generation down."
 ;;--------------------------------
 ;; LaTeX + Image processing
 ;;--------------------------------
-(defun laic-convert ( args )
+(defun DEPRECATED_laic-convert ( args )
   "Run convert on ARGS argument string."
   (shell-command (concat laic-command-convert " " args laic-OS-null-sink) nil nil))
 
-(defun laic-dvipng ( args )
-  "Run dvipng on ARGS argument string."
-  (shell-command (concat laic-command-dvipng " " args laic-OS-null-sink) nil nil))
-
 (defun laic-create-image-from-latex ( code dpi bgcolor fgcolor )
   "Create an image from latex string with given dpi and bg/fg colors and return it."
+
+  ;; TEMP convert is no longer required
   ;; Ensure convert exists
-  (unless (executable-find laic-command-convert)
-    (error "Could not run ImageMagick convert as '%s', please install and/or customize laic-command-convert"
-           laic-command-convert))
+  ;;  (unless (executable-find laic-command-convert)
+  ;;    (error "Could not run ImageMagick convert as '%s', please install and/or customize laic-command-convert"
+  ;;           laic-command-convert))
 
   ;; Create output dir if required
   (when (not (file-directory-p laic-output-dir))
@@ -187,28 +185,53 @@ packages may significantly slow preview generation down."
                     "\n\\end{document}\n"))
     (write-region fullcode nil tmpfilename_tex)
 
-    ;; Run latex on tmp file with no output
-    ;; TODO laic-latex command (also, instead of cd, could we force latex output to specific dir? -o maybe?)
-    (shell-command (concat "cd " (laic-OS-dir laic-output-dir) "; latex " tmpfilename_tex laic-OS-null-sink) nil nil)
-
-    ;; Run dvipng
+    ;; Run latex on tmp file and then run dvipng to generate trimmed image for
+    ;; the latex block with desired fg/bg colours
+    ;;
+    ;; NOTE:
+    ;; - latex must run in the same dir as the .tex, so we cd into it
+    ;; - dvipng
     ;;   -bg \"rgb 0.13 0.13 0.13\" using double quotes is required for Windows (Linux also supports single quotes '..')
     ;;   -bg Transparent works, but Emacs seems to ignore transparency
+    ;;
     ;; TODO:
     ;; - Retrieve DPI programmatically and pass as -D argument
-    (laic-dvipng (concat " -D " (number-to-string dpi) ;DPI
-                         " -bg \"" (laic-convert-color-to-dvipng-arg bgcolor) "\"" ;background color
-                         " -fg \"" (laic-convert-color-to-dvipng-arg fgcolor) "\"" ;foreground color
-                         " " tmpfilename_dvi ;input
-                         " -o " tmpfilename_png)) ;output
+    (shell-command (concat "cd " (laic-OS-dir laic-output-dir)
+                           ;; LaTeX: .tex -> .dvi
+                           "; latex --interaction=batchmode " tmpfilename_tex laic-OS-null-sink
+                           ;; dvipng: .dvi -> .png
+                           "; " laic-command-dvipng
+                           " -D " (number-to-string dpi) ;DPI
+                           " -bg \"" (laic-convert-color-to-dvipng-arg bgcolor) "\"" ;background color
+                           " -fg \"" (laic-convert-color-to-dvipng-arg fgcolor) "\"" ;foreground color
+                           " -T tight" ;avoid whitespace -> equivalent to "convert -trim", but MUCH faster
+                           " -q" ;quiet
+                           " " tmpfilename_dvi ;input
+                           " -o " tmpfilename_png ;output
+                           laic-OS-null-sink)
+                   nil nil)
 
-    ;; Convert: Trim empty space
-    (laic-convert (concat " -trim " tmpfilename_png " " tmpfilename_png))
+    ;; OLD WAY: run separate shell-command, slightly slower
+    ;; Run latex on tmp file with no output
+    ;; (shell-command (concat "cd " (laic-OS-dir laic-output-dir)
+    ;;                        "; latex --interaction=batchmode " tmpfilename_tex laic-OS-null-sink) nil nil)
+    ;; (shell-command (concat laic-command-dvipng
+    ;;                        " -D " (number-to-string dpi) ;DPI
+    ;;                        " -bg \"" (laic-convert-color-to-dvipng-arg bgcolor) "\"" ;background color
+    ;;                        " -fg \"" (laic-convert-color-to-dvipng-arg fgcolor) "\"" ;foreground color
+    ;;                        " -T tight" ;avoid whitespace -> equivalent to "convert -trim", but MUCH faster
+    ;;                        " -q" ;quiet
+    ;;                        " " tmpfilename_dvi ;input
+    ;;                        " -o " tmpfilename_png ;output
+    ;;                        laic-OS-null-sink)
+    ;;                nil nil)
+    ;; Convert: Trim empty space TEMP no longer required after -T tight
+    ;; (DEPRECAED_laic-convert (concat " -trim " tmpfilename_png " " tmpfilename_png))
 
     ;; Create image object, expand-file-name is requied
     (setq img (create-image tmpfilename_png))
 
-    ;; Cleanup temporary files, but not .png required to insert/overlay later!
+    ;; Cleanup temp files, but not .png as it's required to insert/overlay later
     (delete-file tmpfilename_tex)
     (delete-file tmpfilename_dvi)
     (delete-file (expand-file-name (concat (laic-OS-dir laic-output-dir) tmpfilename ".aux")))
