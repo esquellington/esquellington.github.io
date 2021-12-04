@@ -124,6 +124,17 @@ packages may significantly slow preview generation down."
 ;; NOTE: same as in org-sketch.el
 ;; OPTIMIZATION: It may be faster to send both to /dev/null
 ;;--------------------------------
+(defun laic-OS-touch-file ( filename )
+  "OS-specific touch FILENAME to create it or update its timestamp."
+  (call-process "touch" nil nil nil filename))
+
+(defun laic-OS-dir ( path )
+  "OS-specific file-name-as-directory to convert PATH with \ to / if necessary."
+  (cond ((eq system-type 'windows-nt)
+         (subst-char-in-string ?/ ?\\ (file-name-as-directory path)))
+        (t ;;else 'gnu/linux, 'darwin, etc...
+         (file-name-as-directory path))))
+
 (defvar laic-OS-null-sink
   (cond ((eq system-type 'windows-nt)
          " > NUL 2> laic_errors.txt")
@@ -141,17 +152,6 @@ packages may significantly slow preview generation down."
 (defvar laic--list-overlays
   ()
   "List of laic-created overlays.")
-
-(defun laic-OS-touch-file ( filename )
-  "OS-specific touch FILENAME to create it or update its timestamp."
-  (call-process "touch" nil nil nil filename))
-
-(defun laic-OS-dir ( path )
-  "OS-specific file-name-as-directory to convert PATH with \ to / if necessary."
-  (cond ((eq system-type 'windows-nt)
-         (subst-char-in-string ?/ ?\\ (file-name-as-directory path)))
-        (t ;;else 'gnu/linux, 'darwin, etc...
-         (file-name-as-directory path))))
 
 ;;--------------------------------
 ;; LaTeX + Image processing
@@ -209,9 +209,9 @@ packages may significantly slow preview generation down."
     ;; - Retrieve DPI programmatically and pass as -D argument
     (shell-command (concat "cd " (laic-OS-dir laic-output-dir)
                            ;; LaTeX: .tex -> .dvi
-                           "; latex --interaction=batchmode " tmpfilename_tex laic-OS-null-sink
+                           " ; latex --interaction=batchmode " tmpfilename_tex ;;laic-OS-null-sink
                            ;; dvipng: .dvi -> .png
-                           "; " laic-command-dvipng
+                           " ; " laic-command-dvipng
                            " -D " (number-to-string dpi) ;DPI
                            " -bg \"" (laic-convert-color-to-dvipng-arg bgcolor) "\"" ;background color
                            " -fg \"" (laic-convert-color-to-dvipng-arg fgcolor) "\"" ;foreground color
@@ -219,7 +219,8 @@ packages may significantly slow preview generation down."
                            " -q" ;quiet
                            " " tmpfilename_dvi ;input
                            " -o " tmpfilename_png ;output
-                           laic-OS-null-sink)
+                           ;;laic-OS-null-sink
+                           )
                    nil nil)
 
     ;; OLD WAY: run separate shell-command, slightly slower
@@ -243,10 +244,10 @@ packages may significantly slow preview generation down."
     (setq img (create-image tmpfilename_png))
 
     ;; Cleanup temp files
-    (delete-file tmpfilename_tex)
-    (delete-file tmpfilename_dvi)
-    (delete-file (expand-file-name (concat (laic-OS-dir laic-output-dir) tmpfilename ".aux")))
-    (delete-file (expand-file-name (concat (laic-OS-dir laic-output-dir) tmpfilename ".log")))
+;;    (delete-file tmpfilename_tex)
+;;    (delete-file tmpfilename_dvi)
+;;    (delete-file (expand-file-name (concat (laic-OS-dir laic-output-dir) tmpfilename ".aux")))
+;;    (delete-file (expand-file-name (concat (laic-OS-dir laic-output-dir) tmpfilename ".log")))
 
     ;; Save .png for future deletion, as it's required while overlay is visible
     (push tmpfilename_png laic--list-temp-files)
