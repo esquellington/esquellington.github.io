@@ -160,7 +160,7 @@ packages may significantly slow preview generation down."
 
   ;; Try to create image
   (let (tmpfilename tmpfilename_tex tmpfilename_dvi tmpfilename_png
-        prefix defaultpackages extrapackages fullcode
+        prefix packages fullcode
         img)
 
     ;; Create temporary filename using Unix epoch in seconds
@@ -170,13 +170,12 @@ packages may significantly slow preview generation down."
     (setq tmpfilename_png (expand-file-name (concat (laic-OS-dir laic-output-dir) tmpfilename ".png")))
 
     ;; Compose latex code into temporary file
-    (setq prefix "\\documentclass{article}\n\\pagestyle{empty}\n")
-    (setq defaultpackages "\\usepackage{amsmath,amsfonts}\n")
-    (setq extrapackages (concat "\\usepackage{" laic-extra-packages "}\n"))
+    (setq prefix "\\documentclass{article}\n\\pagestyle{empty}\n") ;minimal docuument class also works, slightly faster
+    (setq packages "\\usepackage{amsmath,amsfonts}\n") ;amsfonts adds \( \approx 0 \)  overhead, so add it
+    (setq packages (concat packages "\\usepackage{" laic-extra-packages "}\n")) ;works even if empty
     (setq fullcode (concat
                     prefix
-                    defaultpackages
-                    extrapackages
+                    packages
                     "\\begin{document}\n"
                     code
                     "\n\\end{document}\n"))
@@ -455,8 +454,8 @@ packages may significantly slow preview generation down."
 (defun laic-create-overlays-from-comment-inside()
   "Create image overlays for all blocks in the current comment around point."
   (interactive)
-;;  (message "LAIC took %f seconds"
-;;           (benchmark-elapse ;IMPORTANT (require 'benchmark)
+  (message "LAIC took %f seconds"
+           (benchmark-elapse ;IMPORTANT (require 'benchmark)
              (when (laic-is-point-in-comment-p) ;we're inside a comment
                (save-excursion ;avoid changing point
                  (let (bc ec)
@@ -464,7 +463,7 @@ packages may significantly slow preview generation down."
                    (setq ec (comment-search-forward nil t)) ;comment end, from previously moved point at begin
                    ;;DEBUG (message "be = %d %d = %s" bc ec (buffer-substring-no-properties bc ec))
                    (laic-create-overlays-from-blocks (laic-gather-blocks bc ec))))))
-;;             ))
+             ))
 
 ;;--------------------------------
 ;; Package setup
@@ -490,11 +489,6 @@ packages may significantly slow preview generation down."
 ;; REQUIRES physics package (apt-get install texlive-science), see
 ;; https://ctan.org/pkg/physics and PDF manual linked there
 ;;----------------------------------------------------------------
-
-;; \[ \bra{a} \ket{b} \]
-;; \[ \dd[2]{x} \]
-;; \[ \dv{f}{x} \qq{text} \pdv[2]{f}{x}{y} \qand \var{F} \]
-;; \[ \div f \qand \curl f \qand \laplacian \]
 
 ;;---- Simple blocks
 ;; IMPORTANT: Comment prefix does not matter here

@@ -126,6 +126,9 @@ Align*
                \gamma &= \delta
              \end{align*}
 ** DONE MUCH FASTER without \usepackage{physics}
+** DONE 10% faster using \documentclass{minimal} instead of {article}
+- BUT minimal is not recommended because it lacks support for font sizes, and
+  some basic func... so better avoid it
 * DONE Add custom package list to latex header
 - Just a string of comma-separated package names, for now
 * TODO Single command/keybinding C-c C-x C-l "DWIM" like org-latex-preview
