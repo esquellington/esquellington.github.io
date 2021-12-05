@@ -139,19 +139,17 @@ packages may significantly slow preview generation down."
   (cond ((eq system-type 'windows-nt)
          " > NUL 2> laic_errors.txt")
         (t ;;else 'gnu/linux, 'darwin, etc...
-         (concat " > /dev/null 2> " (laic-OS-dir laic-output-dir) "laic_errors.txt" ))
+         (concat " > /dev/null 2> laic_errors.txt" ))
         (t ""))
   "OS-specific commandline args to redirect output to null sink.")
 
-;; TODO should be buffer-local!!
-(defvar laic--list-temp-files
+(defvar-local laic--list-temp-files
   ()
-  "List of temporary files that were created and should be later deleted.")
+  "Buffer-local list of temporary files to be deleted later.")
 
-;; TODO should be buffer-local!!
-(defvar laic--list-overlays
+(defvar-local laic--list-overlays
   ()
-  "List of laic-created overlays.")
+  "Buffer-local list of laic-created overlays.")
 
 ;;--------------------------------
 ;; LaTeX + Image processing
@@ -162,12 +160,6 @@ packages may significantly slow preview generation down."
 
 (defun laic-create-image-from-latex ( code dpi bgcolor fgcolor )
   "Create an image from latex string with given dpi and bg/fg colors and return it."
-
-  ;; TEMP convert is no longer required
-  ;; Ensure convert exists
-  ;;  (unless (executable-find laic-command-convert)
-  ;;    (error "Could not run ImageMagick convert as '%s', please install and/or customize laic-command-convert"
-  ;;           laic-command-convert))
 
   ;; Create output dir if required
   (when (not (file-directory-p laic-output-dir))
@@ -209,7 +201,7 @@ packages may significantly slow preview generation down."
     ;; - Retrieve DPI programmatically and pass as -D argument
     (shell-command (concat "cd " (laic-OS-dir laic-output-dir)
                            ;; LaTeX: .tex -> .dvi
-                           " ; latex --interaction=batchmode " tmpfilename_tex ;;laic-OS-null-sink
+                           " ; latex --interaction=batchmode " tmpfilename_tex laic-OS-null-sink
                            ;; dvipng: .dvi -> .png
                            " ; " laic-command-dvipng
                            " -D " (number-to-string dpi) ;DPI
@@ -219,8 +211,7 @@ packages may significantly slow preview generation down."
                            " -q" ;quiet
                            " " tmpfilename_dvi ;input
                            " -o " tmpfilename_png ;output
-                           ;;laic-OS-null-sink
-                           )
+                           laic-OS-null-sink)
                    nil nil)
 
     ;; OLD WAY: run separate shell-command, slightly slower
@@ -244,10 +235,10 @@ packages may significantly slow preview generation down."
     (setq img (create-image tmpfilename_png))
 
     ;; Cleanup temp files
-;;    (delete-file tmpfilename_tex)
-;;    (delete-file tmpfilename_dvi)
-;;    (delete-file (expand-file-name (concat (laic-OS-dir laic-output-dir) tmpfilename ".aux")))
-;;    (delete-file (expand-file-name (concat (laic-OS-dir laic-output-dir) tmpfilename ".log")))
+    (delete-file tmpfilename_tex)
+    (delete-file tmpfilename_dvi)
+    (delete-file (expand-file-name (concat (laic-OS-dir laic-output-dir) tmpfilename ".aux")))
+    (delete-file (expand-file-name (concat (laic-OS-dir laic-output-dir) tmpfilename ".log")))
 
     ;; Save .png for future deletion, as it's required while overlay is visible
     (push tmpfilename_png laic--list-temp-files)
@@ -256,7 +247,8 @@ packages may significantly slow preview generation down."
     img))
 
 (defun laic-create-overlay-from-block ( begin end dpi bgcolor fgcolor )
-  "Create latex overlay from BEGIN..END region with DPI, BGCOLOR, FGCOLOR and return it."
+  "Create latex overlay from BEGIN..END region with DPI, BGCOLOR,
+FGCOLOR and return it."
   (let (regioncode ov img)
     (setq regioncode (buffer-substring-no-properties begin end))
     (setq ov (make-overlay begin end))
@@ -448,7 +440,8 @@ packages may significantly slow preview generation down."
 
 ;;;###autoload
 (defun laic-create-overlay-from-latex-inside-or-forward ()
-  "If point is inside a latex block create overlay overlay, otherwise find next latex block, and move point to end."
+  "If point is inside a latex block create overlay overlay,
+otherwise find next latex block, and move point to end."
   (interactive)
     (let (beginpt endpt)
       (setq beginpt (laic-search-backward-block-begin)) ;find prev begin wrt point
@@ -462,8 +455,7 @@ packages may significantly slow preview generation down."
             (t ;otherwise, point is inside begin/end
              (laic-create-overlay-from-latex-inside)) )))
 
-;; TODO Should only remove overlays added by laic, which would be automatic if laic--list* vars were buffer-local
-;; TODO CAN remove only overlays in BEGIN END region
+;; TODO COULD remove-overlays in BEGIN END region too, good for toggle
 ;;;###autoload
 (defun laic-remove-overlays ()
   "Remove all overlays and delete all temporary files."
