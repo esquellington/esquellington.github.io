@@ -154,7 +154,8 @@ Align*
 - BUT if I create overlay and then delete the .png manually, it shows correctly
 - SO, we should delay .png deletion
 * TODO Remove only overlays created by laic
-\[ \alpha = \beta \]
+- Just need to make laic--list-* buffer-local, but we MAY need a minor mode for
+  that? not sure
 * TODO Single command/keybinding C-c C-x C-l "DWIM" like org-latex-preview
 - If inside block, preview it
 - If outside block, preview all blocks
