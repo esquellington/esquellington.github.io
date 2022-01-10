@@ -153,14 +153,21 @@ Align*
 - For some reason if .png is deleted after creating img, it does not display
 - BUT if I create overlay and then delete the .png manually, it shows correctly
 - SO, we should delay .png deletion
-* TODO Remove only overlays created by laic
-- Just need to make laic--list-* buffer-local, but we MAY need a minor mode for
-  that? not sure
+* DONE Remove only overlays created by laic
 * TODO Single command/keybinding C-c C-x C-l "DWIM" like org-latex-preview
 - If inside block, preview it
 - If outside block, preview all blocks
 - SEPARATE command to preview current-or-next?
   \[ a+b =c \]
+- I think
+* TODO Toggle overlay on/off with same keys?
+- remove-overlays can be called with BEGIN END, good for toggle, BUT would apply
+  to all overlays
+- So we'd better look for laic--list-overlays in begin/end range and remove
+  those (ex: current coment begin/end range)
+- SO, if point-in-comment, AND there's SOME overlay in the comment, remove all,
+  otherwise, create all?
+- OR maybe same but if point-in-latex-block, remove it, otherwise, create it
 * TODO WON'T DO
 ** TODO Better overlays
 *** TODO laic-remove-overlays --> ONLY owned overlays
@@ -188,3 +195,21 @@ Align*
 - Could it happen on stuff not in screen only? not sure how to repro it
 - If we stick to "in-comments" version, then we could just get the
   color from comment font lock properties
+* TODO BENCHMARK preview
+\begin{align*}
+  \alpha &= \beta \\
+  C &= \|p_0-p_1\| = 0 \\
+  I &= \int_a^b f(\mathbf x) dx \\
+  \alpha &= ( \beta + \eta ) \\
+  \gamma &= [ \delta - \nu ] \\
+  M &= \begin{bmatrix}
+     M_{xx} & M_{xy} & M_{xz} \\
+     M_{yx} & M_{yy} & M_{yz} \\
+     M_{zx} & M_{zy} & M_{zz} \\
+     \end{bmatrix} \\
+  \nabla &= (\frac{\partial}{\partial x},\frac{\partial}{\partial y},\frac{\partial}{\partial z}) \\
+  \nabla f &=(\frac{\partial f}{\partial x},\frac{\partial f}{\partial y},\frac{\partial f}{\partial z}) \\
+  \Delta f &= \nabla^2 f = \nabla \cdot \nabla f \\
+  \text{div} \vec f &= \nabla \cdot \vec f \\
+  \text{curl} \vec f &= \nabla \times \vec f \\
+\end{align*}
