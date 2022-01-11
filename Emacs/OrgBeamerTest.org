@@ -1,0 +1,50 @@
+#+TITLE: Example Presentation in org-mode + LaTeX Beamer
+#+AUTHOR: OscarCF
+#+OPTIONS: H:2 toc:t num:t author:nil //date:nil
+#+LATEX_CLASS: beamer
+#+LATEX_CLASS_OPTIONS: [presentation]
+#+BEAMER_THEME: default
+#+LATEX_HEADER: \setbeamertemplate{navigation symbols}{} %Disable useless navigation symbols
+#+LATEX_HEADER: \setbeameroption{hide notes} %{hide notes,show notes,show notes on second screen}
+
+#+COLUMNS: %45ITEM %10BEAMER_ENV(Env) %10BEAMER_ACT(Act) %4BEAMER_COL(Col)
+
+* TEST structural section
+** org-beamer is fun
+- This slide has no blocks or notes
+- Here's a formula
+    \[ \alpha = \beta \]
+
+- And a screenshot
+*** A screenshot                                            :BMCOL:B_example:
+    :PROPERTIES:
+    :BEAMER_col: 0.5
+    :BEAMER_env: example
+    :END:
+    #+ATTR_LATEX: width=\textwidth
+    [[file:./table.png]]
+
+
+* ORIGINAL EXAMPLE STRUCTURAL SECTION
+
+** Frame 1
+*** Thanks to Eric Fraga                                           :B_block:
+    :PROPERTIES:
+    :BEAMER_COL: 0.48
+    :BEAMER_ENV: block
+    :END:
+    for the first viable Beamer setup in Org
+*** Thanks to everyone else                                        :B_block:
+    :PROPERTIES:
+    :BEAMER_COL: 0.48
+    :BEAMER_ACT: <2->
+    :BEAMER_ENV: block
+    :END:
+    for contributing to the discussion
+**** This will be formatted as a beamer note                       :B_note:
+     :PROPERTIES:
+     :BEAMER_env: note
+     :END:
+** Frame 2 (where we will not use columns)
+*** Request
+    Please test this stuff!
