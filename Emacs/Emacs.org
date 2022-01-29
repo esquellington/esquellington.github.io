@@ -132,6 +132,11 @@ https://karthinks.com/software/avy-can-do-anything/
   org-link-parameters so I guess it can be overwritten to do the same
   as inline image viz?
 - See https://orgmode.org/manual/Adding-Hyperlink-Types.html#Adding-Hyperlink-Types
-* ORG-mode presentations https://www.youtube.com/watch?v=vz9aLmxYJB0
-https://www.youtube.com/watch?v=E-NAM9U5JYE
+* ORG BEAMER presentations
+- Tutorial https://orgmode.org/worg/exporters/beamer/tutorial.html
+- Refcard: https://github.com/fniessen/refcard-org-beamer
+- Export https://orgmode.org/manual/Beamer-Export.html
+- Tricks: https://github.com/jgoerzen/public-snippets/blob/master/emacs/emacs-org-beamer/emacs-org-beamer.org
+* ORG TREE SLIDES (presentations)
+- Howto video (30min) https://www.youtube.com/watch?v=vz9aLmxYJB0
 * LSP mode https://www.youtube.com/watch?v=E-NAM9U5JYE

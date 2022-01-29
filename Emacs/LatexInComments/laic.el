@@ -143,6 +143,14 @@ packages may significantly slow preview generation down."
         (t ""))
   "OS-specific commandline args to redirect output to null sink.")
 
+(defvar laic-OS-commandline-separator
+  (cond ((eq system-type 'windows-nt)
+         "&")
+        (t ;;else 'gnu/linux, 'darwin, etc...
+         ";"))
+  "OS-specific commandline separator string, to concatenate commands."
+)
+
 (defvar-local laic--list-temp-files
   ()
   "Buffer-local list of temporary files to be deleted later.")
@@ -201,9 +209,9 @@ packages may significantly slow preview generation down."
     ;; - Retrieve DPI programmatically and pass as -D argument
     (shell-command (concat "cd " (laic-OS-dir laic-output-dir)
                            ;; LaTeX: .tex -> .dvi
-                           " ; latex --interaction=batchmode " tmpfilename_tex laic-OS-null-sink
+                           " " laic-OS-commandline-separator " latex --interaction=batchmode " tmpfilename_tex laic-OS-null-sink
                            ;; dvipng: .dvi -> .png
-                           " ; " laic-command-dvipng
+                           " " laic-OS-commandline-separator " " laic-command-dvipng
                            " -D " (number-to-string dpi) ;DPI
                            " -bg \"" (laic-convert-color-to-dvipng-arg bgcolor) "\"" ;background color
                            " -fg \"" (laic-convert-color-to-dvipng-arg fgcolor) "\"" ;foreground color

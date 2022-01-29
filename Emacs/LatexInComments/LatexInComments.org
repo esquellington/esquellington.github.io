@@ -154,7 +154,6 @@ Align*
 - BUT if I create overlay and then delete the .png manually, it shows correctly
 - SO, we should delay .png deletion
 * DONE Remove only overlays created by laic
-\[ \alpha = \beta \]
 * TODO Single command/keybinding C-c C-x C-l "DWIM" like org-latex-preview
 - If inside block, preview it
 - If outside block, preview all blocks
