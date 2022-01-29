@@ -66,7 +66,7 @@ https://karthinks.com/software/avy-can-do-anything/
 - Deltas 𝛅, 𝚫
 - Partials 𝞉, ∂, 𝜕, 𝝏
 - DOES it work on Windows?
-* Magit mode HowTo
+* Magit HowTo
 - User manual: https://magit.vc/manual/magit/
 - Visual intro: https://magit.vc/screenshots/
 - magit-status (C-x g), and then:
