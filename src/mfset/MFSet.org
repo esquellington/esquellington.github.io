@@ -131,7 +131,9 @@ DeleteEdge e = (n1,n2)
   - MST-edges es podrien guardar en llista incrustada
 - Una edge s'etiqueta com a MST en ser afegida (Merge), pero POT
   DEIXAR DE SER-HO quan apareixen noves edges
-  - STATS: Quantes MST hi ha?
+  - STATS: Quantes MST hi ha? --> MOLTES, es podrien guardar nomes les que
+    fusionen sets grans, pero, les mes importants, pero no sabem quants node
+    per set hi ha (rank), i guardar-ho seria mes costos
   - UPDATE: Treure flag MST quan s'afegeix una aresta que tambe ho
     es al mateix CC?
 - Si no s'aplanes la jerarquia de forma agressiva amb
@@ -199,7 +201,9 @@ DeleteEdge e = (n1,n2)
 * Profiling & Optimization
   - Use perf
   - Try to improve it
-* Optimizations
+* OPTIMIZATIONS
+  - FOCUS on LL4 as it seems the BEST option, LE4 is cool but too complex, and
+    edge list per CC can be found easily in a second pass using 100% ext memory
 ** Space
    - Merging to smallest-root allows m_Parent to be used as m_Last for
      roots, saving additional m_Last attrib
@@ -224,6 +228,13 @@ DeleteEdge e = (n1,n2)
    optimizations Otherise, the cost of initialization and update of
    next/last and pred/succ may exceed any O(N) cost of rebuilding the
    lists when required/on access.
+** Storing edges is QUITE EXPENSIVE --> AVOID LE4 code, it's a nice experiment, but too complex!
+   - Var array of edges, and significantly longer code
+   - Consider instead, classifying edges into CC in a SECOND PASS where we KNOW
+     that both nodes (n1,n2) ref by an edge are already in the same CC, so just
+     use Find(n1) and store edge on that root's growing list
+   - THIS allows having an ext list of edges and just count-sort them into
+     per-CC buckets, or link them in an in-place list
 ** Initialization cost
    - Could we memset(0xFF) or memset(0) and maybe do extra checks in Find/Merge
      to detect uninit values explicitly?
@@ -244,5 +255,5 @@ DeleteEdge e = (n1,n2)
 - REQUREIX relacio node->arestes[]
 
 * Beyond
-** Weighted edges, strong CC ?
+** Weighted edges, strong CC?
 ** Directed edges?
