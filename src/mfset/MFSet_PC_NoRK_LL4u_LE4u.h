@@ -27,6 +27,7 @@ public:
                 m_vecN[it_n].m_PredR = it_n-1;
                 m_vecN[it_n].m_SuccR = it_n+1;
             }
+            // Connect first/last
             m_vecN.front().m_PredR = m_vecN.size()-1;
             m_vecN.back().m_SuccR = 0;
         }
@@ -38,7 +39,7 @@ public:
                 return m_vecN[n].m_ParentR;
             }
             else //n < m_ParentR
-                return n; //BECAUSE m_vecN[n].m_ParentR is LAST
+                return n; //BECAUSE m_vecN[n].m_ParentR is LastN
         }
 
     /* FirstN-LastN lists
@@ -91,6 +92,9 @@ public:
             }
             else if( rid2 < rid1 )
                 std::swap(rid1,rid2);
+
+            // Merge
+            m_NumMerge++;
 
             // Get roots
             Node& root1( m_vecN[rid1] );
@@ -233,8 +237,8 @@ public:
                 } while( it_cc != first_root );
                 auto end = std::chrono::system_clock::now();
                 std::chrono::duration<float> elapsed = end-start;
-                printf( "Enumerate CC = %d, in %f sec \n",
-                        num_cc, elapsed.count() );
+                printf( "Enumerate CC = %d, in %f sec, %d merges \n",
+                        num_cc, elapsed.count(), m_NumMerge );
                 printf( "Sum =  %d\n", sum );
                 // TEMP: Call EnumerateCC_Edges here to test both at once
                 EnumerateCC_Edges(b_verbose);
@@ -337,6 +341,12 @@ private:
         union { uint32_t m_FirstN; uint32_t m_NextN; }; //First for roots, Next for children
         union { uint32_t m_PredR; uint32_t m_FirstE; }; //R for roots, E for children
         union { uint32_t m_SuccR; uint32_t m_LastE; }; //R for roots, E for children
+
+        // TODO reorg as Root/Child!
+        // union {
+        //     struct { uint32_t m_LastN, m_FirstN, m_FirstE, m_LastE; } Root;
+        //     struct { uint32_t m_ParentR, m_FirstN, m_PredR, m_SuccR; } Child;
+        // };
     };
     struct Edge
     {
@@ -347,4 +357,5 @@ private:
     };
     std::vector<Node> m_vecN;
     std::vector<Edge> m_vecE;
+    uint32_t m_NumMerge = 0;
 };

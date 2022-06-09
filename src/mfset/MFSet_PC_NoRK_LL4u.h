@@ -4,10 +4,10 @@
 #include <vector>
 #include <chrono>
 
-/* Same as MFSet_PC_NoRK_LL2u, but adding a list of ROOTS is embedded
-  as a PrecR/SuccR list in elements, so that nodes require exactly 4x
-  uint32_t (fits in a single 128B cache entry), and avoids foreach(n)
-  CC search in EnumerateCC()
+/* Same as MFSet_PC_NoRK_LL2u, but adding a list of ROOTS embedded as a
+   PredR/SuccR list in elements, so that nodes require exactly 4x uint32_t (fits
+   in a single 16B cache entry), and avoids foreach(n) CC search in
+   EnumerateCC()
 
   \todo Try to SIMPLIFY Merge() code
 */
@@ -26,6 +26,7 @@ public:
                 m_vecN[it_n].m_PredR = it_n-1;
                 m_vecN[it_n].m_SuccR = it_n+1;
             }
+            // Wrap around first,last
             m_vecN.front().m_PredR = m_vecN.size()-1;
             m_vecN.back().m_SuccR = 0;
         }

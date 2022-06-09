@@ -168,6 +168,10 @@ public:
             }
         }
 private:
-    struct Entry { union { uint32_t m_Parent; uint32_t m_Last; }; uint32_t m_Next; };
+    struct Entry
+    {
+        union { uint32_t m_Parent; uint32_t m_Last; };
+        uint32_t m_Next;
+    };
     std::vector<Entry> m_vecN;
 };

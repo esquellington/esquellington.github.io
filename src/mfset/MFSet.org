@@ -101,6 +101,10 @@ Explain how this maps to indices of any array<T>
 ** DONE Post-process
   - Foreach n == Find(n)
 * DONE Storing edges
+  - The key idea is that only Root nodes need to store explicit Node and Edge
+    lists First/Last. Non-Root nodes can just store next/prev node in the same
+    CC (parent)
+  - Code SIGNIFICANTLY more complex than non-Edge list version (LL4)
 ** Edges
    - MFSet edge-array 0..E-1
    - Edge = n1,n2,pred_edge_in_cc,succ_edge_in_cc
@@ -207,6 +211,10 @@ DeleteEdge e = (n1,n2)
    - list-CC
    - list-nodes-in-CC
    - list-edges-in-CC
+   - instead of reading/writing to m_vecN[root1/2] constantly during Merge(),
+     grab 2xN into local vars, modify them, and write at the end
+     explicitly. This will ensure they stay in registers and there's no reloads,
+     hopefully
 ** Tradeoffs
    It's reasonable to keep track of
    - list-nodes-in-CC
@@ -216,6 +224,16 @@ DeleteEdge e = (n1,n2)
    optimizations Otherise, the cost of initialization and update of
    next/last and pred/succ may exceed any O(N) cost of rebuilding the
    lists when required/on access.
+** Initialization cost
+   - Could we memset(0xFF) or memset(0) and maybe do extra checks in Find/Merge
+     to detect uninit values explicitly?
+   - NO for prev-next root lists, BUT, if prev/next is 0xFFFFFFFF we KNOW it's
+     uninit, so we could compute actual prev/next from N index +-1 on the spot!
+*** For LL4 version, PredR,SuccR COULD be init to 0xFF
+    - And then checked before use, and init if 0xFF
+    - Only N.front().PredR and N.back().SuccR could be init to N-1 and 0 at the
+      start, so that we don't need to consider these edge cases in Merge() when
+      we access PredR,SuccR and must init them if they're still 0xFF (uninit)
 ** Alloc/Dealloc
    - Single vector with nodes-in-CC organized in subarrays per-CC can
      be build in a 2-pass count-and-classify alg.

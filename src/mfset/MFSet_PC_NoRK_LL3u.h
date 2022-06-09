@@ -159,6 +159,11 @@ public:
             }
         }
 private:
-    struct Entry { uint32_t m_Parent; uint32_t m_Next; uint32_t m_Last; };
+    struct Entry
+    {
+        uint32_t m_Parent;
+        uint32_t m_Next;
+        uint32_t m_Last;
+    };
     std::vector<Entry> m_vecN;
 };
