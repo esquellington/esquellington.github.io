@@ -76,6 +76,9 @@ public:
             m_vecN[root2].m_ParentR = root1;
 
             // Remove root2 from list of roots where root1 already is
+            // TODO As we know N[0] is ALWAYS A ROOT, could we just store SuccR?
+            // I don't think so, we can't remove an arbitrary element in a
+            // single linked list even relying on the list head.
             m_vecN[ m_vecN[root2].m_SuccR ].m_PredR = m_vecN[root2].m_PredR;
             m_vecN[ m_vecN[root2].m_PredR ].m_SuccR = m_vecN[root2].m_SuccR;
             // TEMPORAL: Recommended for safety, but NOT REQUIRED
@@ -160,7 +163,7 @@ public:
                 uint32_t sum(0); //\todo To avoid elimiation of code with no side-effects
                 auto start = std::chrono::system_clock::now();
                 const uint32_t first_root(0);
-                //\todo NO NEED, 0 WILL ALWAYS BE A ROOT because
+                //\todo NO NEED to search for a root, 0 WILL ALWAYS BE A ROOT because
                 //there's no other num smaller!!
                 // while( first_root > m_vecN[first_root].m_ParentR ) first_root++;
                 uint32_t it_cc( first_root );
@@ -186,10 +189,17 @@ public:
 private:
     struct Entry
     {
+        // TODO define union of Root and Child node types
         union { uint32_t m_ParentR; uint32_t m_LastN; };
         uint32_t m_NextN;
         uint32_t m_SuccR;
         uint32_t m_PredR;
+
+        // TODO reorg as Root/Child!
+        // union {
+        //     struct Root  { uint32_t m_LastN  , m_NextN, m_SuccR, m_PredR; };
+        //     struct Child { uint32_t m_ParentR, m_NextN,  unused, unuseed; };
+        // };
     };
     std::vector<Entry> m_vecN;
 };

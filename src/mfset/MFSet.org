@@ -55,7 +55,7 @@ Explain how this maps to indices of any array<T>
      http://cgi.cs.arizona.edu/~mstrout/Papers/Papers12/lcpc2012-parcubed.pdf
    - En aquesta tesi
      http://dspace.uib.no/bitstream/handle/1956/5118/Dr.thesis_Mostofa_Ali_Patwary.pdf?sequence=1&isAllowed=y
-     en parlen amb detall, SI, es pot usar per a això!
+     en parlen amb detall, SI, es pot usar per a aixÃ²!
      - "Another application of the Union-Find algorithm is the
        computation of an 12 elimination tree from a sparse, symmetric,
        and positive definitematrix in numer- ical linear algebra [86,
@@ -70,16 +70,17 @@ Explain how this maps to indices of any array<T>
        tree directly from the sparse matrix efficiently, different
        variations of Union-Find algorithms have been tried and found
        to be efficient"
-** Mfset == minimitzar autòmats?? Util per reduir FSA
+** Mfset == minimitzar autÃ²mats?? Util per reduir FSA
+** Nodes are variables, edges are equations, CC are disjoint eq systems
 * DataStructure/Algorithms
 * Rem's algorithm
   Sembla que es una variant MES RAPIDA que mfset amb PC i RK, que es
-  "l'optim teòric"
+  "l'optim teÃ²ric"
     - http://www.ii.uib.no/~fredrikm/fredrik/papers/SEA2010.pdf
     - 2010_ExperimentsOnUnionFindAlgorithms
   - Interleave Find(n1), Find(n2) ? no ho entenc massa be, pero
     sembla que troba rapidament el cas en que n1 i n2 ja son fills
-    del mateix root, però no han estat encara comprimits del tot.
+    del mateix root, perÃ² no han estat encara comprimits del tot.
 * DONE Algorithmic Optimizations
 ** DONE Path-compression
   - Recursive
@@ -127,7 +128,7 @@ Explain how this maps to indices of any array<T>
 DeleteEdge e = (n1,n2)
 - NOMES afecta a root(n1)
 - Es pot fer rebuild parcial
-- Nomes si e no és MST-edge
+- Nomes si e no Ã©s MST-edge
   - MST-edges es podrien guardar en llista incrustada
 - Una edge s'etiqueta com a MST en ser afegida (Merge), pero POT
   DEIXAR DE SER-HO quan apareixen noves edges
@@ -189,8 +190,8 @@ DeleteEdge e = (n1,n2)
 ** TODO Enumerate All N=8, E=0..K_8 graphs
    - 8x8 = 64 parells, 2^64 bits representen tots els grafs possibles
    - Generar fent que 64b representin la matriu d'adjacencia
-   - MOLTS menys, en realitat, pq adj-matrix és simetrica i té
-     diagonal a 0 forçosament
+   - MOLTS menys, en realitat, pq adj-matrix Ã©s simetrica i tÃ©
+     diagonal a 0 forÃ§osament
    - 2^64 continua sent MASSA... veure so es pot generar tots els
      grafs d'N nodes de forma sistematica i sense simetries?
    - STATS: min,max,avg time per Merge/EnumCC, organitzats per #N i #E
@@ -198,16 +199,71 @@ DeleteEdge e = (n1,n2)
 * Plots
 ** Increase N, E and R in Benchmarks
 ** Real cost Vs Theoretical cost
-* Profiling & Optimization
-  - Use perf
-  - Try to improve it
 * OPTIMIZATIONS
-  - FOCUS on LL4 as it seems the BEST option, LE4 is cool but too complex, and
-    edge list per CC can be found easily in a second pass using 100% ext memory
+  - FOCUS on LL2 and LL4 as they seem the BEST options, LE4 is cool but too
+    complex, and edge list per CC can be found easily in a second pass using
+    100% ext memory
+  - LL2 is also very good, and can be init with memset(0xFF), so losing perfect
+    enum of CC nodes may not be that bad, as reconstructing it is O(N). If we
+    only compute+enumerate the CC once, it's not that relevant. If we enumerate
+    many times, then enum cost would be more important wrt init cost.
 ** Space
    - Merging to smallest-root allows m_Parent to be used as m_Last for
      roots, saving additional m_Last attrib
    - Allows embedding root-list and keep node size <= 128b
+*** LL4 with root list PredR/SuccR can use FIRST child mem to store PredR, saving 1 u32!
+    - LL4 stores
+      union { uint32_t m_ParentR; uint32_t m_LastN; };
+      uint32_t m_NextN;
+      uint32_t m_SuccR;
+      uint32_t m_PredR;
+    - For Root nodes, all 4 entries are used, but for Child node sonly
+      ParentR/NextN are used. So, the 1st Child of any Root has 2xu32
+      SuccR/PredR that are unused --> We could use one of them to store PredR in
+      the place of the unused SuccR!
+      - For Roots without children, there is no free u32 available, and both
+        SuccR/PredR are useful.
+        - BUT in this case, LastN=0xFF, so we could use NextN to store SuccR (as
+          it needs to be > n for Find(n) to work. Or even better, keep SuccR>n
+          where ParentR is, and store LastN in first child unused PredR, for
+          non-empty Roots
+        - Root.LastN is implicitly Child[Root.NextN].LastN. ideally in cache
+        - On Merge(r1,r2) we need r1.LastN and r2.LastN, Child[r1.m_LastN], but
+          not Child[r1.NextN], and we do need to change r1.NextN and/or
+          r1.LastN, so we'd be accessing 2 more nodes
+      union
+      {
+          struct Empty { SuccR>n   , NextN =0xFF , PredR<n }; //LastN implicitly 0xFF
+          struct Root  { SuccR>n   , NextN!=0xFF , PredR<n }; //LastN in Child[n].LastN
+          struct Child { ParentR<n , NextN!=0xFF , Root[ParentR].LastN };
+      }
+
+      For node[N-1].SuccR = 0, we're in trouble, because 0<N-1, so it won't be
+      identified as a Root!... UNLESS we leave node[N-1].SuccR = 0xFF, but then
+      we need to handle it as a special case (we can check n==N-1, but it's ugly)
+
+      --> This can be avoided with the next layout, where 1st field is >n for
+      all root nodes regardless of n, and r1.SuccR is in node[r1.LastN].SuccR.
+      --> This allows accessing r1/r2.NextN/LastN directly in Merge(). Updating
+      PredR/SuccR in Merge() is still way too complex though, requires 2 extra
+      node accesses due to indirect r1/r2.SuccR, and I don't think there's
+      enough computation to hide the extra cache latency...
+
+      union
+      {
+          struct Empty { LastN=0xFF>n , SuccR       , PredR<n };
+          struct Root  { LastN>n      , NextN!=0xFF , PredR<n };
+          struct Child { ParentR<n    , NextN!=0xFF , Root[ParentR].SuccR };
+      }
+
+    - OVERALL this could work and saves 25% mem over LL4, but code would be too
+      complicated, and requires 2 extre node accesses per Merge op, so most
+      likely not worth it over LL2+expensive enumerate CC, or LL4 with 25% more
+      mem but much simpler code/data
+
+    - LL4 is essentially LL2 + root list, so they're easy to interchange and can
+      reuse almost same for Find+Merge
+
 ** Cache
    - Sort lists incrementally whenever accessed by swapping
      neighbours, costs O(1) per access but average/amortized cost
@@ -238,19 +294,21 @@ DeleteEdge e = (n1,n2)
 ** Initialization cost
    - Could we memset(0xFF) or memset(0) and maybe do extra checks in Find/Merge
      to detect uninit values explicitly?
-   - NO for prev-next root lists, BUT, if prev/next is 0xFFFFFFFF we KNOW it's
-     uninit, so we could compute actual prev/next from N index +-1 on the spot!
-*** For LL4 version, PredR,SuccR COULD be init to 0xFF
-    - And then checked before use, and init if 0xFF
-    - Only N.front().PredR and N.back().SuccR could be init to N-1 and 0 at the
-      start, so that we don't need to consider these edge cases in Merge() when
-      we access PredR,SuccR and must init them if they're still 0xFF (uninit)
+     - WE CAN memset(0xFF) for LL2 version
+*** For LL4 version, PredR,SuccR COULD be init to 0xFF --> NO IT CANNOT, root list wouldn't exist!
+   - We could init to 0xFF and then check before using and init on the fly, BUT
+     we wouldn't have a valid root list most of the time. Ex: N nodes and 0
+     edges would have an empty root list, while it should contain all nodes!
+     Only adding edges would init PredR/NextR, which is bad
+   - N.front().PredR and N.back().SuccR could be init to N-1 and 0 at the
+     start, so that we don't need to consider these edge cases in Merge() when
+     we access PredR,SuccR and must init them if they're still 0xFF (uninit)
 ** Alloc/Dealloc
    - Single vector with nodes-in-CC organized in subarrays per-CC can
      be build in a 2-pass count-and-classify alg.
 ** Comparison
 - Comparar amb single-shot flood alg foreach(n) -> flood and gather accessible if not already flooded
-- Per a CC single-shot es més eficient, imagino
+- Per a CC single-shot es mÃ©s eficient, imagino
 - Per incremental no crec
 - REQUREIX relacio node->arestes[]
 
