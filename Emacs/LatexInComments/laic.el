@@ -175,7 +175,7 @@ packages may significantly slow preview generation down."
 
   ;; Try to create image
   (let (tmpfilename tmpfilename_tex tmpfilename_dvi tmpfilename_png
-        prefix packages fullcode
+        prefix packages extra fullcode
         img)
 
     ;; Create temporary filename using Unix epoch in seconds
@@ -188,9 +188,11 @@ packages may significantly slow preview generation down."
     (setq prefix "\\documentclass{article}\n\\pagestyle{empty}\n") ;minimal docuument class 10% faster, but limited
     (setq packages "\\usepackage{amsmath,amsfonts}\n") ;amsfonts adds \( \approx 0 \)  overhead, so add it
     (setq packages (concat packages "\\usepackage{" laic-extra-packages "}\n")) ;works even if empty
+    (setq extra "\\DeclareMathOperator{\\trace}{tr}") ;extra declarations
     (setq fullcode (concat
                     prefix
                     packages
+                    extra
                     "\\begin{document}\n"
                     code
                     "\n\\end{document}\n"))
