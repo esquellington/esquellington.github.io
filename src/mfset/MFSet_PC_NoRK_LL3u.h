@@ -159,6 +159,11 @@ public:
             }
         }
 private:
-    struct Entry { uint32_t m_Parent; uint32_t m_Next; uint32_t m_Last; };
+    struct Entry
+    {
+        uint32_t m_Parent; //Could hold LastN, see LL2
+        uint32_t m_Next; //NextN
+        uint32_t m_Last; //Could be NextR, single-linked root list
+    };
     std::vector<Entry> m_vecN;
 };
