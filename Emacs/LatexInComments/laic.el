@@ -1,6 +1,6 @@
 ;;; laic --- Render LateX in comments -*- lexical-binding: t; -*-
 ;;
-;; Copyright (C) 2021 Oscar Civit Flores
+;; Copyright (C) 2022 Oscar Civit Flores
 ;; Author: Oscar Civit Flores
 ;; Keywords: LaTeX
 ;; Package-Version: ???????????
