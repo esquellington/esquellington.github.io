@@ -188,7 +188,10 @@ packages may significantly slow preview generation down."
     (setq prefix "\\documentclass{article}\n\\pagestyle{empty}\n") ;minimal docuument class 10% faster, but limited
     (setq packages "\\usepackage{amsmath,amsfonts}\n") ;amsfonts adds \( \approx 0 \)  overhead, so add it
     (setq packages (concat packages "\\usepackage{" laic-extra-packages "}\n")) ;works even if empty
-    (setq extra "\\DeclareMathOperator{\\trace}{tr}") ;extra declarations
+    (setq extra (concat
+                 "\\DeclareMathOperator{\\trace}{tr}"
+                 "\\DeclareMathOperator{\\adjugate}{adj}"
+                 )) ;extra macros/operators
     (setq fullcode (concat
                     prefix
                     packages
