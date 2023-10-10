@@ -1,3 +1,4 @@
+#+STARTUP: indent overview
 * Intro
 The MF-Set / union-find is one of my favourite algorithms (LINK wikipedia)
 
@@ -315,3 +316,6 @@ DeleteEdge e = (n1,n2)
 * Beyond
 ** Weighted edges, strong CC?
 ** Directed edges?
+
+* REFERENCES
+- Erin Catto on Box2D 3.0 Parallel Union-Find https://box2d.org/posts/2023/10/simulation-islands/
