@@ -1,4 +1,4 @@
-#+STARTUP: indent
+#+STARTUP: indent overview
 
 Literary programming exercise: test AVX vs SSE vs Scalar code
 
@@ -107,10 +107,6 @@ Literary programming exercise: test AVX vs SSE vs Scalar code
 #+END_SRC
 
 #+RESULTS: test-avx
-| INT1   | -2147483648 | T | 0.346446 |
-| FLOAT1 | 134217728.0 | T | 0.385269 |
-| SIMD4  |  67108864.0 | T | 0.277574 |
-| SIMD8  |  67108864.0 | T | 0.207161 |
 
 ** elisp TANGLE to .cpp
 #+BEGIN_SRC elisp :results silent
@@ -133,11 +129,6 @@ Literary programming exercise: test AVX vs SSE vs Scalar code
 #+END_SRC
 
 #+RESULTS:
-| Running |    text-avx |   |          |
-| INT1    | -2147483648 | T | 0.347879 |
-| FLOAT1  | 134217728.0 | T | 0.387705 |
-| SIMD4   |  67108864.0 | T | 0.277489 |
-| SIMD8   |  67108864.0 | T |  0.20509 |
 
 ** TODO gnuplot PLOT RESULTS
 - Use C-c C-x C-v to display inline image
@@ -375,8 +366,6 @@ o-O3 causes auto-vectorization and float1 is equivalent to simd8
 #+END_SRC
 
 #+RESULTS: test-avx-gather-vec3f
-| FLOAT1 | 77311.179688 | T | 0.127842 |
-| SIMD8  | 77311.179688 | T | 0.149394 |
 
 ** elisp TANGLE to .cpp
 #+BEGIN_SRC elisp :results silent
@@ -397,6 +386,9 @@ o-O3 causes auto-vectorization and float1 is equivalent to simd8
   echo "Running text-avx-gather-vec3f"
   ./test-avx-gather-vec3f
 #+END_SRC
+
+#+RESULTS:
+
 ** Analysis
 - At -O3 -mavx2, FLOAT1 uses 128b instructions (xmm) and runs 10%
   faster than SIMD8.
