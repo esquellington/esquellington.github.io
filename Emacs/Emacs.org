@@ -1,5 +1,7 @@
 #+STARTUP: indent
 
+WIP: [[rmsbolt-mode]]
+
 Emacs hacking and tests
 
 * Build Emacs from source
@@ -157,6 +159,9 @@ https://github.com/domtronn/all-the-icons.el
   top dir
 - (project-switch-to-buffer) C-x p b --> switch to open buffer in project
   (subset of open buffers)
+* TODO Flycheck or Flymake?
+- Make is the default!?
+- eglot only supports Flymake?
 * TODO LSP
 - eglot or lsp-mode? https://www.mgmarlow.com/words/2022-10-23-eglot/
 - Try eglot first!? (builtin mode)
@@ -176,6 +181,94 @@ https://github.com/domtronn/all-the-icons.el
 ** TODO lsp-mode
 ** TODO MAY interfere with dumb-jump!?
 - xref mechanism and keybindings may interfere, not sure
-* TODO Flycheck or Flymake?
-- Make is the default!?
-- eglot only supports Flymake?
+* TODO Emacs + ASM
+** Emacs disaster
+- See https://github.com/jart/disaster
+- Uses GCC + objdump
+- The idea is pretty good, and works well for simple files
+*** DONE Default output is ugly
+- customize "Disaster Objdump" like this, looks better
+  objdump -d -M intel -Sl --no-show-raw-insn --source-comment -C
+*** TODO Fails to compile often even if Makefile exists
+- Trouble compiling files with custom includes, because of the way it calls
+  make, can be fixed but seems a bit tricky
+- The fundamental op is "compile current buffer file", which is ill-defined if
+  the target .o location needs to be known.
+**** TODO So maybe we could add special rule to Makefile to compile any .cpp to its disaster-requested target?
+**** TODO Could we SKIP the Makefile and make call completely and just call gcc like FlyCheck does?
+- gcc file.cpp -o file.o should work!
+- just needs the right CC args, could be customized
+**** TODO I think there are internal funcs to generate compilation commandline, maybe can be replaced?
+- HOW DOES FlyCheck know how to build the .cpp in current buffer?
+- Couldn't we just use EXACTLY the same method?
+***** FlyCheck customizations
+'(flycheck-gcc-args
+  '("-Wall" "-Werror" "-Wno-unused" "-Wno-unused-result" "-Wno-unknown-pragmas"))
+'(flycheck-gcc-include-path
+  '("/home/oscar/Escriptori/esquellington/tot" "/home/oscar/Escriptori/esquellington/ext"))
+'(flycheck-gcc-language-standard "c++17")
+'(flycheck-gcc-warnings nil)
+***** Disaster
+-I/home/oscar/Escriptori/esquellington/tot -I/home/oscar/Escriptori/esquellington/ext
+*** TODO output uses asm-mode by default, nasm-mode would be nicer
+- Can be toggled a posteriori, but should be automatic
+- I could customize so that asm buffers use nasm-mode instead, not sure if
+  that's decided by disaster when creating the *assembly* buffer, I guess so.
+*** Potential disaster improvements
+**** More flexible compile rules, more params
+**** More output style options (ex: asm-mode to be used for *assembly* buffer)
+**** Refresh output as C++ changes, keeping asm buffer open (ASM-googles)
+**** Windows support??
+- See https://stackoverflow.com/questions/1020498/how-to-view-the-assembly-behind-the-code-using-visual-c
+- This post is interesting:
+    For MSVC you can use the linker.
+      link.exe /dump /linenumbers /disasm /out:foo.dis foo.dll
+    foo.pdb needs to be available to get symbols
+- Can also generate "assembly listing" for any .cpp with interleaved code using
+  the option /FAs, see https://learn.microsoft.com/en-us/cpp/build/reference/fa-fa-listing-file?view=msvc-170
+  - MAYBE there's a compile-to-assembly action and we can call it from emacs
+    using VB as we do with regular Compile?
+***** TODO Extend disaster to work on Windows?
+**** Could we JUST objdump the EXISTING .o, instead of re-compiling it with custom flags!?
+- This is the most useful use-case actually... only requires finding .o and
+  running objdump
+- Optionally recompile .o if out-of-date... AH but disaster call to make ALREADY
+  does that!
+- So overall, if we fix call to make, it should all work fine!
+** Emacs iasm-mode
+- See https://github.com/RAttab/iasm-mode
+- Interactive disasm?
+- Seems experimental, but close to what I had in mind?
+** rmsbolt-mode
+- LOOKS AWESOME, almost exactly what I had in mind!
+- https://github.com/emacsmirror/rmsbolt
+- rmsbolt to enable in a C++ file
+*** TODO Compilation uses plain g++ or compile_commands.json if exists
+- Fails like disaster did
+- Should customize includes I guess
+*** TODO Does not show *rmsbolt-output* buffer automatically
+- creates it, but does not split window and show it
+*** TODO Changing code triggers recompilation automatically, and that auto-saves the file!
+- This may be a sideffect of the regular "compile" command/customization, but
+  it's dangerous if we're just mocking/exploring the effect of temporary changes!
+- Can be customized off (Rmsbolt Automatic Recompile)
+*** DONE Customization can use local vars in C++ itself --> BUT ALSO customize-group, which is better
+// Local Variables:
+// rmsbolt-command: "gcc -O0"
+// rmsbolt-disassemble: nil
+// rmsbolt-filter-comment-only: nil
+// rmsbolt-demangle: t
+// End:
+*** TODO Does not show inline code/comments?
+- But does not "need to" because it navitages C++/ASM in parallel
+- Still would be nice to inspect ASM directly without navigating C++ to get
+  correspondences through highlighted region
+*** TODO Disabling mode is not easy from M-x, req prefix arg
+- Just write utility funcs to toggle
+- Consider keybindings
+** Emacs ASM syntax modes
+*** asm-mode
+- Simple builtin ASM major mode
+*** nasm-mode
+- Looks nicer! install from MELPA
+- Works on objdump -S and gcc -S output
