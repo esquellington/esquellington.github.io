@@ -245,13 +245,11 @@ https://github.com/domtronn/all-the-icons.el
 - See https://github.com/RAttab/iasm-mode
 - Interactive disasm?
 - Seems experimental, but close to what I had in mind?
-** rmsbolt-mode
+** rmsbolt
+- See [[beardbolt]], looks simpler and nicer
 - LOOKS AWESOME, almost exactly what I had in mind!
 - https://github.com/emacsmirror/rmsbolt or https://gitlab.com/jgkamat/rmsbolt
   - gitlab seems to have more activity, issues, PRs, etc...
-- FUCK there's a fork that seems even better for C++, but not active and not on
-  MELPA
-  - https://github.com/joaotavora/beardbolt
 - rmsbolt to enable in a C++ file
 *** TODO Compilation uses plain g++ or compile_commands.json if exists
 - Fails like disaster did
@@ -272,16 +270,65 @@ https://github.com/domtronn/all-the-icons.el
 // rmsbolt-filter-comment-only: nil
 // rmsbolt-demangle: t
 // End:
+*** TODO Disabling mode is not easy from M-x, req prefix arg
+- Just write utility funcs to toggle
+- Consider keybindings
 *** TODO Does not show inline code/comments?
 - But does not "need to" because it navitages C++/ASM in parallel
 - Still would be nice to inspect ASM directly without navigating C++ to get
   correspondences through highlighted region
-*** TODO Disabling mode is not easy from M-x, req prefix arg
-- Just write utility funcs to toggle
-- Consider keybindings
-*** TODO beardbolt advantages
+** TODO beardbolt
+- https://github.com/joaotavora/beardbolt
+- Fork or rmsbolt that seems even better for C++, but not that active and not on
+  MELPA
 - Author is also the author of Eglot, so probably knows what they do
-**** Code is beardbolt is a lot simpler
-- Looks like a stripped-down version, code is similar but shorter
-**** Faster, according to github page
-**** Does not save buffer on compilation, major issue IMHO
+*** DONE Improvements over rmsbolt
+- Code is beardbolt is a lot simpler! Looks like a stripped-down version, code
+  is similar but shorter
+- Does not save buffer on compilation!
+- Faster than rmsbolt, according to github page
+*** DONE beardbolt-mode
+- Toggle on a buffer
+- Automatic recompile on changes
+- Navigation tracks source/asm buffers in sync
+- Overwrites C-c C-c to recompile
+*** DONE beardbolt-compile
+- Explicit compile
+- Navigating source does not track asm (but asm tracks source)
+*** Default uses plain gcc or compile_commands.json if exists
+- Not enough, but easy to fix using
+*** TODO CUSTOMIZE
+**** TODO Compilation
+- needs same args as Flycheck
+- Local vars
+  // beardbolt-command: "g++ -std=c++17 -O3 -fno-exceptions -march=native -I/home/oscar/Escriptori/esquellington/tot -I/home/oscar/Escriptori/esquellington/ext"
+**** TODO Ensure *bb-asm* is visible
+- By default seems hidden, not sure why, maybe bury-successful-compilation??
+- Write keybinding that just does that, on beardbolt-compile open bb-asm and
+  split vertically
+**** TODO Keep code interleaved with asm?
+- objdump can do that!
+
+*** TODO CONTRIBUTE?
+- Maybe I could modify + contrib to it?
+- Customizations should all be available as local-vars
+**** TODO [#A] Option to use flycheck-gcc-include-path automatically for GCC
+- Would ensure that if we have FM/FC working on a given project then beardbolt
+  works out of the box, which is nice
+***** TODO Could add a beardbolt-gcc-include-path var and customize that
+- makes sense on its own
+- defaults to nil
+- easy to bind it to 'flycheck-gcc-include-path, make it one of the available options
+**** TODO [#A] Option to avoid redefining C-c C-c in beardbolt-mode
+**** TODO [#C] Option to keep inline code/comments?
+- // beardbolt-preserve-comments: t
+  - Does not seem to work!? not sure if that's supposed to keep C++ comments,
+    probably not
+- But does not "need to" because it navitages C++/ASM in parallel
+- Still would be nice to inspect ASM directly without navigating C++ to get
+  correspondences through highlighted region
+**** TODO [#B] Function to Narrow to function/region
+- Simplify focusing on function and its asm on both buffers
+- Regular narrowing works on SRC and ASM buffers, but it's not synchronized, we
+  could add a "bb-narrow-srd-and-asm" function that does that automatically, and
+  toggle narrow/widen
