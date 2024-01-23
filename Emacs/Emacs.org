@@ -182,6 +182,12 @@ https://github.com/domtronn/all-the-icons.el
 ** TODO MAY interfere with dumb-jump!?
 - xref mechanism and keybindings may interfere, not sure
 * TODO Emacs + ASM
+** Emacs ASM syntax modes
+*** asm-mode
+- Simple builtin ASM major mode
+*** nasm-mode
+- Looks nicer! install from MELPA
+- Works on objdump -S and gcc -S output
 ** Emacs disaster
 - See https://github.com/jart/disaster
 - Uses GCC + objdump
@@ -241,17 +247,24 @@ https://github.com/domtronn/all-the-icons.el
 - Seems experimental, but close to what I had in mind?
 ** rmsbolt-mode
 - LOOKS AWESOME, almost exactly what I had in mind!
-- https://github.com/emacsmirror/rmsbolt
+- https://github.com/emacsmirror/rmsbolt or https://gitlab.com/jgkamat/rmsbolt
+  - gitlab seems to have more activity, issues, PRs, etc...
+- FUCK there's a fork that seems even better for C++, but not active and not on
+  MELPA
+  - https://github.com/joaotavora/beardbolt
 - rmsbolt to enable in a C++ file
 *** TODO Compilation uses plain g++ or compile_commands.json if exists
 - Fails like disaster did
 - Should customize includes I guess
+*** TODO rmsbolt Code is long and complex... I don't think I can modify or even understand all of it
+- Supports many languages I don't care about
 *** TODO Does not show *rmsbolt-output* buffer automatically
 - creates it, but does not split window and show it
 *** TODO Changing code triggers recompilation automatically, and that auto-saves the file!
 - This may be a sideffect of the regular "compile" command/customization, but
   it's dangerous if we're just mocking/exploring the effect of temporary changes!
 - Can be customized off (Rmsbolt Automatic Recompile)
+- beardbolt avoids this
 *** DONE Customization can use local vars in C++ itself --> BUT ALSO customize-group, which is better
 // Local Variables:
 // rmsbolt-command: "gcc -O0"
@@ -266,9 +279,9 @@ https://github.com/domtronn/all-the-icons.el
 *** TODO Disabling mode is not easy from M-x, req prefix arg
 - Just write utility funcs to toggle
 - Consider keybindings
-** Emacs ASM syntax modes
-*** asm-mode
-- Simple builtin ASM major mode
-*** nasm-mode
-- Looks nicer! install from MELPA
-- Works on objdump -S and gcc -S output
+*** TODO beardbolt advantages
+- Author is also the author of Eglot, so probably knows what they do
+**** Code is beardbolt is a lot simpler
+- Looks like a stripped-down version, code is similar but shorter
+**** Faster, according to github page
+**** Does not save buffer on compilation, major issue IMHO
