@@ -1,6 +1,6 @@
 #+STARTUP: indent
 
-WIP: [[rmsbolt-mode]]
+WIP: [[beardbolt]]
 
 Emacs hacking and tests
 
@@ -277,6 +277,13 @@ https://github.com/domtronn/all-the-icons.el
 - But does not "need to" because it navitages C++/ASM in parallel
 - Still would be nice to inspect ASM directly without navigating C++ to get
   correspondences through highlighted region
+** DONE compiler-explorer
+- https://github.com/mkcms/compiler-expl
+- For completeness, there's a third option: a local client for the (remote)
+  godbolt compiler-explorer. It's a pretty good option for short tests, but less
+  viable for files that are part of a larger local project.
+- Works pretty well, but no SRC/ASM synchronized navigation
+- Not viable for files with local includes, I guess?
 ** TODO beardbolt
 - https://github.com/joaotavora/beardbolt
 - Fork or rmsbolt that seems even better for C++, but not that active and not on
@@ -297,38 +304,68 @@ https://github.com/domtronn/all-the-icons.el
 - Navigating source does not track asm (but asm tracks source)
 *** Default uses plain gcc or compile_commands.json if exists
 - Not enough, but easy to fix using
+*** Default Keybindings
+(define-key map (kbd "C-c C-c") #'bb-compile)
+(define-key map (kbd "C-c C-d") #'bb-clear-rainbow-overlays)
 *** TODO CUSTOMIZE
 **** TODO Compilation
 - needs same args as Flycheck
 - Local vars
   // beardbolt-command: "g++ -std=c++17 -O3 -fno-exceptions -march=native -I/home/oscar/Escriptori/esquellington/tot -I/home/oscar/Escriptori/esquellington/ext"
-**** TODO Ensure *bb-asm* is visible
-- By default seems hidden, not sure why, maybe bury-successful-compilation??
+***** TODO How does the compile_commands.json option work?
+**** DONE Ensure *bb-asm* is visible
+- See [[Function to set Layout, port idea from compiler-explorer]]
+- By default seems hidden, not sure why, maybe bury-successful-compilation?? -->
+  YES, incompatible!
 - Write keybinding that just does that, on beardbolt-compile open bb-asm and
   split vertically
-**** TODO Keep code interleaved with asm?
-- objdump can do that!
-
+**** TODO Adding beardbolt-mode-hook does not seem to work?
+- never runs?
 *** TODO CONTRIBUTE?
 - Maybe I could modify + contrib to it?
 - Customizations should all be available as local-vars
-**** TODO [#A] Option to use flycheck-gcc-include-path automatically for GCC
+**** TODO FORK, not Clone, official beardbolt into local /repo
+**** DONE [#A] Keybindings for n (next) and p (prev) in ASM buffer
+- nicer navigation, like in magit, if it's read-only no point in requiring
+  Ctrl+n/p to navigate lines
+**** TODO [#A] Additional beardbolt-gcc-include-flags custom var
+- Easy peasy
+***** TODO Allow binding to 'flycheck-gcc-include-path to reuse setup?
+- Ideally offer this as an option, ex 'flycheck-gcc-include-path, and if
+  selected, just query that var and use it
 - Would ensure that if we have FM/FC working on a given project then beardbolt
   works out of the box, which is nice
-***** TODO Could add a beardbolt-gcc-include-path var and customize that
-- makes sense on its own
-- defaults to nil
-- easy to bind it to 'flycheck-gcc-include-path, make it one of the available options
-**** TODO [#A] Option to avoid redefining C-c C-c in beardbolt-mode
+- BUT 'flycheck-gcc-include-path is a list of paths, not a single flags string
+**** TODO [#B] Additional beardbolt-gcc-args, like 'flycheck-gcc-args
+- Could use these to customize -march, etc..., all except optimization level,
+  that goes into next one
+**** TODO [#A] Additional beardbolt-gcc-optimization-flags
+- Easy to concat
+- Thes could be set as local from keybinding?
+- Add to bb-mode-map (C-c 0..3?)
+- Recompile when changed from keybinding, just call beardbolt-compile automatically
+***** TODO [#A] Option to change optimization level in a beardbolt-mode buffer using keybinding
+- Just "set opt level to 0..3"
+- Ideally as a LOCAL var, but maybe global?
+**** TODO [#A] Additonal info on ASM buffer modeline
+***** TODO Optimization level -O0..3
+***** TODO What else?
+**** TODO [#A] Option to disable rainbow completely
+**** TODO [#A] Option to avoid default keybindings
+**** TODO [#B] Function to Narrow to function/region
+- Simplify focusing on function and its asm on both buffers
+- Regular narrowing works on SRC and ASM buffers, but it's not synchronized, we
+  could add a "bb-narrow-srd-and-asm" function that does that automatically, and
+  toggle narrow/widen
+**** TODO [#C] Function to set Layout, port idea from compiler-explorer
+- Single default vertical split layout, for now, but consider having several
+- Re-apply on specific bb-set-layout or on each bb-compile?
 **** TODO [#C] Option to keep inline code/comments?
+- objdump can do that, I think
 - // beardbolt-preserve-comments: t
   - Does not seem to work!? not sure if that's supposed to keep C++ comments,
     probably not
 - But does not "need to" because it navitages C++/ASM in parallel
 - Still would be nice to inspect ASM directly without navigating C++ to get
   correspondences through highlighted region
-**** TODO [#B] Function to Narrow to function/region
-- Simplify focusing on function and its asm on both buffers
-- Regular narrowing works on SRC and ASM buffers, but it's not synchronized, we
-  could add a "bb-narrow-srd-and-asm" function that does that automatically, and
-  toggle narrow/widen
+**** TODO [#C] Disable bury-successful-compilation to avoid closing the ASM buffer
