@@ -312,7 +312,7 @@ https://github.com/domtronn/all-the-icons.el
 *** DONE Default Keybindings --> intrusive, improved in [[CONTRIBUTE]]
 (define-key map (kbd "C-c C-c") #'bb-compile)
 (define-key map (kbd "C-c C-d") #'bb-clear-rainbow-overlays)
-*** TODO CUSTOMIZE
+*** DONE CUSTOMIZE
 **** DONE Ensure *bb-asm* is visible
 - See [[Function to set Layout, port idea from compiler-explorer]]
 - By default seems hidden, not sure why, maybe bury-successful-compilation?? -->
@@ -321,13 +321,12 @@ https://github.com/domtronn/all-the-icons.el
   split vertically
 **** DONE toggle bb-mode in c++-mode
 - (local-set-key (kbd "C-c C-a") 'beardbolt-mode)
-**** TODO Compilation
+**** DONE Adding beardbolt-mode-hook does not seem to work?
+**** DONE Compilation
 - needs same args as Flycheck
 - Local vars
   // beardbolt-command: "g++ -std=c++17 -O3 -fno-exceptions -march=native -I/home/oscar/Escriptori/esquellington/tot -I/home/oscar/Escriptori/esquellington/ext"
-***** TODO How does the compile_commands.json option work?
-**** TODO Adding beardbolt-mode-hook does not seem to work?
-- never runs --> DOES run, but before mode is init and deinit, so it still overwrites?
+**** DONE How does the compile_commands.json option work?
 *** TODO CONTRIBUTE
 - Maybe I could modify + contrib to it?
 - Customizations should all be available as local-vars
@@ -354,7 +353,52 @@ https://github.com/domtronn/all-the-icons.el
 - Add to bb-mode-map (C-c C-l + 0..3)
   - Just "set opt level to 0..3"
 - Recompile when changed from keybinding, just call beardbolt-compile automatically
-**** TODO [#B] Select arch+instruction set for code generation
+**** DONE [#A] Option to skip all default keybindings in keymap
+- Just define them in custom mode hook
+- Disable keymap completely for now
+**** DONE [#A] Toggle automatic compilation on buffer change on/off  :MID:
+- We want to remain in bb mode but still defer recompilation, even if that
+  invalidates rainbow
+  - Maybe remove rainbow until recompilation?
+- Even in bb mode we could toggle autocompile on /off with keys to avoid
+  breaking flow if compile is slow.
+- Customizable local var, and interactive func to toggle it, with default keybinding
+- Notify in modeline that it's disabled --> cloud icon
+***** DONE Change bb--after-change
+- Keep after-change callback, but just skip recompilation, and change modeline
+  icon to cloud
+***** DONE define-minor-mode bb-mode defines modeline string, can we change it later?
+- YES, we can :eval the lighter (on buffer change, I think) with this
+  :lighter (:eval (if bb-auto-compile-on-change " ⚡SRC" " ⛈SRC"))
+**** TODO [#A] Option to disable rainbows completely                :HARD:
+- bb-clear-rainbow-overlays exists, but it justs clears overlays on current
+  buffer, does not disable rainbow on successive calls, and breaks sync
+  highlight on SRC/ASM, and does not allow enabling them again
+- Ideally bb-toggle-rainbow-overlays to enable/disable
+- Ah... but bb seems to use overlays to sync regions in SRC/ASM, so we cannot
+  disable them completely, but maybe we can make them invisible?
+**** TODO [#A] Additonal info on ASM buffer modeline                :EASY:
+***** DONE Optimization level -O0..3
+- Read from corresponding SRC buffer?
+***** DONE Arch
+***** TODO Shorten to avoid clutter, ideally ASM/native/O3 or similar
+- could just strip -mxxx= prefixes or similar?
+***** TODO CAN reeval modeline lighter with :eval, see SRC mode
+**** TODO [#B] Function to Narrow to function/region                :HARD:
+- Simplify focusing on function and its asm on both buffers
+- Regular narrowing works on SRC and ASM buffers, but it's not synchronized, we
+  could add a "bb-narrow-srd-and-asm" function that does that automatically, and
+  toggle narrow/widen
+**** TODO [#B] Docs on ASM instruction under point in ASM buffer --> Just use x86-lookup :EASY:
+- Tracy does this and it's pretty awesome
+- Maybe some other mode this this already?
+  - Seems orthogonal to bb, and only requires asm-mode or derived
+- ElDoc could do this?
+- Could just add keybinding to do a browser search on a known website that lists
+  ASM instructions
+***** TODO Spacemacs has this https://develop.spacemacs.org/layers/+lang/asm/README.html
+***** TODO x86-lookup https://github.com/skeeto/x86-lookup
+**** TODO [#B] Select arch+instruction set for code generation      :EASY:
 - See https://gcc.gnu.org/onlinedocs/gcc/x86-Options.html
 - gcc -march=XXXX
   - default to native
@@ -383,42 +427,6 @@ https://github.com/domtronn/all-the-icons.el
   - x64 + avx2
 ***** DONE Show in ASM modeline
 ***** TODO Command to select one of the few predefined combinations?
-**** TODO [#A] Toggle automatic compilation on buffer change on/off
-- We want to remain in bb mode but still defer recompilation, even if that
-  invalidates rainbow
-  - Maybe remove rainbow until recompilation?
-- Even in bb mode we could toggle autocompile on /off with keys to avoid
-  breaking flow if compile is slow.
-- Customizable local var, and interactive func to toggle it, with default keybinding
-- Notify in modeline that it's disabled --> cloud icon
-**** TODO [#A] Option to disable rainbows completely --> hard!?
-- bb-clear-rainbow-overlays exists, but it justs clears overlays on current
-  buffer, does not disable rainbow on successive calls, and breaks sync
-  highlight on SRC/ASM, and does not allow enabling them again
-- Ideally bb-toggle-rainbow-overlays to enable/disable
-- Ah... but bb seems to use overlays to sync regions in SRC/ASM, so we cannot
-  disable them completely, but maybe we can make them invisible?
-**** TODO [#A] Additonal info on ASM buffer modeline
-***** DONE Optimization level -O0..3
-- Read from corresponding SRC buffer?
-***** DONE Arch
-***** TODO Shorten to avoid clutter, ideally ASM/native/O3 or similar
-**** TODO [#A] Option to skip all default keybindings in keymap
-- Just define them in custom mode hook
-**** TODO [#B] Function to Narrow to function/region
-- Simplify focusing on function and its asm on both buffers
-- Regular narrowing works on SRC and ASM buffers, but it's not synchronized, we
-  could add a "bb-narrow-srd-and-asm" function that does that automatically, and
-  toggle narrow/widen
-**** TODO [#B] Docs on ASM instruction under point in ASM buffer --> Just use x86-lookup
-- Tracy does this and it's pretty awesome
-- Maybe some other mode this this already?
-  - Seems orthogonal to bb, and only requires asm-mode or derived
-- ElDoc could do this?
-- Could just add keybinding to do a browser search on a known website that lists
-  ASM instructions
-***** TODO Spacemacs has this https://develop.spacemacs.org/layers/+lang/asm/README.html
-***** TODO x86-lookup https://github.com/skeeto/x86-lookup
 **** TODO [#C] Option to keep inline code/comments?
 - objdump can do that, I think
 - // beardbolt-preserve-comments: t
@@ -436,7 +444,10 @@ https://github.com/domtronn/all-the-icons.el
 **** TODO [#C] Disable bury-successful-compilation to avoid closing the ASM buffer
 - Interferes, but leaving compilation buffer open sucks!
 - Maybe keybinding to bury it (by name, so it's easy!)
-- bury-buffer?
+  - bury-buffer?
+- Should not be necessary, ideally we can modify bb--handle-finish-compile to
+  just remove compilation buffer when it finishes successfully even if it's open
+  because it failed last time?
 **** TODO [#C] Multiple layouts, port idea from compiler-explorer
 - Single default vertical split layout, for now, but consider having several
 - Re-apply on specific bb-set-layout or on each bb-compile?
