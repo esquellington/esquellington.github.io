@@ -141,6 +141,10 @@ https://karthinks.com/software/avy-can-do-anything/
 - Tricks: https://github.com/jgoerzen/public-snippets/blob/master/emacs/emacs-org-beamer/emacs-org-beamer.org
 * ORG TREE SLIDES (presentations)
 - Howto video (30min) https://www.youtube.com/watch?v=vz9aLmxYJB0
+* Quoting functions with #'
+- If looks like #'something is the proper way to "quote a function", equivalent
+  to 'something if someting is a function, but will fail for non-functions
+- See https://www.emacswiki.org/emacs/EmacsSymbolNotation
 * DONE <2024-01-21 dom> UPDATE PACKAGES (Emacs 30 from sources)
 * DONE all-the-icons
 https://github.com/domtronn/all-the-icons.el
@@ -377,27 +381,29 @@ https://github.com/domtronn/all-the-icons.el
 - Ideally bb-toggle-rainbow-overlays to enable/disable
 - Ah... but bb seems to use overlays to sync regions in SRC/ASM, so we cannot
   disable them completely, but maybe we can make them invisible?
+- Alternative mode would highlight current region very clearly, and nothing else
 **** TODO [#A] Additonal info on ASM buffer modeline                :EASY:
 ***** DONE Optimization level -O0..3
 - Read from corresponding SRC buffer?
 ***** DONE Arch
+***** DONE CAN reeval modeline lighter with :eval, see SRC mode
 ***** TODO Shorten to avoid clutter, ideally ASM/native/O3 or similar
 - could just strip -mxxx= prefixes or similar?
-***** TODO CAN reeval modeline lighter with :eval, see SRC mode
-**** TODO [#B] Function to Narrow to function/region                :HARD:
-- Simplify focusing on function and its asm on both buffers
-- Regular narrowing works on SRC and ASM buffers, but it's not synchronized, we
-  could add a "bb-narrow-srd-and-asm" function that does that automatically, and
-  toggle narrow/widen
-**** TODO [#B] Docs on ASM instruction under point in ASM buffer --> Just use x86-lookup :EASY:
+**** DONE [#B] Docs on ASM instruction under point in ASM buffer --> Just use x86-lookup :EASY:
 - Tracy does this and it's pretty awesome
 - Maybe some other mode this this already?
   - Seems orthogonal to bb, and only requires asm-mode or derived
 - ElDoc could do this?
 - Could just add keybinding to do a browser search on a known website that lists
   ASM instructions
-***** TODO Spacemacs has this https://develop.spacemacs.org/layers/+lang/asm/README.html
-***** TODO x86-lookup https://github.com/skeeto/x86-lookup
+***** DONE x86-lookup https://github.com/skeeto/x86-lookup
+- Works, a bit ugly and does not find VXXXX instructions (ex VMOVPS), but finds MOVPS
+- Could strip V- automatically I guess
+**** TODO [#B] Function to Narrow to function/region                :HARD:
+- Simplify focusing on function and its asm on both buffers
+- Regular narrowing works on SRC and ASM buffers, but it's not synchronized, we
+  could add a "bb-narrow-srd-and-asm" function that does that automatically, and
+  toggle narrow/widen
 **** TODO [#B] Select arch+instruction set for code generation      :EASY:
 - See https://gcc.gnu.org/onlinedocs/gcc/x86-Options.html
 - gcc -march=XXXX
