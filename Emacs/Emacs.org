@@ -415,7 +415,7 @@ SHOW?
 ***** TODO beardbolt-execute-args: string args
 ***** TODO beardbolt-auto-excute-after-compile: t/nil
 ***** DONE toggle with command
-**** TODO HUGE conundrum with local vars!
+**** DONE HUGE conundrum with local vars! --> forget setq-local, always customize globals
 - must read with (buffer-local-value xxxx (current-buffer))
 - COMPILE does not use bb-gcc-optimization-flags for some reason now? likely
   it's buffer local but not read as such!?
@@ -425,7 +425,8 @@ SHOW?
   setq-local, and assume actual file local vars are the only pure local
 - This means that toggling stuff in one buffer toggles it in all buffers that DO
   NOT explicitly set that local var
-**** TODO [#A] ASM -march does not seem to show buffer local vars?   :MID:
+***** Ok! found way to query local vars (buffer-local-value 'bb-local-var (current-buffer))
+**** DONE [#A] ASM -march does not seem to show buffer local vars?   :MID:
 - see test.cpp
 - WEIRD C-h v beardbolt-gcc-arch-flags shows right value in SRC, but default in
   ASM
@@ -449,7 +450,7 @@ SHOW?
   could add a "bb-narrow-srd-and-asm" function that does that automatically, and
   toggle narrow/widen
 - Not sure bb overlays are working correctly when I manually narrow SRC and ASM
-**** TODO [#B] Discreate selection of arch+instructionset :EASY:
+**** TODO [#B] Discreate selection of arch+instructionset           :EASY:
 - See https://gcc.gnu.org/onlinedocs/gcc/x86-Options.html
 - gcc -march=XXXX
   - default to native
