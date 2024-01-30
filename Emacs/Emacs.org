@@ -190,6 +190,12 @@ https://github.com/domtronn/all-the-icons.el
 ** TODO lsp-mode
 ** TODO MAY interfere with dumb-jump!?
 - xref mechanism and keybindings may interfere, not sure
+* TODO bury-successful-compilation replacement that is simpler?
+Couldn't we just do this in a compilation hook, similar to beardbolt?
+(let (w)
+  (setq w (get-buffer-window "*compilation*"))
+  (when w
+    (delete-window w)))
 * TODO Emacs + ASM
 ** Emacs ASM syntax modes
 *** asm-mode
@@ -374,21 +380,11 @@ https://github.com/domtronn/all-the-icons.el
 ***** DONE define-minor-mode bb-mode defines modeline string, can we change it later?
 - YES, we can :eval the lighter (on buffer change, I think) with this
   :lighter (:eval (if bb-auto-compile-on-change " ⚡SRC" " ⛈SRC"))
-**** TODO [#A] Option to disable rainbows completely                :HARD:
-- bb-clear-rainbow-overlays exists, but it justs clears overlays on current
-  buffer, does not disable rainbow on successive calls, and breaks sync
-  highlight on SRC/ASM, and does not allow enabling them again
-- Ideally bb-toggle-rainbow-overlays to enable/disable
-- Ah... but bb seems to use overlays to sync regions in SRC/ASM, so we cannot
-  disable them completely, but maybe we can make them invisible?
-- Alternative mode would highlight current region very clearly, and nothing else
-**** TODO [#A] Additonal info on ASM buffer modeline                :EASY:
+**** DONE [#B] Additonal info on ASM buffer modeline                :EASY:
 ***** DONE Optimization level -O0..3
 - Read from corresponding SRC buffer?
 ***** DONE Arch
 ***** DONE CAN reeval modeline lighter with :eval, see SRC mode
-***** TODO Shorten to avoid clutter, ideally ASM/native/O3 or similar
-- could just strip -mxxx= prefixes or similar?
 **** DONE [#B] Docs on ASM instruction under point in ASM buffer --> Just use x86-lookup :EASY:
 - Tracy does this and it's pretty awesome
 - Maybe some other mode this this already?
@@ -399,12 +395,60 @@ https://github.com/domtronn/all-the-icons.el
 ***** DONE x86-lookup https://github.com/skeeto/x86-lookup
 - Works, a bit ugly and does not find VXXXX instructions (ex VMOVPS), but finds MOVPS
 - Could strip V- automatically I guess
+**** DONE [#A] Keyb to hide bb-compilation buffer                   :EASY:
+- Just hide it by name, must be easy!
+- (delete-windows-on buffer-name) --> fails if no window on that buffer
+HIDE
+(let (w)
+  (setq w (get-buffer-window "*bb-compilation*"))
+  (when w
+    (delete-window w)))
+SHOW?
+- beardbolt does this (display-buffer asm-buffer '(nil (inhibit-same-window . t)))
+**** DONE [#A] Split bb-execute into args+auto                       :MID:
+***** DONE display rocket next to bolt/cloud
+***** TODO beardbolt-execute can be t/nil or a string
+- if t, it expands to "" args
+- if nil, it does not exec
+- if string-p, it becomes args
+- This is super-confusing
+***** TODO beardbolt-execute-args: string args
+***** TODO beardbolt-auto-excute-after-compile: t/nil
+***** DONE toggle with command
+**** TODO HUGE conundrum with local vars!
+- must read with (buffer-local-value xxxx (current-buffer))
+- COMPILE does not use bb-gcc-optimization-flags for some reason now? likely
+  it's buffer local but not read as such!?
+- it did work when we (setq xxx) globally, but not after (setq-local xxx)
+  because we don't get them as local during bb--c/c++-setup
+- FFS... I have no idea how to fix it, so for now all commants setq insead of
+  setq-local, and assume actual file local vars are the only pure local
+- This means that toggling stuff in one buffer toggles it in all buffers that DO
+  NOT explicitly set that local var
+**** TODO [#A] ASM -march does not seem to sync to buffer local vars? :MID:
+- see test.cpp
+- WEIRD C-h v beardbolt-gcc-arch-flags shows right value in SRC, but default in
+  ASM
+- SO I guess var is buffer-local in SRC buffer BB mode, but not seen by ASM buffer!
+- How does it see optimization then? --> AH! I was setting global var, not local!
+***** TODO Send SRC buffer-local values to ASM so that modeline is correct!
+**** TODO [#A] Option to disable rainbows completely                :HARD:
+- bb-clear-rainbow-overlays exists, but it justs clears overlays on current
+  buffer, does not disable rainbow on successive calls, and breaks sync
+  highlight on SRC/ASM, and does not allow enabling them again
+- Ideally bb-toggle-rainbow-overlays to enable/disable
+- Ah... but bb seems to use overlays to sync regions in SRC/ASM, so we cannot
+  disable them completely, but maybe we can make them invisible?
+- Alternative mode would highlight current region very clearly, and nothing else
+***** TODO bb-current-line-face is the face used for highlight?
+- Yes it is, changing background to be bright helps, even if rainbow is not removed
 **** TODO [#B] Function to Narrow to function/region                :HARD:
 - Simplify focusing on function and its asm on both buffers
 - Regular narrowing works on SRC and ASM buffers, but it's not synchronized, we
   could add a "bb-narrow-srd-and-asm" function that does that automatically, and
   toggle narrow/widen
-**** TODO [#B] Select arch+instruction set for code generation      :EASY:
+- Not sure bb overlays are working correctly when I manually narrow SRC and ASM
+**** TODO [#B] Discreate selection of arch+instructionset :EASY:
 - See https://gcc.gnu.org/onlinedocs/gcc/x86-Options.html
 - gcc -march=XXXX
   - default to native
@@ -433,6 +477,9 @@ https://github.com/domtronn/all-the-icons.el
   - x64 + avx2
 ***** DONE Show in ASM modeline
 ***** TODO Command to select one of the few predefined combinations?
+**** TODO [#C] Prettier mode-line ASM info                           :MID:
+- Shorten to avoid clutter, ideally ASM/native/O3 or similar
+- Could just strip -mxxx= prefixes or similar?
 **** TODO [#C] Option to keep inline code/comments?
 - objdump can do that, I think
 - // beardbolt-preserve-comments: t
