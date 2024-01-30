@@ -425,12 +425,13 @@ SHOW?
   setq-local, and assume actual file local vars are the only pure local
 - This means that toggling stuff in one buffer toggles it in all buffers that DO
   NOT explicitly set that local var
-**** TODO [#A] ASM -march does not seem to sync to buffer local vars? :MID:
+**** TODO [#A] ASM -march does not seem to show buffer local vars?   :MID:
 - see test.cpp
 - WEIRD C-h v beardbolt-gcc-arch-flags shows right value in SRC, but default in
   ASM
 - SO I guess var is buffer-local in SRC buffer BB mode, but not seen by ASM buffer!
 - How does it see optimization then? --> AH! I was setting global var, not local!
+- So if we set local var, it's not seen
 ***** TODO Send SRC buffer-local values to ASM so that modeline is correct!
 **** TODO [#A] Option to disable rainbows completely                :HARD:
 - bb-clear-rainbow-overlays exists, but it justs clears overlays on current
