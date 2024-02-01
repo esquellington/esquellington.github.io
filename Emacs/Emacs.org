@@ -366,7 +366,7 @@ Couldn't we just do this in a compilation hook, similar to beardbolt?
 **** DONE [#A] Option to skip all default keybindings in keymap
 - Just define them in custom mode hook
 - Disable keymap completely for now
-**** DONE [#A] Toggle automatic compilation on buffer change on/off  :MID:
+**** DONE [#A] Toggle automatic compilation on buffer change on/off
 - We want to remain in bb mode but still defer recompilation, even if that
   invalidates rainbow
   - Maybe remove rainbow until recompilation?
@@ -380,12 +380,12 @@ Couldn't we just do this in a compilation hook, similar to beardbolt?
 ***** DONE define-minor-mode bb-mode defines modeline string, can we change it later?
 - YES, we can :eval the lighter (on buffer change, I think) with this
   :lighter (:eval (if bb-auto-compile-on-change " ⚡SRC" " ⛈SRC"))
-**** DONE [#B] Additonal info on ASM buffer modeline                :EASY:
+**** DONE [#B] Additonal info on ASM buffer modeline
 ***** DONE Optimization level -O0..3
 - Read from corresponding SRC buffer?
 ***** DONE Arch
 ***** DONE CAN reeval modeline lighter with :eval, see SRC mode
-**** DONE [#B] Docs on ASM instruction under point in ASM buffer --> Just use x86-lookup :EASY:
+**** DONE [#B] Docs on ASM instruction under point in ASM buffer --> Just use x86-lookup
 - Tracy does this and it's pretty awesome
 - Maybe some other mode this this already?
   - Seems orthogonal to bb, and only requires asm-mode or derived
@@ -395,7 +395,7 @@ Couldn't we just do this in a compilation hook, similar to beardbolt?
 ***** DONE x86-lookup https://github.com/skeeto/x86-lookup
 - Works, a bit ugly and does not find VXXXX instructions (ex VMOVPS), but finds MOVPS
 - Could strip V- automatically I guess
-**** DONE [#A] Keyb to hide bb-compilation buffer                   :EASY:
+**** DONE [#A] Keyb to hide bb-compilation buffer
 - Just hide it by name, must be easy!
 - (delete-windows-on buffer-name) --> fails if no window on that buffer
 HIDE
@@ -405,7 +405,7 @@ HIDE
     (delete-window w)))
 SHOW?
 - beardbolt does this (display-buffer asm-buffer '(nil (inhibit-same-window . t)))
-**** DONE [#A] Split bb-execute into args+auto                       :MID:
+**** DONE [#A] Split bb-execute into args+auto
 ***** DONE display rocket next to bolt/cloud
 ***** TODO beardbolt-execute can be t/nil or a string
 - if t, it expands to "" args
@@ -415,7 +415,7 @@ SHOW?
 ***** TODO beardbolt-execute-args: string args
 ***** TODO beardbolt-auto-excute-after-compile: t/nil
 ***** DONE toggle with command
-**** DONE HUGE conundrum with local vars! --> forget setq-local, always customize globals
+**** DONE [#A] HUGE conundrum with local vars! --> forget setq-local, always customize globals
 - must read with (buffer-local-value xxxx (current-buffer))
 - COMPILE does not use bb-gcc-optimization-flags for some reason now? likely
   it's buffer local but not read as such!?
@@ -426,7 +426,7 @@ SHOW?
 - This means that toggling stuff in one buffer toggles it in all buffers that DO
   NOT explicitly set that local var
 ***** Ok! found way to query local vars (buffer-local-value 'bb-local-var (current-buffer))
-**** DONE [#A] ASM -march does not seem to show buffer local vars?   :MID:
+**** DONE [#A] ASM -march does not seem to show buffer local vars?
 - see test.cpp
 - WEIRD C-h v beardbolt-gcc-arch-flags shows right value in SRC, but default in
   ASM
@@ -444,6 +444,10 @@ SHOW?
 - Alternative mode would highlight current region very clearly, and nothing else
 ***** TODO bb-current-line-face is the face used for highlight?
 - Yes it is, changing background to be bright helps, even if rainbow is not removed
+**** TODO [#A] Higher contrast selection/correspondence highlight    :MID:
+- Default is pretty hard to see, I overwrote color and it's a lot clearer
+- Ideally we'd find a "complementary hue" or similar automatically from known
+  background color that still keeps text visible at the same time
 **** TODO [#B] Function to Narrow to function/region                :HARD:
 - Simplify focusing on function and its asm on both buffers
 - Regular narrowing works on SRC and ASM buffers, but it's not synchronized, we
@@ -490,7 +494,7 @@ SHOW?
 - But does not "need to" because it navitages C++/ASM in parallel
 - Still would be nice to inspect ASM directly without navigating C++ to get
   correspondences through highlighted region
-**** TODO [#C] Allow binding to Flycheck/Flymake customization to beardbolt customization
+**** TODO [#C] Allow binding to Flycheck/Flymake customization to beardbolt customization --> pretty irrelevant
 - Would ensure that if we have FM/FC working on a given project then beardbolt
   works out of the box with same args, which is nice
 ***** TODO beardbolt-gcc-include-flags = 'flycheck-gcc-include-path
@@ -503,14 +507,14 @@ SHOW?
 - Should not be necessary, ideally we can modify bb--handle-finish-compile to
   just remove compilation buffer when it finishes successfully even if it's open
   because it failed last time?
-**** TODO [#C] Multiple layouts, port idea from compiler-explorer
-- Single default vertical split layout, for now, but consider having several
-- Re-apply on specific bb-set-layout or on each bb-compile?
-- Only makes sense if >2 windows are desired
 *** TODO Use-Cases/Examples
 - A few performance hazards that are easily avoided by looking at the ASM
+**** DONE See effect of math lib calls
+- It's very easy to call "double" prec math funcs by mistake, ASM should make it obvious
+- Some comp params might cause unexpected calls to math.h funcs that set errno, or similar
 **** TODO See effect of __restrict__ in resulting ASM
-***** TODO Minimal Example
+***** TODO Minimal Example with mat4x4 maybe?
+- loop that calls mul(mat,vec) or similar, noinline, and see effect
 **** TODO See (N)RVO application/effect
 - Not clear when it's applied, so checking ASM is the only infallible way
 - See if it can be disabled with gcc arg, and try with/without
@@ -518,8 +522,8 @@ SHOW?
 **** TODO See how STL code is inlined
 - Potential source of silent inefficiency, good to see what code is generated by
   complex templates
-**** TODO See effect of math lib calls
-- It's very easy to call "double" prec math funcs by mistake, ASM should make it obvious
-- Some comp params might cause unexpected calls to math.h funcs that set errno, or similar
 **** TODO See effect of Exceptions
 - How much overhead do they add? ASM should make it apparent
+*** TODO Clang support?!
+- Should work, but getting include dirs will be hard...
+- Unless I can copy commandline from Clang from VS
