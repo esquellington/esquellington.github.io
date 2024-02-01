@@ -139,8 +139,7 @@ packages may significantly slow preview generation down."
   (cond ((eq system-type 'windows-nt)
          " > NUL 2> laic_errors.txt")
         (t ;;else 'gnu/linux, 'darwin, etc...
-         (concat " > /dev/null 2> laic_errors.txt" ))
-        (t ""))
+         (concat " > /dev/null 2> laic_errors.txt" )))
   "OS-specific commandline args to redirect output to null sink.")
 
 (defvar laic-OS-commandline-separator
