@@ -154,6 +154,16 @@ https://github.com/domtronn/all-the-icons.el
 - Looks more featureful than Neotree (https://github.com/jaypei/emacs-neotree)
 - Looks VERY COMPLEX and heavyweight, Neotree is fine, I don't really need all those features
 - Overall NT is simpler, just use it
+* DONE Use keymap-local-set instead of local-set-key!
+- https://www.gnu.org/software/emacs/manual/html_node/emacs/Init-Rebinding.html
+- IMPORTANT: For MINOR modes, custom keybindings must NOT USE local-set-key or
+  keymap-local-set, because that overrides the MAJOR mode keymap, and therefore
+  the keybinding is not automatically cleaned up when the MINOR mode is
+  disabled, but the MAJOR mode remains active. For example, for beardbolt.
+  ;; Custom keybindings. bb is a MINOR mode, so we must set the
+  ;; beardbolt-mode-keymap EXPLICITLY with keymap-set, not the "local"
+  ;; keymap with keymap-local-set, it would override the MAJOR mode (C/C++)
+  (keymap-set beardbolt-mode-map "C-c C-k" #'beardbolt-compile)
 * TODO Perf viewer?
 - Emacs Perf viewer?
 - Google search shows no modes or anybody discussing this, maybe it makes no sense
@@ -434,6 +444,10 @@ SHOW?
 - How does it see optimization then? --> AH! I was setting global var, not local!
 - So if we set local var, it's not seen
 ***** TODO Send SRC buffer-local values to ASM so that modeline is correct!
+**** DONE [#A] Remove beardbolt-mode hook keybindings on exit        :MID:
+- BB beardbolt-mode-hook local-set-key stay after BB mode is exited, which
+  interferes with C++ mode if BB redefines some keybindings (ex: hide-compilation)
+- BB keymap is correctly cleaned up on exit... so maybe just add keys to keymap?
 **** TODO [#A] Option to disable rainbows completely                :HARD:
 - bb-clear-rainbow-overlays exists, but it justs clears overlays on current
   buffer, does not disable rainbow on successive calls, and breaks sync
@@ -454,6 +468,8 @@ SHOW?
   could add a "bb-narrow-srd-and-asm" function that does that automatically, and
   toggle narrow/widen
 - Not sure bb overlays are working correctly when I manually narrow SRC and ASM
+- Correspondence is not necessarily compact, especially for inline funcs, it can
+  get very messy
 **** TODO [#B] Discreate selection of arch+instructionset           :EASY:
 - See https://gcc.gnu.org/onlinedocs/gcc/x86-Options.html
 - gcc -march=XXXX
@@ -524,6 +540,3 @@ SHOW?
   complex templates
 **** TODO See effect of Exceptions
 - How much overhead do they add? ASM should make it apparent
-*** TODO Clang support?!
-- Should work, but getting include dirs will be hard...
-- Unless I can copy commandline from Clang from VS
