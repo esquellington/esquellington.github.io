@@ -534,3 +534,6 @@ SHOW?
 **** TODO See effect of Exceptions
 - How much overhead do they add? ASM should make it apparent
 * TODO Emacs * GPT https://github.com/karthink/gptel
+- Also, this blog post https://nullprogram.com/blog/2024/11/10/
+  explains how to run local LLMs using llama.cpp (supported by gptel),
+  even on CPU, or shitty GPU, consider trying
