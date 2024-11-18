@@ -1,0 +1,118 @@
+#+title: Example Post
+#+date: <2024-11-17 dom>
+#+author: Oscar
+#+HTML_LINK_UP: sitemap.html
+#+HTML_LINK_HOME: index.html
+
+* Intro
+
+hereinafter inasmuch
+
+See internal link [[Appendix]]
+
+* Body
+
+** Text formatting
+
+Properties: *bold*, /italic/, ~code~, _underlined_, =verbatim=, +strike-through+
+
+Super/subindices: a^b, a_b
+
+Unicode 𝞉, ∂, 𝜕, 𝝏
+
+** Lists
+
+List
+- fdfd
+- fdfd
+- fd
+
+Enum
+1. first
+2. second
+3. third
+
+** Latex
+
+Inline LateX $a = b$
+
+Inline Equation \[ \alpha \neq \beta + \gamma\]
+
+Numbered equation
+\begin{equation} \alpha = \beta \end{equation}
+
+** Code
+C++ code, requires loading appropriate theme in publish.el to get nice
+syntax highlighting
+#+BEGIN_SRC C++
+  int main( int argc, char** argv )
+  {
+      return 0; //yeah
+  }
+#+END_SRC
+
+** Images
+Link with description does not display image [[file:../img/ScotchBonnet.png][ojocuidao!]]
+
+But explicit link does does
+
+#+CAPTION: BART
+#+ATTR_HTML: :alt cat/spider image :title Action! :align right
+[[../img/ScotchBonnet.png]]
+
+** Tables and Plots
+
+Table works as expected
+#+tblname: data-table
+| x | y1 | y2 |
+|---+----+----|
+| 0 |  0 |  0 |
+| 1 |  1 |  1 |
+| 2 |  4 |  8 |
+| 3 |  9 | 27 |
+
+Gnuplot SRC works, BUT result does not display inline unless I add an
+extra return after #+RESULTS: before the image link
+#+BEGIN_SRC gnuplot :var data=data-table :file ../img/table.png
+  plot data u 1:2 with lines, \
+       data u 1:3 with lines
+#+END_SRC
+
+#+RESULTS:
+
+[[file:../img/table.png]]
+* Conclusions
+*all of your base are belong to us*
+*all of your base are belong to us*
+*all of your base are belong to us*
+*all of your base are belong to us*
+*all of your base are belong to us*
+*all of your base are belong to us*
+*all of your base are belong to us*
+*all of your base are belong to us*
+*all of your base are belong to us*
+*all of your base are belong to us*
+*all of your base are belong to us*
+*all of your base are belong to us*
+*all of your base are belong to us*
+*all of your base are belong to us*
+*all of your base are belong to us*
+*all of your base are belong to us*
+*all of your base are belong to us*
+*all of your base are belong to us*
+*all of your base are belong to us*
+*all of your base are belong to us*
+*all of your base are belong to us*
+*all of your base are belong to us*
+*all of your base are belong to us*
+*all of your base are belong to us*
+*all of your base are belong to us*
+*all of your base are belong to us*
+*all of your base are belong to us*
+*all of your base are belong to us*
+*all of your base are belong to us*
+*all of your base are belong to us*
+*all of your base are belong to us*
+*all of your base are belong to us*
+
+* Appendix

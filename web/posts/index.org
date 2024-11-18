@@ -1,0 +1,6 @@
+#+title: INDEX
+[[file:post_one.org][FIRST POST]]
+
+[[https://mastodon.gamedev.place/home][Mastodon]]
+
+[[file:sitemap.org][Site Map]]
