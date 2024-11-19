@@ -1,4 +1,4 @@
-#+title: Example Post
+#+title: Test Post
 #+date: <2024-11-17 dom>
 #+author: Oscar
 
@@ -7,6 +7,12 @@
 hereinafter inasmuch
 
 See internal link [[Appendix]]
+
+Start httpd server on public dir and browse it:
+#+BEGIN_SRC elisp
+  (httpd-serve-directory "~/Desktop/esquellington/esquellington.github.io/web/public/")
+  (eww "localhost:8080")
+#+END_SRC
 
 * Body
 

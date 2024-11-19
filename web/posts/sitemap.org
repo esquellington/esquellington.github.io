@@ -1,5 +1,5 @@
 #+TITLE: Site Map TEST
 
 - [[file:index.org][INDEX]]
-- [[file:post_one.org][Example Post]]
+- [[file:00_test.org][Test Post]]
 - [[file:post_with_css.org][Post with overwritten CSS]]
