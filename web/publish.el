@@ -35,6 +35,25 @@
 (setq org-html-head (concat "<link rel=\"stylesheet\" href=\"../css/simple.min.css\" />"
                             "<link rel=\"stylesheet\" href=\"../css/custom.css\" />"))
 
+;; Copied from https://github.com/clarete/clarete.github.io/blob/master/publish.el, not 100% sure how it works but does
+(setq org-html-divs '((preamble  "header" "top")
+                      (content   "main"   "content")
+                      (postamble "footer" "postamble")))
+
+(defun load-file-to-string (path)
+  "Return the contents of file at PATH."
+  (with-temp-buffer
+    (insert-file-contents path)
+    (buffer-string)))
+
+(defun load-preamble (_plist)
+  "Header (or preamble) for the blog."
+  (load-file-to-string "../layout/header.html"))
+
+(defun load-postamble (_plist)
+  "Footer (or postamble) for the blog."
+  (load-file-to-string "../layout/footer.html"))
+
 ;;---- website sources
 (setq org-publish-project-alist
       '(("posts"
@@ -47,10 +66,10 @@
          :auto-sitemap t
          :sitemap-title "Site Map TEST"
          :sitemap-sort-files anti-chronologically
-         ;; Header (TODO class-es should be defined in CSS!!! ex ".notice" is defined, but no others
-         ; :html-preamble "<div class=\"header\"> PREAMBLE </div>"
+         ;; Header
+         :html-preamble load-preamble
          ;; Footer
-         ; :html-postamble "<div class=\"footer\"> <div class=\"bg\"> <div class=\"notice\"> POSTAMBLE </div> </div> </div>"
+         :html-postamble load-postamble
          ;; Info
          :author "OCF"
          :email "invalid@example.com"

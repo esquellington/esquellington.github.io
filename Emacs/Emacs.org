@@ -567,7 +567,7 @@ packages desired to org->website.
 *** DONE Serve site locally
 - Systemcrafters shows way to do it within Emacs IIRC, no python needed
 - simple-httpd
-- (use-package simple-httpd :ensure t)
+- Run (use-package simple-httpd :ensure t)
 - M-x httpd-serve-directory
 - shell:firefox http://localhost:8080/
 *** DONE CSS/template/fonts/etc
