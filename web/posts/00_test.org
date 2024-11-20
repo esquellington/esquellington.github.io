@@ -8,7 +8,7 @@ hereinafter inasmuch
 
 See internal link [[Appendix]]
 
-Start httpd server on public dir and browse it:
+Start httpd server on public dir and browse it from Emacs:
 #+BEGIN_SRC elisp
   (httpd-serve-directory "~/Desktop/esquellington/esquellington.github.io/web/public/")
   (eww "localhost:8080")
@@ -17,13 +17,17 @@ Start httpd server on public dir and browse it:
 #+RESULTS:
 : #<buffer  *http localhost:8080*>
 
+Browse with Firefox
+
+  [[shell:firefox localhost:8080 &]]
+
 * Body
 
-** Text formatting
+** Text
 
 Properties: *bold*, /italic/, ~code~, _underlined_, =verbatim=, +strike-through+
 
-Super/subindices: a^b, a_b
+Superindex a^b and Subindex a_b
 
 Unicode 𝞉, ∂, 𝜕, 𝝏
 
@@ -39,9 +43,9 @@ Enum
 2. second
 3. third
 
-** Latex
+** LaTeX $\LaTeX$
 
-Inline LateX $a = b$
+Inline $a = b$
 
 Inline Equation \[ \alpha \neq \beta + \gamma\]
 
@@ -88,6 +92,10 @@ extra return after #+RESULTS: before the image link
 #+RESULTS:
 
 [[file:../img/table.png]]
+** TODO Inline HTML
+
+can we inject HTML for specific/unsupported features?
+
 * Conclusions
 *all of your base are belong to us*
 *all of your base are belong to us*

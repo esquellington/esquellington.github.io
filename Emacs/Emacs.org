@@ -605,5 +605,8 @@ org-html-head "<link rel=\"stylesheet\" href=\"https://cdn.simplecss.org/simple.
   - With Emacs+Org (links and logos?)
   - With Simple.css (https://simplecss.org/)
   - etc...
+**** TODO Icons
+- People seem to use fontawesome for icons, contains many of them,
+  github, email, RSS, etc...
 *** TODO Auto-publish to github
 - Follow https://www.youtube.com/watch?v=za99DwdZEyg
