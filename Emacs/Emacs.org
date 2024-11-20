@@ -592,19 +592,18 @@ org-html-head "<link rel=\"stylesheet\" href=\"https://cdn.simplecss.org/simple.
       '((preamble  "header" "top")
         (content   "main"   "content")
         (postamble "footer" "postamble"))
-**** TODO image --> link back to index
-**** TODO title
-**** DONE Link back to Index or sitemap? or menu? (UP/HOME)
-**** TODO Mastodon link?
-**** TODO Github link?
-**** TODO RSS?
+**** DONE image --> link back to index
+**** TODO fancy title?
+**** TODO Mastodon logo+link?
+**** TODO Github logo+link?
+**** TODO RSS logo+link?
 - See (require 'ox-rss)
 **** TODO Footer
-- Back to Top
+- Back to Top (anchor?)
 - Back to Index
 - Credits
   - With Emacs+Org (links and logos?)
-  - With simple.CSS (link)
-  - Etc...
+  - With Simple.css (https://simplecss.org/)
+  - etc...
 *** TODO Auto-publish to github
 - Follow https://www.youtube.com/watch?v=za99DwdZEyg

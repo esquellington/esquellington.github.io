@@ -14,6 +14,9 @@ Start httpd server on public dir and browse it:
   (eww "localhost:8080")
 #+END_SRC
 
+#+RESULTS:
+: #<buffer  *http localhost:8080*>
+
 * Body
 
 ** Text formatting
@@ -86,34 +89,6 @@ extra return after #+RESULTS: before the image link
 
 [[file:../img/table.png]]
 * Conclusions
-*all of your base are belong to us*
-*all of your base are belong to us*
-*all of your base are belong to us*
-*all of your base are belong to us*
-*all of your base are belong to us*
-*all of your base are belong to us*
-*all of your base are belong to us*
-*all of your base are belong to us*
-*all of your base are belong to us*
-*all of your base are belong to us*
-*all of your base are belong to us*
-*all of your base are belong to us*
-*all of your base are belong to us*
-*all of your base are belong to us*
-*all of your base are belong to us*
-*all of your base are belong to us*
-*all of your base are belong to us*
-*all of your base are belong to us*
-*all of your base are belong to us*
-*all of your base are belong to us*
-*all of your base are belong to us*
-*all of your base are belong to us*
-*all of your base are belong to us*
-*all of your base are belong to us*
-*all of your base are belong to us*
-*all of your base are belong to us*
-*all of your base are belong to us*
-*all of your base are belong to us*
 *all of your base are belong to us*
 *all of your base are belong to us*
 *all of your base are belong to us*
