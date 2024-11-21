@@ -45,9 +45,10 @@ Enum
 
 ** LaTeX $\LaTeX$
 
-Inline $a = b$
+Inline $a = b$ formula
 
-Inline Equation \[ \alpha \neq \beta + \gamma\]
+Equation
+\[ \alpha \neq \beta + \gamma\]
 
 Numbered equation
 \begin{equation} \alpha = \beta \end{equation}

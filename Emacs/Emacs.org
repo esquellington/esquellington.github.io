@@ -606,7 +606,9 @@ org-html-head "<link rel=\"stylesheet\" href=\"https://cdn.simplecss.org/simple.
   - With Simple.css (https://simplecss.org/)
   - etc...
 **** TODO Icons
+- https://fontawesome.com
 - People seem to use fontawesome for icons, contains many of them,
   github, email, RSS, etc...
+- Can be embedded as pure SVG, see header, good enough!
 *** TODO Auto-publish to github
 - Follow https://www.youtube.com/watch?v=za99DwdZEyg
