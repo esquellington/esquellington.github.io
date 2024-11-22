@@ -76,8 +76,8 @@
          ;; Style
          :with-author nil
          :with-creator t ;show Emacs+Org version
-         :with-date nil ;toggle page gen date
-         :with-toc t
+         :with-date t ;toggle page gen date
+         :with-toc nil ;toggle table of contents at top of each page
          :with-todo-keywords t
          :section-numbers nil
          :time-stamp-file nil)

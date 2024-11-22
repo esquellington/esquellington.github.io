@@ -1,20 +1,22 @@
 <style>
-  /* Remove Simple.css header padding*/
-  .status { padding: 0 }
-  .wrapper_header { margin: 20px 20px; }
+  /* Customize Simple.css <header> padding top/bottom and left/right
+     NOTE: this affects <footer> too, seems unavoidable
+   */
+  .status { padding: 20px 20px; }
+  /* Container grid for 3 header elements */
   .container_img_title_icons { width: 100%;
                                display: grid;
                                grid-template-columns: 25% 50% 25%; }
+  /* Container grid for 3 icons */
   .container_icons { display: grid;
                      grid-template-columns: 33% 33% 33%; }
-  /* Simple styling to size an SVG from fontawesome, see
-     https://docs.fontawesome.com/web/add-icons/svg-bare */
+  /* SVG icon from fontawesome https://docs.fontawesome.com/web/add-icons/svg-bare */
   .icon { width: 2em;
           height: 2em;
           vertical-align: -0.125em; }
 </style>
 
-<div class="wrapper_header">
+<div class="wrapper_header"> <!-- unnecessary -->
 
 <div class="container_img_title_icons">
 

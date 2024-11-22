@@ -607,7 +607,7 @@ org-html-head "<link rel=\"stylesheet\" href=\"https://cdn.simplecss.org/simple.
 - People seem to use fontawesome for icons, contains many of them,
   github, email, RSS, etc...
 - Can be embedded as pure SVG, see header, good enough!
-**** TODO fancy title?
+**** TODO Fancy title?
 **** TODO RSS logo+link?
 - See (require 'ox-rss)
 *** TODO Auto-publish to github
