@@ -11,11 +11,11 @@ See internal link [[Appendix]]
 Start httpd server on public dir and browse it from Emacs:
 #+BEGIN_SRC elisp
   (httpd-serve-directory "~/Desktop/esquellington/esquellington.github.io/web/public/")
-  (eww "localhost:8080")
+  ;(eww "localhost:8080")
 #+END_SRC
 
 #+RESULTS:
-: #<buffer  *http localhost:8080*>
+: Started simple-httpd on 0.0.0.0:8080, serving: ~/Desktop/esquellington/esquellington.github.io/web/public/
 
 Browse with Firefox
 

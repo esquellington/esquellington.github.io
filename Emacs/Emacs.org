@@ -593,22 +593,22 @@ org-html-head "<link rel=\"stylesheet\" href=\"https://cdn.simplecss.org/simple.
         (content   "main"   "content")
         (postamble "footer" "postamble"))
 **** DONE image --> link back to index
-**** TODO fancy title?
-**** TODO Mastodon logo+link?
-**** TODO Github logo+link?
-**** TODO RSS logo+link?
-- See (require 'ox-rss)
-**** TODO Footer
+**** DONE Mastodon logo+link?
+**** DONE Github logo+link?
+**** DONE Footer
 - Back to Top (anchor?)
 - Back to Index
 - Credits
   - With Emacs+Org (links and logos?)
   - With Simple.css (https://simplecss.org/)
   - etc...
-**** TODO Icons
+**** DONE Icons
 - https://fontawesome.com
 - People seem to use fontawesome for icons, contains many of them,
   github, email, RSS, etc...
 - Can be embedded as pure SVG, see header, good enough!
+**** TODO fancy title?
+**** TODO RSS logo+link?
+- See (require 'ox-rss)
 *** TODO Auto-publish to github
 - Follow https://www.youtube.com/watch?v=za99DwdZEyg
