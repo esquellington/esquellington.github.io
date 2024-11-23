@@ -1,65 +1,64 @@
-#+title: That time I saw a reflection rainbow
+#+title: That time I saw a weird rainbow
 #+date: <2024-11-17 dom>
 #+author: Oscar
 
-In May 2019 I saw this strange rainbow over Edinburgh. At first sight
-it looks like just another double rainbow, but if you focus on the
-bases you can see that they intersect.
+In May 2019 I saw this mysterious rainbow over Edinburgh. At first
+sight it looks like just another double rainbow, but if you focus on
+the bases you can see that they intersect.
 
-Double rainbows are concentric, they're not supposed to intersect! so
-something else must be going on... and I couldn't help try to find out
-*what* was going on.
+Double rainbows are concentric, so they're not supposed to intersect!
+something else must be going on... so I started reading a bit to find
+out exactly what.
 
-TL;DR: It was a reflection rainbow, and I ended up finding the answer
-to "how far is the rainbow", which is often unknown.
+It was a fun trip, and I ended up with satisfying answer ([[So, what did I see?][spoiler]]),
+and a new question ([[Test 2: Distances (to gold at the base!)][how far is the rainbow?]])
 
-#+CAPTION: Reflection Rainbow
-#+ATTR_HTML: :alt Reflection Rainbow :width 50%
+#+ATTR_HTML: :alt Weird Rainbow :width 50%
 [[../img/Rainbow/Rainbow-2019-05-22-ORIGINAL.jpeg]]
 
-* Describe regular bow
-A regular rainbow can be seen when sunlight rays are refracted inside
-rain droplets, split into different wavelengths/colours and come out
-towards your eyes, at around 42 degrees backwards. This is the *primary
-bow* https://www.atoptics.co.uk/rainbows/primary.htm
+* Single rainbow
+A single *primary* bow can be seen when sunlight rays are refracted
+inside rain droplets, split into different wavelengths/colours and
+come out towards your eyes, at around /42 degrees/ backwards. More
+details [[https://www.atoptics.co.uk/rainbows/primary.htm][here]].
 
-* Secondary and supernumeraries
-Regular rainbows are awesome on their own, and sometimes come with
-extra niceties, such as a [[file:~/Escriptori/Rainbow/Rainbow-2018-11-20.jpg][Secondary]] bow caused by extra refractions,
-which is concentric, larger and fainter than the primary one, and
-supernumeraries [[file:~/Escriptori/Rainbow/Rainbow-2017-08-18-A.jpg][Supernumeraries 1]], [[file:~/Escriptori/Rainbow/Rainbow-2017-08-18-B.jpg][Supernumeraries 2]], caused by
-lightwave interference. These are all very cool, but clearly not what
-I saw.
+* Multiple concentric rainbows
+Single rainbows are awesome on their own, but sometimes they're
+accompained by additional concentric bows:
+- A *secondary* bow caused by extra refractions, which is concentric
+  to the primary, but larger and fainter. Ternary (even larger, even
+  fainter) are also possible. More details [[https://www.atoptics.co.uk/rainbows/sec.htm][here]].
+  - Example file:~/Escriptori/Rainbow/Rainbow-2018-11-20
+- Supernumerary bows [[file:~/Escriptori/Rainbow/Rainbow-2017-08-18-A.jpg][Supernumeraries 1]], [[file:~/Escriptori/Rainbow/Rainbow-2017-08-18-B.jpg][Supernumeraries 2]], caused by
+  lightwave interference. More detals [[https://www.atoptics.co.uk/rainbows/supers.htm][here]].
+These are all very cool, but they're definitely not what I saw.
 
-https://www.atoptics.co.uk/rainbows/sec.htm
-https://www.atoptics.co.uk/rainbows/supers.htm
-
-* Describe Reflection bows
-Reflection bows are two separate rainbows, a regular one caused by
-direct sunlight, and a reflection one above the regular, caused by
-sunlight reflected on a water surface, that must be must be at your
-back and calm enough for sunlight to reflect in a coherent direction
-instead of scattering https://www.atoptics.co.uk/rainbows/bowim6.htm
-
-* Describe Twinned bows
+* Twinned bows
 Twinned bows are *much* rarer, and apparently not yet fully
 understood. A possible explanation is that they're a regular bows that
 split due to the presence of larger droplets that become non-spherical
 under the effect of air friction, and refract light in a slightly
-different angle https://www.atoptics.co.uk/rainbows/bowim28.htm
+different angle. More details [[https://www.atoptics.co.uk/rainbows/bowim28.htm][here]].
 
-This very nice paper explains and manages to simulate several kinds of
-rainbows, including secondary bows, supernumeraries and twinned
-ones. Well worth a read
-http://graphics.ucsd.edu/~henrik/papers/physically_based_simulation_of_rainbows.pdf
+* Reflection bows
+Reflection bows are two separate rainbows, a regular one caused by
+direct sunlight, and a reflection one above the regular, caused by
+sunlight reflected on a water surface, that must be must be at your
+back and calm enough for sunlight to reflect in a coherent direction
+instead of scattering. More derails [[https://www.atoptics.co.uk/rainbows/bowim6.htm][here]].
 
 * So, what did I see?
-So, what kind of rainbow did I see? I think I found a reasonable
-answer just from the picture, using basic trigonometry and publically
-available maps and astronomical data.
 
-Spoiler: The picture matches a predicted reflection bow with
-surprising accuracy.
+Given that the 2 rainbows in my picture intersected, they could only
+be a twinned primary bow, or a pair of primary and a reflection
+bows. I very much suspected it was primary+reflection, but I had no
+proof. A sane person would have probably stopped there. I didn't.
+
+Using my picture, some basic trigonometry and publically available
+maps and astronomical data, I think I found a convincing answer: The
+picture matches a predicted *reflection bow* with surprising accuracy.
+
+Below I'll detail the steps that took me there.
 
 * Sun angle and water position
 This site shows the sun direction and altitude angle above the
@@ -191,7 +190,6 @@ Finally, the distance to the pot of gold, which is the SAME to all
 points in the bow, is therefore h_r = [0.7..1.16]km
 
 * ACCOUNTING for camera height over sea level
-
 - According to https://en.wikipedia.org/wiki/Horizon, horizon distance
   is d = 3.57*sqrt(h) (d in km, h in meters), so at h=70m above esea
   level d = 30km, QUITE far away, so FoF sure falls inside it, and
@@ -199,3 +197,11 @@ points in the bow, is therefore h_r = [0.7..1.16]km
   which may be quite far up (h=1000m approx in picture, if reflection
   at farthest FoF border), so d = 113km, not far enough for the west
   coast
+
+* References
+- The Atmospheric Optics website https://atoptics.co.uk/ is a great
+  reference for learning about the Rainbows and other phenomena, I
+  would have never reached the bottom of this rabbit hole without it.
+- This paper [[https://cs.dartmouth.edu/~wjarosz/publications/sadeghi11physically.html][Physically-based simulation of rainbows]] explains and
+  manages to simulate several kinds of rainbows, including secondary
+  bows, supernumeraries and twinned ones. It's worth a read.

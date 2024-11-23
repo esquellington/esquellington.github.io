@@ -2,5 +2,5 @@
 
 - [[file:index.org][Index]]
 - [[file:00_test.org][Test Post]]
-- [[file:01_rainbow.org][That time I saw a reflection rainbow]]
+- [[file:01_rainbow.org][That time I saw a weird rainbow]]
 - [[file:post_with_css.org][Post with overwritten CSS]]
