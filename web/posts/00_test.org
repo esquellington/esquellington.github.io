@@ -75,6 +75,7 @@ But explicit link does does
 ** Tables and Plots
 
 Table works as expected
+#+CAPTION: example
 #+tblname: data-table
 | x | y1 | y2 |
 |---+----+----|
