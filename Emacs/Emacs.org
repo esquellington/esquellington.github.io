@@ -580,7 +580,7 @@ org-html-head "<link rel=\"stylesheet\" href=\"https://cdn.simplecss.org/simple.
 *** DONE Export LaTeX formulas to html
 - works out of the box with Mathjax (remote javascript), requires
   whitelisting JS though
-*** TODO Header + Footer
+*** DONE Header + Footer
 - See https://clarete.li/blog/starting-a-blog.html, I think
   html-preamble/postamble is what injects footer?
 - Yeah, he has header/footer specific html with icons etc
@@ -607,8 +607,8 @@ org-html-head "<link rel=\"stylesheet\" href=\"https://cdn.simplecss.org/simple.
 - People seem to use fontawesome for icons, contains many of them,
   github, email, RSS, etc...
 - Can be embedded as pure SVG, see header, good enough!
-**** TODO Fancy title?
-**** TODO RSS logo+link?
+*** TODO Fancy title?
+*** TODO RSS logo+link?
 - See (require 'ox-rss)
 *** TODO Auto-publish to github
 - Follow https://www.youtube.com/watch?v=za99DwdZEyg

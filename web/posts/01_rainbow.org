@@ -1,0 +1,196 @@
+#+title: That time I saw a reflection rainbow
+#+date: <2024-11-17 dom>
+#+author: Oscar
+
+A few days ago I saw this strange rainbow over Edinburgh, so I read a
+bit about them and found out that it may either be a reflection bow or
+a very rare twinned bow... I got all nerdy about it and tried to find
+out which one was it. Incidentally, I ended up finding the answer to
+"how far is the rainbow", which is unknown.
+
+#+CAPTION: Reflection Rainbow
+#+ATTR_HTML: :alt Reflection Rainbow :align center :width 50%
+[[../img/Rainbow/Rainbow-2019-05-22-ORIGINAL.jpeg]]
+
+* Describe regular bow
+A regular rainbow can be seen when sunlight rays are refracted inside
+rain droplets, split into different wavelengths/colours and come out
+towards your eyes, at around 42 degrees backwards. This is the *primary
+bow* https://www.atoptics.co.uk/rainbows/primary.htm
+
+* Secondary and supernumeraries
+Regular rainbows are awesome on their own, and sometimes come with
+extra niceties, such as a [[file:~/Escriptori/Rainbow/Rainbow-2018-11-20.jpg][Secondary]] bow caused by extra refractions,
+which is concentric, larger and fainter than the primary one, and
+supernumeraries [[file:~/Escriptori/Rainbow/Rainbow-2017-08-18-A.jpg][Supernumeraries 1]], [[file:~/Escriptori/Rainbow/Rainbow-2017-08-18-B.jpg][Supernumeraries 2]], caused by
+lightwave interference. These are all very cool, but clearly not what
+I saw.
+
+https://www.atoptics.co.uk/rainbows/sec.htm
+https://www.atoptics.co.uk/rainbows/supers.htm
+
+* Describe Reflection bows
+Reflection bows are two separate rainbows, a regular one caused by
+direct sunlight, and a reflection one above the regular, caused by
+sunlight reflected on a water surface, that must be must be at your
+back and calm enough for sunlight to reflect in a coherent direction
+instead of scattering https://www.atoptics.co.uk/rainbows/bowim6.htm
+
+* Describe Twinned bows
+Twinned bows are *much* rarer, and apparently not yet fully
+understood. A possible explanation is that they're a regular bows that
+split due to the presence of larger droplets that become non-spherical
+under the effect of air friction, and refract light in a slightly
+different angle https://www.atoptics.co.uk/rainbows/bowim28.htm
+
+This very nice paper explains and manages to simulate several kinds of
+rainbows, including secondary bows, supernumeraries and twinned
+ones. Well worth a read
+http://graphics.ucsd.edu/~henrik/papers/physically_based_simulation_of_rainbows.pdf
+
+* So, what did I see?
+So, what kind of rainbow did I see? I think I found a reasonable
+answer just from the picture, using basic trigonometry and publically
+available maps and astronomical data.
+
+Spoiler: The picture matches a predicted reflection bow with
+surprising accuracy.
+
+* Sun angle and water position
+This site shows the sun direction and altitude angle above the
+horizon, relative to the camera position, at that time the picture was
+taken
+https://www.suncalc.org/#/55.9316,-3.1718,11/2019.05.21/21:00/1/3
+
+A) Is there a water surface where the sun may reflect at that time?
+Yes, the Firth of Forth overlaps the sun direction between
+approximately 10km to 16km from the camera position
+
+B) Does the vertical separation between regular and reflected bow in
+the picture match the sun elevation angle? Yes, they match with around
+3% error, which is quite low given that all magnitudes are approximate!
+
+Now, a fun sideffect of knowing the approximate distance from the
+camera to the water reflection is that it allows computing the
+distance to the rainbow itself, which is NOT possible with a regular
+bow.
+
+* DONE Calcs
+
+- IS it a twinned or a reflection rainbow?
+- According to this https://www.atoptics.co.uk/rainbows/reflect.htm,
+  sun reflection on water needs to happen BEHIND you to see BOTH,
+  otherwise you may only see the reflected one. This diagram shows how
+  it works quite intuitively http://www.eo.ucar.edu/rainbows/rnbw8.gif.
+- By ear, the rainbow center was around 45 deg to my right wrt base
+  point (behind chimmeney), casting a line from rainbow center
+  direction backwards hits the Firth of Forth water mass at 10..15km.
+- Sun config at time of pic 21/05/2019 21:00 can be computed here
+  https://www.suncalc.org/#/55.9316,-3.1718,11/2019.05.21/21:00/1/3
+  and matches direction I approximated, but yields water between 10km
+  or 14km and 16.5km at my back, and a sun altitude of 2.7deg
+- Ground height wrt sea level is 220ft (67m), from sea level, plus 3m
+  at home, so 70m approx, but compared to dist to sea it's negligible
+  http://en-gb.topographic-map.com/places/Edinburgh-89983/
+- So the question is, given sun configuration, could it have been a
+  reflection rainbow? if not, then it must be a twinned one
+- This site https://www.atoptics.co.uk/fz439.htm also wonders "how far
+  is the rainbow", and explains there is no answer (for simple bows)
+** DONE Test 1: Angles (non-conclusive)
+   - Does the image height (difference? ratio?) of the two bows in the
+     picture match the predictied range for reflected bows at the
+     existing range of distances to the sea?
+   - Just checking bow height difference AND the known view angles for
+     both wrt horizon we can decide if the bows may come from a reflection
+   - BUT we're NOT accounting for distance-to-see at all, just picture
+     heights/ratios, so it's not conclusive, it does not discard a
+     reflection bow
+
+Knowns:
+
+Angles wrt horizon
+  theta_d = 39.3deg
+  theta_r = 44.7deg
+
+Height wrt horizon, in picture
+  y_r = 284 pixels
+  y_d = 242 pixels
+
+Unknowns:
+
+Distance along horizon
+  x_d == x_r
+
+Assuming rectangle triangle wrt horizon, and assuming x_d == x_r
+  tan(theta_d) = y_d / x
+  tan(theta_r) = y_r / x
+
+Thus, y_d / y_r should be tan(theta_d)/tan(theta_r), regardless of
+unknown x.
+
+  theta_r = tan(44.7) = 0.989582
+  theta_d = tan(39.3) = 0.818491
+  /= 1.209032231
+
+  y_r = 284 pixels
+  y_d = 242 pixels
+  /= 1.173553719
+
+Rel error:
+  (1.209032231-1.173553719) / 1.209032231 = 3%
+
+
+** DONE Test 2: Distances (to gold at the base!)
+   - HOW can we validate distance-to-sea is compatible with reflection?
+   - One idea is using d2s to compute actual height of the bows, and
+     see if that's physically possible (1m would be stupid, 100km too)
+   - Distance to bow base could also be computed from d2s, and also
+     tested for consistency
+   - How far was the gold at the base from me? combine X and Y to find
+     it!
+
+Knowns (reflection bow)
+  Angles A=2.7, C=42, B = 135.3deg
+  Distance-to-sea c = 10..16.5km, opposite to angle C
+
+Distances from observer to rainbow h_r, opposite to angle A
+
+Law of sines:
+  a/sin(A) = b/sin(B) = c/sin(C)
+
+So to find h_r == a from knowns
+  a = c * sin(A)/sin(C)
+    = c * sin(2.7)/sin(42)
+    = c * 0.0703995
+
+So for
+  c = [10..16.5]km,
+
+The distance to the top of the reflection bow is
+  h_r = a = [0.7..1.16]km
+
+And using h_r as hypotenusa, the horizontal distance to the bow base
+would be
+  cos(theta_r) = x_r / h_r
+  x_r = h_r * cos(theta_r)
+      = h_r * 0.710799
+      = [0.497559..0.824527]km
+
+And from this, we can compute height in km
+  y_r = x_r * tan(theta_r)
+      = x_r * 0.989582
+      = [0.497559..0.824527] * 0.989582
+      = [0.492375..0.815937]km
+
+Finally, the distance to the pot of gold, which is the SAME to all
+points in the bow, is therefore h_r = [0.7..1.16]km
+
+* ACCOUNTING for camera height over sea level
+
+- According to https://en.wikipedia.org/wiki/Horizon, horizon distance
+  is d = 3.57*sqrt(h) (d in km, h in meters), so at h=70m above esea
+  level d = 30km, QUITE far away, so FoF sure falls inside it, and
+  actually, we should worry about horizon distance at rainbow height,
+  which may be quite far up (h=1000m approx in picture, if reflection
+  at farthest FoF border), so d = 113km, not far enough for the west
+  coast

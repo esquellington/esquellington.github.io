@@ -2,3 +2,9 @@
 :root {
   --accent: turquoise;
 }
+/* Remove img transparency as it dims pictures unnecessarily */
+@media (prefers-color-scheme: dark) {
+  img, video {
+    opacity: 1.0;
+  }
+}

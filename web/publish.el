@@ -84,7 +84,7 @@
         ("img"
          :recursive t
          :base-directory "img/"
-         :base-extension "png\\|jpg\\|gif"
+         :base-extension "png\\|jpg\\|jpeg\\|gif"
          :publishing-directory "public/img"
          :publishing-function org-publish-attachment)
         ("css"

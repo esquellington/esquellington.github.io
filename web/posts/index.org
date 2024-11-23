@@ -1,8 +1,8 @@
 #+title: Index
 
 * Posts
-- [[file:00_test.org][Test]]
-- Reflection Rainbow
+- file:00_test.org
+- file:01_rainbow.org
 
 * Emacs
 - LatexInComments
@@ -10,11 +10,11 @@
 - org-sketch
 
 * Games
-- HexenStorm [[https://draven.itch.io/hexenstorm][(itch.io)]] [[https://www.lexaloffle.com/bbs/?tid=29847][(Lexaloffle)]]
-- [[https://esquellington.github.io/games/NoCandyForOldMan/index.html][No Candy for Old Man (Candy Jam)]]
-- [[https://esquellington.github.io/games/PainInTheCave/index.html][Pain in the Cave (Ludum Dare 36)]]
+- HexenStorm at [[https://draven.itch.io/hexenstorm][itch.io]] / [[https://www.lexaloffle.com/bbs/?tid=29847][Lexaloffle]], made with [[https://www.lexaloffle.com/pico-8.php][PICO-8]]
+- [[https://esquellington.github.io/games/PainInTheCave/index.html][Pain in the Cave (Ludum Dare 36)]], made with [[https://love2d.org/][LÖVE]]
+- [[https://esquellington.github.io/games/NoCandyForOldMan/index.html][No Candy for Old Man (Candy Jam)]], made with [[https://love2d.org/][LÖVE]]
 
-* Research
+* Research                                                         :noexport:
 - Thesis
 - Papers
 

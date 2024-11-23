@@ -17,9 +17,9 @@ Start httpd server on public dir and browse it from Emacs:
 #+RESULTS:
 : Started simple-httpd on 0.0.0.0:8080, serving: ~/Desktop/esquellington/esquellington.github.io/web/public/
 
-Browse with Firefox
+Browse with Firefox (new window, same instance)
 
-  [[shell:firefox localhost:8080 &]]
+  [[shell:firefox --new-window localhost:8080 &]]
 
 * Body
 
