@@ -1,10 +1,17 @@
 /* Change accent colour */
 :root {
-  --accent: turquoise;
+    --accent: turquoise;
 }
-/* Remove img transparency as it dims pictures unnecessarily */
+
 @media (prefers-color-scheme: dark) {
   img, video {
+    /* Remove img transparency, otherwise pictures are unnecessarily dimmed */
     opacity: 1.0;
+
+    /* Center img by default, otherwise they're left-aligned. Width still
+       defaults to 100%, but can be easily overriden per-image)*/
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
   }
 }

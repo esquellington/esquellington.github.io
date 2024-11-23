@@ -9,7 +9,7 @@ out which one was it. Incidentally, I ended up finding the answer to
 "how far is the rainbow", which is unknown.
 
 #+CAPTION: Reflection Rainbow
-#+ATTR_HTML: :alt Reflection Rainbow :align center :width 50%
+#+ATTR_HTML: :alt Reflection Rainbow :width 50%
 [[../img/Rainbow/Rainbow-2019-05-22-ORIGINAL.jpeg]]
 
 * Describe regular bow
