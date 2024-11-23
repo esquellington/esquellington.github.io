@@ -10,11 +10,16 @@
   /* Container grid for 3 icons */
   .container_icons { display: grid;
                      grid-template-columns: 33% 33% 33%; }
-  /* SVG icon from fontawesome https://docs.fontawesome.com/web/add-icons/svg-bare */
+  /* SVG icon from fontawesome https://docs.fontawesome.com/web/add-icons/svg-bare
+     fill: white, instead of default black TODO: dark mode only!?)
+  */
   .icon { width: 2em;
           height: 2em;
-          fill: white; /* white icons, instead of black TODO: dark mode only!?) */
+          fill: white;
           vertical-align: -0.25em; }
+  /* Change icon color when hovered */
+  .icon:hover { fill: red; }
+
 </style>
 
 <div class="wrapper_header"> <!-- unnecessary -->
