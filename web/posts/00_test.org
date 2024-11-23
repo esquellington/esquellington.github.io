@@ -2,24 +2,22 @@
 #+date: <2024-11-17 dom>
 #+author: Oscar
 
-* Intro
+* Start
 
-hereinafter inasmuch
-
-See internal link [[Appendix]]
-
-Start httpd server on public dir and browse it from Emacs:
-#+BEGIN_SRC elisp
-  (httpd-serve-directory "~/Desktop/esquellington/esquellington.github.io/web/public/")
-  ;(eww "localhost:8080")
+Start Emacs http server on public path
+#+BEGIN_SRC elisp :results silent
+  (httpd-serve-directory (concat default-directory "../public"))
+#+END_SRC
+Browse it from Emacs
+#+BEGIN_SRC elisp :results silent
+  (eww "localhost:8080")
+#+END_SRC
+or from Firefox
+#+BEGIN_SRC bash :results silent
+  firefox --new-window localhost:8080 &
 #+END_SRC
 
-#+RESULTS:
-: Started simple-httpd on 0.0.0.0:8080, serving: ~/Desktop/esquellington/esquellington.github.io/web/public/
-
-Browse with Firefox (new window, same instance)
-
-  [[shell:firefox --new-window localhost:8080 &]]
+Don't jump to [[Conclusions]]
 
 * Body
 
@@ -28,6 +26,8 @@ Browse with Firefox (new window, same instance)
 Properties: *bold*, /italic/, ~code~, _underlined_, =verbatim=, +strike-through+
 
 Superindex a^b and Subindex a_b
+
+Text Çatal·là i Español
 
 Unicode 𝞉, ∂, 𝜕, 𝝏
 
@@ -69,13 +69,14 @@ Link with description does not display image [[file:../img/ScotchBonnet.png][ojo
 But explicit link does does
 
 #+CAPTION: BART
-#+ATTR_HTML: :alt cat/spider image :title Action! :align right
+#+ATTR_HTML: :alt cat/spider image :title Action! :width 90%
 [[../img/ScotchBonnet.png]]
 
 ** Tables and Plots
 
-Table works as expected
+Table works as expected, with customizable width
 #+CAPTION: example
+#+ATTR_HTML: :width 50%
 #+tblname: data-table
 | x | y1 | y2 |
 |---+----+----|
@@ -99,9 +100,8 @@ extra return after #+RESULTS: before the image link
 can we inject HTML for specific/unsupported features?
 
 * Conclusions
-*all of your base are belong to us*
-*all of your base are belong to us*
-*all of your base are belong to us*
-*all of your base are belong to us*
 
-* Appendix
+*all of your base are belong to us*
+*all of your base are belong to us*
+*all of your base are belong to us*
+*all of your base are belong to us*

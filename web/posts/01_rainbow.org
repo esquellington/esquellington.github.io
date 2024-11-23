@@ -2,11 +2,16 @@
 #+date: <2024-11-17 dom>
 #+author: Oscar
 
-A few days ago I saw this strange rainbow over Edinburgh, so I read a
-bit about them and found out that it may either be a reflection bow or
-a very rare twinned bow... I got all nerdy about it and tried to find
-out which one was it. Incidentally, I ended up finding the answer to
-"how far is the rainbow", which is unknown.
+In May 2019 I saw this strange rainbow over Edinburgh. At first sight
+it looks like just another double rainbow, but if you focus on the
+bases you can see that they intersect.
+
+Double rainbows are concentric, they're not supposed to intersect! so
+something else must be going on... and I couldn't help try to find out
+*what* was going on.
+
+TL;DR: It was a reflection rainbow, and I ended up finding the answer
+to "how far is the rainbow", which is often unknown.
 
 #+CAPTION: Reflection Rainbow
 #+ATTR_HTML: :alt Reflection Rainbow :width 50%
