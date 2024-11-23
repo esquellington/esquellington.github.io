@@ -10,57 +10,75 @@ Double rainbows are concentric, so they're not supposed to intersect!
 something else must be going on... so I started reading a bit to find
 out exactly what.
 
-It was a fun trip, and I ended up with satisfying answer ([[So, what did I see?][spoiler]]),
-and a new question ([[Test 2: Distances (to gold at the base!)][how far is the rainbow?]])
+It was a fun trip and I ended up with satisfying answer ([[So, what did I see?][spoiler]]) and
+a new question ([[Test 2: Distances (to gold at the base!)][how far is the rainbow?]])
 
 #+ATTR_HTML: :alt Weird Rainbow :width 50%
 [[../img/Rainbow/Rainbow-2019-05-22-ORIGINAL.jpeg]]
 
-* Single rainbow
+* Rain-bows-tiary
+
+After this terrible pun, let's have a quick look at the different
+kinds of rainbows that have been observed and studied.
+
+** Single rainbow
 A single *primary* bow can be seen when sunlight rays are refracted
-inside rain droplets, split into different wavelengths/colours and
-come out towards your eyes, at around /42 degrees/ backwards. More
+once inside rain droplets, split into different wavelengths (colours)
+and travel towards the observer at around /42 degrees/ backwards. More
 details [[https://www.atoptics.co.uk/rainbows/primary.htm][here]].
 
-* Multiple concentric rainbows
+** Concentric rainbows
 Single rainbows are awesome on their own, but sometimes they're
 accompained by additional concentric bows:
-- A *secondary* bow caused by extra refractions, which is concentric
-  to the primary, but larger and fainter. Ternary (even larger, even
-  fainter) are also possible. More details [[https://www.atoptics.co.uk/rainbows/sec.htm][here]].
-  - Example file:~/Escriptori/Rainbow/Rainbow-2018-11-20
-- Supernumerary bows [[file:~/Escriptori/Rainbow/Rainbow-2017-08-18-A.jpg][Supernumeraries 1]], [[file:~/Escriptori/Rainbow/Rainbow-2017-08-18-B.jpg][Supernumeraries 2]], caused by
-  lightwave interference. More detals [[https://www.atoptics.co.uk/rainbows/supers.htm][here]].
+- A *secondary* bow is caused by extra refractions of light inside rain
+  doplets. The secondary bow is concentric to primary one, appears
+  outside and is and fainter. The secondary bow colors are
+  reversed. Primary + secondary form the relatively frequent /double
+  rainbow/ that everybody loves. More details [[https://www.atoptics.co.uk/rainbows/sec.htm][here]].
+#+ATTR_HTML: :alt Weird Rainbow :width 50%
+[[../img/Rainbow/Rainbow-2020-03-08-Double.jpg]]
+- Supernumerary bows are caused by lightwave interference.
+  [[file:~/Escriptori/Rainbow/Rainbow-2017-08-18-A.jpg][Supernumeraries 1]], [[file:~/Escriptori/Rainbow/Rainbow-2017-08-18-B.jpg][Supernumeraries 2]] More detals [[https://www.atoptics.co.uk/rainbows/supers.htm][here]].
+
 These are all very cool, but they're definitely not what I saw.
 
-* Twinned bows
-Twinned bows are *much* rarer, and apparently not yet fully
-understood. A possible explanation is that they're a regular bows that
-split due to the presence of larger droplets that become non-spherical
-under the effect of air friction, and refract light in a slightly
-different angle. More details [[https://www.atoptics.co.uk/rainbows/bowim28.htm][here]].
+** Reflection rainbows
+Reflection rainbows are formed by two separate bows, a primary one
+caused by direct sunlight, and a reflection one above the primary,
+caused by sunlight reflected on a reflective (water) surface, that
+must be behind the observer and calm enough for sunlight to reflect in
+a coherent direction, instead of scattering. More details [[https://www.atoptics.co.uk/rainbows/bowim6.htm][here]].
 
-* Reflection bows
-Reflection bows are two separate rainbows, a regular one caused by
-direct sunlight, and a reflection one above the regular, caused by
-sunlight reflected on a water surface, that must be must be at your
-back and calm enough for sunlight to reflect in a coherent direction
-instead of scattering. More derails [[https://www.atoptics.co.uk/rainbows/bowim6.htm][here]].
+** Twinned rainbows
+Twinned rainbows are *much* rarer, and apparently not yet fully
+understood. A possible explanation is that they're primary bows that
+bifurcate in some sections due to the presence of larger droplets that
+become non-spherical under the effect of air friction, and refract
+light in a slightly different direction, so the rays that reach the
+observer come from slightly above/below the primary bow. More details
+[[https://www.atoptics.co.uk/rainbows/bowim28.htm][here]].
 
 * So, what did I see?
-
-Given that the 2 rainbows in my picture intersected, they could only
-be a twinned primary bow, or a pair of primary and a reflection
-bows. I very much suspected it was primary+reflection, but I had no
+Given that the 2 rainbows in my picture were not concentric they could
+only be a twinned primary bow, or a pair of primary and a reflection
+bows. I very much suspected it was primary + reflection, but I had no
 proof. A sane person would have probably stopped there. I didn't.
 
-Using my picture, some basic trigonometry and publically available
-maps and astronomical data, I think I found a convincing answer: The
-picture matches a predicted *reflection bow* with surprising accuracy.
+My shamelessly biased starting assumption was: /If I could prove that
+a reflection bow was very likely, then it probably was, given how
+rare twinned bows are, and how hard it would be to prove that it was a
+twinned bow instead/.
 
-Below I'll detail the steps that took me there.
+So yeah, I essentially looked for my keys under the [[https://en.wikipedia.org/wiki/Streetlight_effect][streetlight]], not
+where I probably lost them.
 
-* Sun angle and water position
+The good news is that using my picture, some basic trigonometry and
+publically available maps and astronomical data, I arrived at a pretty
+convincing answer: The picture matches a predicted reflection bow with
+surprising accuracy, so it most likely was. Below I'll detail the
+steps I followed.
+
+** Sun angle and water position
 This site shows the sun direction and altitude angle above the
 horizon, relative to the camera position, at that time the picture was
 taken
@@ -113,31 +131,31 @@ bow.
 Knowns:
 
 Angles wrt horizon
-  theta_d = 39.3deg
+  theta_p = 39.3deg
   theta_r = 44.7deg
 
 Height wrt horizon, in picture
+  y_p = 242 pixels
   y_r = 284 pixels
-  y_d = 242 pixels
 
 Unknowns:
 
 Distance along horizon
-  x_d == x_r
+  x_p == x_r
 
-Assuming rectangle triangle wrt horizon, and assuming x_d == x_r
-  tan(theta_d) = y_d / x
+Assuming rectangle triangle wrt horizon, and assuming x_p == x_r
+  tan(theta_p) = y_p / x
   tan(theta_r) = y_r / x
 
-Thus, y_d / y_r should be tan(theta_d)/tan(theta_r), regardless of
+Thus, y_p / y_r should be tan(theta_p)/tan(theta_r), regardless of
 unknown x.
 
   theta_r = tan(44.7) = 0.989582
-  theta_d = tan(39.3) = 0.818491
+  theta_p = tan(39.3) = 0.818491
   /= 1.209032231
 
   y_r = 284 pixels
-  y_d = 242 pixels
+  y_p = 242 pixels
   /= 1.173553719
 
 Rel error:
@@ -189,14 +207,13 @@ And from this, we can compute height in km
 Finally, the distance to the pot of gold, which is the SAME to all
 points in the bow, is therefore h_r = [0.7..1.16]km
 
-* ACCOUNTING for camera height over sea level
-- According to https://en.wikipedia.org/wiki/Horizon, horizon distance
-  is d = 3.57*sqrt(h) (d in km, h in meters), so at h=70m above esea
-  level d = 30km, QUITE far away, so FoF sure falls inside it, and
-  actually, we should worry about horizon distance at rainbow height,
-  which may be quite far up (h=1000m approx in picture, if reflection
-  at farthest FoF border), so d = 113km, not far enough for the west
-  coast
+** Accounting for camera height over sea level
+According to https://en.wikipedia.org/wiki/Horizon, horizon distance
+is d = 3.57*sqrt(h) (d in km, h in meters), so at h=70m above esea
+level d = 30km, QUITE far away, so FoF sure falls inside it, and
+actually, we should worry about horizon distance at rainbow height,
+which may be quite far up (h=1000m approx in picture, if reflection at
+farthest FoF border), so d = 113km, not far enough for the west coast
 
 * References
 - The Atmospheric Optics website https://atoptics.co.uk/ is a great
