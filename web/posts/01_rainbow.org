@@ -3,8 +3,11 @@
 #+author: Oscar
 
 In May 2019 I saw this mysterious rainbow over Edinburgh. At first
-sight it looks like just another double rainbow, but if you focus on
+sight it may look like a common double rainbow, but if you focus on
 the bases you can see that they intersect.
+
+#+ATTR_HTML: :alt Weird Rainbow :width 50%
+[[../img/Rainbow/Rainbow-2019-05-22-MILLORAT.jpeg]]
 
 Double rainbows are concentric, so they're not supposed to intersect!
 something else must be going on... so I started reading a bit to find
@@ -13,34 +16,34 @@ out exactly what.
 It was a fun trip and I ended up with satisfying answer ([[So, what did I see?][spoiler]]) and
 a new question ([[Test 2: Distances (to gold at the base!)][how far is the rainbow?]])
 
-#+ATTR_HTML: :alt Weird Rainbow :width 50%
-[[../img/Rainbow/Rainbow-2019-05-22-ORIGINAL.jpeg]]
-
 /(NB: All inline pictures are mine)/
 
 * Rain-bows-tiary
 
 After this terrible pun, let's have a quick look at the different
-kinds of rainbows that have been observed and studied.
+kinds of rainbows that have been observed and studied, and try to
+classify the one in the picture above.
 
 ** Single rainbow
 A single *primary* bow can be seen when sunlight rays are refracted
 once inside rain droplets, split into different wavelengths (colours)
 and travel towards the observer standing between the Sun and the
-observed rainbow. Rays are refracted around /42 degrees/
-downwards. More details [[https://www.atoptics.co.uk/rainbows/primary.htm][here]].
+rainbow. Rays are refracted around /42 degrees/ downwards. More
+details [[https://www.atoptics.co.uk/rainbows/primary.htm][here]].
+
+~TODO~ side diagram of single reflection inside spherical droplet and angles
 
 ** Concentric rainbows
 Single rainbows are awesome on their own, but sometimes they're
 accompained by additional concentric bows:
-- A *secondary* bow is caused by extra refractions of light inside rain
-  doplets. The secondary bow is concentric to primary one, appears
-  outside and is and fainter. The secondary bow colors are
-  reversed. Primary + secondary form the relatively frequent /double
-  rainbow/ that everybody loves. More details [[https://www.atoptics.co.uk/rainbows/sec.htm][here]].
-- Supernumerary bows are caused by lightwave interference. They appear
-  adjacent to any bow and seem to repeat the same color pattern. More
-  detals [[https://www.atoptics.co.uk/rainbows/supers.htm][here]].
+- A *secondary* bow is caused by extra refractions of light inside
+  rain doplets. The secondary bow is concentric to primary one,
+  appears outside and is significantly fainter. The secondary bow
+  colors are reversed. Primary + secondary form the relatively
+  common /double rainbow/ that everybody loves. More details [[https://www.atoptics.co.uk/rainbows/sec.htm][here]].
+- Supernumerary bows can appear adjacent to the inside of any bow and
+  seem to repeat the same color pattern, but compressed. They are
+  caused by lightwave interference. More detals [[https://www.atoptics.co.uk/rainbows/supers.htm][here]].
 
 The picture below shows a faint secondary bow above the primary one,
 and part of a supernumerary right below its violet shade.
@@ -51,10 +54,14 @@ These are all very cool, but definitely not what I saw.
 
 ** Reflection rainbows
 Reflection rainbows are formed by two separate bows: a primary one
-caused by direct sunlight, and a reflection one above the primary,
+caused by direct sunlight, and a *reflection* one above the primary,
 caused by sunlight reflected on a water surface that must be behind
 the observer and calm enough for sunlight to reflect in a coherent
-direction instead of scattering. More details [[https://www.atoptics.co.uk/rainbows/bowim6.htm][here]].
+direction instead of scattering. The reflection bow is not concentric,
+and appears above the primary one. More details [[https://www.atoptics.co.uk/rainbows/bowim6.htm][here]].
+
+~TODO~ side diagram of primary + reflection ray trajectories inside
+spherical droplets at 2 different heights/angles to same observer
 
 ** Twinned rainbows
 Twinned rainbows are very rare, and apparently not yet fully
@@ -66,7 +73,7 @@ observer come from slightly above/below the primary bow. More details
 [[https://www.atoptics.co.uk/rainbows/bowim28.htm][here]].
 
 * So, what did I see?
-Given that the 2 rainbows in my picture were not concentric they could
+Given that the 2 bows in my picture were not concentric they could
 only be a twinned primary bow, or a pair of primary and a reflection
 bows. I very much suspected it was primary + reflection but I had no
 proof. A sane person would have probably stopped there. I didn't.
@@ -85,11 +92,9 @@ convincing answer: The picture matches a predicted reflection bow with
 surprising accuracy, so it most likely was. I'll detail how I got to
 that conclusion below.
 
-** Sun angle and water position
-This site shows the sun direction and altitude angle above the
-horizon, relative to the camera position, at that time the picture was
-taken
-https://www.suncalc.org/#/55.9316,-3.1718,11/2019.05.21/21:00/1/3
+** Method/Plan to test
+
+~TODO~ REUSE previous diagram with primary+reflection
 
 A) Is there a water surface where the sun may reflect at that time?
 Yes, the Firth of Forth overlaps the sun direction between
@@ -99,10 +104,24 @@ B) Does the vertical separation between regular and reflected bow in
 the picture match the sun elevation angle? Yes, they match with around
 3% error, which is quite low given that all magnitudes are approximate!
 
-Now, a fun sideffect of knowing the approximate distance from the
-camera to the water reflection is that it allows computing the
-distance to the rainbow itself, which is NOT possible with a regular
-bow.
+PROBLEM: We' want to compute vertical separation at the apex, but the
+bows were not complete, they faded out completely outside the picture
+
+** Reconstructing the full bows from partial picture
+
+~TODO~ Filtered and reconstructed bows
+
+#+ATTR_HTML: :alt Reconstructed bows :width 80%
+[[../img/Rainbow/Rainbow.svg]]
+
+** Sun angle and water position
+
+This site shows the sun direction and altitude angle above the
+horizon, relative to the camera position, at that time the picture was
+taken
+https://www.suncalc.org/#/55.9316,-3.1718,11/2019.05.21/21:00/1/3
+
+Sun elevation: 2.7 deg
 
 * DONE Calcs
 
@@ -121,19 +140,17 @@ bow.
 - Ground height wrt sea level is 220ft (67m), from sea level, plus 3m
   at home, so 70m approx, but compared to dist to sea it's negligible
   http://en-gb.topographic-map.com/places/Edinburgh-89983/
-- So the question is, given sun configuration, could it have been a
-  reflection rainbow? if not, then it must be a twinned one
-- This site https://www.atoptics.co.uk/fz439.htm also wonders "how far
-  is the rainbow", and explains there is no answer (for simple bows)
+
 ** DONE Test 1: Angles (non-conclusive)
-   - Does the image height (difference? ratio?) of the two bows in the
-     picture match the predictied range for reflected bows at the
-     existing range of distances to the sea?
-   - Just checking bow height difference AND the known view angles for
-     both wrt horizon we can decide if the bows may come from a reflection
-   - BUT we're NOT accounting for distance-to-see at all, just picture
-     heights/ratios, so it's not conclusive, it does not discard a
-     reflection bow
+- Does the image height (difference? ratio?) of the two bows in the
+  picture match the predictied range for reflected bows at the
+  existing range of distances to the sea?
+- Just checking bow height difference AND the *known view angles for
+  both wrt horizon* (from sun dir/angle from astro data + and
+  reflected sunlights on a specular surface) we can decide if the bows
+  may come from a reflection
+- BUT we're NOT accounting for distance-to-see at all, just picture
+  heights/ratios, so it's not conclusive
 
 Knowns:
 
@@ -168,15 +185,24 @@ unknown x.
 Rel error:
   (1.209032231-1.173553719) / 1.209032231 = 3%
 
-
 ** DONE Test 2: Distances (to gold at the base!)
-   - HOW can we validate distance-to-sea is compatible with reflection?
-   - One idea is using d2s to compute actual height of the bows, and
-     see if that's physically possible (1m would be stupid, 100km too)
-   - Distance to bow base could also be computed from d2s, and also
-     tested for consistency
-   - How far was the gold at the base from me? combine X and Y to find
-     it!
+
+Now, a fun sideffect of knowing the approximate distance from the
+camera to the water reflection is that it allows computing the
+distance to the rainbow itself, which is NOT possible with a regular
+bow.
+
+- This site https://www.atoptics.co.uk/fz439.htm also wonders "how far
+  is the rainbow", and explains there is no answer (for simple bows)
+
+
+- HOW can we validate distance-to-sea is compatible with reflection?
+- One idea is using d2s to compute actual height of the bows, and
+  see if that's physically possible (1m would be stupid, 100km too)
+- Distance to bow base could also be computed from d2s, and also
+  tested for consistency
+- How far was the gold at the base from me? combine X and Y to find
+  it!
 
 Knowns (reflection bow)
   Angles A=2.7, C=42, B = 135.3deg
