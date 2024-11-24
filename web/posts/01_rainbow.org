@@ -16,6 +16,8 @@ a new question ([[Test 2: Distances (to gold at the base!)][how far is the rainb
 #+ATTR_HTML: :alt Weird Rainbow :width 50%
 [[../img/Rainbow/Rainbow-2019-05-22-ORIGINAL.jpeg]]
 
+/(NB: All inline pictures are mine)/
+
 * Rain-bows-tiary
 
 After this terrible pun, let's have a quick look at the different
@@ -24,8 +26,9 @@ kinds of rainbows that have been observed and studied.
 ** Single rainbow
 A single *primary* bow can be seen when sunlight rays are refracted
 once inside rain droplets, split into different wavelengths (colours)
-and travel towards the observer at around /42 degrees/ backwards. More
-details [[https://www.atoptics.co.uk/rainbows/primary.htm][here]].
+and travel towards the observer standing between the Sun and the
+observed rainbow. Rays are refracted around /42 degrees/
+downwards. More details [[https://www.atoptics.co.uk/rainbows/primary.htm][here]].
 
 ** Concentric rainbows
 Single rainbows are awesome on their own, but sometimes they're
@@ -35,22 +38,26 @@ accompained by additional concentric bows:
   outside and is and fainter. The secondary bow colors are
   reversed. Primary + secondary form the relatively frequent /double
   rainbow/ that everybody loves. More details [[https://www.atoptics.co.uk/rainbows/sec.htm][here]].
-#+ATTR_HTML: :alt Weird Rainbow :width 50%
-[[../img/Rainbow/Rainbow-2020-03-08-Double.jpg]]
-- Supernumerary bows are caused by lightwave interference.
-  [[file:~/Escriptori/Rainbow/Rainbow-2017-08-18-A.jpg][Supernumeraries 1]], [[file:~/Escriptori/Rainbow/Rainbow-2017-08-18-B.jpg][Supernumeraries 2]] More detals [[https://www.atoptics.co.uk/rainbows/supers.htm][here]].
+- Supernumerary bows are caused by lightwave interference. They appear
+  adjacent to any bow and seem to repeat the same color pattern. More
+  detals [[https://www.atoptics.co.uk/rainbows/supers.htm][here]].
 
-These are all very cool, but they're definitely not what I saw.
+The picture below shows a faint secondary bow above the primary one,
+and part of a supernumerary right below its violet shade.
+#+ATTR_HTML: :alt Double Rainbow with supernumerary :width 90%
+[[../img/Rainbow/Rainbow-2019-10-29-Super.jpg]]
+
+These are all very cool, but definitely not what I saw.
 
 ** Reflection rainbows
-Reflection rainbows are formed by two separate bows, a primary one
+Reflection rainbows are formed by two separate bows: a primary one
 caused by direct sunlight, and a reflection one above the primary,
-caused by sunlight reflected on a reflective (water) surface, that
-must be behind the observer and calm enough for sunlight to reflect in
-a coherent direction, instead of scattering. More details [[https://www.atoptics.co.uk/rainbows/bowim6.htm][here]].
+caused by sunlight reflected on a water surface that must be behind
+the observer and calm enough for sunlight to reflect in a coherent
+direction instead of scattering. More details [[https://www.atoptics.co.uk/rainbows/bowim6.htm][here]].
 
 ** Twinned rainbows
-Twinned rainbows are *much* rarer, and apparently not yet fully
+Twinned rainbows are very rare, and apparently not yet fully
 understood. A possible explanation is that they're primary bows that
 bifurcate in some sections due to the presence of larger droplets that
 become non-spherical under the effect of air friction, and refract
@@ -61,7 +68,7 @@ observer come from slightly above/below the primary bow. More details
 * So, what did I see?
 Given that the 2 rainbows in my picture were not concentric they could
 only be a twinned primary bow, or a pair of primary and a reflection
-bows. I very much suspected it was primary + reflection, but I had no
+bows. I very much suspected it was primary + reflection but I had no
 proof. A sane person would have probably stopped there. I didn't.
 
 My shamelessly biased starting assumption was: /If I could prove that
@@ -75,8 +82,8 @@ where I probably lost them.
 The good news is that using my picture, some basic trigonometry and
 publically available maps and astronomical data, I arrived at a pretty
 convincing answer: The picture matches a predicted reflection bow with
-surprising accuracy, so it most likely was. Below I'll detail the
-steps I followed.
+surprising accuracy, so it most likely was. I'll detail how I got to
+that conclusion below.
 
 ** Sun angle and water position
 This site shows the sun direction and altitude angle above the
@@ -220,5 +227,5 @@ farthest FoF border), so d = 113km, not far enough for the west coast
   reference for learning about the Rainbows and other phenomena, I
   would have never reached the bottom of this rabbit hole without it.
 - This paper [[https://cs.dartmouth.edu/~wjarosz/publications/sadeghi11physically.html][Physically-based simulation of rainbows]] explains and
-  manages to simulate several kinds of rainbows, including secondary
-  bows, supernumeraries and twinned ones. It's worth a read.
+  reproduces several kinds of rainbows, including secondary bows,
+  supernumeraries and twinned bows. It's worth a read.
