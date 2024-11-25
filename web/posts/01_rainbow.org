@@ -84,64 +84,91 @@ rare twinned bows are, and how hard it would be to prove that it was a
 twinned bow instead/.
 
 So yeah, I essentially looked for my keys under the [[https://en.wikipedia.org/wiki/Streetlight_effect][streetlight]], not
-where I probably lost them.
+where I had probably lost them.
 
 The good news is that using my picture, some basic trigonometry and
 publically available maps and astronomical data, I arrived at a pretty
 convincing answer: The picture matches a predicted reflection bow with
-surprising accuracy, so it most likely was. I'll detail how I got to
-that conclusion below.
+surprising accuracy (3%), so it most likely was. Details on how I got
+there follow below.
 
-** Method/Plan to test
+** Method
 
 ~TODO~ REUSE previous diagram with primary+reflection
 
-A) Is there a water surface where the sun may reflect at that time?
-Yes, the Firth of Forth overlaps the sun direction between
-approximately 10km to 16km from the camera position
+I had to answer these 2 questions:
+1. /Is there a water surface where the sun may have reflected it?/
+2. /Does the separation between primary and reflection bows in the
+   picture match the expected value for the Sun elevation at that
+   time?/
 
-B) Does the vertical separation between regular and reflected bow in
-the picture match the sun elevation angle? Yes, they match with around
-3% error, which is quite low given that all magnitudes are approximate!
+The first one was relatively easy, I knew that the Firth of Forth was
+somewhere behind the camera, but not exactly where or at what
+distance. The secondd one was harder, because the bow separation
+changes along the arcs. We'd ideally use vertical separation at the
+apex, but the bows were not complete, they faded out completely
+outside the picture.
 
-PROBLEM: We' want to compute vertical separation at the apex, but the
-bows were not complete, they faded out completely outside the picture
+*** Sun, Camera aaaaaaand Water!
 
-** Reconstructing the full bows from partial picture
+A map of the area and the Sun configuration relative to the camera
+position at the time of observation (21/05/2019 21:00) can be obtained
+from the [[https://www.suncalc.org/#/55.9316,-3.1718,11/2019.05.21/21:00/1/3][SunCalc site]].
 
-~TODO~ Filtered and reconstructed bows
+#+ATTR_HTML: :alt SunConfig :width 80%
+[[../img/Rainbow/Rainbow-2019-05-22-SunConfig.png]]
+
+- The Sun direction matches the observed rainbow orientation, with a
+  Sun altitude of 2.7deg above the horizon.
+- The camera was pointing towards the left side of the rainbow, and placed
+  around 70m above sea level.
+- The water body in the map is the Firth of Forth, and extends from 10km
+  and 16.5km towards the Sun (behind the camera)
+
+*** Reconstructing the full bows from partial picture
+
+I manually reconstructed the full bows from the partial picture, by
+reflecting it horizontally and matching circles to them in
+Inkscape. This is obviously approximate, but the conclusion seems to
+prove it was good enough.
 
 #+ATTR_HTML: :alt Reconstructed bows :width 80%
 [[../img/Rainbow/Rainbow.svg]]
 
-** Sun angle and water position
+From this reconstruction we can compute primary and reflection apex
+heights or circle radii.
 
-This site shows the sun direction and altitude angle above the
-horizon, relative to the camera position, at that time the picture was
-taken
-https://www.suncalc.org/#/55.9316,-3.1718,11/2019.05.21/21:00/1/3
+Height wrt horizon, in picture
+  y_p = 242 pixels
+  y_r = 284 pixels
 
-Sun elevation: 2.7 deg
+*** Identifying a RR from sun inclination and primary/reflection separation
+
+The green line in this picture is the separation between primary and
+reflection bows.
+
+Observer height was 70m and can be considered irrelevant, as it may
+only change the perceived height of the bows over the horizon, but not
+their relative configuration.
+
+#+ATTR_HTML: :alt Angles :width 100%
+[[../img/Rainbow/Rainbow_Angles.svg]]
+
+Angles wrt horizon
+  theta_p = 39.3deg
+  theta_r = 44.7deg
+
 
 * DONE Calcs
 
-- IS it a twinned or a reflection rainbow?
-- According to this https://www.atoptics.co.uk/rainbows/reflect.htm,
-  sun reflection on water needs to happen BEHIND you to see BOTH,
-  otherwise you may only see the reflected one. This diagram shows how
-  it works quite intuitively http://www.eo.ucar.edu/rainbows/rnbw8.gif.
 - By ear, the rainbow center was around 45 deg to my right wrt base
   point (behind chimmeney), casting a line from rainbow center
   direction backwards hits the Firth of Forth water mass at 10..15km.
-- Sun config at time of pic 21/05/2019 21:00 can be computed here
-  https://www.suncalc.org/#/55.9316,-3.1718,11/2019.05.21/21:00/1/3
-  and matches direction I approximated, but yields water between 10km
-  or 14km and 16.5km at my back, and a sun altitude of 2.7deg
 - Ground height wrt sea level is 220ft (67m), from sea level, plus 3m
   at home, so 70m approx, but compared to dist to sea it's negligible
   http://en-gb.topographic-map.com/places/Edinburgh-89983/
 
-** DONE Test 1: Angles (non-conclusive)
+** DONE Test 1: reflection/primary height ratio from Angles (inconclusive?)
 - Does the image height (difference? ratio?) of the two bows in the
   picture match the predictied range for reflected bows at the
   existing range of distances to the sea?
@@ -150,7 +177,8 @@ Sun elevation: 2.7 deg
   reflected sunlights on a specular surface) we can decide if the bows
   may come from a reflection
 - BUT we're NOT accounting for distance-to-see at all, just picture
-  heights/ratios, so it's not conclusive
+  heights/ratios, so it's not conclusive? NOT necessarily, we're
+  accounting for sun angle, we don't need more, do we?
 
 Knowns:
 
@@ -249,9 +277,9 @@ which may be quite far up (h=1000m approx in picture, if reflection at
 farthest FoF border), so d = 113km, not far enough for the west coast
 
 * References
-- The Atmospheric Optics website https://atoptics.co.uk/ is a great
-  reference for learning about the Rainbows and other phenomena, I
-  would have never reached the bottom of this rabbit hole without it.
+- The [[https://atoptics.co.uk/][Atmospheric Optics]] website is a great reference for learning
+  about the Rainbows and other phenomena, I would have never reached
+  the bottom of this rabbit hole without it.
 - This paper [[https://cs.dartmouth.edu/~wjarosz/publications/sadeghi11physically.html][Physically-based simulation of rainbows]] explains and
   reproduces several kinds of rainbows, including secondary bows,
   supernumeraries and twinned bows. It's worth a read.
