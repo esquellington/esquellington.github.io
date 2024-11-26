@@ -3,12 +3,15 @@
 
 <svg
    width="210.00481mm"
-   height="166.92767mm"
-   viewBox="0 0 744.11152 591.47601"
+   height="122.92767mm"
+   viewBox="0 0 744.11152 435.57037"
    id="svg2"
    version="1.1"
    inkscape:version="1.1.2 (0a00cf5339, 2022-02-04)"
    sodipodi:docname="Rainbow-2019-05-22-RECONSTRUIT.svg"
+   inkscape:export-filename="/home/oscar/Desktop/esquellington/esquellington.github.io/web/img/Rainbow/Rainbow-2019-05-22-RECONSTRUIT.png"
+   inkscape:export-xdpi="96"
+   inkscape:export-ydpi="96"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:xlink="http://www.w3.org/1999/xlink"
@@ -401,9 +404,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="1.1642613"
-     inkscape:cx="309.63839"
-     inkscape:cy="275.7113"
+     inkscape:zoom="0.9159505"
+     inkscape:cx="260.38525"
+     inkscape:cy="207.43479"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -417,7 +420,8 @@
      fit-margin-top="0"
      fit-margin-left="0"
      fit-margin-right="0"
-     fit-margin-bottom="0" />
+     fit-margin-bottom="0"
+     height="166.92767mm" />
   <metadata
      id="metadata7">
     <rdf:RDF>
@@ -487,19 +491,19 @@
     <g
        id="g8514"
        transform="matrix(0.91959544,0,0,0.91959544,0.11525811,-58.753067)"
-       style="stroke-width:1.01947008;stroke-miterlimit:4;stroke-dasharray:none">
+       style="stroke:#ffcc00;stroke-width:1.01947;stroke-miterlimit:4;stroke-dasharray:none">
       <circle
          r="287.53528"
          cy="597.99384"
          cx="406.32901"
          id="path4264"
-         style="fill:none;fill-rule:evenodd;stroke:#ff0000;stroke-width:1.01947008;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
+         style="fill:none;fill-rule:evenodd;stroke:#ffcc00;stroke-width:1.01947;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
       <circle
          r="4.6413984"
          cy="598.59308"
          cx="406.39398"
          id="path4296"
-         style="fill:#ff0000;fill-rule:evenodd;stroke:#000000;stroke-width:1.01947008;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
+         style="fill:#ff0000;fill-rule:evenodd;stroke:#ffcc00;stroke-width:1.01947;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
     </g>
     <path
        style="fill:none;fill-rule:evenodd;stroke:#00ff00;stroke-width:0.919595;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
@@ -515,19 +519,19 @@
     <g
        id="g8520"
        transform="matrix(0.91959544,0,0,0.91959544,0.11525811,-58.753067)"
-       style="stroke-width:1.01947008;stroke-miterlimit:4;stroke-dasharray:none">
+       style="stroke-width:1.01947;stroke-miterlimit:4;stroke-dasharray:none">
       <circle
          r="287.53528"
          cy="552.36218"
          cx="405.5"
          id="path4264-79"
-         style="fill:none;fill-rule:evenodd;stroke:#007ee1;stroke-width:1.01947008;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
+         style="fill:none;fill-rule:evenodd;stroke:#007ee1;stroke-width:1.01947;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
       <circle
          r="4.6413984"
          cy="552.96149"
          cx="405.56497"
          id="path4296-2"
-         style="fill:#007ee1;fill-opacity:1;fill-rule:evenodd;stroke:#007ee1;stroke-width:1.01947008;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
+         style="fill:#007ee1;fill-opacity:1;fill-rule:evenodd;stroke:#007ee1;stroke-width:1.01947;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
     </g>
     <path
        style="fill:none;fill-rule:evenodd;stroke:#00ff00;stroke-width:0.972823;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
@@ -538,27 +542,30 @@
     <text
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;line-height:0%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#007ee1;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       x="344.99643"
-       y="175.29784"
+       x="379.62454"
+       y="178.42566"
        id="text14006-0-8-9-2-7-7-9-2"><tspan
          sodipodi:role="line"
-         x="344.99643"
-         y="175.29784"
+         x="379.62454"
+         y="178.42566"
          id="tspan8685"
-         style="font-size:14.3751px;line-height:1.25">y_r=284px</tspan></text>
+         style="font-size:14.3751px;line-height:1.25">284 px</tspan></text>
     <text
        xml:space="preserve"
-       style="font-style:normal;font-weight:normal;line-height:0%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#ff0000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       x="384.49643"
-       y="219.54782"
-       id="text14006-0-8-9-2-7-7-9-9"><tspan
+       style="font-style:normal;font-weight:normal;line-height:0%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#ffcc00;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="381.49692"
+       y="221.6768"
+       id="text14006-0-8-9-2-7-7-9-9"
+       inkscape:export-filename="/home/oscar/Desktop/esquellington/esquellington.github.io/web/img/Rainbow/Rainbow-2019-05-22-RECONSTRUIT.png"
+       inkscape:export-xdpi="96"
+       inkscape:export-ydpi="96"><tspan
          sodipodi:role="line"
          id="tspan14008-9-7-2-2-3-5-2-7"
-         x="384.49643"
-         y="219.54782"
-         style="font-size:14.3751px;line-height:1.25">y_d=242px</tspan></text>
+         x="381.49692"
+         y="221.6768"
+         style="font-size:14.3751px;line-height:1.25;fill:#ffcc00">242 px</tspan></text>
     <path
-       style="fill:none;fill-rule:evenodd;stroke:#ff0000;stroke-width:1.4172;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       style="fill:none;fill-rule:evenodd;stroke:#ffcc00;stroke-width:1.4172;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
        d="M 378.15869,227.4058 V 470.8073"
        id="path4146-5-3"
        inkscape:connector-curvature="0" />
