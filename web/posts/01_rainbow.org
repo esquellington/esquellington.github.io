@@ -97,14 +97,14 @@ there follow below.
 ~TODO~ REUSE previous diagram with primary+reflection
 
 I had to answer these 2 questions:
-1. /Is there a water surface where the sun may have reflected it?/
+1. /Is there a water surface where the Sun may have reflected?/
 2. /Does the separation between primary and reflection bows in the
    picture match the expected value for the Sun elevation at that
    time?/
 
 The first one was relatively easy, I knew that the Firth of Forth was
 somewhere behind the camera, but not exactly where or at what
-distance. The secondd one was harder, because the bow separation
+distance. The second one was harder, because the bow separation
 changes along the arcs. We'd ideally use vertical separation at the
 apex, but the bows were not complete, they faded out completely
 outside the picture.
@@ -118,17 +118,17 @@ from the [[https://www.suncalc.org/#/55.9316,-3.1718,11/2019.05.21/21:00/1/3][Su
 #+ATTR_HTML: :alt SunConfig :width 80%
 [[../img/Rainbow/Rainbow-2019-05-22-SunConfig.png]]
 
-- The Sun direction matches the observed rainbow orientation, with a
+- The Sun direction matched the observed rainbow orientation, with a
   Sun altitude of 2.7deg above the horizon.
-- The camera was pointing towards the left side of the rainbow, and placed
-  around 70m above sea level.
-- The water body in the map is the Firth of Forth, and extends from 10km
-  and 16.5km towards the Sun (behind the camera)
+- The camera was pointing towards the left side of the rainbow from
+  approximately 70m above sea level.
+- There was a large water body behind the camera, the Firth of Forth,
+  and extends from 10km and 16.5km towards the Sun.
 
 *** Reconstructing the full bows from partial picture
 
 I manually reconstructed the full bows from the partial picture, by
-reflecting it horizontally and matching circles to them in
+mirroring it horizontally and matching a circle to each bow in
 Inkscape. This is obviously approximate, but the conclusion seems to
 prove it was good enough.
 
