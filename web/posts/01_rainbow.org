@@ -9,12 +9,11 @@ the bases you can see that they intersect.
 #+ATTR_HTML: :alt Weird Rainbow :width 75%
 [[../img/Rainbow/Rainbow-2019-05-22-RETALLAT.jpeg]]
 
-Double rainbows are concentric, so they're not supposed to intersect!
-something else must be going on... so I started reading to find out
-exactly what.
-
-It was a fun trip and I ended up with satisfying answer ([[So, what did I see?][spoiler]]) and
-a new question ([[Test 2: Distances (to gold at the base!)][how far is the rainbow?]])
+Double rainbows are concentric, so they're not supposed to
+intersect...  there was definitely something else going on, so I
+started reading to find out exactly what. It was a fun trip and I
+ended up with satisfying answer ([[So, what did I see?][spoiler]]) and a new question ([[Test 2: Distances (to gold at the base!)][how far
+is the rainbow?]])
 
 /(NB: All inline pictures are mine)/
 
@@ -88,9 +87,9 @@ where I had probably lost them.
 
 The good news is that using my picture, some basic trigonometry and
 publically available maps and astronomical data, I arrived at a pretty
-convincing answer: The picture matches a predicted ~reflection bow~
-with surprising accuracy (3%), so it most likely was. Below I'll
-detail how I arrived at this conclusion
+convincing answer: The top bow in the picture matches a predicted
+*reflection bow* with surprising accuracy (97%), so it most likely
+was. Below I'll detail how I arrived at this conclusion
 
 ** Method
 
@@ -117,7 +116,7 @@ camera position at the time of observation (21/05/2019 21:00). This
 saved me from having to aggregate the same information from different
 sources.
 
-#+ATTR_HTML: :alt SunConfig :width 80%
+#+ATTR_HTML: :alt SunConfig :width 90%
 [[../img/Rainbow/Rainbow-2019-05-22-SunConfig.png]]
 
 This image answers question 1, and provides useful data that will help
@@ -144,29 +143,42 @@ each bow using [[https://inkscape.org/][Inkscape]]. This is obviously an approxi
 conclusion seems to prove it was good enough, so hooray for scrappy
 Science.
 
-#+ATTR_HTML: :alt Reconstructed bows :width 80%
+#+ATTR_HTML: :alt Reconstructed bows :width 90%
 [[../img/Rainbow/Rainbow-2019-05-22-RECONSTRUIT.png]]
 
 From this picture the heights are $y_p = 242$ pixels (primary) and
 $y_r = 284$ pixels (reflection). I did not count the pixels one by
 one, I promise.
 
-*** Identifying a RR from sun inclination and primary/reflection separation
+*** Identifying a RR from sun inclination and primary/reflection heights
 
-The green line in this picture is the separation between primary and
-reflection bows.
+Observer height above sea level was 70m and can be considered
+irrelevant, as it may only change the perceived height of the bows
+over the horizon, but not their relative configuration.
 
-Observer height was 70m and can be considered irrelevant, as it may
-only change the perceived height of the bows over the horizon, but not
-their relative configuration.
+Angles above the horizon are $\theta_p = 39.3$ deg and $\theta_r = 44.7$ deg
 
 #+ATTR_HTML: :alt Angles :width 100%
 [[../img/Rainbow/Rainbow_Angles.svg]]
 
-Angles wrt horizon
-  theta_p = 39.3deg
-  theta_r = 44.7deg
+Observer distances along the horizon to the primary $x_p$ and
+reflection $x_r$ bows are unknown, but assumed to be equal $x_p = x_r
+= x$, as they were most likely caused by the same curtain of rain
+droplets.
 
+Assuming bow apex heights are perpendicular to the horizon, we have 2
+rectangle triangles
+\begin{eqnarray*}
+  \tan(\theta_r) = y_r / x \\
+  \tan(\theta_p) = y_p / x
+\end{eqnarray*}
+
+we can get rid of the unknown $x$ easily by dividing the 2 equations
+
+\[\frac{\tan(\theta_r)}{\tan(\theta_p)} = \frac{y_r}{y_p}\]
+
+and operating we arrive at $1.209 \approx 1.173$ with a relative error
+of $3\%$, or, phrased in positive: an accuracy of $97\%$, not too bad!
 
 * DONE Calcs
 
