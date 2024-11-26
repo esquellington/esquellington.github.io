@@ -6,12 +6,12 @@ In May 2019 I saw this mysterious rainbow over Edinburgh. At first
 sight it may look like a common double rainbow, but if you focus on
 the bases you can see that they intersect.
 
-#+ATTR_HTML: :alt Weird Rainbow :width 50%
-[[../img/Rainbow/Rainbow-2019-05-22-MILLORAT.jpeg]]
+#+ATTR_HTML: :alt Weird Rainbow :width 75%
+[[../img/Rainbow/Rainbow-2019-05-22-RETALLAT.jpeg]]
 
 Double rainbows are concentric, so they're not supposed to intersect!
-something else must be going on... so I started reading a bit to find
-out exactly what.
+something else must be going on... so I started reading to find out
+exactly what.
 
 It was a fun trip and I ended up with satisfying answer ([[So, what did I see?][spoiler]]) and
 a new question ([[Test 2: Distances (to gold at the base!)][how far is the rainbow?]])
@@ -135,19 +135,21 @@ of $\alpha_{p} = -2.7$ deg, then their specular reflection on the
 water that caused the reflection bow hit the rain droplets at an angle
 of $\alpha_{r} = 2.7$ deg.
 
-*** TODO Reconstructing the full bows from partial picture
+*** Reconstructing the full bows from partial picture
 
 We need the apex heights of the primary and reflection bows, but they
 were incomplete, so I manually reconstructed the full bows from the
 partial picture, by mirroring it horizontally and matching a circle to
-each bow in Inkscape. This is obviously an approximation, but the
-conclusion seems to prove it was good enough, so hooray for Science.
+each bow using [[https://inkscape.org/][Inkscape]]. This is obviously an approximation, but the
+conclusion seems to prove it was good enough, so hooray for scrappy
+Science.
 
 #+ATTR_HTML: :alt Reconstructed bows :width 80%
 [[../img/Rainbow/Rainbow-2019-05-22-RECONSTRUIT.png]]
 
 From this picture the heights are $y_p = 242$ pixels (primary) and
-$y_r = 284$ pixels (reflection)
+$y_r = 284$ pixels (reflection). I did not count the pixels one by
+one, I promise.
 
 *** Identifying a RR from sun inclination and primary/reflection separation
 
