@@ -110,17 +110,15 @@ picture.
 
 *** DONE Sun, Camera aaaaaaand Water!
 
-I was lucky to find the [[https://www.suncalc.org/#/55.9316,-3.1718,11/2019.05.21/21:00/1/3][SunCalc site]], and used it to generate a map of
-the area and that includes the Sun configuration relative to the
-camera position at the time of observation (21/05/2019 21:00). This
-saved me from having to aggregate the same information from different
-sources.
+I was lucky to find the [[https://www.suncalc.org/#/55.9316,-3.1718,11/2019.05.21/21:00/1/3][SunCalc]] site, and used it to generate a map of
+the area that includes the Sun configuration relative to the camera
+position at the time of observation (21/05/2019 21:00).
 
 #+ATTR_HTML: :alt SunConfig :width 90%
 [[../img/Rainbow/Rainbow-2019-05-22-SunConfig.png]]
 
-This image answers question 1, and provides useful data that will help
-answer question 2:
+This image answers question 1, and provides data that will help answer
+question 2:
 - The Sun direction matched the observed rainbow orientation, with a
   and altitude of $2.7$ degrees above the horizon.
 - The camera was pointing towards the left side of the rainbow from
@@ -132,11 +130,11 @@ Assuming a perfect mirror water surface, we can infer that if the Sun
 rays that caused the primary bow hit the rain droplets with an angle
 of $\alpha_{p} = -2.7$ deg, then their specular reflection on the
 water that caused the reflection bow hit the rain droplets at an angle
-of $\alpha_{r} = 2.7$ deg.
+of $\alpha_{r} = +2.7$ deg.
 
 *** Reconstructing the full bows from partial picture
 
-We need the apex heights of the primary and reflection bows, but they
+I needed the apex heights of the primary and reflection bows, but they
 were incomplete, so I manually reconstructed the full bows from the
 partial picture, by mirroring it horizontally and matching a circle to
 each bow using [[https://inkscape.org/][Inkscape]]. This is obviously an approximation, but the
@@ -146,17 +144,18 @@ Science.
 #+ATTR_HTML: :alt Reconstructed bows :width 90%
 [[../img/Rainbow/Rainbow-2019-05-22-RECONSTRUIT.png]]
 
-From this picture the heights are $y_p = 242$ pixels (primary) and
-$y_r = 284$ pixels (reflection). I did not count the pixels one by
-one, I promise.
+From this picture I computed the heights in pixels: $y_p = 242$ pixels
+(primary) and $y_r = 284$ pixels (reflection). I did not count the
+pixels one by one, I promise.
 
-*** Identifying a RR from sun inclination and primary/reflection heights
+*** Identifying a reflection bow from known angles and heights
 
 Observer height above sea level was 70m and can be considered
 irrelevant, as it may only change the perceived height of the bows
 over the horizon, but not their relative configuration.
 
-Angles above the horizon are $\theta_p = 39.3$ deg and $\theta_r = 44.7$ deg
+View angles above the horizon are $\theta_p = 39.3$ deg and $\theta_r
+= 44.7$ deg.
 
 #+ATTR_HTML: :alt Angles :width 100%
 [[../img/Rainbow/Rainbow_Angles.svg]]
@@ -178,7 +177,7 @@ we can get rid of the unknown $x$ easily by dividing the 2 equations
 \[\frac{\tan(\theta_r)}{\tan(\theta_p)} = \frac{y_r}{y_p}\]
 
 and operating we arrive at $1.209 \approx 1.173$ with a relative error
-of $3\%$, or, phrased in positive: an accuracy of $97\%$, not too bad!
+of $3\%$, or, phrased in positive terms: an accuracy of $97\%$, not too bad!
 
 * DONE Calcs
 
