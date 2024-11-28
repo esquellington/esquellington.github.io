@@ -94,9 +94,47 @@ extra return after #+RESULTS: before the image link
 #+RESULTS:
 
 [[file:../img/table.png]]
-** TODO Inline HTML
+** Inline HTML
 
-can we inject HTML for specific/unsupported features?
+We can we use raw HTML blocks inside =+BEGIN_EXPORT html
+.. #+END_EXPORT= to produce output HTML with any feature not directly
+supported by org-html-export. For example, the block below uses
+unsupported =<blockquote>= and =<cite>= tags.
+
+#+BEGIN_SRC html
+#+BEGIN_EXPORT html
+<blockquote>
+  <p>Never whistle while you're pissing.</p>
+  <p><cite>– Hagbard P. Celine</cite></p>
+</blockquote>
+#+END_EXPORT
+#+END_SRC
+
+This is the result:
+#+BEGIN_EXPORT html
+<blockquote>
+  <p>Never whistle while you're pissing.</p>
+  <p><cite>– Hagbard Celine</cite></p>
+</blockquote>
+#+END_EXPORT
+
+another one
+#+BEGIN_SRC html
+#+BEGIN_EXPORT html
+<details>
+  <summary>Secret sentence...</summary>
+  <p>fnord fnord fnord fnord fnord fnord fnord fnord!</p>
+</details>
+#+END_EXPORT
+#+END_SRC
+
+produces
+#+BEGIN_EXPORT html
+<details>
+  <summary>Secret sentence...</summary>
+  <p>fnord fnord fnord fnord fnord fnord fnord fnord!</p>
+</details>
+#+END_EXPORT
 
 * Conclusions
 
