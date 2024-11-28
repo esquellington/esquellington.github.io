@@ -121,8 +121,8 @@ This image answers question 1, and provides data that will help answer
 question 2:
 - The Sun direction matched the observed rainbow orientation, with a
   and altitude of $2.7$ degrees above the horizon.
-- There was a large water body that extends from $[10..16.5]$ km behind
-  the camera, the Firth of Forth.
+- There was a large water body that extends from
+  $[10\text{km},16.5\text{km}]$ behind the camera, the Firth of Forth.
 
 Assuming a perfect mirror water surface, we can infer that if the Sun
 rays that caused the primary bow hit the rain droplets with an angle
@@ -180,18 +180,11 @@ of $3\%$, or, phrased in positive terms: an accuracy of $97\%$, not too bad!
 *** Is this conclusive, can we improve it?
 
 We have our answer, but I found it slightly unsatisfying. In
-particular, we didn't use the distance to the water $c = [10..16.5]$
+particular, we didn't use the distance to the water $c = [10,16.5]$
 km. Could we use it to validate or disprove the conclusion?
 
-One idea is to compute /how high is the rainbow?/, and verify the
-answer is reasonable. The reflection bow height $h_r$ must be within
-the possible range of rain clouds.
-
-We could find actual numbers, but let's just guesstimate them:
-- Planes often fly at approx 10km and that's above the clouds, so any
-  rainbow height value above 10km would be very suspicious.
-- Just comparing the rainbow with the buildings in the picture we can
-  infer that its height is above 100m.
+One idea is to compute /how high is the rainbow?/ and verify the
+answer is reasonable. Let's get the answer first and then analyze it.
 
 *** How far is the rainbow?
 
@@ -203,9 +196,40 @@ bow.
 This site https://www.atoptics.co.uk/fz439.htm also wonders "how far
 is the rainbow", and explains there is no answer for simple bows.
 
+Knowns (reflection bow)
+  Angles A=2.7, C=42, B = 135.3deg
+  Distance-to-sea c = 10..16.5km, opposite to angle C
+
+Distances from observer to rainbow $h_r$, opposite to angle $A$
+
+Law of sines:
+\[
+  \frac{a}{\sin(A)} = \frac{b}{\sin(B)} = \frac{c}{\sin(C)}
+\]
+
+So to find $h_r = a$ from knowns
+\[ a = c \frac{\sin(A)}{\sin(C)} = c \frac{\sin(2.7)}{\sin(42)} =
+[10..16.5] \times 0.0704 = [0.7..1.16] \text{km}
+\]
+
+And using $h_r$ as hypotenusa, the horizontal distance $x_r$ to the
+bow base would be
+\[
+  x_r = h_r \cos(\theta_r) = [0.7..1.16] \times 0.710 = [0.497..0.824] \text{km}
+\]
+
+And from this, we can compute height $y_r$ in km
+\[
+  y_r = h_r \sin(\theta_r) = [0.7..1.16] \times 0.703 = [0.492,0.816] \text{km}
+\]
+
+Is this height range, roughly 500m to 800m, reasonable? It's very much
+within the expected height for low clouds, from 500m to 3km according
+to this random website https://www.weather.gov/key/low_clouds, so yes,
+I'm finally convinced!
+
 ** DONE Test 2: Distances (to gold at the base!)
 
-- HOW can we validate distance-to-sea is compatible with reflection?
 - One idea is using d2s to compute actual height of the bows, and
   see if that's physically possible (1m would be stupid, 100km too)
 - Distance to bow base could also be computed from d2s, and also
