@@ -12,8 +12,7 @@ the bases you can see that they intersect.
 Double rainbows are concentric, so they're not supposed to
 intersect...  there was definitely something else going on, so I
 started reading to find out exactly what. It was a fun trip and I
-ended up with satisfying answer ([[So, what did I see?][spoiler]]) and a new question ([[Test
-2: Distances (to gold at the base!)][how far is the rainbow?]])
+ended up with satisfying answer ([[So, what did I see?][spoiler]]) and a new [[QUESTION][question]].
 
 /(NB: All inline pictures are mine)/
 
@@ -184,16 +183,25 @@ particular, we didn't use the distance to the water $c = [10,16.5]$
 km. Could we use it to validate or disprove the conclusion?
 
 One idea is to compute /how high is the rainbow?/ and verify the
-answer is reasonable. Let's get the answer first and then analyze it.
+answer is reasonable.
 
-*** How far is the rainbow?
+Let's get the answer first and then analyze it.
+
+*** <<QUESTION>> How +high+ *far* is the rainbow?
+
+It turns out that with the data we have, it's a lot easier to compute
+"How far is the rainbow", than its height.
+
+It's also interesting that this question cannot be answered for a
+single rainbow, because it can be *anywhere* along the viewing
+direction (details [[https://www.atoptics.co.uk/fz439.hth][here]]).
 
 Now, a fun sideffect of knowing the approximate distance from the
 camera to the water reflection is that it allows computing the
 distance to the rainbow itself, which is NOT possible with a regular
 bow.
 
-This site https://www.atoptics.co.uk/fz439.htm also wonders "how far
+This also wonders "how far
 is the rainbow", and explains there is no answer for simple bows.
 
 Knowns (reflection bow)
@@ -227,51 +235,6 @@ Is this height range, roughly 500m to 800m, reasonable? It's very much
 within the expected height for low clouds, from 500m to 3km according
 to this random website https://www.weather.gov/key/low_clouds, so yes,
 I'm finally convinced!
-
-** DONE Test 2: Distances (to gold at the base!)
-
-- One idea is using d2s to compute actual height of the bows, and
-  see if that's physically possible (1m would be stupid, 100km too)
-- Distance to bow base could also be computed from d2s, and also
-  tested for consistency
-- How far was the gold at the base from me? combine X and Y to find
-  it!
-
-Knowns (reflection bow)
-  Angles A=2.7, C=42, B = 135.3deg
-  Distance-to-sea c = 10..16.5km, opposite to angle C
-
-Distances from observer to rainbow h_r, opposite to angle A
-
-Law of sines:
-  a/sin(A) = b/sin(B) = c/sin(C)
-
-So to find h_r == a from knowns
-  a = c * sin(A)/sin(C)
-    = c * sin(2.7)/sin(42)
-    = c * 0.0703995
-
-So for
-  c = [10..16.5]km,
-
-The distance to the top of the reflection bow is
-  h_r = a = [0.7..1.16]km
-
-And using h_r as hypotenusa, the horizontal distance to the bow base
-would be
-  cos(theta_r) = x_r / h_r
-  x_r = h_r * cos(theta_r)
-      = h_r * 0.710799
-      = [0.497559..0.824527]km
-
-And from this, we can compute height in km
-  y_r = x_r * tan(theta_r)
-      = x_r * 0.989582
-      = [0.497559..0.824527] * 0.989582
-      = [0.492375..0.815937]km
-
-Finally, the distance to the pot of gold, which is the SAME to all
-points in the bow, is therefore h_r = [0.7..1.16]km
 
 ** Accounting for camera height over sea level                     :noexport:
 According to https://en.wikipedia.org/wiki/Horizon, horizon distance
