@@ -150,15 +150,19 @@ Observer height above sea level was 70m ([[http://en-gb.topographic-map.com/][da
 irrelevant, as it may only change the perceived height of the bows
 over the horizon, but not their relative configuration.
 
-~TODO~ unify angle nomenclature
-
-View angles above the horizon are $\theta_p = 39.3$ deg and $\theta_r
-= 44.7$ deg, computed the known light-eye droplet reflection angle
-$42$ and the sun and reflection elevations $+-2.7$. Reflection
-triangle angles are $A=2.7$, $B=135.3$ and $C=42$.
+The diagram below shows Sun/primary bow data in orange, and reflection
+bow data in blue. Reflection triangle angles are $A=2.7$, $B=135.3$
+and $C=42$.
 
 #+ATTR_HTML: :alt Angles :width 100%
 [[../img/Rainbow/Rainbow_Angles.svg]]
+
+and zooming on the observer-horizon-bow triangles, view angles above
+the horizon are $\theta_p = 39.3$ deg and $\theta_r = 44.7$ deg are
+computed from the known light-eye droplet reflection angle $42$ and
+the Sun and reflection elevations $\alpha_p=-2.7$ and $\alpha_r=2.7$.
+#+ATTR_HTML: :alt Distance and Height :width 50%
+[[../img/Rainbow/Rainbow_Angles_Zoomed.svg]]
 
 Observer distances along the horizon (x-axis) to the primary $x_p$ and
 reflection $x_r$ bows are unknown, but assumed to be equal $x_p = x_r
@@ -211,13 +215,13 @@ Using the [[https://en.wikipedia.org/wiki/Law_of_sines][law of sines]]
   \frac{a}{\sin(A)} = \frac{b}{\sin(B)} = \frac{c}{\sin(C)}
 \]
 
-we isolate $d_r = a$ and obtain the distance range
+we isolate $d_r = a$ and obtain a distance range
 \[
 d_r = c \frac{\sin(A)}{\sin(C)} =
 [10,16.5] \times 0.0704 = [0.7,1.16] \text{km}
 \]
 
-and using $d_r$ as a right triangle hypotenuse we obtain the height range
+and using $d_r$ and the view angle $\theta_r$ we obtain a height range
 
 \[ y_r = d_r \sin(\theta_r) = [0.7,1.16] \times 0.703 = [0.492,0.816] \text{km} \]
 
