@@ -146,10 +146,6 @@ pixels one by one, I promise.
 
 *** Identifying a reflection bow from known angles and heights
 
-Observer height above sea level was 70m ([[http://en-gb.topographic-map.com/][data]]) and can be considered
-irrelevant, as it may only change the perceived height of the bows
-over the horizon, but not their relative configuration.
-
 The diagram below shows Sun/primary bow data in orange, and reflection
 bow data in blue. Reflection triangle angles are $A=2.7$, $B=135.3$
 and $C=42$.
@@ -157,8 +153,8 @@ and $C=42$.
 #+ATTR_HTML: :alt Angles :width 100%
 [[../img/Rainbow/Rainbow_Angles.svg]]
 
-and zooming on the observer-horizon-bow triangles, view angles above
-the horizon are $\theta_p = 39.3$ deg and $\theta_r = 44.7$ deg are
+The next diagrams zooms on the observer-horizon-bow triangles. View
+angles above the horizon are $\theta_p = 39.3$ and $\theta_r = 44.7$,
 computed from the known light-eye droplet reflection angle $42$ and
 the Sun and reflection elevations $\alpha_p=-2.7$ and $\alpha_r=2.7$.
 #+ATTR_HTML: :alt Distance and Height :width 50%
@@ -198,17 +194,18 @@ reconsider.
 
 *** <<QUESTION>> How +high+ *far* is the rainbow?
 
-It turns out that with the data we have it's easier to first compute
-the observer distance to the rainbow $d_r$, rather than its height
-$y_r$ over the horizon... Which is interesting, because the distance
-to the rainbow cannot be computed for a single primary bow, in
-general. The reason is that it could be *anywhere* along the viewing
-direction, and for a single bow we have no additional data to
-triangulate its height (details [[https://www.atoptics.co.uk/fz439.hth][here]]).
+From the reconstructed picture we know the bow heights in /pixels/,
+but not in /meters/. It turns out that with the data we have it's
+easier to first compute the observer distance to the rainbow $d_r$,
+rather than its height $y_r$ over the horizon... This is worth
+mentioning because, in general, the distance to a single primary bow
+cannot be known: it could be anywhere along the viewing direction, and
+we have no additional data required to triangulate its height (details
+[[https://www.atoptics.co.uk/fz439.hth][here]]).
 
-Fortunately, we know the distance range to the water reflection
-$c=[10,16.5]\text{km}$, so we can compute the height of the reflection
-bow $y_r$ as follows.
+Fortunately, we know the distance range to the water reflection that
+causes the reflection bow $c=[10,16.5]\text{km}$, so we can compute
+its height $y_r$ as follows.
 
 Using the [[https://en.wikipedia.org/wiki/Law_of_sines][law of sines]]
 \[
@@ -233,6 +230,10 @@ finally convinced: this was a reflection rainbow, and my lost keys
 were under the streetlight.
 
 ** Accounting for camera height over sea level                     :noexport:
+Observer height above sea level was 70m ([[http://en-gb.topographic-map.com/][data]]) and can be considered
+irrelevant, as it may only change the perceived height of the bows
+over the horizon, but not their relative configuration.
+
 According to https://en.wikipedia.org/wiki/Horizon, horizon distance
 is d = 3.57*sqrt(h) (d in km, h in meters), so at h=70m above the sea
 level d = 30km, QUITE far away, so FoF sure falls inside it, and
