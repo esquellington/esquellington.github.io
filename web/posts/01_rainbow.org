@@ -247,7 +247,7 @@ farthest FoF border), so d = 113km, not far enough for the west coast
 
 * References
 - The [[https://atoptics.co.uk/][Atmospheric Optics]] website is a great reference for learning
-  about rainbows and other phenomena
+  about rainbows and other phenomena.
 - The Wikipedia entry on [[https://en.wikipedia.org/wiki/Rainbow][Rainbow]] is pretty exhaustive, I've linked a
   few pictures from there.
 - This paper [[https://cs.dartmouth.edu/~wjarosz/publications/sadeghi11physically.html][Physically-based simulation of rainbows]] explains and

@@ -19,7 +19,7 @@
 (TODO copy data from https://www.cs.upc.edu/~ocivit/)
 
 Thesis
-- [[https://www.cs.upc.edu/~ocivit/misc/Thesis-Digital.pdf][Robust Interactive Simulation of Deformable Solids with Detailed Geometry using Corotational FEM]] ([[https://www.cs.upc.edu/~ocivit/slides/SlidesThesis.pdf][slides]])
+- [[https://www.cs.upc.edu/~ocivit/misc/Thesis-Digital.pdf]["Robust Interactive Simulation of Deformable Solids with Detailed Geometry using Corotational FEM"]] ([[https://www.cs.upc.edu/~ocivit/slides/SlidesThesis.pdf][slides]])
 
 Papers
 - Civit-Flores, O. and Susín, A. (2014),
