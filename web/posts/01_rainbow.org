@@ -14,7 +14,7 @@ intersect...  there was definitely something else going on, so I
 started reading to find out exactly what. It was a fun trip and I
 ended up with satisfying answer ([[So, what did I see?][spoiler]]) and a new [[QUESTION][question]].
 
-/(NB: All inline pictures are mine)/
+/(NB: All pictures mine unless source explicitly stated)/
 
 * Rain-bows-tiary
 
@@ -26,20 +26,21 @@ classify the one in the picture above.
 A single *primary* bow can be seen when sunlight rays are refracted
 once inside rain droplets, split into different wavelengths (colours)
 and travel towards the observer standing between the Sun and the
-rainbow. Rays are refracted around /42 degrees/ downwards. More
-details [[https://www.atoptics.co.uk/rainbows/primary.htm][here]].
+rainbow. Rays are exit the droplet /42 degrees/ downwards from the
+original sunlight direction, as depicted below (Source: [[https://upload.wikimedia.org/wikipedia/commons/7/70/Rainbow1.svg][Wikipedia Commons]])
 
-~TODO~ side diagram of single reflection inside spherical droplet and angles
+#+ATTR_HTML: :alt Refraction and reflection in a raindrop :width 50%
+https://upload.wikimedia.org/wikipedia/commons/7/70/Rainbow1.svg
 
 ** Concentric rainbows
 Single rainbows are awesome on their own, but sometimes they're
 accompained by additional concentric bows:
-- A *secondary* bow can appear around the primary one, caused by extra
-  refractions of light inside rain doplets. The secondary bow is
-  concentric to primary one, appears outside and is significantly
-  fainter. The secondary bow colors are reversed. Primary + secondary
-  form the relatively common "double rainbow" that everybody
-  loves. More details [[https://www.atoptics.co.uk/rainbows/sec.htm][here]].
+- A *secondary* bow can appear around the primary one, caused by a
+  second refraction of sunlight inside rain doplets. The secondary bow
+  is concentric to primary one, appears approximately /10 degrees/
+  outside, is significantly fainter and its colors are
+  reversed. Primary + secondary form the relatively common "double
+  rainbow" that everybody loves. More details [[https://www.atoptics.co.uk/rainbows/sec.htm][here]].
 - Supernumerary bows can appear adjacent to the inside of any bow and
   seem to repeat the same color pattern, but compressed. They are
   caused by lightwave interference, it seems, which is very awesome
@@ -60,9 +61,6 @@ the observer, and calm enough for sunlight to reflect in a coherent
 direction instead of scattering. The reflection bow is not concentric,
 and appears above the primary one. More details [[https://www.atoptics.co.uk/rainbows/bowim6.htm][here]].
 
-~TODO~ side diagram of primary + reflection ray trajectories inside
-spherical droplets at 2 different heights/angles to same observer
-
 ** Twinned rainbows
 Twinned rainbows are very rare, and apparently not yet fully
 understood. A possible explanation is that they're primary bows that
@@ -71,6 +69,12 @@ become non-spherical under the effect of air friction, and refract
 light in a slightly different direction, so the rays that reach the
 observer come from slightly above/below the primary bow. More details
 [[https://www.atoptics.co.uk/rainbows/bowim28.htm][here]].
+
+The picture below shows a twinned primary bow and secondary bow above
+it (Source: [[https://commons.wikimedia.org/wiki/File:Alexander%E2%80%99s_band_will_1.jpg][Wikimedia Commons]])
+
+#+ATTR_HTML: :alt Twinned Rainbow :width 90%
+https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/Alexander%E2%80%99s_band_will_1.jpg/800px-Alexander%E2%80%99s_band_will_1.jpg
 
 * So, what did I see?
 Given that the 2 bows in my picture were not concentric they could
@@ -100,10 +104,10 @@ I unitaterally decided had to answer these 2 questions:
    time?/
 
 The first one was relatively easy, I knew that the Firth of Forth was
-somewhere behind the camera, but not exactly where or at what
-distance. The second one was harder, because the bow separation
-changes along the arcs. We'd ideally use vertical separation at the
-apex, but the bows were far from complete, they faded out outside the
+somewhere behind the camera, but not exactly where, so I had to find
+out. The second one was harder, because the bow separation changes
+along the arcs. We'd ideally analyze the vertical separation at the
+apex, but the bows were not complete, they faded out outside the
 picture.
 
 *** Sun, Camera and Water
@@ -146,17 +150,17 @@ pixels one by one, I promise.
 
 *** Identifying a reflection bow from known angles and heights
 
-The diagram below shows Sun/primary bow data in orange, and reflection
-bow data in blue. Reflection triangle angles are $A=2.7$, $B=135.3$
-and $C=42$.
+The diagram below shows primary bow data in orange and reflection bow
+data in blue. Reflection triangle angles are $A=2.7$, $B=135.3$, $C=42$.
 
 #+ATTR_HTML: :alt Angles :width 100%
 [[../img/Rainbow/Rainbow_Angles.svg]]
 
-The next diagrams zooms on the observer-horizon-bow triangles. View
-angles above the horizon are $\theta_p = 39.3$ and $\theta_r = 44.7$,
-computed from the known light-eye droplet reflection angle $42$ and
-the Sun and reflection elevations $\alpha_p=-2.7$ and $\alpha_r=2.7$.
+The next diagram zooms on the observer-horizon-bow triangles on the
+right of the observer (origin). View angles above the horizon are
+$\theta_p = 39.3$ and $\theta_r = 44.7$, computed from the known
+light-eye droplet reflection angle $42$ and the Sun and reflection
+elevations $\alpha_p=-2.7$ and $\alpha_r=2.7$.
 #+ATTR_HTML: :alt Distance and Height :width 50%
 [[../img/Rainbow/Rainbow_Angles_Zoomed.svg]]
 
@@ -179,16 +183,16 @@ we can get rid of the unknown $x$ easily by dividing the 2 equations
 and operating we arrive at $1.209 \approx 1.173$ with a relative error
 of $3\%$, or, phrased in positive terms: an accuracy of $97\%$, not too bad!
 
-*** Is this conclusive, can we improve it?
+*** Are we done? I don't think so...
 
 We have our answer, but it's slightly unsatisfying. In particular, we
 used known angles, but we did not need to consider the distance to the
 water at all... Maybe we can use it to validate or disprove the
-conclusion we arrived?
+conclusion?
 
 One idea is to compute /how high is the rainbow?/ and verify the
 answer is reasonable. Clouds at Edinburgh's latitude extend between
-roughly 500m to 10km above the sea (details later). If we compute the
+roughly 500m to 10km above the sea (details later). If we computed the
 height and it's significantly outside that range we'd need to
 reconsider.
 
@@ -196,7 +200,7 @@ reconsider.
 
 From the reconstructed picture we know the bow heights in /pixels/,
 but not in /meters/. It turns out that with the data we have it's
-easier to first compute the observer distance to the rainbow $d_r$,
+easier to first compute the observer distance to the rainbow $d_r$
 rather than its height $y_r$ over the horizon... This is worth
 mentioning because, in general, the distance to a single primary bow
 cannot be known: it could be anywhere along the viewing direction, and
@@ -222,12 +226,12 @@ and using $d_r$ and the view angle $\theta_r$ we obtain a height range
 
 \[ y_r = d_r \sin(\theta_r) = [0.7,1.16] \times 0.703 = [0.492,0.816] \text{km} \]
 
-This range between roughly 500m to 800m is very much within the
-expected values for low clouds, from 500m to 3km, according
-https://www.weather.gov/key/low_clouds, and the clouds in the picture
-did look pretty low indeed, as usual in Edinburgh, so overall I'm
-finally convinced: this was a reflection rainbow, and my lost keys
-were under the streetlight.
+This range between roughly 500m to 800m is within the expected values
+for low clouds, from 500m to 3km, according
+https://www.weather.gov/key/low_clouds. The clouds in the picture did
+look pretty low indeed, as usual in Edinburgh, so I'm finally
+convinced: I saw a reflection rainbow, and my lost keys were under the
+streetlight.
 
 ** Accounting for camera height over sea level                     :noexport:
 Observer height above sea level was 70m ([[http://en-gb.topographic-map.com/][data]]) and can be considered
@@ -243,13 +247,9 @@ farthest FoF border), so d = 113km, not far enough for the west coast
 
 * References
 - The [[https://atoptics.co.uk/][Atmospheric Optics]] website is a great reference for learning
-  about the Rainbows and other phenomena, I would have never reached
-  the bottom of this rabbit hole without it.
+  about rainbows and other phenomena
+- The Wikipedia entry on [[https://en.wikipedia.org/wiki/Rainbow][Rainbow]] is pretty exhaustive, I've linked a
+  few pictures from there.
 - This paper [[https://cs.dartmouth.edu/~wjarosz/publications/sadeghi11physically.html][Physically-based simulation of rainbows]] explains and
-  reproduces several kinds of rainbows, including secondary bows,
-  supernumeraries and twinned bows. It's worth a read.
-* TODO PENDING                                                     :noexport:
-** TODO Diagrams
-** TODO Unify angle/length names to a,b,c,A,B,C
-- greek letters are fine but why bother
-- also use a_r,b_r,c_r with subindexes
+  computationally reproduces several kinds of rainbows, including
+  secondary bows, supernumeraries and twinned bows. It's worth a read.
