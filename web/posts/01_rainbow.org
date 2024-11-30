@@ -93,8 +93,6 @@ how I arrived at this conclusion
 
 ** Method
 
-~TODO~ REUSE previous diagram with primary+reflection, compact angle
-
 I unitaterally decided had to answer these 2 questions:
 1. /Is there a water surface where the Sun may have reflected?/
 2. /Does the separation between primary and reflection bows in the
@@ -152,19 +150,23 @@ Observer height above sea level was 70m ([[http://en-gb.topographic-map.com/][da
 irrelevant, as it may only change the perceived height of the bows
 over the horizon, but not their relative configuration.
 
+~TODO~ unify angle nomenclature
+
 View angles above the horizon are $\theta_p = 39.3$ deg and $\theta_r
-= 44.7$ deg.
+= 44.7$ deg, computed the known light-eye droplet reflection angle
+$42$ and the sun and reflection elevations $+-2.7$. Reflection
+triangle angles are $A=2.7$, $B=135.3$ and $C=42$.
 
 #+ATTR_HTML: :alt Angles :width 100%
 [[../img/Rainbow/Rainbow_Angles.svg]]
 
-Observer distances along the horizon to the primary $x_p$ and
+Observer distances along the horizon (x-axis) to the primary $x_p$ and
 reflection $x_r$ bows are unknown, but assumed to be equal $x_p = x_r
 = x$, as they were most likely caused by the same curtain of rain
 droplets.
 
 Assuming bow apex heights in the picture are perpendicular to the
-horizon, we have 2 rectangle triangles
+horizon (y-axis), we have 2 rectangle triangles
 \begin{eqnarray*}
   \tan(\theta_r) = y_r / x \\
   \tan(\theta_p) = y_p / x
@@ -179,66 +181,56 @@ of $3\%$, or, phrased in positive terms: an accuracy of $97\%$, not too bad!
 
 *** Is this conclusive, can we improve it?
 
-We have our answer, but I found it slightly unsatisfying. In
-particular, we used known angles, but we did not need to consider the
-distance to the water at all... so maybe we can use it to validate or
-disprove the conclusion we arrived?
+We have our answer, but it's slightly unsatisfying. In particular, we
+used known angles, but we did not need to consider the distance to the
+water at all... Maybe we can use it to validate or disprove the
+conclusion we arrived?
 
 One idea is to compute /how high is the rainbow?/ and verify the
 answer is reasonable. Clouds at Edinburgh's latitude extend between
-roughly 500m to 10km above the sea (details later) so if we compute a
-height that is significantly outside that range, it'd be suspicious.
+roughly 500m to 10km above the sea (details later). If we compute the
+height and it's significantly outside that range we'd need to
+reconsider.
 
 *** <<QUESTION>> How +high+ *far* is the rainbow?
 
-But it turns out that with the data we have it's easier to first
-compute the observer distance to the rainbow, rather than its height
-over the horizon... Whick is interesting, because the distance to the
-rainbow cannot be computed for a single primary bow, in general. The
-reason is that it could be *anywhere* along the viewing direction, and
-for a single bow we have no additional data to triangulate its height
-(details [[https://www.atoptics.co.uk/fz439.hth][here]]). Fortunately, we know the distance to the water
-reflection, so we can compute the height of the (supposed) reflection
-bow, but not the primary one.
+It turns out that with the data we have it's easier to first compute
+the observer distance to the rainbow $d_r$, rather than its height
+$y_r$ over the horizon... Which is interesting, because the distance
+to the rainbow cannot be computed for a single primary bow, in
+general. The reason is that it could be *anywhere* along the viewing
+direction, and for a single bow we have no additional data to
+triangulate its height (details [[https://www.atoptics.co.uk/fz439.hth][here]]).
 
-Knowns (reflection bow)
-  Angles A=2.7, C=42, B = 135.3deg
-  Distance-to-sea c = 10..16.5km, opposite to angle C
+Fortunately, we know the distance range to the water reflection
+$c=[10,16.5]\text{km}$, so we can compute the height of the reflection
+bow $y_r$ as follows.
 
-*TODO* repeat diagram with angles/lenghts vars used below
-
-Distances from observer to rainbow $h_r$, opposite to angle $A$
-
-Law of sines
+Using the [[https://en.wikipedia.org/wiki/Law_of_sines][law of sines]]
 \[
   \frac{a}{\sin(A)} = \frac{b}{\sin(B)} = \frac{c}{\sin(C)}
 \]
 
-So to find $h_r = a$ from knowns
-\[ a = c \frac{\sin(A)}{\sin(C)} = c \frac{\sin(2.7)}{\sin(42)} =
-[10..16.5] \times 0.0704 = [0.7..1.16] \text{km}
-\]
-
-And using $h_r$ as hypotenusa, the horizontal distance $x_r$ to the
-bow base would be
+we isolate $d_r = a$ and obtain the distance range
 \[
-  x_r = h_r \cos(\theta_r) = [0.7..1.16] \times 0.710 = [0.497..0.824] \text{km}
+d_r = c \frac{\sin(A)}{\sin(C)} =
+[10,16.5] \times 0.0704 = [0.7,1.16] \text{km}
 \]
 
-And from this, we can compute height $y_r$ in km
-\[
-  y_r = h_r \sin(\theta_r) = [0.7..1.16] \times 0.703 = [0.492,0.816] \text{km}
-\]
+and using $d_r$ as a right triangle hypotenuse we obtain the height range
 
-This height range, roughly 500m to 800m, is very much within the
+\[ y_r = d_r \sin(\theta_r) = [0.7,1.16] \times 0.703 = [0.492,0.816] \text{km} \]
+
+This range between roughly 500m to 800m is very much within the
 expected values for low clouds, from 500m to 3km, according
 https://www.weather.gov/key/low_clouds, and the clouds in the picture
-look pretty low indeed, so I'm finally convinced: this was a
-reflection rainbow, and my lost keys were under the streetlight.
+did look pretty low indeed, as usual in Edinburgh, so overall I'm
+finally convinced: this was a reflection rainbow, and my lost keys
+were under the streetlight.
 
 ** Accounting for camera height over sea level                     :noexport:
 According to https://en.wikipedia.org/wiki/Horizon, horizon distance
-is d = 3.57*sqrt(h) (d in km, h in meters), so at h=70m above esea
+is d = 3.57*sqrt(h) (d in km, h in meters), so at h=70m above the sea
 level d = 30km, QUITE far away, so FoF sure falls inside it, and
 actually, we should worry about horizon distance at rainbow height,
 which may be quite far up (h=1000m approx in picture, if reflection at
