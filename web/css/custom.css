@@ -1,11 +1,21 @@
-/* Change accent colour */
+/* Change accent in light scheme */
 :root {
-    --accent: turquoise;
+    --accent: orange;
+    --accent-hover: turquoise;
 }
 
+/* Change accent in dark scheme */
 @media (prefers-color-scheme: dark) {
-  img, video {
-    /* Remove img transparency, otherwise pictures are unnecessarily dimmed */
+    :root {
+        --accent: turquoise;
+        --accent-hover: orange;
+    }
+}
+
+/* Change media params (light+dark) */
+img, video {
+    /* Remove img transparency, otherwise pictures are
+       unnecessarily dimmed (in dark scheme) */
     opacity: 1.0;
 
     /* Center img by default, otherwise they're left-aligned. Width still
@@ -13,11 +23,10 @@
     display: block;
     margin-left: auto;
     margin-right: auto;
-  }
 }
 
 /* Center tables by default, otherwise they're left-aligned */
 table {
-  margin-left: auto;
-  margin-right: auto;
+    margin-left: auto;
+    margin-right: auto;
 }

@@ -15,10 +15,16 @@
   */
   .icon { width: 2em;
           height: 2em;
-          fill: white;
+          fill: black;
           vertical-align: -0.25em; }
   /* Change icon color when hovered */
-  .icon:hover { fill: orange; }
+  .icon:hover { fill: turquoise; }
+
+  /* Change icon fill+hover in dark scheme */
+  @media (prefers-color-scheme: dark) {
+      .icon { fill: white; }
+      .icon:hover { fill: orange; }
+  }
 
 </style>
 
