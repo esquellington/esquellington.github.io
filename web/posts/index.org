@@ -16,9 +16,7 @@
 
 * Research
 
-(TODO copy data from https://www.cs.upc.edu/~ocivit/)
-
-Thesis
+Thesis (2016)
 - [[https://www.cs.upc.edu/~ocivit/misc/Thesis-Digital.pdf]["Robust Interactive Simulation of Deformable Solids with Detailed Geometry using Corotational FEM"]] ([[https://www.cs.upc.edu/~ocivit/slides/SlidesThesis.pdf][slides]])
 
 Papers
@@ -34,8 +32,12 @@ Posters
   for Implicit Corotational FEM"]] in Symposium on Computer Animation
   2014 ([[https://www.cs.upc.edu/~ocivit/videos/DCNLFEM-Final-HD.avi][video]])
 
-Projecte de Tesi (DEA)
+Thesis Project (2008)
 - [[https://www.cs.upc.edu/~ocivit/PdT/dea.pdf]["Interactive Simulation of Coupled Mechanical Systems"]] ([[https://www.cs.upc.edu/~ocivit/PdT/Presentacio_PdT_UPC.pdf][slides]])
+
+** TODO Research files                                             :noexport:
+- Files are hosted at https://www.cs.upc.edu/~ocivit/, for now, but
+  also available locally in Dropbox, may upload to /web/data eventually
 
 * MAYBE                                                            :noexport:
 [[file:sitemap.org][Site Map]]
