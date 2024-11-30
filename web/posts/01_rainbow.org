@@ -251,3 +251,8 @@ farthest FoF border), so d = 113km, not far enough for the west coast
 - This paper [[https://cs.dartmouth.edu/~wjarosz/publications/sadeghi11physically.html][Physically-based simulation of rainbows]] explains and
   reproduces several kinds of rainbows, including secondary bows,
   supernumeraries and twinned bows. It's worth a read.
+* TODO PENDING                                                     :noexport:
+** TODO Diagrams
+** TODO Unify angle/length names to a,b,c,A,B,C
+- greek letters are fine but why bother
+- also use a_r,b_r,c_r with subindexes
