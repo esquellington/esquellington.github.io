@@ -34,14 +34,16 @@ details [[https://www.atoptics.co.uk/rainbows/primary.htm][here]].
 ** Concentric rainbows
 Single rainbows are awesome on their own, but sometimes they're
 accompained by additional concentric bows:
-- A *secondary* bow is caused by extra refractions of light inside
-  rain doplets. The secondary bow is concentric to primary one,
-  appears outside and is significantly fainter. The secondary bow
-  colors are reversed. Primary + secondary form the relatively
-  common "double rainbow" that everybody loves. More details [[https://www.atoptics.co.uk/rainbows/sec.htm][here]].
+- A *secondary* bow can appear around the primary one, caused by extra
+  refractions of light inside rain doplets. The secondary bow is
+  concentric to primary one, appears outside and is significantly
+  fainter. The secondary bow colors are reversed. Primary + secondary
+  form the relatively common "double rainbow" that everybody
+  loves. More details [[https://www.atoptics.co.uk/rainbows/sec.htm][here]].
 - Supernumerary bows can appear adjacent to the inside of any bow and
   seem to repeat the same color pattern, but compressed. They are
-  caused by lightwave interference. More detals [[https://www.atoptics.co.uk/rainbows/supers.htm][here]].
+  caused by lightwave interference, it seems, which is very awesome
+  but we won't dig any deeper for now. More detals [[https://www.atoptics.co.uk/rainbows/supers.htm][here]].
 
 The picture below shows a faint secondary bow above the primary one,
 and part of a supernumerary right below the primary violet shade.
@@ -82,13 +84,12 @@ twinned bows seem to be, and how hard it would be to prove that it was
 a twinned bow instead/.
 
 So yeah, I essentially looked for my keys under the [[https://en.wikipedia.org/wiki/Streetlight_effect][streetlight]], not
-where I had probably lost them.
-
-The good news is that using my picture, some basic trigonometry and
-publically available maps and astronomical data, I arrived at a pretty
-convincing answer: The top bow in the picture matches a predicted
-*reflection bow* with surprising accuracy (97%), so it most likely
-was. Below I'll detail how I arrived at this conclusion
+where I had probably lost them. The good news is that using my
+picture, some basic trigonometry and publically available maps and
+astronomical data, I arrived at a pretty convincing answer: The top
+bow in the picture matches a predicted *reflection bow* with
+surprising accuracy (97%), so it most likely was. Below I'll detail
+how I arrived at this conclusion
 
 ** Method
 
@@ -97,8 +98,8 @@ was. Below I'll detail how I arrived at this conclusion
 I unitaterally decided had to answer these 2 questions:
 1. /Is there a water surface where the Sun may have reflected?/
 2. /Does the separation between primary and reflection bows in the
-   picture match the expected value for given the Sun elevation at
-   that time?/
+   picture match the expected value, given the Sun elevation at that
+   time?/
 
 The first one was relatively easy, I knew that the Firth of Forth was
 somewhere behind the camera, but not exactly where or at what
@@ -107,7 +108,7 @@ changes along the arcs. We'd ideally use vertical separation at the
 apex, but the bows were far from complete, they faded out outside the
 picture.
 
-*** Sun, Camera aaaaaaand Water!
+*** Sun, Camera and Water
 
 I was lucky to find the [[https://www.suncalc.org/#/55.9316,-3.1718,11/2019.05.21/21:00/1/3][SunCalc]] site, and used it to generate a map of
 the area that includes the Sun configuration relative to the camera
@@ -179,38 +180,36 @@ of $3\%$, or, phrased in positive terms: an accuracy of $97\%$, not too bad!
 *** Is this conclusive, can we improve it?
 
 We have our answer, but I found it slightly unsatisfying. In
-particular, we didn't use the distance to the water $c = [10,16.5]$
-km. Could we use it to validate or disprove the conclusion?
+particular, we used known angles, but we did not need to consider the
+distance to the water at all... so maybe we can use it to validate or
+disprove the conclusion we arrived?
 
 One idea is to compute /how high is the rainbow?/ and verify the
-answer is reasonable.
-
-Let's get the answer first and then analyze it.
+answer is reasonable. Clouds at Edinburgh's latitude extend between
+roughly 500m to 10km above the sea (details later) so if we compute a
+height that is significantly outside that range, it'd be suspicious.
 
 *** <<QUESTION>> How +high+ *far* is the rainbow?
 
-It turns out that with the data we have, it's a lot easier to compute
-"How far is the rainbow", than its height.
-
-It's also interesting that this question cannot be answered for a
-single rainbow, because it can be *anywhere* along the viewing
-direction (details [[https://www.atoptics.co.uk/fz439.hth][here]]).
-
-Now, a fun sideffect of knowing the approximate distance from the
-camera to the water reflection is that it allows computing the
-distance to the rainbow itself, which is NOT possible with a regular
-bow.
-
-This also wonders "how far
-is the rainbow", and explains there is no answer for simple bows.
+But it turns out that with the data we have it's easier to first
+compute the observer distance to the rainbow, rather than its height
+over the horizon... Whick is interesting, because the distance to the
+rainbow cannot be computed for a single primary bow, in general. The
+reason is that it could be *anywhere* along the viewing direction, and
+for a single bow we have no additional data to triangulate its height
+(details [[https://www.atoptics.co.uk/fz439.hth][here]]). Fortunately, we know the distance to the water
+reflection, so we can compute the height of the (supposed) reflection
+bow, but not the primary one.
 
 Knowns (reflection bow)
   Angles A=2.7, C=42, B = 135.3deg
   Distance-to-sea c = 10..16.5km, opposite to angle C
 
+*TODO* repeat diagram with angles/lenghts vars used below
+
 Distances from observer to rainbow $h_r$, opposite to angle $A$
 
-Law of sines:
+Law of sines
 \[
   \frac{a}{\sin(A)} = \frac{b}{\sin(B)} = \frac{c}{\sin(C)}
 \]
@@ -231,10 +230,11 @@ And from this, we can compute height $y_r$ in km
   y_r = h_r \sin(\theta_r) = [0.7..1.16] \times 0.703 = [0.492,0.816] \text{km}
 \]
 
-Is this height range, roughly 500m to 800m, reasonable? It's very much
-within the expected height for low clouds, from 500m to 3km according
-to this random website https://www.weather.gov/key/low_clouds, so yes,
-I'm finally convinced!
+This height range, roughly 500m to 800m, is very much within the
+expected values for low clouds, from 500m to 3km, according
+https://www.weather.gov/key/low_clouds, and the clouds in the picture
+look pretty low indeed, so I'm finally convinced: this was a
+reflection rainbow, and my lost keys were under the streetlight.
 
 ** Accounting for camera height over sea level                     :noexport:
 According to https://en.wikipedia.org/wiki/Horizon, horizon distance
