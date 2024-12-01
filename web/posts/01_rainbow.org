@@ -24,10 +24,11 @@ classify the one in the picture above.
 
 ** Single rainbow
 A single *primary* bow can be seen when sunlight rays are refracted
-once inside rain droplets, split into different wavelengths (colours)
-and travel towards the observer standing between the Sun and the
+once inside raindrops, split into different wavelengths (colours) and
+travel towards the observer standing between the Sun and the
 rainbow. Rays are exit the droplet /42 degrees/ downwards from the
-original sunlight direction, as depicted below (Source: [[https://upload.wikimedia.org/wikipedia/commons/7/70/Rainbow1.svg][Wikipedia Commons]])
+original sunlight direction, as depicted below (Source: [[https://upload.wikimedia.org/wikipedia/commons/7/70/Rainbow1.svg][Wikipedia
+Commons]])
 
 #+ATTR_HTML: :alt Refraction and reflection in a raindrop :width 50%
 https://upload.wikimedia.org/wikipedia/commons/7/70/Rainbow1.svg
@@ -127,10 +128,11 @@ question 2:
   $[10\text{km},16.5\text{km}]$ behind the camera, the Firth of Forth.
 
 Assuming a perfect mirror water surface, we can infer that if the Sun
-rays that caused the primary bow hit the rain droplets with an angle
-of $\alpha_{p} = -2.7$ deg, then their specular reflection on the
-water that caused the reflection bow hit the rain droplets at an angle
-of $\alpha_{r} = +2.7$ deg.
+rays that caused the primary bow hit the raindrops with an angle of
+${\color[RGB]{247,189,0} \alpha_p} = -2.7$ deg, then their specular
+reflection on the water that caused the reflection bow hit the rain
+droplets at an angle of ${\color[RGB]{0,126,225} \alpha_r} = +2.7$
+deg.
 
 *** Reconstructing the full bows from a partial picture
 
@@ -144,9 +146,10 @@ Science.
 #+ATTR_HTML: :alt Reconstructed bows :width 90%
 [[../img/Rainbow/Rainbow-2019-05-22-RECONSTRUIT.png]]
 
-From this picture I computed the heights in pixels: $y_p = 242$ pixels
-(primary) and $y_r = 284$ pixels (reflection). I did not count the
-pixels one by one, I promise.
+From this picture I computed the heights in pixels:
+${\color[RGB]{247,189,0} y_p} = 242$ px (primary) and
+${\color[RGB]{0,126,225} y_r} = 284$ px (reflection). I did not count
+the pixels one by one, I promise.
 
 *** Identifying a reflection bow from known angles and heights
 
@@ -158,30 +161,33 @@ data in blue. Reflection triangle angles are $A=2.7$, $B=135.3$, $C=42$.
 
 The next diagram zooms on the observer-horizon-bow triangles on the
 right of the observer (origin). View angles above the horizon are
-$\theta_p = 39.3$ and $\theta_r = 44.7$, computed from the known
+${\color[RGB]{247,189,0} \theta_p} = 39.3$ and
+${\color[RGB]{0,126,225} \theta_r} = 44.7$, computed from the known
 light-eye droplet reflection angle $42$ and the Sun and reflection
-elevations $\alpha_p=-2.7$ and $\alpha_r=2.7$.
+elevations ${\color[RGB]{247,189,0} \alpha_p} = -2.7$ and
+${\color[RGB]{0,126,225} \alpha_r} =2.7$.
 #+ATTR_HTML: :alt Distance and Height :width 50%
 [[../img/Rainbow/Rainbow_Angles_Zoomed.svg]]
 
-Observer distances along the horizon (x-axis) to the primary $x_p$ and
-reflection $x_r$ bows are unknown, but assumed to be equal $x_p = x_r
-= x$, as they were most likely caused by the same curtain of rain
-droplets.
+Observer distances along the horizon (x-axis) to the primary and
+reflection bows are unknown, but assumed to be equal
+${\color[RGB]{247,189,0} x_p} = {\color[RGB]{0,126,225} x_r} = x$,
+as they were most likely caused by the same curtain of raindrops.
 
 Assuming bow apex heights in the picture are perpendicular to the
 horizon (y-axis), we have 2 rectangle triangles
 \begin{eqnarray*}
-  \tan(\theta_r) = y_r / x \\
-  \tan(\theta_p) = y_p / x
+  \tan( {\color[RGB]{0,126,225} \theta_r} ) = {\color[RGB]{0,126,225} y_r} / x \\
+  \tan( {\color[RGB]{247,189,0} \theta_p} ) = {\color[RGB]{247,189,0} y_p} / x
 \end{eqnarray*}
 
 we can get rid of the unknown $x$ easily by dividing the 2 equations
 
-\[\frac{\tan(\theta_r)}{\tan(\theta_p)} = \frac{y_r}{y_p}\]
+\[\frac{\tan( {\color[RGB]{0,126,225} \theta_r} )}{\tan( {\color[RGB]{247,189,0} \theta_p} )} =
+\frac{ {\color[RGB]{0,126,225} y_r} }{ {\color[RGB]{247,189,0} y_p} }\]
 
 and operating we arrive at $1.209 \approx 1.173$ with a relative error
-of $3\%$, or, phrased in positive terms: an accuracy of $97\%$, not too bad!
+of $3\%$ or an accuracy of $97\%$, not too bad!
 
 *** Are we done? I don't think so...
 
@@ -200,8 +206,9 @@ reconsider.
 
 From the reconstructed picture we know the bow heights in /pixels/,
 but not in /meters/. It turns out that with the data we have it's
-easier to first compute the observer distance to the rainbow $d_r$
-rather than its height $y_r$ over the horizon... This is worth
+easier to first compute the observer distance to the rainbow
+${\color[RGB]{0,126,225} d_r}$ rather than its height
+${\color[RGB]{0,126,225} y_r}$ over the horizon... This is worth
 mentioning because, in general, the distance to a single primary bow
 cannot be known: it could be anywhere along the viewing direction, and
 we have no additional data required to triangulate its height (details
@@ -209,27 +216,31 @@ we have no additional data required to triangulate its height (details
 
 Fortunately, we know the distance range to the water reflection that
 causes the reflection bow $c=[10,16.5]\text{km}$, so we can compute
-its height $y_r$ as follows.
+its height ${\color[RGB]{0,126,225} y_r}$ as follows.
 
 Using the [[https://en.wikipedia.org/wiki/Law_of_sines][law of sines]]
 \[
   \frac{a}{\sin(A)} = \frac{b}{\sin(B)} = \frac{c}{\sin(C)}
 \]
 
-we isolate $d_r = a$ and obtain a distance range
+we isolate ${\color[RGB]{0,126,225} d_r} = a$ and obtain a distance range
 \[
-d_r = c \frac{\sin(A)}{\sin(C)} =
+{\color[RGB]{0,126,225} d_r} = c \frac{\sin(A)}{\sin(C)} =
 [10,16.5] \times 0.0704 = [0.7,1.16] \text{km}
 \]
 
-and using $d_r$ and the view angle $\theta_r$ we obtain a height range
+and using ${\color[RGB]{0,126,225} d_r}$ and the view angle
+${\color[RGB]{0,126,225} \theta_r}$ we obtain a height range
 
-\[ y_r = d_r \sin(\theta_r) = [0.7,1.16] \times 0.703 = [0.492,0.816] \text{km} \]
+\[
+{\color[RGB]{0,126,225} y_r}
+= {\color[RGB]{0,126,225} d_r}\sin({\color[RGB]{0,126,225} \theta_r}) = [0.7,1.16] \times 0.703
+= [0.492,0.816] \text{km}
+\]
 
 This range between roughly 500m to 800m is within the expected values
-for low clouds, from 500m to 3km, according
-https://www.weather.gov/key/low_clouds. The clouds in the picture did
-look pretty low indeed, as usual in Edinburgh, so I'm finally
+for low clouds, from 500m to 3km ([[https://www.weather.gov/key/low_clouds][details]]). The clouds in the picture
+did look pretty low indeed, as usual in Edinburgh, so I'm finally
 convinced: I saw a reflection rainbow, and my lost keys were under the
 streetlight.
 
