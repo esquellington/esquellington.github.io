@@ -129,6 +129,11 @@ Literary programming exercise: test AVX vs SSE vs Scalar code
 #+END_SRC
 
 #+RESULTS:
+| Running |    text-avx |   |          |
+| INT1    | -2147483648 | T | 0.414505 |
+| FLOAT1  | 134217728.0 | T | 0.670809 |
+| SIMD4   |  67108864.0 | T |  0.17682 |
+| SIMD8   |  67108864.0 | T | 0.109108 |
 
 ** TODO gnuplot PLOT RESULTS
 - Use C-c C-x C-v to display inline image

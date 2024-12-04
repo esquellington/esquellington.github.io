@@ -177,6 +177,10 @@ Couldn't we just do this in a compilation hook, similar to beardbolt?
   (setq w (get-buffer-window "*compilation*"))
   (when w
     (delete-window w)))
+* TODO Emacs * GPT https://github.com/karthink/gptel
+- Also, this blog post https://nullprogram.com/blog/2024/11/10/
+  explains how to run local LLMs using llama.cpp (supported by gptel),
+  even on CPU, or shitty GPU, consider trying
 * TODO Flycheck or Flymake?
 - Make is the default!?
 - eglot only supports Flymake?
@@ -302,7 +306,7 @@ Couldn't we just do this in a compilation hook, similar to beardbolt?
   viable for files that are part of a larger local project.
 - Works pretty well, but no SRC/ASM synchronized navigation
 - Not viable for files with local includes, I guess?
-** TODO beardbolt                                                      :WIP:
+** TODO beardbolt
 - https://github.com/joaotavora/beardbolt
 - Fork or rmsbolt that seems even better for C++, but not that active and not on
   MELPA
@@ -533,10 +537,6 @@ SHOW?
   complex templates
 **** TODO See effect of Exceptions
 - How much overhead do they add? ASM should make it apparent
-* TODO Emacs * GPT https://github.com/karthink/gptel
-- Also, this blog post https://nullprogram.com/blog/2024/11/10/
-  explains how to run local LLMs using llama.cpp (supported by gptel),
-  even on CPU, or shitty GPU, consider trying
 * TODO ORG website/blog
 - Website as collection of .org files + data
 - Landing page + menu + links + list of posts with date

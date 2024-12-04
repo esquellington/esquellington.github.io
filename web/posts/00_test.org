@@ -49,8 +49,8 @@ Inline $a = b$ formula
 Equation
 \[ \alpha \neq \beta + \gamma\]
 
-Numbered equation
-\begin{equation} \alpha = \beta \end{equation}
+Numbered equation with colors
+\begin{equation} \alpha = {\color[RGB]{247,189,0} \beta} \end{equation}
 
 ** Code
 C++ code, requires loading appropriate theme in publish.el to get nice
