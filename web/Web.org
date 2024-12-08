@@ -1,0 +1,77 @@
+#+STARTUP: indent overview
+
+* REFERENCES
+- Needs significant config https://orgmode.org/worg/org-tutorials/org-publish-html-tutorial.html
+- Video from systemcrafters https://www.youtube.com/watch?v=AfkrzFodoNw
+  - NOTES: https://systemcrafters.net/publishing-websites-with-org-mode/building-the-site/
+  - Next on how to publish automatically to github https://www.youtube.com/watch?v=za99DwdZEyg
+- Quick intro https://opensource.com/article/20/3/blog-emacs
+- Good example https://clarete.li/blog/starting-a-blog.html site is on
+  github so can be used as a ref
+* TODO org-mode website
+- Website as collection of .org files + data
+- Landing page + menu + links + list of posts with date
+- List of org-to-website options https://orgmode.org/worg/org-blog-wiki.html
+** DONE weblorg: Nice simple blog using https://emacs.love/weblorg/ --> not great, try org-publish instead
+- tried it but didn't seem to do much and it's not widely used, docs
+  are a bit obscure and I couldn't care less about the details
+** DONE ox-hugo: Seems a good alternative, less self-contained --> try to stay within Emacs/Org for evarything
+- Requires Hugo that is powerful and complex and unnecessary, so
+  ideally avoid
+- https://ox-hugo.scripter.co/
+** TODO ox-publish: Native and good enough it seems, judging from examples :WIP:
+*** DONE publish.el
+*** DONE Makefile or build.sh script
+Several options, could just eval-buffer publish.el directly, but ideally we
+want to use a clean/vanilla emacs with no init.el and strictly the
+packages desired to org->website.
+- Systemcrafters uses build.sh: emacs -Q
+- others use: emacs --batch --load publish.el --funcall org-publish-all
+*** DONE Serve site locally
+- Systemcrafters shows way to do it within Emacs IIRC, no python needed
+- simple-httpd
+- Run (use-package simple-httpd :ensure t)
+- M-x httpd-serve-directory
+- shell:firefox http://localhost:8080/
+*** DONE CSS/template/fonts/etc
+- systemcrafters uses https://simplecss.org/ that looks good enough,
+  can be served locally too, ensure no javascript and use it if so,
+  don't waste time on cosmetics!
+org-html-head "<link rel=\"stylesheet\" href=\"https://cdn.simplecss.org/simple.min.css\" />")
+**** DONE make the CSS LOCAL
+- This explains how https://opensource.com/article/20/3/blog-emacs
+*** DONE Export LaTeX formulas to html
+- works out of the box with Mathjax (remote javascript), requires
+  whitelisting JS though
+*** DONE Header + Footer
+- See https://clarete.li/blog/starting-a-blog.html, I think
+  html-preamble/postamble is what injects footer?
+- Yeah, he has header/footer specific html with icons etc
+  (fontawesome), very minimal but requires messing with generated HTML
+  it seems... maybe there's a simpler/official way already?
+- html-divs attrib also seems used sometimes to org pre/main/post as
+  this, similar to org-html-head
+  org-html-divs
+      '((preamble  "header" "top")
+        (content   "main"   "content")
+        (postamble "footer" "postamble"))
+**** DONE image --> link back to index
+**** DONE Mastodon logo+link?
+**** DONE Github logo+link?
+**** DONE Footer
+- Back to Top (anchor?)
+- Back to Index
+- Credits
+  - With Emacs+Org (links and logos?)
+  - With Simple.css (https://simplecss.org/)
+  - etc...
+**** DONE Icons
+- https://fontawesome.com
+- People seem to use fontawesome for icons, contains many of them,
+  github, email, RSS, etc...
+- Can be embedded as pure SVG, see header, good enough!
+* TODO Fancy title?
+* TODO RSS logo+link?
+- See (require 'ox-rss)
+* TODO Auto-publish to github
+- Follow https://www.youtube.com/watch?v=za99DwdZEyg
