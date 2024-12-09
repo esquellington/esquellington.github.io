@@ -446,28 +446,41 @@ SHOW?
 - BB beardbolt-mode-hook local-set-key stay after BB mode is exited, which
   interferes with C++ mode if BB redefines some keybindings (ex: hide-compilation)
 - BB keymap is correctly cleaned up on exit... so maybe just add keys to keymap?
-**** TODO [#A] Option to disable rainbows completely                :HARD:
-- bb-clear-rainbow-overlays exists, but it justs clears overlays on current
-  buffer, does not disable rainbow on successive calls, and breaks sync
-  highlight on SRC/ASM, and does not allow enabling them again
-- Ideally bb-toggle-rainbow-overlays to enable/disable
-- Ah... but bb seems to use overlays to sync regions in SRC/ASM, so we cannot
-  disable them completely, but maybe we can make them invisible?
-- Alternative mode would highlight current region very clearly, and nothing else
-***** TODO bb-current-line-face is the face used for highlight?
-- Yes it is, changing background to be bright helps, even if rainbow is not removed
-**** TODO [#A] Higher contrast selection/correspondence highlight    :MID:
-- Default is pretty hard to see, I overwrote color and it's a lot clearer
-- Ideally we'd find a "complementary hue" or similar automatically from known
-  background color that still keeps text visible at the same time
-**** TODO [#B] Function to Narrow to function/region                :HARD:
+**** TODO [#B] Option to preserve SRC/ASM point after recompilation  :MID:
+- (simpler) alternative to [[Option to Narrow to function/region]],
+  instead of narrowing we'd just keep point in the interest region
+- It's a bit annoying that recompilation resets ASM point to start of
+  file, and requires moving cursor in SRC buffer to re-sync ASM to it
+- Ideally we'd just save/restore the point, but ASM buffer will likely
+  change so there's no guarantee it'll be good
+***** DONE [#A] Find sync-point (SRC/ASM) that is closest to current SRC point after a recompile, and move there in SRC/ASM
+- If SRC is on a sync-point, then just refresh ASM to that same point
+- Otherwise we'd want to find the closest sync-point BACKWARDS, up to
+  the function start, as we'll often iterate on a function body
+- Add new func "bb-goto-src-closest-sync-point" or similar
+- Call it on recompile, ensure we stay if we're already on a
+  sync-point in SRC
+- DUH... bb--synch-relation-overlays should in principle be able to do
+  this, but code is super-messy... I have no idea of how to find
+  closest previous sync-point and sync there
+  - Well it's not that bad
+***** DONE [#C] Alternative: Try to sync current function by name in SRC/ASM --> Nah no need
+  - We should try to restore the "closest point", maybe looking for a
+    match of a few lines, and if not found, revert to current function start
+  - If we ensure we keep func names in SRC/ASM this should work well
+    enough in most cases
+***** DONE [#C] Calling bb--synch-relation-overlays at the end of bb--handle-finish-compile works to preserve point IF already at a sync-point
+***** TODO WORKS! Make this optional                                :WIP:
+- Customize var maybe?
+**** TODO [#B] Option to Narrow to function/region                  :HARD:
 - Simplify focusing on function and its asm on both buffers
 - Regular narrowing works on SRC and ASM buffers, but it's not synchronized, we
-  could add a "bb-narrow-srd-and-asm" function that does that automatically, and
+  could add a "bb-narrow-src-and-asm" function that does that automatically, and
   toggle narrow/widen
 - Not sure bb overlays are working correctly when I manually narrow SRC and ASM
 - Correspondence is not necessarily compact, especially for inline funcs, it can
-  get very messy
+  get very messy, so we'd only be able to narrow to a large min/max
+  region in ASM at least... this makes it quite useless
 **** TODO [#B] Discrete selection of arch+instructionset            :EASY:
 - See https://gcc.gnu.org/onlinedocs/gcc/x86-Options.html
 - gcc -march=XXXX
@@ -500,6 +513,20 @@ SHOW?
 **** TODO [#C] Prettier mode-line ASM info                           :MID:
 - Shorten to avoid clutter, ideally ASM/native/O3 or similar
 - Could just strip -mxxx= prefixes or similar?
+**** TODO [#C] Higher contrast selection/correspondence highlight    :MID:
+- Default is pretty hard to see, I overwrote color and it's a lot clearer
+- Ideally we'd find a "complementary hue" or similar automatically from known
+  background color that still keeps text visible at the same time
+**** TODO [#C] Option to disable rainbows completely                :HARD:
+- bb-clear-rainbow-overlays exists, but it justs clears overlays on current
+  buffer, does not disable rainbow on successive calls, and breaks sync
+  highlight on SRC/ASM, and does not allow enabling them again
+- Ideally bb-toggle-rainbow-overlays to enable/disable
+- Ah... but bb seems to use overlays to sync regions in SRC/ASM, so we cannot
+  disable them completely, but maybe we can make them invisible?
+- Alternative mode would highlight current region very clearly, and nothing else
+***** TODO bb-current-line-face is the face used for highlight?
+- Yes it is, changing background to be bright helps, even if rainbow is not removed
 **** TODO [#C] Option to keep inline code/comments?
 - objdump can do that, I think
 - // beardbolt-preserve-comments: t
@@ -521,6 +548,21 @@ SHOW?
 - Should not be necessary, ideally we can modify bb--handle-finish-compile to
   just remove compilation buffer when it finishes successfully even if it's open
   because it failed last time?
+*** TODO [#B] Add '-fopt-info' info annotations on SRC               :MID:
+- See https://gcc.gnu.org/onlinedocs/gcc/Developer-Options.html
+- could be useful to show opt tips/messages to annotate code, maybe as
+  an overlay on code (output contains line/column so should be easy to
+  overlay in open buffer)
+- GCC generates this info, it's a bit noisy about inlining, but seems useful
+- -fopt-info-missed seems useful to find bits that may be improved
+**** TODO Show "potential aliasing" info when relevant
+- -all shows "consider run-time aliasing test between XXXXX" messages
+  that can signal unintended aliasing that induce unnecessary MOVs
+**** TODO Show missed optimization when relevant
+**** TODO Overall this could be code independent from BB, but seems useful in combination with it
+- In particular, -fopt-info-all param would be passed to BB
+  commandline to generate output, maybe in a target file, and then we
+  could inspect it and add overlays to BB SRC buffer, or any other sRC buffer
 *** TODO Use-Cases/Examples
 - A few performance hazards that are easily avoided by looking at the ASM
 **** DONE See effect of math lib calls
@@ -538,9 +580,3 @@ SHOW?
   complex templates
 **** TODO See effect of Exceptions
 - How much overhead do they add? ASM should make it apparent
-*** TODO Add '-fopt-info' info
-- See https://gcc.gnu.org/onlinedocs/gcc/Developer-Options.html
-- could be useful to show opt tips/messages to annotate code, maybe as
-  an overlay
-- GCC generates this info, it's a bit noisy about inlining, but seems useful
-- -fopt-info-missed seems useful to find bits that may be improved
