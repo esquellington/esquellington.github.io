@@ -446,9 +446,17 @@ SHOW?
 - BB beardbolt-mode-hook local-set-key stay after BB mode is exited, which
   interferes with C++ mode if BB redefines some keybindings (ex: hide-compilation)
 - BB keymap is correctly cleaned up on exit... so maybe just add keys to keymap?
-**** TODO [#B] Option to preserve SRC/ASM point after recompilation  :MID:
-- (simpler) alternative to [[Option to Narrow to function/region]],
-  instead of narrowing we'd just keep point in the interest region
+**** DONE [#B] Option to Narrow to function/region --> not worth it :HARD:
+- Simplify focusing on function and its asm on both buffers
+- Regular narrowing works on SRC and ASM buffers, but it's not synchronized, we
+  could add a "bb-narrow-src-and-asm" function that does that automatically, and
+  toggle narrow/widen
+- Not sure bb overlays are working correctly when I manually narrow SRC and ASM
+- Correspondence is not necessarily compact, especially for inline funcs, it can
+  get very messy, so we'd only be able to narrow to a large min/max
+  region in ASM at least... this makes it quite useless
+- Too hard for very little gain, ignore!
+**** DONE [#B] Option to preserve SRC/ASM point after recompilation  :MID:
 - It's a bit annoying that recompilation resets ASM point to start of
   file, and requires moving cursor in SRC buffer to re-sync ASM to it
 - Ideally we'd just save/restore the point, but ASM buffer will likely
@@ -470,17 +478,6 @@ SHOW?
   - If we ensure we keep func names in SRC/ASM this should work well
     enough in most cases
 ***** DONE [#C] Calling bb--synch-relation-overlays at the end of bb--handle-finish-compile works to preserve point IF already at a sync-point
-***** TODO WORKS! Make this optional                                :WIP:
-- Customize var maybe?
-**** TODO [#B] Option to Narrow to function/region                  :HARD:
-- Simplify focusing on function and its asm on both buffers
-- Regular narrowing works on SRC and ASM buffers, but it's not synchronized, we
-  could add a "bb-narrow-src-and-asm" function that does that automatically, and
-  toggle narrow/widen
-- Not sure bb overlays are working correctly when I manually narrow SRC and ASM
-- Correspondence is not necessarily compact, especially for inline funcs, it can
-  get very messy, so we'd only be able to narrow to a large min/max
-  region in ASM at least... this makes it quite useless
 **** TODO [#B] Discrete selection of arch+instructionset            :EASY:
 - See https://gcc.gnu.org/onlinedocs/gcc/x86-Options.html
 - gcc -march=XXXX
