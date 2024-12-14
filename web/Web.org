@@ -1,5 +1,7 @@
 #+STARTUP: indent overview
 
+Web at https://esquellington.github.io/
+
 * REFERENCES
 - Needs significant config https://orgmode.org/worg/org-tutorials/org-publish-html-tutorial.html
 - Video from systemcrafters https://www.youtube.com/watch?v=AfkrzFodoNw
@@ -8,7 +10,7 @@
 - Quick intro https://opensource.com/article/20/3/blog-emacs
 - Good example https://clarete.li/blog/starting-a-blog.html site is on
   github so can be used as a ref
-* TODO org-mode website
+* DONE org-mode website
 - Website as collection of .org files + data
 - Landing page + menu + links + list of posts with date
 - List of org-to-website options https://orgmode.org/worg/org-blog-wiki.html
@@ -19,7 +21,7 @@
 - Requires Hugo that is powerful and complex and unnecessary, so
   ideally avoid
 - https://ox-hugo.scripter.co/
-** TODO ox-publish: Native and good enough it seems, judging from examples :WIP:
+** DONE ox-publish: Native and good enough it seems, judging from examples
 *** DONE publish.el
 *** DONE Makefile or build.sh script
 Several options, could just eval-buffer publish.el directly, but ideally we
@@ -70,8 +72,27 @@ org-html-head "<link rel=\"stylesheet\" href=\"https://cdn.simplecss.org/simple.
 - People seem to use fontawesome for icons, contains many of them,
   github, email, RSS, etc...
 - Can be embedded as pure SVG, see header, good enough!
-* TODO Fancy title?
-* TODO RSS logo+link?
+* TODO Site Structure
+** DONE Home
+** TODO [#B] Logo image
+- Unnecessary but would be nice
+- Could be Hexen from HS, or maybe one of the executioners
+- Shouldn't have copyright
+** TODO [#C] Fancy title?
+- I don't really need it, why bother
+- May add later
+- Idea: Lletres de gng "take a key for coming in!" de la imatge
+  [[file:/home/oscar/Desktop/coses/gng/arthur.png]]
+** TODO [#C] Navigation
+- Only manes sense if >1 top pages exist
+- DISABLE unless used
+*** TODO Posts?
+- Maybe just list at Home, unless there's a lot and deserves its own section
+*** TODO About?
+- I don't think so... do not share ANY private info, not even name
+- Could put Mastodon/Github/RSS here too, maybe
+** TODO [#C] RSS logo+link?
+- Remove RSS logo unless it's valid
 - See (require 'ox-rss)
-* TODO Auto-publish to github
+* TODO [#A] Auto-publish to github
 - Follow https://www.youtube.com/watch?v=za99DwdZEyg

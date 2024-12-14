@@ -5,9 +5,9 @@
 - file:01_rainbow.org
 
 ** TODO Others                                                     :noexport:
-- ASM in Emacs
+- ASM in Emacs howto
+- Restrict + inspect ASM
 - MFSets
-- Restrict
 
 * Games
 - HexenStorm at [[https://draven.itch.io/hexenstorm][itch.io]] / [[https://www.lexaloffle.com/bbs/?tid=29847][Lexaloffle]], made with [[https://www.lexaloffle.com/pico-8.php][PICO-8]]
