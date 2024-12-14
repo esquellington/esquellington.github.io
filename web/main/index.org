@@ -1,8 +1,8 @@
 #+title: Index
 
 * Posts
-- file:00_test.org
-- file:01_rainbow.org
+- file:posts/00_test.org
+- file:posts/01_rainbow.org
 
 ** TODO Others                                                     :noexport:
 - ASM in Emacs howto

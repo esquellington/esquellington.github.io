@@ -48,19 +48,40 @@
 
 (defun load-preamble (_plist)
   "Header (or preamble) for the blog."
-  (load-file-to-string "../layout/header.html"))
+  (load-file-to-string "../layout/header.html")) ;TODO relative to /posts?
 
 (defun load-postamble (_plist)
   "Footer (or postamble) for the blog."
-  (load-file-to-string "../layout/footer.html"))
+  (load-file-to-string "../layout/footer.html")) ;TODO relative to /posts?
 
 ;;---- website sources
 (setq org-publish-project-alist
-      '(("posts"
+      '(
+        ;;main
+        ;;() index and main pages that go directly in ROOT, not in public
+        ("main"
+         :recursive t
+         :base-directory "main/"
+         :base-extension "org"
+         :publishing-directory "public"
+         :publishing-function org-html-publish-to-html
+         ;; SiteMap
+         :auto-sitemap nil
+         ;; Header
+         :html-preamble load-preamble
+         ;; Footer
+         :html-postamble load-postamble
+         ;; Style
+         :with-author nil
+         :with-toc nil ;toggle table of contents at top of each page
+         :section-numbers nil
+         :time-stamp-file nil)
+        ;;posts
+        ("posts"
          :recursive t
          :base-directory "posts/"
          :base-extension "org"
-         :publishing-directory "public/"
+         :publishing-directory "public/posts"
          :publishing-function org-html-publish-to-html
          ;; SiteMap
          :auto-sitemap t
@@ -81,6 +102,7 @@
          :with-todo-keywords t
          :section-numbers nil
          :time-stamp-file nil)
+        ;;images
         ("img"
          :recursive t
          :base-directory "img/"

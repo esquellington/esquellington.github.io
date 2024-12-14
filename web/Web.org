@@ -9,7 +9,8 @@ Web at https://esquellington.github.io/
   - Next on how to publish automatically to github https://www.youtube.com/watch?v=za99DwdZEyg
 - Quick intro https://opensource.com/article/20/3/blog-emacs
 - Good example https://clarete.li/blog/starting-a-blog.html site is on
-  github so can be used as a ref
+  github https://github.com/clarete/clarete.github.io so can be used
+  as a ref
 * DONE org-mode website
 - Website as collection of .org files + data
 - Landing page + menu + links + list of posts with date
@@ -96,3 +97,15 @@ org-html-head "<link rel=\"stylesheet\" href=\"https://cdn.simplecss.org/simple.
 - See (require 'ox-rss)
 * TODO [#A] Auto-publish to github
 - Follow https://www.youtube.com/watch?v=za99DwdZEyg
+** TODO github needs index.html at root dir
+- Publish to
+- root/public instead of root/web/public
+- index.html to root/ instead of public/
+*** TODO Clarete has publish.el in root dir
+*** TODO We can have different publish rule for index.org and for other pages (ex: posts)
+** TODO consider moving all github.io stuff to other repos!
+- Leave github.io just for web!
+- Maybe leave games, not sure
+*** laic
+*** org-sketch
+*** mfset
