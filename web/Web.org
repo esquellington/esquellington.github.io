@@ -6,13 +6,8 @@ Web at https://esquellington.github.io/
 
 Start Emacs http server on public path
 #+BEGIN_SRC elisp :results silent
-  (httpd-serve-directory (concat default-directory "../public"))
-#+END_SRC
-
-#+BEGIN_SRC elisp :results silent
   (httpd-serve-directory (concat default-directory ".."))
 #+END_SRC
-
 Browse it from Emacs
 #+BEGIN_SRC elisp :results silent
   (eww "localhost:8080")
@@ -95,6 +90,14 @@ org-html-head "<link rel=\"stylesheet\" href=\"https://cdn.simplecss.org/simple.
 - Can be embedded as pure SVG, see header, good enough!
 * TODO Site Structure
 ** DONE Home
+** DONE [#C] Navigation
+- Only manes sense if >1 top pages exist
+- DISABLE unless used
+*** TODO Posts?
+- Maybe just list at Home, unless there's a lot and deserves its own section
+*** TODO About?
+- I don't think so... do not share ANY private info, not even name
+- Could put Mastodon/Github/RSS here too, maybe
 ** TODO [#B] Logo image
 - Unnecessary but would be nice
 - Could be Hexen from HS, or maybe one of the executioners
@@ -104,20 +107,12 @@ org-html-head "<link rel=\"stylesheet\" href=\"https://cdn.simplecss.org/simple.
 - May add later
 - Idea: Lletres de gng "take a key for coming in!" de la imatge
   [[file:/home/oscar/Desktop/coses/gng/arthur.png]]
-** TODO [#C] Navigation
-- Only manes sense if >1 top pages exist
-- DISABLE unless used
-*** TODO Posts?
-- Maybe just list at Home, unless there's a lot and deserves its own section
-*** TODO About?
-- I don't think so... do not share ANY private info, not even name
-- Could put Mastodon/Github/RSS here too, maybe
 ** TODO [#C] RSS logo+link?
 - Remove RSS logo unless it's valid
 - See (require 'ox-rss)
-* TODO [#A] Auto-publish to github
+* DONE Auto-publish to github
 - Follow https://www.youtube.com/watch?v=za99DwdZEyg
-** TODO github needs index.html at root dir --> enough, all HTML goes to ROOT now, no more /posts output folder
+** DONE github needs index.html at root dir --> enough, all HTML goes to ROOT now, no more /posts output folder
 - Publish to
 - root/public instead of root/web/public
 - index.html to root/ instead of public/
@@ -138,9 +133,10 @@ org-html-head "<link rel=\"stylesheet\" href=\"https://cdn.simplecss.org/simple.
 - This ensures all output html can use the same header/footer and CSS
   relative links, otherwise if output html are in different folders
   the shared links fail in one or the other
-** TODO consider moving all github.io stuff to other repos!
+** DONE re-publish locally and commit output, easiest method
+* TODO consider moving all github.io stuff to other repos!
 - Leave github.io just for web!
 - Maybe leave games, not sure
-*** laic
-*** org-sketch
-*** mfset
+** laic
+** org-sketch
+** mfset
