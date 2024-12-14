@@ -26,9 +26,9 @@ classify the one in the picture above.
 A single *primary* bow can be seen when sunlight rays are refracted
 once inside raindrops, split into different wavelengths (colours) and
 travel towards the observer standing between the Sun and the
-rainbow. Rays are exit the droplet /42 degrees/ downwards from the
-original sunlight direction, as depicted below (Source: [[https://upload.wikimedia.org/wikipedia/commons/7/70/Rainbow1.svg][Wikipedia
-Commons]])
+rainbow. Rays exit the droplet at an angle of /42 degrees/ downwards
+relative to the original sunlight direction, as depicted below
+(Source: [[https://upload.wikimedia.org/wikipedia/commons/7/70/Rainbow1.svg][Wikipedia Commons]])
 
 #+ATTR_HTML: :alt Refraction and reflection in a raindrop :width 50%
 https://upload.wikimedia.org/wikipedia/commons/7/70/Rainbow1.svg
@@ -44,8 +44,8 @@ accompained by additional concentric bows:
   rainbow" that everybody loves. More details [[https://www.atoptics.co.uk/rainbows/sec.htm][here]].
 - Supernumerary bows can appear adjacent to the inside of any bow and
   seem to repeat the same color pattern, but compressed. They are
-  caused by lightwave interference, it seems, which is very awesome
-  but we won't dig any deeper for now. More detals [[https://www.atoptics.co.uk/rainbows/supers.htm][here]].
+  caused by lightwave interference, which is awesome, but we won't dig
+  any deeper for now. More detals [[https://www.atoptics.co.uk/rainbows/supers.htm][here]].
 
 The picture below shows a faint secondary bow above the primary one,
 and part of a supernumerary right below the primary violet shade.
@@ -79,9 +79,9 @@ https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/Alexander%E2%80%99s_ba
 
 * So, what did I see?
 Given that the 2 bows in my picture were not concentric they could
-only be a twinned primary bow, or a pair of primary and a reflection
-bows. I very much suspected it was primary + reflection but I had no
-proof. A sane person would have probably stopped there. I didn't.
+only be a twinned primary bow, or a pair of primary and reflection
+bows. I very much suspected it the latter but I had no proof. A sane
+person would have probably stopped there. I didn't.
 
 My shamelessly biased starting assumption was: /If I can prove that a
 reflection bow was very likely, then it probably was, given how rare
@@ -94,9 +94,7 @@ picture, some basic trigonometry and publically available maps and
 astronomical data, I arrived at a pretty convincing answer: The top
 bow in the picture matches a predicted *reflection bow* with
 surprising accuracy (97%), so it most likely was. Below I'll detail
-how I arrived at this conclusion
-
-** Method
+how I arrived at this conclusion.
 
 I unitaterally decided had to answer these 2 questions:
 1. /Is there a water surface where the Sun may have reflected?/
