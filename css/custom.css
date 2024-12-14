@@ -1,0 +1,32 @@
+/* Change accent in light scheme */
+:root {
+    --accent: orange;
+    --accent-hover: turquoise;
+}
+
+/* Change accent in dark scheme */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --accent: turquoise;
+        --accent-hover: orange;
+    }
+}
+
+/* Change media params (light+dark) */
+img, video {
+    /* Remove img transparency, otherwise pictures are
+       unnecessarily dimmed (in dark scheme) */
+    opacity: 1.0;
+
+    /* Center img by default, otherwise they're left-aligned. Width still
+       defaults to 100%, but can be easily overriden per-image)*/
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Center tables by default, otherwise they're left-aligned */
+table {
+    margin-left: auto;
+    margin-right: auto;
+}
