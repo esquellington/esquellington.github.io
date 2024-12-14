@@ -57,8 +57,7 @@
 ;;---- website sources
 (setq org-publish-project-alist
       '(
-        ;;main
-        ;;() index and main pages that go directly in ROOT, not in public
+        ;; Main page(s), published to ROOT
         ("main"
          :recursive t
          :base-directory "main/"
@@ -76,7 +75,7 @@
          :with-toc nil ;toggle table of contents at top of each page
          :section-numbers nil
          :time-stamp-file nil)
-        ;;posts
+        ;; Individual posts, in subfolder
         ("posts"
          :recursive t
          :base-directory "posts/"
@@ -115,7 +114,7 @@
           :base-extension "css"
           :publishing-directory "public/css"
           :publishing-function org-publish-attachment)
-        ("all" :components ("posts" "img" "css"))))
+        ("all" :components ("main" "posts" "img" "css"))))
 
 ;; Run from Makefile and consider avoiding explicit call to org-publish-all with
 ;;EITHER emacs --batch --load publish.el --funcall org-publish-all
