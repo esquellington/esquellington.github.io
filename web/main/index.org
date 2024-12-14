@@ -1,14 +1,3 @@
-#+title: Index
-
-* Posts
-- file:posts/00_test.org
-- file:posts/01_rainbow.org
-
-** TODO Others                                                     :noexport:
-- ASM in Emacs howto
-- Restrict + inspect ASM
-- MFSets
-
 * Games
 - HexenStorm at [[https://draven.itch.io/hexenstorm][itch.io]] and [[https://www.lexaloffle.com/bbs/?tid=29847][Lexaloffle]], made with [[https://www.lexaloffle.com/pico-8.php][PICO-8]]
 - [[https://esquellington.github.io/games/PainInTheCave/index.html][Pain in the Cave (Ludum Dare 36)]], made with [[https://love2d.org/][LÖVE]]

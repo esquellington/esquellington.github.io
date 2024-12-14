@@ -31,6 +31,7 @@
       org-html-head-include-default-style nil) ;Use our own styles???
 
 ;; Use Local CSS with custom overrides, copied from https://simplecss.org/
+;; IMPORTANT: cSS path is RELATIVE to /posts and /main
 ;;   "<link rel=\"stylesheet\" href=\"https://cdn.simplecss.org/simple.min.css\" />"
 (setq org-html-head (concat "<link rel=\"stylesheet\" href=\"../css/simple.min.css\" />"
                             "<link rel=\"stylesheet\" href=\"../css/custom.css\" />"))
@@ -46,13 +47,14 @@
     (insert-file-contents path)
     (buffer-string)))
 
+;; IMPORTANT: pre/postamble file path is RELATIVE to /posts and /main
 (defun load-preamble (_plist)
   "Header (or preamble) for the blog."
-  (load-file-to-string "../layout/header.html")) ;TODO relative to /posts?
+  (load-file-to-string "../layout/header.html"))
 
 (defun load-postamble (_plist)
   "Footer (or postamble) for the blog."
-  (load-file-to-string "../layout/footer.html")) ;TODO relative to /posts?
+  (load-file-to-string "../layout/footer.html"))
 
 ;;---- website sources
 (setq org-publish-project-alist
@@ -62,7 +64,7 @@
          :recursive t
          :base-directory "main/"
          :base-extension "org"
-         :publishing-directory "public"
+         :publishing-directory ".." ;:publishing-directory "public"
          :publishing-function org-html-publish-to-html
          ;; SiteMap
          :auto-sitemap nil
@@ -75,16 +77,16 @@
          :with-toc nil ;toggle table of contents at top of each page
          :section-numbers nil
          :time-stamp-file nil)
-        ;; Individual posts, in subfolder
+        ;; Individual posts, published to ROOT to ensure all IMG and CSS links work
         ("posts"
          :recursive t
          :base-directory "posts/"
          :base-extension "org"
-         :publishing-directory "public/posts"
+         :publishing-directory ".." ;:publishing-directory "public/posts"
          :publishing-function org-html-publish-to-html
          ;; SiteMap
-         :auto-sitemap t
-         :sitemap-title "Site Map TEST"
+         :auto-sitemap nil
+         :sitemap-title "Site Map NAME HERE"
          :sitemap-sort-files anti-chronologically
          ;; Header
          :html-preamble load-preamble
@@ -101,18 +103,19 @@
          :with-todo-keywords t
          :section-numbers nil
          :time-stamp-file nil)
-        ;;images
+        ;;images, published to ROOT/IMG
         ("img"
          :recursive t
          :base-directory "img/"
          :base-extension "png\\|jpg\\|jpeg\\|gif\\|svg"
-         :publishing-directory "public/img"
+         :publishing-directory "../img" ;:publishing-directory "public/img"
          :publishing-function org-publish-attachment)
+        ;;css, published to ROOT/CSS
         ("css"
           :recursive t
           :base-directory "css/"
           :base-extension "css"
-          :publishing-directory "public/css"
+          :publishing-directory "../css" ;:publishing-directory "public/css"
           :publishing-function org-publish-attachment)
         ("all" :components ("main" "posts" "img" "css"))))
 

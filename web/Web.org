@@ -2,6 +2,26 @@
 
 Web at https://esquellington.github.io/
 
+* Start
+
+Start Emacs http server on public path
+#+BEGIN_SRC elisp :results silent
+  (httpd-serve-directory (concat default-directory "../public"))
+#+END_SRC
+
+#+BEGIN_SRC elisp :results silent
+  (httpd-serve-directory (concat default-directory ".."))
+#+END_SRC
+
+Browse it from Emacs
+#+BEGIN_SRC elisp :results silent
+  (eww "localhost:8080")
+#+END_SRC
+or from Firefox
+#+BEGIN_SRC bash :results silent
+  firefox --new-window localhost:8080 &
+#+END_SRC
+
 * REFERENCES
 - Needs significant config https://orgmode.org/worg/org-tutorials/org-publish-html-tutorial.html
 - Video from systemcrafters https://www.youtube.com/watch?v=AfkrzFodoNw
@@ -97,12 +117,27 @@ org-html-head "<link rel=\"stylesheet\" href=\"https://cdn.simplecss.org/simple.
 - See (require 'ox-rss)
 * TODO [#A] Auto-publish to github
 - Follow https://www.youtube.com/watch?v=za99DwdZEyg
-** TODO github needs index.html at root dir
+** TODO github needs index.html at root dir --> enough, all HTML goes to ROOT now, no more /posts output folder
 - Publish to
 - root/public instead of root/web/public
 - index.html to root/ instead of public/
-*** TODO Clarete has publish.el in root dir
-*** TODO We can have different publish rule for index.org and for other pages (ex: posts)
+*** DONE Tried to make this work with /posts subdir but I failed --> DISCARDED
+**** TODO Clarete has publish.el in root dir
+**** TODO We can have different publish rule for index.org and for other pages (ex: posts)
+**** FUCK it's hard to have index.html in ROOT and other stuff in /public without all links breaking
+- We need to "serve" ROOT
+- We need all img and css links to be RELATIVE to each .org (otherwise
+  org-publish seems to fail, or not link images correctly)
+**** TODO Create basic index.org->html that links CSS and IMG manually into /public
+- Serve this ROOT
+**** TODO Leave all content in /web --> /public folder and link it from index.org->html
+*** DONE OK, the simplest way is to just org-publish everything to ROOT directly, or subdirs
+- /main and /posts map to ROOT
+- /img to ROOT/img
+- /css to ROOT/css
+- This ensures all output html can use the same header/footer and CSS
+  relative links, otherwise if output html are in different folders
+  the shared links fail in one or the other
 ** TODO consider moving all github.io stuff to other repos!
 - Leave github.io just for web!
 - Maybe leave games, not sure

@@ -4,19 +4,6 @@
 
 * Start
 
-Start Emacs http server on public path
-#+BEGIN_SRC elisp :results silent
-  (httpd-serve-directory (concat default-directory "../public"))
-#+END_SRC
-Browse it from Emacs
-#+BEGIN_SRC elisp :results silent
-  (eww "localhost:8080")
-#+END_SRC
-or from Firefox
-#+BEGIN_SRC bash :results silent
-  firefox --new-window localhost:8080 &
-#+END_SRC
-
 Don't jump to [[Conclusions]]
 
 * Body
