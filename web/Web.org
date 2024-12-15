@@ -134,9 +134,22 @@ org-html-head "<link rel=\"stylesheet\" href=\"https://cdn.simplecss.org/simple.
   relative links, otherwise if output html are in different folders
   the shared links fail in one or the other
 ** DONE re-publish locally and commit output, easiest method
-* TODO consider moving all github.io stuff to other repos!
+* TODO consider moving all github.io stuff to other repos!              :WIP:
 - Leave github.io just for web!
 - Maybe leave games, not sure
-** laic
-** org-sketch
-** mfset
+** TODO laic --> DO IT                                              :BORING:
+- Deserves own repo, it's essentially finished
+- Keep private maybe, but could ask for clearance
+- But it's boring
+** TODO org-sketch --> NOT FOR NOW
+- not that useful
+- could move to repo
+** TODO src/mfset --> NOT FOR NOW
+- This is unfinished, keep it
+** TODO Emacs.org? --> NOT FOR NOW
+- Dropbox! like TODO.org maybe?
+- Or just keep /Emacs for small tests and later create custom repros
+  for stuff that deserves it
+** TODO Games
+- Not sure what to do with these
+- HS should make repo per game and private I guess
