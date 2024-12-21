@@ -186,6 +186,9 @@ Customize individual org-sketch-tool-command--???, as var, not as func
   Emacs itself, without having to open external programs explicitly,
   adding links, etc...
 * Similar Emacs packages
+** easydraw https://github.com/misohena/el-easydraw
+- Seems AWESOME, draw SVG diagrams directly in Emacs
+- No MELPA though, several files and no installation instructions
 ** org-krita https://github.com/lepisma/org-krita
 - seems Wip, but is very similar to what I wanted
 - plans to support other painting programs
