@@ -1,0 +1,11 @@
+#+title: Post with overwritten CSS
+#+date: <2024-11-17 dom>
+#+author: John Doe
+#+email: john.doe@example.com
+
+#+HTML_LINK_UP: sitemap.html
+#+HTML_LINK_HOME: index.html
+
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="../css/example.css" />
+
+explicit CSS looks different

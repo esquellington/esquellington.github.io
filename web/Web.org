@@ -1,0 +1,155 @@
+#+STARTUP: indent overview
+
+Web at https://esquellington.github.io/
+
+* Start
+
+Start Emacs http server on public path
+#+BEGIN_SRC elisp :results silent
+  (httpd-serve-directory (concat default-directory ".."))
+#+END_SRC
+Browse it from Emacs
+#+BEGIN_SRC elisp :results silent
+  (eww "localhost:8080")
+#+END_SRC
+or from Firefox
+#+BEGIN_SRC bash :results silent
+  firefox --new-window localhost:8080 &
+#+END_SRC
+
+* REFERENCES
+- Needs significant config https://orgmode.org/worg/org-tutorials/org-publish-html-tutorial.html
+- Video from systemcrafters https://www.youtube.com/watch?v=AfkrzFodoNw
+  - NOTES: https://systemcrafters.net/publishing-websites-with-org-mode/building-the-site/
+  - Next on how to publish automatically to github https://www.youtube.com/watch?v=za99DwdZEyg
+- Quick intro https://opensource.com/article/20/3/blog-emacs
+- Good example https://clarete.li/blog/starting-a-blog.html site is on
+  github https://github.com/clarete/clarete.github.io so can be used
+  as a ref
+* DONE org-mode website
+- Website as collection of .org files + data
+- Landing page + menu + links + list of posts with date
+- List of org-to-website options https://orgmode.org/worg/org-blog-wiki.html
+** DONE weblorg: Nice simple blog using https://emacs.love/weblorg/ --> not great, try org-publish instead
+- tried it but didn't seem to do much and it's not widely used, docs
+  are a bit obscure and I couldn't care less about the details
+** DONE ox-hugo: Seems a good alternative, less self-contained --> try to stay within Emacs/Org for evarything
+- Requires Hugo that is powerful and complex and unnecessary, so
+  ideally avoid
+- https://ox-hugo.scripter.co/
+** DONE ox-publish: Native and good enough it seems, judging from examples
+*** DONE publish.el
+*** DONE Makefile or build.sh script
+Several options, could just eval-buffer publish.el directly, but ideally we
+want to use a clean/vanilla emacs with no init.el and strictly the
+packages desired to org->website.
+- Systemcrafters uses build.sh: emacs -Q
+- others use: emacs --batch --load publish.el --funcall org-publish-all
+*** DONE Serve site locally
+- Systemcrafters shows way to do it within Emacs IIRC, no python needed
+- simple-httpd
+- Run (use-package simple-httpd :ensure t)
+- M-x httpd-serve-directory
+- shell:firefox http://localhost:8080/
+*** DONE CSS/template/fonts/etc
+- systemcrafters uses https://simplecss.org/ that looks good enough,
+  can be served locally too, ensure no javascript and use it if so,
+  don't waste time on cosmetics!
+org-html-head "<link rel=\"stylesheet\" href=\"https://cdn.simplecss.org/simple.min.css\" />")
+**** DONE make the CSS LOCAL
+- This explains how https://opensource.com/article/20/3/blog-emacs
+*** DONE Export LaTeX formulas to html
+- works out of the box with Mathjax (remote javascript), requires
+  whitelisting JS though
+*** DONE Header + Footer
+- See https://clarete.li/blog/starting-a-blog.html, I think
+  html-preamble/postamble is what injects footer?
+- Yeah, he has header/footer specific html with icons etc
+  (fontawesome), very minimal but requires messing with generated HTML
+  it seems... maybe there's a simpler/official way already?
+- html-divs attrib also seems used sometimes to org pre/main/post as
+  this, similar to org-html-head
+  org-html-divs
+      '((preamble  "header" "top")
+        (content   "main"   "content")
+        (postamble "footer" "postamble"))
+**** DONE image --> link back to index
+**** DONE Mastodon logo+link?
+**** DONE Github logo+link?
+**** DONE Footer
+- Back to Top (anchor?)
+- Back to Index
+- Credits
+  - With Emacs+Org (links and logos?)
+  - With Simple.css (https://simplecss.org/)
+  - etc...
+**** DONE Icons
+- https://fontawesome.com
+- People seem to use fontawesome for icons, contains many of them,
+  github, email, RSS, etc...
+- Can be embedded as pure SVG, see header, good enough!
+* TODO Site Structure
+** DONE Home
+** DONE [#C] Navigation
+- Only manes sense if >1 top pages exist
+- DISABLE unless used
+*** TODO Posts?
+- Maybe just list at Home, unless there's a lot and deserves its own section
+*** TODO About?
+- I don't think so... do not share ANY private info, not even name
+- Could put Mastodon/Github/RSS here too, maybe
+** TODO [#B] Logo image
+- Unnecessary but would be nice
+- Could be Hexen from HS, or maybe one of the executioners
+- Shouldn't have copyright
+** TODO [#C] Fancy title?
+- I don't really need it, why bother
+- May add later
+- Idea: Lletres de gng "take a key for coming in!" de la imatge
+  [[file:/home/oscar/Desktop/coses/gng/arthur.png]]
+** TODO [#C] RSS logo+link?
+- Remove RSS logo unless it's valid
+- See (require 'ox-rss)
+* DONE Auto-publish to github
+- Follow https://www.youtube.com/watch?v=za99DwdZEyg
+** DONE github needs index.html at root dir --> enough, all HTML goes to ROOT now, no more /posts output folder
+- Publish to
+- root/public instead of root/web/public
+- index.html to root/ instead of public/
+*** DONE Tried to make this work with /posts subdir but I failed --> DISCARDED
+**** TODO Clarete has publish.el in root dir
+**** TODO We can have different publish rule for index.org and for other pages (ex: posts)
+**** FUCK it's hard to have index.html in ROOT and other stuff in /public without all links breaking
+- We need to "serve" ROOT
+- We need all img and css links to be RELATIVE to each .org (otherwise
+  org-publish seems to fail, or not link images correctly)
+**** TODO Create basic index.org->html that links CSS and IMG manually into /public
+- Serve this ROOT
+**** TODO Leave all content in /web --> /public folder and link it from index.org->html
+*** DONE OK, the simplest way is to just org-publish everything to ROOT directly, or subdirs
+- /main and /posts map to ROOT
+- /img to ROOT/img
+- /css to ROOT/css
+- This ensures all output html can use the same header/footer and CSS
+  relative links, otherwise if output html are in different folders
+  the shared links fail in one or the other
+** DONE re-publish locally and commit output, easiest method
+* TODO consider moving all github.io stuff to other repos!              :WIP:
+- Leave github.io just for web!
+- Maybe leave games, not sure
+** TODO laic --> DO IT                                              :BORING:
+- Deserves own repo, it's essentially finished
+- Keep private maybe, but could ask for clearance
+- But it's boring
+** TODO org-sketch --> NOT FOR NOW
+- not that useful
+- could move to repo
+** TODO src/mfset --> NOT FOR NOW
+- This is unfinished, keep it
+** TODO Emacs.org? --> NOT FOR NOW
+- Dropbox! like TODO.org maybe?
+- Or just keep /Emacs for small tests and later create custom repros
+  for stuff that deserves it
+** TODO Games
+- Not sure what to do with these
+- HS should make repo per game and private I guess

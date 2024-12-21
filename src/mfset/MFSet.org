@@ -6,7 +6,6 @@ I've implemented it like 6 or 7 times,
 
 * Idea
 The basic idea is
-
 ** Set
 given the set of integers 0..N-1, manage its subsets
 - Each element in exactly 1 subset
@@ -90,7 +89,6 @@ Explain how this maps to indices of any array<T>
   - Computing "size"
 ** TODO Cost Analysis
 *** Ackerman??
-
 * DONE Enumerating set elements
 ** DONE Online: O(1)
   - Merge with linked-lists of bucket-lists, done in CRS Partitions
@@ -200,7 +198,7 @@ DeleteEdge e = (n1,n2)
 * Plots
 ** Increase N, E and R in Benchmarks
 ** Real cost Vs Theoretical cost
-* OPTIMIZATIONS
+* OPTIMIZATIONS                                               :WIP:IMPORTANT:
   - FOCUS on LL2 and LL4 as they seem the BEST options, LE4 is cool but too
     complex, and edge list per CC can be found easily in a second pass using
     100% ext memory
@@ -312,7 +310,6 @@ DeleteEdge e = (n1,n2)
 - Per a CC single-shot es més eficient, imagino
 - Per incremental no crec
 - REQUREIX relacio node->arestes[]
-
 * Beyond
 ** Weighted edges, strong CC?
 ** Directed edges?
