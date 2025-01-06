@@ -37,7 +37,7 @@ https://upload.wikimedia.org/wikipedia/commons/7/70/Rainbow1.svg
 Single rainbows are awesome on their own, but sometimes they're
 accompained by additional concentric bows:
 - A *secondary* bow can appear around the primary one, caused by a
-  second refraction of sunlight inside rain doplets. The secondary bow
+  second refraction of sunlight inside rain droplets. The secondary bow
   is concentric to primary one, appears approximately /10 degrees/
   outside, is significantly fainter and its colors are
   reversed. Primary + secondary form the relatively common "double
@@ -196,7 +196,7 @@ conclusion?
 
 One idea is to compute /how high is the rainbow?/ and verify the
 answer is reasonable. Clouds at Edinburgh's latitude extend between
-roughly 500m to 10km above the sea (details later). If we computed the
+roughly 500m to 10km above the sea (details later). If we compute the
 height and it's significantly outside that range we'd need to
 reconsider.
 
