@@ -144,6 +144,8 @@ https://karthinks.com/software/avy-can-do-anything/
 - If looks like #'something is the proper way to "quote a function", equivalent
   to 'something if someting is a function, but will fail for non-functions
 - See https://www.emacswiki.org/emacs/EmacsSymbolNotation
+* TODO Learning Emacs Lisp course
+https://systemcrafters.net/learning-emacs-lisp/
 * DONE <2024-01-21 dom> UPDATE PACKAGES (Emacs 30 from sources)
 * DONE all-the-icons
 https://github.com/domtronn/all-the-icons.el
