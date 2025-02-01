@@ -480,6 +480,10 @@ SHOW?
   - If we ensure we keep func names in SRC/ASM this should work well
     enough in most cases
 ***** DONE [#C] Calling bb--synch-relation-overlays at the end of bb--handle-finish-compile works to preserve point IF already at a sync-point
+**** TODO [#B] Before/After ASM buffers                             :HARD:
+- Keep outputs side by side
+- Useful to compre before/after changes
+- Diff ASM buffers
 **** TODO [#B] Discrete selection of arch+instructionset            :EASY:
 - See https://gcc.gnu.org/onlinedocs/gcc/x86-Options.html
 - gcc -march=XXXX
