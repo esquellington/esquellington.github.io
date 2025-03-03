@@ -6,7 +6,7 @@ TODO request permission
 - HexenStorm at [[https://draven.itch.io/hexenstorm][itch.io]] and [[https://www.lexaloffle.com/bbs/?tid=29847][Lexaloffle]], made with [[https://www.lexaloffle.com/pico-8.php][PICO-8]]
 
 * Emacs
-- [[https://github.com/esquellington/esquellington.github.io/tree/master/Emacs/LatexInComments][LatexInComments]]: Emacs package to render LaTeX math blocks in code
+- [[https://github.com/esquellington/LatexInComments][LatexInComments]]: Emacs package to render LaTeX math blocks in code
   comments as overlays.
 ** NOT YET                                                         :noexport:
 - [[https://github.com/esquellington/esquellington.github.io/tree/master/Emacs/OrgSketch][org-sketch]]
