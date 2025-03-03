@@ -144,6 +144,8 @@ https://karthinks.com/software/avy-can-do-anything/
 - If looks like #'something is the proper way to "quote a function", equivalent
   to 'something if someting is a function, but will fail for non-functions
 - See https://www.emacswiki.org/emacs/EmacsSymbolNotation
+* TODO Learning Emacs Lisp course
+https://systemcrafters.net/learning-emacs-lisp/
 * DONE <2024-01-21 dom> UPDATE PACKAGES (Emacs 30 from sources)
 * DONE all-the-icons
 https://github.com/domtronn/all-the-icons.el
@@ -478,6 +480,10 @@ SHOW?
   - If we ensure we keep func names in SRC/ASM this should work well
     enough in most cases
 ***** DONE [#C] Calling bb--synch-relation-overlays at the end of bb--handle-finish-compile works to preserve point IF already at a sync-point
+**** TODO [#B] Before/After ASM buffers                             :HARD:
+- Keep outputs side by side
+- Useful to compre before/after changes
+- Diff ASM buffers
 **** TODO [#B] Discrete selection of arch+instructionset            :EASY:
 - See https://gcc.gnu.org/onlinedocs/gcc/x86-Options.html
 - gcc -march=XXXX
