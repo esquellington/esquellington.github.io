@@ -82,6 +82,18 @@ extra return after #+RESULTS: before the image link
 #+RESULTS:
 
 [[file:../img/table.png]]
+** Graphviz
+
+Graphviz SRC works, similar to Gnuplot we need an extra return
+after #+RESULTS: before the image link
+#+BEGIN_SRC dot :cmdline -Kdot -Tpng :file ../img/graphviz.png
+  digraph { A->B B->C C->A }
+#+END_SRC
+
+#+RESULTS:
+
+[[file:../img/graphviz.png]]
+
 ** Inline HTML
 
 We can we use raw HTML blocks inside =+BEGIN_EXPORT html
@@ -123,7 +135,6 @@ produces
   <p>fnord fnord fnord fnord fnord fnord fnord fnord!</p>
 </details>
 #+END_EXPORT
-
 * Conclusions
 
 *all of your base are belong to us*

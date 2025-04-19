@@ -55,6 +55,8 @@ Emacs hacking and tests
 * Web file:../web/Web.org
 * Avy advanded usage
 https://karthinks.com/software/avy-can-do-anything/
+* Elisp tutorials
+- https://protesilaos.com/emacs/emacs-lisp-elements
 * Unicode in Emacs
 - http://ergoemacs.org/emacs/emacs_n_unicode.html
 - M-x insert character OR C-x 8 RET
