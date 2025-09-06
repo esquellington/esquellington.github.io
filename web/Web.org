@@ -103,7 +103,7 @@ org-html-head "<link rel=\"stylesheet\" href=\"https://cdn.simplecss.org/simple.
 *** TODO About?
 - I don't think so... do not share ANY private info, not even name
 - Could put Mastodon/Github/RSS here too, maybe
-** TODO [#B] Logo image
+** DONE [#B] Logo image
 - Unnecessary but would be nice
 - Could be Hexen from HS, or maybe one of the executioners
 - Shouldn't have copyright
@@ -115,6 +115,7 @@ org-html-head "<link rel=\"stylesheet\" href=\"https://cdn.simplecss.org/simple.
 ** TODO [#C] RSS logo+link?
 - Remove RSS logo unless it's valid
 - See (require 'ox-rss)
+** TODO [#C] itchio logo+link
 * DONE Auto-publish to github
 - Follow https://www.youtube.com/watch?v=za99DwdZEyg
 ** DONE github needs index.html at root dir --> enough, all HTML goes to ROOT now, no more /posts output folder
@@ -142,7 +143,7 @@ org-html-head "<link rel=\"stylesheet\" href=\"https://cdn.simplecss.org/simple.
 * TODO consider moving all github.io stuff to other repos!              :WIP:
 - Leave github.io just for web!
 - Maybe leave games, not sure
-** TODO laic --> DO IT                                              :BORING:
+** DONE laic --> DO IT                                              :BORING:
 - Deserves own repo, it's essentially finished
 - Keep private maybe, but could ask for clearance
 - But it's boring
