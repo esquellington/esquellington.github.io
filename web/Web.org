@@ -107,6 +107,7 @@ org-html-head "<link rel=\"stylesheet\" href=\"https://cdn.simplecss.org/simple.
 - Unnecessary but would be nice
 - Could be Hexen from HS, or maybe one of the executioners
 - Shouldn't have copyright
+** DONE [#C] itchio logo+link
 ** TODO [#C] Fancy title?
 - I don't really need it, why bother
 - May add later
@@ -115,7 +116,6 @@ org-html-head "<link rel=\"stylesheet\" href=\"https://cdn.simplecss.org/simple.
 ** TODO [#C] RSS logo+link?
 - Remove RSS logo unless it's valid
 - See (require 'ox-rss)
-** TODO [#C] itchio logo+link
 * DONE Auto-publish to github
 - Follow https://www.youtube.com/watch?v=za99DwdZEyg
 ** DONE github needs index.html at root dir --> enough, all HTML goes to ROOT now, no more /posts output folder
