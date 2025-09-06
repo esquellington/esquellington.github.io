@@ -146,6 +146,12 @@ https://karthinks.com/software/avy-can-do-anything/
 - If looks like #'something is the proper way to "quote a function", equivalent
   to 'something if someting is a function, but will fail for non-functions
 - See https://www.emacswiki.org/emacs/EmacsSymbolNotation
+* DONE fold-this
+- Supports nested regions/overlays which is cool
+- Pretty cool, but no easy way to fold a C++ scope
+- MAYBE add it? seems feasible just find balanced {} and fold-this on
+  that region
+- Works well with er/expand-region
 * TODO Learning Emacs Lisp course
 https://systemcrafters.net/learning-emacs-lisp/
 * DONE <2024-01-21 dom> UPDATE PACKAGES (Emacs 30 from sources)
@@ -182,10 +188,27 @@ Couldn't we just do this in a compilation hook, similar to beardbolt?
   (setq w (get-buffer-window "*compilation*"))
   (when w
     (delete-window w)))
+* DONE Emacs Dired
+- Lots of useful commands, see https://www.gnu.org/software/emacs/manual/html_node/emacs/Dired.html
+- 'f' Visit file in this window
+- 'v' View file in this window, read-only
+- 'o' Visit file in other window, and move cursor to it
+- 'C-o' Visit file in other window, but keep cursor in Dired window
+- '^' Visit parent dir
+- 's' Sort files+folders alphabetically (toggle on/off)
+- '+' Create directory
+- 'C-x C-q' (dired-toggle-read-only)
+  - Edit arbitrary file names directly
+  - 'C-c C-c' commit changes explicitly
+  - 'C-x C-q' toggle off edit mode --> asks to commit if there was any changes
+  - THIS IS AWESOME!
+** File operations https://www.gnu.org/software/emacs/manual/html_node/emacs/Operating-on-Files.html
 * TODO Emacs * GPT https://github.com/karthink/gptel
 - Also, this blog post https://nullprogram.com/blog/2024/11/10/
   explains how to run local LLMs using llama.cpp (supported by gptel),
   even on CPU, or shitty GPU, consider trying
+- BUT no more free access to ChatGPT API so gptel doesn't work, only
+  chat in website does https://chatgpt.com/
 * TODO Flycheck or Flymake?
 - Make is the default!?
 - eglot only supports Flymake?
