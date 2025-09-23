@@ -140,7 +140,7 @@ org-html-head "<link rel=\"stylesheet\" href=\"https://cdn.simplecss.org/simple.
   relative links, otherwise if output html are in different folders
   the shared links fail in one or the other
 ** DONE re-publish locally and commit output, easiest method
-* TODO consider moving all github.io stuff to other repos!              :WIP:
+* TODO consider moving all github.io stuff to other repos!
 - Leave github.io just for web!
 - Maybe leave games, not sure
 ** DONE laic --> DO IT                                              :BORING:
