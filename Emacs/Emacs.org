@@ -211,7 +211,6 @@ Couldn't we just do this in a compilation hook, similar to beardbolt?
   chat in website does https://chatgpt.com/
 ** DONE Try with Deepseek! https://github.com/karthink/gptel?tab=readme-ov-file#deepseek
 - Ah bugger API usage also requires payment, website chat is free, like ChatGPT
-
 * TODO Flycheck or Flymake?
 - Make is the default!?
 - eglot only supports Flymake?
