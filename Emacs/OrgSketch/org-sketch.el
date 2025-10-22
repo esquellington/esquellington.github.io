@@ -101,6 +101,10 @@
   "Xournal++ command."
   :group 'org-sketch
   :type 'string)
+(defcustom org-sketch-command-screenshot "gnome-screenshot -a -f" ;-i for interactive
+  "Screenshot command (system-dependent)."
+  :group 'org-sketch
+  :type 'file)
 
 ;; TOOL select
 ;; We use `executable-find' function to search for potentially-customized
@@ -165,6 +169,14 @@
 (defun org-sketch-convert ( args )
   "Run convert on ARGS argument string."
   (shell-command (concat org-sketch-command-convert " " args org-sketch-OS-null-sink)))
+
+
+;;--------------------------------
+;; SCREENSHOT
+;;--------------------------------
+(defun org-sketch-screenshot ( args )
+  "Capture screenshot on ARGS argument string."
+  (shell-command (concat org-sketch-command-screenshot " " args org-sketch-OS-null-sink)))
 
 ;;--------------------------------
 ;; TOOL: gimp
@@ -463,6 +475,44 @@
   result_file)
 
 ;;--------------------------------
+;; Screenshot sketch creation
+;;--------------------------------
+(defun org-sketch-create-screenshot ( skname )
+  "Create sketch SKNAME from screenshot."
+
+  ;; Default params if empty/nil
+  (when (string-empty-p skname) (setq skname "UNNAMED_SKETCH")) ;TODO generate unique name
+
+  ;; Result, either nil or a valid expanded filename
+  (setq result_file nil)
+
+  ;; Select tool
+  ;; TODO only 1 screenshot tool is supported at the moment
+
+  ;; Create output dir if required
+  (when (not (file-directory-p org-sketch-output-dir))
+    (make-directory org-sketch-output-dir))
+
+  ;; Try to create sketch
+  (let (skname_png)
+
+    (setq skname_png (concat (org-sketch-OS-dir org-sketch-output-dir) skname ".png"))
+
+    ;; Avoid overwriting silently
+    (when (or (not (file-exists-p skname_png))
+              (yes-or-no-p "Sketch exists! Overwrite? "))
+
+      ;; Capture screenshot
+      (org-sketch-screenshot skname_png)
+
+      ;; Save result if not empty
+      (when (file-exists-p skname_png)
+        (setq result_file skname_png))))
+
+  ;; return result
+  result_file)
+
+;;--------------------------------
 ;; Interactive functions
 ;;--------------------------------
 ;;
@@ -501,6 +551,15 @@
     (setq sketch_filename (org-sketch-create skname width height))
     (when (not (eq sketch_filename nil))
       (org-insert-link nil (concat "file:" sketch_filename) nil))))
+
+(defun org-sketch-insert-screenshot-and-display ( skname )
+  "Insert sketch SKNAME with from screenshot."
+  (interactive "sScreenshot Name: ")
+  (let (sketch_filename)
+    (setq sketch_filename (org-sketch-create-screenshot skname))
+    (when (not (eq sketch_filename nil))
+      (org-insert-link nil (concat "file:" sketch_filename) nil)
+      (insert-image (create-image (expand-file-name sketch_filename)))))) ;;Display new image transiently
 
 ;;--------------------------------
 ;; Package setup

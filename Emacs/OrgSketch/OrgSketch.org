@@ -87,6 +87,16 @@ Customize individual org-sketch-tool-command--???, as var, not as func
 - Path may be global, just check it's there and fail if not
 - Re-check if tool available using executable-find in
   org-sketch-insert, and fail if not there
+** GOOD org-sketch-screenshot-insert
+- Reuse org-sketch to call platform-specific screenshot tool and
+  output to org-sketck regular file
+- See https://github.com/dfeich/org-screenshot
+- WORKS!
+#+BEGIN_SRC emacs-lisp
+(org-sketch-insert-screenshot-and-display "PROVA")
+#+END_SRC
+*** TODO Support other screenshot tools, same as sketch tools
+*** TODO Support Windows snipingtool
 ** TODO Publish?
 - Github
 - MELPA?
