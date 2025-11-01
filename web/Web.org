@@ -143,7 +143,7 @@ org-html-head "<link rel=\"stylesheet\" href=\"https://cdn.simplecss.org/simple.
 * TODO consider moving all github.io stuff to other repos!
 - Leave github.io just for web!
 - Maybe leave games, not sure
-** DONE laic --> DO IT                                              :BORING:
+** DONE laic --> DO IT
 - Deserves own repo, it's essentially finished
 - Keep private maybe, but could ask for clearance
 - But it's boring
