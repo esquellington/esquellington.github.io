@@ -51,7 +51,6 @@ Emacs hacking and tests
   - Maybe ESC, but I rarely use it...
 * org-mode stuff: file:advanced_org_features.org
 * Literate programming howto/exercise: file:test-avx.org
-* Latex in comments file:LatexInComments/LatexInComments.org
 * Web file:../web/Web.org
 * Avy advanded usage
 https://karthinks.com/software/avy-can-do-anything/
@@ -88,15 +87,6 @@ https://karthinks.com/software/avy-can-do-anything/
   - 'l' for magit-log, and then 'a' or 'b' to see see commit history for all
     references or branches
   - 'R' to Rename a file
-* Debugging in Emacs
-** GUD
-- Builtin... ugly but works
-** realgud
-- Seems to have more features than GUD
-** dap-mode https://www.youtube.com/watch?v=0bilcQVSlbM
-- New thing using DAP extensions for VSCode... seems hard to install,
-  I'll pass
-- WATCH the video, maybe it's simpler than I thought
 * Pico8-mode
 - Consider custom mode for easy code section narrowing of .p8 files,
   syntax highlight, re-launching game, etc...
@@ -120,7 +110,6 @@ https://karthinks.com/software/avy-can-do-anything/
 ** Org-babel + SQL https://orgmode.org/worg/org-contrib/babel/languages/ob-doc-sql.html
 ** emacsql https://kitchingroup.cheme.cmu.edu/blog/2017/01/03/Find-stuff-in-org-mode-anywhere/
 ** org-sql, but it's the other way around https://github.com/ndwarshuis/org-sql
-* Sketches in org-mode file:OrgSketch/OrgSketch.org
 * ORG custom links
 - Run commandline for custom:link links
 ** Simple link abbreviation way:
@@ -152,8 +141,6 @@ https://karthinks.com/software/avy-can-do-anything/
 - MAYBE add it? seems feasible just find balanced {} and fold-this on
   that region
 - Works well with er/expand-region
-* TODO Learning Emacs Lisp course
-https://systemcrafters.net/learning-emacs-lisp/
 * DONE <2024-01-21 dom> UPDATE PACKAGES (Emacs 30 from sources)
 * DONE all-the-icons
 https://github.com/domtronn/all-the-icons.el
@@ -203,18 +190,7 @@ Couldn't we just do this in a compilation hook, similar to beardbolt?
   - 'C-x C-q' toggle off edit mode --> asks to commit if there was any changes
   - THIS IS AWESOME!
 ** File operations https://www.gnu.org/software/emacs/manual/html_node/emacs/Operating-on-Files.html
-* TODO Emacs * GPT https://github.com/karthink/gptel
-- Also, this blog post https://nullprogram.com/blog/2024/11/10/
-  explains how to run local LLMs using llama.cpp (supported by gptel),
-  even on CPU, or shitty GPU, consider trying
-- BUT no more free access to ChatGPT API so gptel doesn't work, only
-  chat in website does https://chatgpt.com/
-** DONE Try with Deepseek! https://github.com/karthink/gptel?tab=readme-ov-file#deepseek
-- Ah bugger API usage also requires payment, website chat is free, like ChatGPT
-* TODO Flycheck or Flymake?
-- Make is the default!?
-- eglot only supports Flymake?
-* TODO LSP
+* TODO [#A] LSP
 - eglot or lsp-mode? https://www.mgmarlow.com/words/2022-10-23-eglot/
 - Try eglot first!? (builtin mode)
 - https://www.youtube.com/watch?v=E-NAM9U5JYE
@@ -233,7 +209,29 @@ Couldn't we just do this in a compilation hook, similar to beardbolt?
 ** TODO lsp-mode
 ** TODO MAY interfere with dumb-jump!?
 - xref mechanism and keybindings may interfere, not sure
-* TODO Emacs + ASM
+* TODO [#C] Emacs * GPT https://github.com/karthink/gptel
+- Also, this blog post https://nullprogram.com/blog/2024/11/10/
+  explains how to run local LLMs using llama.cpp (supported by gptel),
+  even on CPU, or shitty GPU, consider trying
+- BUT no more free access to ChatGPT API so gptel doesn't work, only
+  chat in website does https://chatgpt.com/
+** DONE Try with Deepseek! https://github.com/karthink/gptel?tab=readme-ov-file#deepseek
+- Ah bugger API usage also requires payment, website chat is free, like ChatGPT
+* TODO [#C] Flycheck or Flymake?
+- Make is the default!?
+- eglot only supports Flymake?
+* TODO Debugging in Emacs
+** GUD
+- Builtin... ugly but works
+** realgud
+- Seems to have more features than GUD
+** dap-mode https://www.youtube.com/watch?v=0bilcQVSlbM
+- New thing using DAP extensions for VSCode... seems hard to install,
+  I'll pass
+- WATCH the video, maybe it's simpler than I thought
+* TODO Learning Emacs Lisp course
+https://systemcrafters.net/learning-emacs-lisp/
+* GOOD Emacs + ASM
 ** Emacs ASM syntax modes
 *** asm-mode
 - Simple builtin ASM major mode
@@ -336,7 +334,7 @@ Couldn't we just do this in a compilation hook, similar to beardbolt?
   viable for files that are part of a larger local project.
 - Works pretty well, but no SRC/ASM synchronized navigation
 - Not viable for files with local includes, I guess?
-** TODO beardbolt
+** GOOD beardbolt
 - https://github.com/joaotavora/beardbolt
 - Fork or rmsbolt that seems even better for C++, but not that active and not on
   MELPA
@@ -610,3 +608,5 @@ SHOW?
   complex templates
 **** TODO See effect of Exceptions
 - How much overhead do they add? ASM should make it apparent
+* GOOD Sketches in org-mode file:OrgSketch/OrgSketch.org
+* DONE Latex in comments file:LatexInComments/LatexInComments.org
