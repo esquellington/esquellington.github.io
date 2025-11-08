@@ -610,11 +610,16 @@ SHOW?
 - How much overhead do they add? ASM should make it apparent
 * GOOD Sketches in org-mode file:OrgSketch/OrgSketch.org
 * DONE Latex in comments file:LatexInComments/LatexInComments.org
-* emacs-clion
+* emacs-clion                                                           :WIP:
 - Interop with CLion IDE from Emacs
 - Main use-case is debugging in CLion, similar to VS debugger, much
   less painful than gdb/cgdb/gud
 ** TODO Consider minor-mode to add this functionality to C/C++ projects
+- "jetbrains" mode exists, but it just opens project/file in a move
+  verbose way, so why bother
+  - See https://github.com/emacs-php/jetbrains.el/blob/master/jetbrains.el
+- Would be useful to support customization vars and mode-local vars
+  (CLion window id)
 ** How can we can we send commands from Emacs to CLion?
 - only commandline it seems?
 - see https://www.jetbrains.com/help/clion/opening-files-from-command-line.html#linux
@@ -622,11 +627,10 @@ SHOW?
 - Not sure if there's some kind of listener
 - Project info is stored in .idea folder
 ** DONE Shell commands to open CLion
-- Open with [[shell:sh /opt/clion-*/bin/clion.sh &]]
+- Open [[shell:sh /opt/clion-*/bin/clion.sh &]]
 - Open project [[shell:sh /opt/clion-*/bin/clion.sh ~/Desktop/esquellington/tot/Trencadis/ &]]
-- Open project [[shell:sh /opt/clion-*/bin/clion.sh ~/Desktop/esquellington/tot/Trencadis/ && xdotool getactivewindow]]
 - Open file (in current project, if member) [[shell:sh /opt/clion-*/bin/clion.sh --line 32 ~/Desktop/esquellington/tot/Trencadis/tests/TentaclesMode.cpp &]]
-** TODO [#A] Command to open current Emacs project in CLion
+** GOOD [#A] Command to open current Emacs project in CLion
 - Ideally use projectile "project" or similar, but that's TOT not
   Trencadis and fails to open properly in CLion
 #+BEGIN_SRC elisp :results silent
@@ -667,20 +671,13 @@ SHOW?
   and I don't really understand the scripting/automation API, seems Java?
 - Is there a "listener" in CLion that we could send commands to?
 - Maybe we'd need a CLion plugin and send commands from Emacs to it?
-*** TODO Idea: Change focus to CLion and press "Debug" button automatically
+*** GOOD Idea: Change focus to CLion and press "Debug" button automatically
 - Instead of expecting CLion to listen to commands and send them from
   Emacs, we could try to "automate UI events" as if a human performed
   them
+**** xdotool
 - xdotool can do this it seems https://github.com/jordansissel/xdotool
 - NOT in wayland, but who cares
-**** TODO Clicking on icon (XClicker can automate clicks)
-- But requires accurate coords, messy and unstable
-- See https://ubuntuhandbook.org/index.php/2022/03/automate-mouse-clicks-ubuntu/
-- xdotool too, looks better
-**** TODO Pressing keyboard shortcut Shift+F9
-- Likely there's a way to send X keyboard presses to another app
-- See https://superuser.com/questions/518907/command-line-way-to-send-keystrokes-to-a-window-open-on-a-different-x-session
-**** xdotool
 - Get name of focused window
   - [[shell:sleep 5 && cat "/proc/$(xdotool getwindowpid "$(xdotool getwindowfocus)")/comm"]]
 - Get active window
@@ -693,6 +690,17 @@ SHOW?
 - Finding CLion actual window ID is not trivial
 *** Elisp
 #+BEGIN_SRC elisp :results silent
+  ;; TODO run this if clion--debug-window-id var is nil, and store it
+  ;; there, so that we can use it later in (clion-debug-current-project)
+  (defun clion-select-debug-window ()
+    "Select CLion debug window"
+    (interactive)
+    (let (cmd)
+      (setq cmd "xdotool selectwindow")
+      (message cmd)
+      (shell-command cmd)))
+
+  ;; TODO pass windowid as param or use mode-local var
   (defun clion-debug-current-project ()
     "Debug current project in CLion"
     (interactive)
@@ -703,9 +711,12 @@ SHOW?
       (message cmd)
       (shell-command cmd)))
 #+END_SRC
-** TODO [#B] Command to add/remove breakpoint at current position
+** TODO [#C] Command to add/remove breakpoint at current position
 - LOL, if I edit the breakpoint definitions in the CLion workspace
   file, they're hot-reloaded by CLion so they change interactively
 [[file:~/Escriptori/esquellington/tot/Trencadis/.idea/workspace.xml][breakpoints defined here]]
-- We could even show them Emacs
+- We could even show them in Emacs
+- Seems very fragile though... sending buffers to CLion and adding
+  breakpoints there is probably enough
 ** TODO [#C] Send file from CLion to Emacs
+- Useful for symmetry, but not really necessary
