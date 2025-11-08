@@ -610,3 +610,102 @@ SHOW?
 - How much overhead do they add? ASM should make it apparent
 * GOOD Sketches in org-mode file:OrgSketch/OrgSketch.org
 * DONE Latex in comments file:LatexInComments/LatexInComments.org
+* emacs-clion
+- Interop with CLion IDE from Emacs
+- Main use-case is debugging in CLion, similar to VS debugger, much
+  less painful than gdb/cgdb/gud
+** TODO Consider minor-mode to add this functionality to C/C++ projects
+** How can we can we send commands from Emacs to CLion?
+- only commandline it seems?
+- see https://www.jetbrains.com/help/clion/opening-files-from-command-line.html#linux
+- See https://www.jetbrains.com/help/clion/working-with-the-ide-features-from-command-line.html#toolbox
+- Not sure if there's some kind of listener
+- Project info is stored in .idea folder
+** DONE Shell commands to open CLion
+- Open with [[shell:sh /opt/clion-*/bin/clion.sh &]]
+- Open project [[shell:sh /opt/clion-*/bin/clion.sh ~/Desktop/esquellington/tot/Trencadis/ &]]
+- Open project [[shell:sh /opt/clion-*/bin/clion.sh ~/Desktop/esquellington/tot/Trencadis/ && xdotool getactivewindow]]
+- Open file (in current project, if member) [[shell:sh /opt/clion-*/bin/clion.sh --line 32 ~/Desktop/esquellington/tot/Trencadis/tests/TentaclesMode.cpp &]]
+** TODO [#A] Command to open current Emacs project in CLion
+- Ideally use projectile "project" or similar, but that's TOT not
+  Trencadis and fails to open properly in CLion
+#+BEGIN_SRC elisp :results silent
+  (defun clion-open-current-project ()
+    "Open current project in CLion"
+    (interactive)
+    (let (cmd)
+      (setq cmd (concat "/opt/clion-*/bin/clion.sh"
+                        " "
+                        "~/Desktop/esquellington/tot/Trencadis/" ;;TODO get this from current "project"
+                        " &")) ;async
+      (message cmd)
+      (shell-command cmd)))
+#+END_SRC
+** GOOD [#A] Command to open current Emacs buffer in CLion
+- Define in emacs-clion lisp mode or similar?
+#+BEGIN_SRC elisp :results silent
+  ;; CLion only seems to recognize "~/Desktop" file paths, not full
+  ;; paths "/home/oscar/ (as produced by (buffer-file-name) or relative
+  ;; path "~/Escriptori" (as produced by (abbreviate-file-name), so we
+  ;; must (string-replace) to produce a "~/Desktop" path
+  ;; IMPORTANT: This only works properly IF project is alwready open in CLion
+  (defun clion-open-current-file ()
+    "Open current file in CLion"
+    (interactive)
+    (let (cmd)
+      (setq cmd (concat "/opt/clion-*/bin/clion.sh"
+                        (format " --line %d --column %d "
+                                (line-number-at-pos nil 1) ;line number, ignores narrowing
+                                (current-column)) ;column number
+                        (string-replace "Escriptori" "Desktop"
+                                        (abbreviate-file-name (buffer-file-name)))))
+      (message cmd)
+      (shell-command cmd)))
+#+END_SRC
+** TODO [#A] Command to Run/Debug in CLion
+- Not sure how to do this... there seems to be no commandline option,
+  and I don't really understand the scripting/automation API, seems Java?
+- Is there a "listener" in CLion that we could send commands to?
+- Maybe we'd need a CLion plugin and send commands from Emacs to it?
+*** TODO Idea: Change focus to CLion and press "Debug" button automatically
+- Instead of expecting CLion to listen to commands and send them from
+  Emacs, we could try to "automate UI events" as if a human performed
+  them
+- xdotool can do this it seems https://github.com/jordansissel/xdotool
+- NOT in wayland, but who cares
+**** TODO Clicking on icon (XClicker can automate clicks)
+- But requires accurate coords, messy and unstable
+- See https://ubuntuhandbook.org/index.php/2022/03/automate-mouse-clicks-ubuntu/
+- xdotool too, looks better
+**** TODO Pressing keyboard shortcut Shift+F9
+- Likely there's a way to send X keyboard presses to another app
+- See https://superuser.com/questions/518907/command-line-way-to-send-keystrokes-to-a-window-open-on-a-different-x-session
+**** xdotool
+- Get name of focused window
+  - [[shell:sleep 5 && cat "/proc/$(xdotool getwindowpid "$(xdotool getwindowfocus)")/comm"]]
+- Get active window
+  - [[shell:xdotool getactivewindow]]
+- Get window by selecting it
+  [[shell:xdotool selectwindow]]
+  --> returns window ID
+- Send "Shift+F9" to specific window ID
+  [[shell:xdotool windowactivate 44040276 && xdotool key Shift+F9]]
+- Finding CLion actual window ID is not trivial
+*** Elisp
+#+BEGIN_SRC elisp :results silent
+  (defun clion-debug-current-project ()
+    "Debug current project in CLion"
+    (interactive)
+    (let (cmd)
+      (setq cmd (concat "xdotool windowactivate "
+                        "44040276" ;TODO windowid for CLion (ex: xdotool selectwindow)
+                        " && xdotool key Shift+F9"))
+      (message cmd)
+      (shell-command cmd)))
+#+END_SRC
+** TODO [#B] Command to add/remove breakpoint at current position
+- LOL, if I edit the breakpoint definitions in the CLion workspace
+  file, they're hot-reloaded by CLion so they change interactively
+[[file:~/Escriptori/esquellington/tot/Trencadis/.idea/workspace.xml][breakpoints defined here]]
+- We could even show them Emacs
+** TODO [#C] Send file from CLion to Emacs
