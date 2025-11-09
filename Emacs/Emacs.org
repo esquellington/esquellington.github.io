@@ -612,14 +612,18 @@ SHOW?
 * DONE Latex in comments file:LatexInComments/LatexInComments.org
 * emacs-clion                                                           :WIP:
 - Interop with CLion IDE from Emacs
-- Main use-case is debugging in CLion, similar to VS debugger, much
-  less painful than gdb/cgdb/gud
+- Main use-case is debugging in CLion, much less painful than
+  gdb/cgdb/gud
 ** TODO Consider minor-mode to add this functionality to C/C++ projects
 - "jetbrains" mode exists, but it just opens project/file in a move
-  verbose way, so why bother
-  - See https://github.com/emacs-php/jetbrains.el/blob/master/jetbrains.el
-- Would be useful to support customization vars and mode-local vars
-  (CLion window id)
+  verbose way than mine, see
+  https://github.com/emacs-php/jetbrains.el/blob/master/jetbrains.el
+- minor-mode would be great to support customization and mode-local
+  vars (ex: CLion window id)
+- Generalize to any external IDE and call it "puppeteer"?
+- Generalize sending keypresses to add new (command,keypress) pairs
+  and send them to the IDE using the same method (ex:
+  Build,Debug,etc...)
 ** How can we can we send commands from Emacs to CLion?
 - only commandline it seems?
 - see https://www.jetbrains.com/help/clion/opening-files-from-command-line.html#linux
@@ -729,3 +733,20 @@ SHOW?
   breakpoints there is probably enough
 ** TODO [#C] Send file from CLion to Emacs
 - Useful for symmetry, but not really necessary
+** TODO [#C] VSCode support
+- seems feasible, commandline args are quite nice
+  https://code.visualstudio.com/docs/configure/command-line
+*** [#A] Open (Makefile) project
+*** [#A] Open file in project
+*** [#A] Run debugger
+*** [#C] Add/Remove breakpoint at point
+** TODO [#C] VisualStudio support
+- Current VisualBasic method sucks, if there's a commandline way
+  without extra code it'd be a lot better
+- Otherwise, the minor-mode could just generate the VB script on the
+  fly, no need to store it as a separate file and call it, too convoluted
+*** [#A] Open file in project
+*** [#A] Run debugger
+*** [#C] Add/Remove breakpoint at point
+*** [#C] Open project
+- Not so necessary, it's often open, but may be useful
