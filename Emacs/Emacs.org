@@ -637,18 +637,22 @@ SHOW?
 ** GOOD [#A] Command to open current Emacs project in CLion
 - Ideally use projectile "project" or similar, but that's TOT not
   Trencadis and fails to open properly in CLion
+
 #+BEGIN_SRC elisp :results silent
   (defun clion-open-current-project ()
     "Open current project in CLion"
     (interactive)
     (let (cmd)
-      (setq cmd (concat "/opt/clion-*/bin/clion.sh"
+      (setq cmd (concat "/opt/clion-*/bin/clion.sh" ;;TODO find or customize
                         " "
                         "~/Desktop/esquellington/tot/Trencadis/" ;;TODO get this from current "project"
                         " &")) ;async
       (message cmd)
       (shell-command cmd)))
 #+END_SRC
+*** TODO I think the (Makefile) CLion project needs to be setup first (and .idea file created)
+- So 1st time CLion is opened in this folder it will not know about
+  the project, needs to be setup first
 ** GOOD [#A] Command to open current Emacs buffer in CLion
 - Define in emacs-clion lisp mode or similar?
 #+BEGIN_SRC elisp :results silent
@@ -670,7 +674,7 @@ SHOW?
       (message cmd)
       (shell-command cmd)))
 #+END_SRC
-** TODO [#A] Command to Run/Debug in CLion
+** GOOD [#A] Command to Run/Debug in CLion
 - Not sure how to do this... there seems to be no commandline option,
   and I don't really understand the scripting/automation API, seems Java?
 - Is there a "listener" in CLion that we could send commands to?
@@ -737,7 +741,36 @@ SHOW?
 - seems feasible, commandline args are quite nice
   https://code.visualstudio.com/docs/configure/command-line
 *** [#A] Open (Makefile) project
+#+BEGIN_SRC elisp :results silent
+  (defun vscodium-open-current-project ()
+    "Open current project in VSCodium"
+    (interactive)
+    (let (cmd)
+      (setq cmd (concat "/snap/bin/codium" ;;TODO find or customize
+                        " "
+                        "~/Desktop/esquellington/tot/Trencadis/" ;;TODO get this from current "project"
+                        " &")) ;async
+      (message cmd)
+      (shell-command cmd)))
+#+END_SRC
 *** [#A] Open file in project
+#+BEGIN_SRC elisp :results silent
+  (defun vscodium-open-current-file ()
+    "Open current file in VSCodium"
+    (interactive)
+    (let (cmd)
+      (setq cmd (concat "/snap/bin/codium" ;;TODO find or customize
+                        " --goto " ;;req to jump to line/col
+                        ;;(string-replace "Escriptori" "Desktop"
+                        (abbreviate-file-name (buffer-file-name))
+                                          ;)
+                        (format ":%d:%d"
+                                (line-number-at-pos nil 1) ;line number, ignores narrowing
+                                (current-column))
+                        )) ;column number
+      (message cmd)
+      (shell-command cmd)))
+#+END_SRC
 *** [#A] Run debugger
 *** [#C] Add/Remove breakpoint at point
 ** TODO [#C] VisualStudio support
