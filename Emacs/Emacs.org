@@ -698,10 +698,10 @@ SHOW?
 - Finding CLion actual window ID is not trivial
 *** Elisp
 #+BEGIN_SRC elisp :results silent
-  ;; TODO run this if clion--debug-window-id var is nil, and store it
+  ;; TODO run this if clion--window-id var is nil, and store it
   ;; there, so that we can use it later in (clion-debug-current-project)
-  (defun clion-select-debug-window ()
-    "Select CLion debug window"
+  (defun clion-select-window ()
+    "Select CLion window"
     (interactive)
     (let (cmd)
       (setq cmd "xdotool selectwindow")
@@ -714,7 +714,7 @@ SHOW?
     (interactive)
     (let (cmd)
       (setq cmd (concat "xdotool windowactivate "
-                        "8388692" ;TODO windowid for CLion (ex: xdotool selectwindow)
+                        "52428884" ;TODO windowid for CLion (ex: xdotool selectwindow)
                         " && xdotool key Shift+F9"))
       (message cmd)
       (shell-command cmd)))
@@ -724,7 +724,7 @@ SHOW?
     (interactive)
     (let (cmd)
       (setq cmd (concat "xdotool windowkill "
-                        "8388692")) ;TODO windowid for CLion (ex: xdotool selectwindow)
+                        "52428884")) ;TODO windowid for CLion (ex: xdotool selectwindow)
       (message cmd)
       (shell-command cmd)))
 #+END_SRC
