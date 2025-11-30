@@ -783,3 +783,15 @@ SHOW?
 *** [#C] Add/Remove breakpoint at point
 *** [#C] Open project
 - Not so necessary, it's often open, but may be useful
+** DONE Run trencadis from anywhere
+- This is now in init.el [[file:~/.emacs.d/init.el::defun project-run (]]
+#+BEGIN_SRC elisp :results silent
+  (defun run-trencadis ()
+    "Run Trencadis"
+    (interactive)
+    (let (cmd)
+      (setq cmd (concat "cd ~/Desktop/esquellington/tot/Trencadis/;"
+                        "./trencadis_release &"))
+      (message cmd)
+      (shell-command cmd)))
+#+END_SRC
