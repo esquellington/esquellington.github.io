@@ -87,9 +87,12 @@ https://karthinks.com/software/avy-can-do-anything/
   - 'l' for magit-log, and then 'a' or 'b' to see see commit history for all
     references or branches
   - 'R' to Rename a file
+* Emacs internals
+- Interesting blog https://thecloudlet.github.io/blog/project/emacs-01/
 * Pico8-mode
 - Consider custom mode for easy code section narrowing of .p8 files,
   syntax highlight, re-launching game, etc...
+- NO, too much work... probably already exists!?
 * ORG-PAPERS
 - Organize ALL papers in an org-based scheme
 - All .PDF in the SAME directory, with systematic YEAR_Name.pdf
