@@ -613,20 +613,10 @@ SHOW?
 - How much overhead do they add? ASM should make it apparent
 * GOOD Sketches in org-mode file:OrgSketch/OrgSketch.org
 * DONE Latex in comments file:LatexInComments/LatexInComments.org
-* emacs-clion                                                           :WIP:
+* emacs-clion
 - Interop with CLion IDE from Emacs
 - Main use-case is debugging in CLion, much less painful than
   gdb/cgdb/gud
-** TODO Consider minor-mode to add this functionality to C/C++ projects
-- "jetbrains" mode exists, but it just opens project/file in a move
-  verbose way than mine, see
-  https://github.com/emacs-php/jetbrains.el/blob/master/jetbrains.el
-- minor-mode would be great to support customization and mode-local
-  vars (ex: CLion window id)
-- Generalize to any external IDE and call it "puppeteer"?
-- Generalize sending keypresses to add new (command,keypress) pairs
-  and send them to the IDE using the same method (ex:
-  Build,Debug,etc...)
 ** How can we can we send commands from Emacs to CLion?
 - only commandline it seems?
 - see https://www.jetbrains.com/help/clion/opening-files-from-command-line.html#linux
@@ -740,6 +730,18 @@ SHOW?
   breakpoints there is probably enough
 ** TODO [#C] Send file from CLion to Emacs
 - Useful for symmetry, but not really necessary
+** TODO [#B] Consider minor-mode to add this functionality to C/C++ projects
+- "jetbrains" mode exists, but it just opens project/file in a more
+  verbose way than mine, see
+  https://github.com/emacs-php/jetbrains.el/blob/master/jetbrains.el
+- minor-mode would be great to support customization and mode-local
+  vars (ex: CLion window id)
+- Generalize to any external IDE and call it "puppeteer"?
+- Generalize sending keypresses to add new (command,keypress) pairs
+  and send them to the IDE using the same method (ex:
+  Build,Debug,etc...)
+- Simplest minor mode just for clion first, add all existing commands
+  and find a cool name
 ** TODO [#C] VSCode support
 - seems feasible, commandline args are quite nice
   https://code.visualstudio.com/docs/configure/command-line
@@ -798,3 +800,24 @@ SHOW?
       (message cmd)
       (shell-command cmd)))
 #+END_SRC
+* org-id
+:PROPERTIES:
+:ID:       55a5ca56-b964-4fb0-8843-373c8617b5f7
+:END:
+
+The (builtin) Elisp func (org-id-get-create) adds a "globally unique" ID to an org header
+#+BEGIN_SRC elisp :results silent
+  (org-id-get-create)
+#+END_SRC
+
+The ID is added as header PROPERTIES, and can be used to link to that
+header from any org file (ex [[id:55a5ca56-b964-4fb0-8843-373c8617b5f7]])
+or even in code comments or anywhere else (using
+org-open-at-point-global)
+
+I'm not sure what "global" means here, or how IDs are found across
+directories, likely only org-agenda-files are considered when
+searching for ID links, and "global" means unique within the set of
+agenda files? --> MM no, I can add ID headers to any org file not in
+the agenda list, and they're found from other org files (also not in
+the agenda)
