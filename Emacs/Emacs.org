@@ -821,3 +821,10 @@ searching for ID links, and "global" means unique within the set of
 agenda files? --> MM no, I can add ID headers to any org file not in
 the agenda list, and they're found from other org files (also not in
 the agenda)
+
+Docs are obscure, org-id seems to be part of org-capture/attachments,
+but it's not very clear, no good examples. I wonder if anybody has
+used this to track "tasks" by ID instead of relying on header text
+matching... feels useful to track dependencies as a DAG without
+relying on header text/links. If ID are truly global, then they can be
+moved to other files, annotated with extra properties, etc
