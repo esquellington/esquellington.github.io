@@ -197,6 +197,8 @@ Couldn't we just do this in a compilation hook, similar to beardbolt?
 - eglot or lsp-mode? https://www.mgmarlow.com/words/2022-10-23-eglot/
 - Try eglot first!? (builtin mode)
 - https://www.youtube.com/watch?v=E-NAM9U5JYE
+** TODO installing clangd (easy)
+- https://clangd.llvm.org/installation.html
 ** TODO eglot
 - https://www.gnu.org/software/emacs/manual/html_mono/eglot.html
 - Works inside a Project (.git)
@@ -209,7 +211,13 @@ Couldn't we just do this in a compilation hook, similar to beardbolt?
      :documentOnTypeFormattingProvider
      :colorProvider
      :foldingRangeProvider))
+** TODO Requires passing compilation flags to clangd
+- https://clangd.llvm.org/installation.html
+- Either compile_flags.txt or compile_commands.json
+- Ah but the .txt doesn't work well enough, and the .json is hard to
+  generate (from Makefile maybe?)
 ** TODO lsp-mode
+- https://emacs-lsp.github.io/lsp-mode/tutorials/CPP-guide/
 ** TODO MAY interfere with dumb-jump!?
 - xref mechanism and keybindings may interfere, not sure
 * TODO [#C] Emacs * GPT https://github.com/karthink/gptel
@@ -613,10 +621,12 @@ SHOW?
 - How much overhead do they add? ASM should make it apparent
 * GOOD Sketches in org-mode file:OrgSketch/OrgSketch.org
 * DONE Latex in comments file:LatexInComments/LatexInComments.org
-* emacs-clion
+* TODO emacs-clion
 - Interop with CLion IDE from Emacs
 - Main use-case is debugging in CLion, much less painful than
   gdb/cgdb/gud
+- Overall it's a cool idea, and it WORKS, but I don't use it often
+  enough to justify spending time on it for now
 ** How can we can we send commands from Emacs to CLion?
 - only commandline it seems?
 - see https://www.jetbrains.com/help/clion/opening-files-from-command-line.html#linux
@@ -828,3 +838,7 @@ used this to track "tasks" by ID instead of relying on header text
 matching... feels useful to track dependencies as a DAG without
 relying on header text/links. If ID are truly global, then they can be
 moved to other files, annotated with extra properties, etc
+* corfu <2026-04-01 mié>
+- Nice completion UI, works oob in elisp and text (ex: org-mode), but
+  not in C++, needs a completion backend
+- https://github.com/minad/corfu?tab=readme-ov-file
