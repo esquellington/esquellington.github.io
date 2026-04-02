@@ -199,6 +199,14 @@ Couldn't we just do this in a compilation hook, similar to beardbolt?
 - https://www.youtube.com/watch?v=E-NAM9U5JYE
 ** TODO installing clangd (easy)
 - https://clangd.llvm.org/installation.html
+- Tried on <2026-04-01 mié>, it seems to work but includes fail by
+  default and require a ton of configuration to get right, sigh
+*** GOOD Requires passing compilation flags
+- Either compile_flags.txt or compile_commands.json
+- Ah but the .txt doesn't work well enough, no point
+*** TODO compile_commands.json seems the best option
+- But must be generated, seems very verbose, and no official tool for Makefile
+- https://sarcasm.github.io/notes/dev/compilation-database.html
 ** TODO eglot
 - https://www.gnu.org/software/emacs/manual/html_mono/eglot.html
 - Works inside a Project (.git)
@@ -211,11 +219,6 @@ Couldn't we just do this in a compilation hook, similar to beardbolt?
      :documentOnTypeFormattingProvider
      :colorProvider
      :foldingRangeProvider))
-** TODO Requires passing compilation flags to clangd
-- https://clangd.llvm.org/installation.html
-- Either compile_flags.txt or compile_commands.json
-- Ah but the .txt doesn't work well enough, and the .json is hard to
-  generate (from Makefile maybe?)
 ** TODO lsp-mode
 - https://emacs-lsp.github.io/lsp-mode/tutorials/CPP-guide/
 ** TODO MAY interfere with dumb-jump!?
