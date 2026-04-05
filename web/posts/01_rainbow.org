@@ -75,7 +75,7 @@ The picture below shows a twinned primary bow and secondary bow above
 it (Source: [[https://commons.wikimedia.org/wiki/File:Alexander%E2%80%99s_band_will_1.jpg][Wikimedia Commons]])
 
 #+ATTR_HTML: :alt Twinned Rainbow :width 90%
-https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/Alexander%E2%80%99s_band_will_1.jpg/800px-Alexander%E2%80%99s_band_will_1.jpg
+https://upload.wikimedia.org/wikipedia/commons/a/a2/Alexander%E2%80%99s_band_will_1.jpg
 
 * So, what did I see?
 Given that the 2 bows in my picture were not concentric they could
