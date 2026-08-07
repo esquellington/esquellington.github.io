@@ -93,6 +93,9 @@ https://karthinks.com/software/avy-can-do-anything/
 - Consider custom mode for easy code section narrowing of .p8 files,
   syntax highlight, re-launching game, etc...
 - NO, too much work... probably already exists!?
+* proced
+- Process viewer, very cool, better than PS and TOP
+- https://laurencewarne.github.io/emacs/programming/2022/12/26/exploring-proced.html
 * ORG-PAPERS
 - Organize ALL papers in an org-based scheme
 - All .PDF in the SAME directory, with systematic YEAR_Name.pdf
@@ -193,6 +196,20 @@ Couldn't we just do this in a compilation hook, similar to beardbolt?
   - 'C-x C-q' toggle off edit mode --> asks to commit if there was any changes
   - THIS IS AWESOME!
 ** File operations https://www.gnu.org/software/emacs/manual/html_node/emacs/Operating-on-Files.html
+* TODO [#A] emacs Setup Linux env from scratch
+- Org file with sequential (sub)-sections to install all stuff I need
+  on a Linux PC to
+  - Write
+    - Emacs
+  - Dev
+  - Etc
+- Should run in vanilla Emacs, could install any Emacs stuff needed first?
+- Should assume clean Ubuntu install, but could have sections for
+  SteamDeck or others. Could test in a virtual machine with clean install
+- Anonymous, in case I want to upload/share it, shouldn't give away
+  any personal details, especially passwords
+- Ensure (shell) commands run in proper terminal as if they were typed
+  in manually
 * TODO [#A] LSP
 - eglot or lsp-mode? https://www.mgmarlow.com/words/2022-10-23-eglot/
 - Try eglot first!? (builtin mode)
@@ -845,3 +862,6 @@ moved to other files, annotated with extra properties, etc
 - Nice completion UI, works oob in elisp and text (ex: org-mode), but
   not in C++, needs a completion backend
 - https://github.com/minad/corfu?tab=readme-ov-file
+* org mobile
+- https://orgro.org/ recomana Richard, sembla simple, val 5 lliures
+- https://www.beorgapp.com/ versio prova, funciona pero una mica clunky
