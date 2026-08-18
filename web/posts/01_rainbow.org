@@ -263,3 +263,4 @@ farthest FoF border), so d = 113km, not far enough for the west coast
 - This paper [[https://cs.dartmouth.edu/~wjarosz/publications/sadeghi11physically.html][Physically-based simulation of rainbows]] explains and
   computationally reproduces several kinds of rainbows, including
   secondary bows, supernumeraries and twinned bows. It's worth a read.
+- Long and detailed report [[https://tlakoba.w3.uvm.edu/AppliedUGMath/auxpaper_rainbow_glory_review.pdf][The mathematical physics of rainbows and glories]], read in diagonal
