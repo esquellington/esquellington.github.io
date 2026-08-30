@@ -4,10 +4,11 @@ Emacs hacking and tests
 
 * Build Emacs from source
 - Get source from http://git.savannah.gnu.org/cgit/emacs.git
+- git clone --depth 1 (to get last revision, not full history)
 - git clone -b BRANCH git://git.sv.gnu.org/emacs.git
   - BRANCH = master for latest, but sometimes buggy
   - BRANCH = emacs-28 for next release
-- ./autoconf
+- ./autogen.sh
 - ./configure
 - make bootstrap
 - make
