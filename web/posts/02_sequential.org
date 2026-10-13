@@ -11,15 +11,16 @@ towards a body A that is initially at rest, beside a static wall C (A
 is sandwiched between B and C)
 
 \[m_a \leq m_b\]
-\[V_a^0 = 0\], \[V_b^0 > 0\]
+\[V_a^0 = 0\]
+\[V_b^0 > 0\]
 
-\[w_a = \frac{\frac{1}{m_a}}{\frac{1}{m_a} + \frac{1}{m_b}} \],
+\[w_a = \frac{\frac{1}{m_a}}{\frac{1}{m_a} + \frac{1}{m_b}} \]
 \[w_b = 1-w_a\]
 
 In a perfecly inelastic collisions, B will always move towards A, A
 will always move towards C, C will never move.
 
-The solution is \[V_b(t+dt) = V_a(t+dt) = 0\], due to inelasticity and \[V_a^0=V_c^0=0\].
+The solution is \[V_b(t+dt) = V_a(t+dt) = 0\] due to inelasticity and \[V_a^0=V_c^0=0\].
 
 * Inelastic collision response
 
@@ -30,7 +31,7 @@ Instantaneous velocity changes to conserve momentum
 \[V_a^+ = V_a^- + V_{ab} w_a \]
 \[V_b^+ = V_b^- - V_{ab} w_b \]
 
-* SI Iteration \[k\]
+* SI Iteration $k$
 Solve collision AC constraint \[V_{ac}>=0\] results in \[V_a^{(k)} = 0\]
 
 Solve collision AB constraint \[V_{ab}<=0\]
@@ -69,6 +70,7 @@ as \[ k^* = \frac{log(\epsilon)-log(V_b^0)}{log(w_a)} \]
 #+END_SRC
 
 #+RESULTS:
+
 [[file:../img/sequential.png]]
 
 * Conclusions
