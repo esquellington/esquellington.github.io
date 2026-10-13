@@ -1,0 +1,98 @@
+#+title: Sequential Impulses Convergence
+#+date: <2026-10-12 lun>
+#+author: Oscar
+
+Sequential Impulses *sucks* (for impact resolution)
+
+* Problem
+
+We want to solve a perfectly inelastic impact of a body B moving
+towards a body A that is initially at rest, beside a static wall C (A
+is sandwiched between B and C)
+
+\[m_a \leq m_b\]
+\[V_a^0 = 0\], \[V_b^0 > 0\]
+
+\[w_a = \frac{\frac{1}{m_a}}{\frac{1}{m_a} + \frac{1}{m_b}} \],
+\[w_b = 1-w_a\]
+
+In a perfecly inelastic collisions, B will always move towards A, A
+will always move towards C, C will never move.
+
+The solution is \[V_b(t+dt) = V_a(t+dt) = 0\], due to inelasticity and \[V_a^0=V_c^0=0\].
+
+* Inelastic collision response
+
+Relative impact velocity
+\[V_{ab}=V_b-V_a\]
+
+Instantaneous velocity changes to conserve momentum
+\[V_a^+ = V_a^- + V_{ab} w_a \]
+\[V_b^+ = V_b^- - V_{ab} w_b \]
+
+* SI Iteration \[k\]
+Solve collision AC constraint \[V_{ac}>=0\] results in \[V_a^{(k)} = 0\]
+
+Solve collision AB constraint \[V_{ab}<=0\]
+\[V_{ab} = V_b - V_a\], but \[V_a = 0\] due to AC, so we have
+
+\begin{align*}
+V_b^{(k)} &= V_b^{(k-1)} - V_b^{(k-1)} w_b \\
+          &= V_b^{(k-1)} w_a \\
+          &= V_b^{(0)} w_a^{k}
+\end{align*}
+
+* Solution
+
+In the limit, due to inelasticity
+\[V_b^{(\infty)} = 0\]
+
+We'll stop iterating when
+\[V_b^{(k^*)} <= \epsilon\]
+
+We can compute \[k^*\] from \[\epsilon\]
+
+as \[ k^* = \frac{log(\epsilon)-log(V_b^0)}{log(w_a)} \]
+
+* Plot
+#+BEGIN_SRC gnuplot :file ../img/sequential.png
+  set xrange [1:200]
+  set yrange [0:0.01]
+  plot 10*0.5**x with lines, \
+       10*0.6**x with lines, \
+       10*0.7**x with lines, \
+       10*0.8**x with lines, \
+       10*0.9**x with lines, \
+       10*0.95**x with lines, \
+       10*0.952**x with lines, \
+       1e-3 with lines
+#+END_SRC
+
+#+RESULTS:
+[[file:../img/sequential.png]]
+
+* Conclusions
+
+At first glance it looks like the error shrinks with \[w_a < 1\] each
+iteration, so the smaller \[w_a\], the faster the error decreases, and
+\[w_a\] decreases with mass ratio \[m_a/m_b\]. Relative error reduces
+steadily per-iteration.
+
+However, converging below a given *absolute* precision \[\epsilon\]
+requires incresingly more iterations as \[w_a\] grows.
+
+For \[V_b^0 = 10m/s\] and \[\epsilon = 10^{-3}\]
+we solve \[ k^* = (log(10^{-3})-log(10)) / log(w_a) \]
+for \[w_a \in [0.5,0.95]\] representing mass ratios \[1:1\] to \[1:20\]
+we get \[k^* \in [13.2877, 179.562]\]
+
+This means that for fast impacts and large mass ratios \[> 1:10\] we
+need a *lot* of iterations to converge to \[\epsilon\], and no
+warmstarting is possible. From \[w_a=0.9\] to \[w_a=0.95\] iteration
+count required to achieve same epsilon duplicates.
+
+* TODO Direct Solution
+
+Non-iterative solution should be trivial for this problem, we could
+solve system of eq with 2 vars and 2 constraints, assuming vel will
+never change sign, and arrive at \[V_b=0\]

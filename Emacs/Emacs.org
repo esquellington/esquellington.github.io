@@ -4,14 +4,15 @@ Emacs hacking and tests
 
 * Build Emacs from source
 - Get source from http://git.savannah.gnu.org/cgit/emacs.git
-- git clone --depth 1 (to get last revision, not full history)
-- git clone -b BRANCH git://git.sv.gnu.org/emacs.git
+- [[shell:git clone --depth 1 -b emacs-31 git://git.sv.gnu.org/emacs.git]]
+- --depth 1 (to get last revision, not full history)
+- -b BRANCH
   - BRANCH = master for latest, but sometimes buggy
-  - BRANCH = emacs-28 for next release
+  - BRANCH = emacs-31 for next release
 - ./autogen.sh
 - ./configure
-- make bootstrap
-- make
+- make -j
+- make install (optional)
 * [[file:~/.emacs.d/init.el][init.el]]
 * Remapping CAPS_LOCK to CTRL
 - setxkbmap -option ctrl:nocaps (OR BETTER -option caps:ctrl_modifier)
@@ -866,3 +867,16 @@ moved to other files, annotated with extra properties, etc
 * org mobile
 - https://orgro.org/ recomana Richard, sembla simple, val 5 lliures
 - https://www.beorgapp.com/ versio prova, funciona pero una mica clunky
+* TODO tree-sitter
+- See https://www.masteringemacs.org/article/how-to-get-started-tree-sitter
+- req [[shell::sudo apt-get install libtree-sitter-dev]]
+- req https://github.com/tree-sitter/tree-sitter-cpp and
+  https://github.com/tree-sitter/tree-sitter-c
+- req enabling '<major-mode>-ts-mode'
+- Test with M-x treesit-explore-mode and M-x treesit-inspect-mode
+* hideshow
+- [[elisp:hs-minor-mode]] to enable
+- hs-cycle --> cycle current block
+- hs-toggle-all --> hide/show all blocks in buffer
+- I't cool but I dont think I'll use it.. hs-toggle-all is fine to get
+  global file overview though
