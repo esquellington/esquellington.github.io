@@ -82,6 +82,7 @@ extra return after #+RESULTS: before the image link
 #+RESULTS:
 
 [[file:../img/table.png]]
+
 ** Graphviz
 
 Graphviz SRC works, similar to Gnuplot we need an extra return
