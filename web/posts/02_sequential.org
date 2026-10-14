@@ -22,7 +22,7 @@ is sandwiched between B and C)
 \]
 and \[w_b = 1-w_a\]
 
-The mass ratio $\frac{m_b}{m_a}$ can also be written as $\frac{w_a}{1-w_b}$.
+The mass ratio $\frac{m_b}{m_a}$ can also be written as $\frac{w_a}{1-w_a}$.
 
 In a perfecly inelastic collisions, B will always move towards A, A
 will always move towards C, C will never move.
@@ -69,7 +69,8 @@ Setting $V_b^0 = 10m/s$ and $\epsilon = 10^{-3}$ we solve:
 for mass ratios $A:B \in [1..20]$ with $w_a \in [0.5,0.952]$ and get
 $k^* \in [13, 190]$
 
-#+BEGIN_SRC gnuplot :file ../img/sequential.png :exports none
+Plot $V_b(k)$ along $k$, for various $w_a$ from mass-ratio
+#+BEGIN_SRC gnuplot :file ../img/sequential_vb.png :exports none
   set xrange [1:200]
   set yrange [0:0.01]
   plot 10*(1/(1+1/1.0))**x with lines, \
@@ -84,23 +85,29 @@ $k^* \in [13, 190]$
 
 #+RESULTS:
 
-[[file:../img/sequential.png]]
+[[file:../img/sequential_vb.png]]
 
-#+BEGIN_SRC gnuplot :file ../img/sequential_mr.png :exports none
-  set xrange [0.5:0.99]
-  set yrange [0:20]
-  plot x/(1-x) with lines, \
-       1, \
-       2, \
-       3, \
-       4, \
-       5, \
-       10
+Plot $k^*(w_a)$ along $w_a \in [10^{-3},1]$
+#+BEGIN_SRC gnuplot :file ../img/sequential_k_w.png :exports none
+  set xrange [0.001:1]
+  set yrange [0:200]
+  plot (log(0.001) - log(10))/log(x) with lines
 #+END_SRC
 
 #+RESULTS:
 
-[[file:../img/sequential_mr.png]]
+[[file:../img/sequential_k_w.png]]
+
+Plot $k^*(m_b/m_a)$ along mass-ratio [1,100] --> this looks LINEAR, 2x mass ratio, 2x iterations
+#+BEGIN_SRC gnuplot :file ../img/sequential_k_mr.png :exports none
+  set xrange [1:100]
+  set yrange [0:1000]
+  plot (log(0.001) - log(10))/log((1/(1+1/x))) with lines
+#+END_SRC
+
+#+RESULTS:
+
+[[file:../img/sequential_k_mr.png]]
 
 * Conclusions
 
