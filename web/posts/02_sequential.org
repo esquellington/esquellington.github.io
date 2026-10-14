@@ -98,7 +98,9 @@ Plot $k^*(w_a)$ along $w_a \in [10^{-3},1]$
 
 [[file:../img/sequential_k_w.png]]
 
-Plot $k^*(m_b/m_a)$ along mass-ratio [1,100] --> this looks LINEAR, 2x mass ratio, 2x iterations
+Plot $k^*(m_b/m_a)$ along mass-ratio [1,100] --> this looks LINEAR, 2x
+mass ratio, 2x iterations
+TODO formula may be simplified for specific numbers, and find linear slope?
 #+BEGIN_SRC gnuplot :file ../img/sequential_k_mr.png :exports none
   set xrange [1:100]
   set yrange [0:1000]
@@ -120,9 +122,8 @@ However, converging below a given *absolute* precision $\epsilon$
 requires incresingly more iterations as $w_a$ grows.
 
 This means that for fast impacts and large mass ratios $>1:10$ we need
-a *lot* of iterations to converge to $\epsilon$. From $w_a=0.9$ to
-$w_a=0.95$ iteration count required to achieve same epsilon
-duplicates.
+a *lot* of iterations to converge to $\epsilon$. Overall the iteration
+count grows *linearly* with the mass ratio (see last plot)
 
 This makes Sequential Impulses really inefficient for impact
 problems. It's not so bad for persistent contact problems, where
