@@ -54,23 +54,23 @@ V_b^{(k)} &= V_b^{(k-1)} - V_b^{(k-1)} w_b \\
 
 * Solution
 
-Due to inelasticity, in the limit $V_b^{(\infty)} = 0$. In practice
-we'll iterate until an *absolute precision* threshold $\epsilon > 0$
-is met $V_b^{(k^*)} <= \epsilon$. We can compute $k^*$ as:
+Due to inelasticity, in the limit $V_b^{(\infty)} = 0$. In practice we'll
+iterate until error drops below an absolute threshold $V_b^{(k^*)} <=
+\epsilon$. We can assume $k^*$ is real and isolate it taking $\log$ on
+both sides:
 
- \[ k^* = \frac{log(\epsilon)-log(V_b^0)}{log(w_a)} \]
+ \[ k^* = \frac{\log(\epsilon/V_b^0)}{\log(w_a)} \]
 
 ** Example
 
-Setting $V_b^0 = 10m/s$ and $\epsilon = 10^{-3}$ we solve:
+Setting $V_b^0 = 10m/s$ and $\epsilon = 10^{-3}$ we solve $k^* =
+(\log(10^{-3}/10)) / \log(w_a)$
 
-\[ k^* = (log(10^{-3})-log(10)) / log(w_a) \]
+for mass ratios $m_b/m_a \in [1..20]$ and get $k^* \in [13, 190]$
 
-for mass ratios $A:B \in [1..20]$ with $w_a \in [0.5,0.952]$ and get
-$k^* \in [13, 190]$
-
-Plot $V_b(k)$ along $k$, for various $w_a$ from mass-ratio
-#+BEGIN_SRC gnuplot :file ../img/sequential_vb.png :exports none
+#+BEGIN_SRC gnuplot :file ../img/sequential_vb_k.png :exports none :results none
+  set term png size 600, 300
+  set size ratio 0.5
   set xrange [1:200]
   set yrange [0:0.01]
   plot 10*(1/(1+1/1.0))**x with lines, \
@@ -83,32 +83,23 @@ Plot $V_b(k)$ along $k$, for various $w_a$ from mass-ratio
        1e-3 with lines
 #+END_SRC
 
-#+RESULTS:
-
-[[file:../img/sequential_vb.png]]
-
-Plot $k^*(w_a)$ along $w_a \in [10^{-3},1]$
-#+BEGIN_SRC gnuplot :file ../img/sequential_k_w.png :exports none
-  set xrange [0.001:1]
-  set yrange [0:200]
-  plot (log(0.001) - log(10))/log(x) with lines
-#+END_SRC
-
-#+RESULTS:
-
-[[file:../img/sequential_k_w.png]]
+#+CAPTION: Plot $V_b(k)$ along $k>=1$ for $m_b/m_a \in [1..20]
+#+ATTR_HTML: image :width 95%
+[[file:../img/sequential_vb_k.png]]
 
 Plot $k^*(m_b/m_a)$ along mass-ratio [1,100] --> this looks LINEAR, 2x
 mass ratio, 2x iterations
 TODO formula may be simplified for specific numbers, and find linear slope?
-#+BEGIN_SRC gnuplot :file ../img/sequential_k_mr.png :exports none
+#+BEGIN_SRC gnuplot :file ../img/sequential_k_mr.png :exports none :results none
+  set term png size 600, 300
+  set size ratio 0.5
   set xrange [1:100]
   set yrange [0:1000]
-  plot (log(0.001) - log(10))/log((1/(1+1/x))) with lines
+  plot log((1e-3)/10)/log((1/(1+1/x))) with lines
 #+END_SRC
 
-#+RESULTS:
-
+#+CAPTION: Plot $k^*(m_b/m_a)$
+#+ATTR_HTML: image :width 95%
 [[file:../img/sequential_k_mr.png]]
 
 * Conclusions
@@ -121,9 +112,10 @@ steadily per-iteration.
 However, converging below a given *absolute* precision $\epsilon$
 requires incresingly more iterations as $w_a$ grows.
 
-This means that for fast impacts and large mass ratios $>1:10$ we need
-a *lot* of iterations to converge to $\epsilon$. Overall the iteration
-count grows *linearly* with the mass ratio (see last plot)
+This means that for fast impacts and large mass ratios $m_b/m_a > 10$
+we need a *lot* of iterations to converge below $\epsilon$. Overall
+the iteration count grows *linearly* with the mass ratio (see last
+plot)
 
 This makes Sequential Impulses really inefficient for impact
 problems. It's not so bad for persistent contact problems, where
