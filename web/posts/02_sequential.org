@@ -8,41 +8,42 @@ inefficient for rigid impact problems.
 * Problem
 
 We want to solve a perfectly inelastic impact of a body B moving
-towards a body A that is initially at rest, beside a static wall C (A
-is sandwiched between B and C)
+towards a body A that is initially at rest, beside a static wall C, so
+that A is sandwiched between B and C.
 
-\[V_a^0 = 0 \quad V_b^0 > 0\]
+(TODO sketch)
 
-\[m_a \leq m_b\]
-
-\[
-  w_a = \frac{\frac{1}{m_a}}{\frac{1}{m_a} + \frac{1}{m_b}}
-  \quad
-  w_b = \frac{\frac{1}{m_b}}{\frac{1}{m_a} + \frac{1}{m_b}}
-\]
-and \[w_b = 1-w_a\]
-
-The mass ratio $\frac{m_b}{m_a}$ can also be written as $\frac{w_a}{1-w_a}$.
-
-In a perfecly inelastic collisions, B will always move towards A, A
-will always move towards C, C will never move.
-
-The solution is $V_b(t+dt) = V_a(t+dt) = 0$ due to inelasticity and $V_a^0=V_c^0=0$.
+we'll see that solving this simple problem iteratively with sequential
+impulses needs a number of iterations that grows with the mass ratio
+$\frac{m_b}{m_a}$. We'll assume $m_a \leq m_b$.
 
 * Inelastic collision response
 
-Relative impact velocity
-\[V_{ab}=V_b-V_a\]
-
-Instantaneous velocity changes to conserve momentum
+The instantaneous inelastic collision response for AB is
 \[V_a^+ = V_a^- + V_{ab} w_a \]
 \[V_b^+ = V_b^- - V_{ab} w_b \]
+where $V_{ab}=V_b^--V_a^-$ is the collision velocity and
+\[
+  w_a = \frac{\frac{1}{m_a}}{\frac{1}{m_a} + \frac{1}{m_b}}
+  ,\quad
+  w_b = \frac{\frac{1}{m_b}}{\frac{1}{m_a} + \frac{1}{m_b}} = 1-w_a
+\]
 
-* SI Iteration $k$
+In the perfecly inelastic case B will always move towards A, A will
+always move towards C, and C will never move.
+
+With the initial conditions
+\[V_a^0 = 0 ,\quad V_b^0 > 0 ,\quad V_c = 0\]
+The solution is
+\[V_a(t+\Delta t) = V_b(t+\Delta t) = 0\]
+Due to inelasticity A and B won't bounce, and all momentum will be
+absorbed by the static object C.
+
+* Sequential Impulses Iteration $k$
 
 Each iteration we'll:
-- Solve collision AC $V_{ac}>=0$ resulting in $V_a^{(k)} = 0$
-- Solve collision AB $V_{ab}<=0$, with $V_{ab} = V_b - V_a$ and $V_a = 0$ due to AC
+- Solve AC collision $V_{ac}>=0$ resulting in $V_a^{(k)} = 0$
+- Solve AB collision $V_{ab}>=0$, where $V_{ab} = V_b - V_a$ and $V_a = 0$ (due to AC)
 
 So we have the recurrence:
 
@@ -52,21 +53,15 @@ V_b^{(k)} &= V_b^{(k-1)} - V_b^{(k-1)} w_b \\
           &= V_b^{(0)} w_a^{k}
 \end{align*}
 
-* Solution
-
-Due to inelasticity, in the limit $V_b^{(\infty)} = 0$. In practice we'll
-iterate until error drops below an absolute threshold $V_b^{(k^*)} <=
-\epsilon$. We can assume $k^*$ is real and isolate it taking $\log$ on
-both sides:
-
- \[ k^* = \frac{\log(\epsilon/V_b^0)}{\log(w_a)} \]
+The mass ratio $\xi = \frac{m_b}{m_a}$ can also be written as
+$\frac{w_a}{1-w_a}$, and therefore the velocity changes on A,B do not
+depend on their individual masses, only on their mass ratio, with $w_a
+= 1/(\xi+1)$.
 
 ** Example
 
-Setting $V_b^0 = 10m/s$ and $\epsilon = 10^{-3}$ we solve $k^* =
-(\log(10^{-3}/10)) / \log(w_a)$
-
-for mass ratios $m_b/m_a \in [1..20]$ and get $k^* \in [13, 190]$
+We plot $V_b(k)$ for a specific example with $V_b^0 = 10m/s$,
+$\epsilon = 10^{-3}$, $m_a=1$ and $m_b \in [1..20]$
 
 #+BEGIN_SRC gnuplot :file ../img/sequential_vb_k.png :exports none :results none
   set term png size 600, 300
@@ -83,13 +78,21 @@ for mass ratios $m_b/m_a \in [1..20]$ and get $k^* \in [13, 190]$
        1e-3 with lines
 #+END_SRC
 
-#+CAPTION: Plot $V_b(k)$ along $k>=1$ for $m_b/m_a \in [1..20]
 #+ATTR_HTML: image :width 95%
 [[file:../img/sequential_vb_k.png]]
 
-Plot $k^*(m_b/m_a)$ along mass-ratio [1,100] --> this looks LINEAR, 2x
-mass ratio, 2x iterations
-TODO formula may be simplified for specific numbers, and find linear slope?
+** How many iterations do we need?
+Due to inelasticity we know that in the limit $V_b^{(\infty)} = 0$. In
+practice we'll iterate until error drops below an absolute threshold
+$V_b^{(k^*)} <= \epsilon$. We can assume $k^*$ is real and isolate it
+taking $\log$ on both sides:
+
+ \[ k^* = \frac{\log(\epsilon/V_b^0)}{\log(w_a)} \]
+
+We can solve for the constants in the previous example and get $k^*
+\in [13, 190]$ for $m_b \in [1..20]$
+
+Next we plot $k^*(\xi)$ with mass ratio $\xi \in [1,100]$
 #+BEGIN_SRC gnuplot :file ../img/sequential_k_mr.png :exports none :results none
   set term png size 600, 300
   set size ratio 0.5
@@ -98,9 +101,47 @@ TODO formula may be simplified for specific numbers, and find linear slope?
   plot log((1e-3)/10)/log((1/(1+1/x))) with lines
 #+END_SRC
 
-#+CAPTION: Plot $k^*(m_b/m_a)$
 #+ATTR_HTML: image :width 95%
 [[file:../img/sequential_k_mr.png]]
+
+This looks surprisingly linear, and it *almost* is!
+
+\[ k^* = \frac{\log(\epsilon/V_b^0)}{\log(1/(1+1/x))} \]
+
+with
+\[ 1/(1+1/x) = x/(x+1) \]
+
+Important linear conv wrt mass ratio $\log(1/(1+1/x))$ same as
+$\log(x/(x+1))$ almost exactly same as $x/(x+1)-1 = -1/(x+1)$, for
+$x>2$ it’s almost equal. So we can find linear rel Talylor series of
+$\log(x/(x+1))$ show its very very close to linear, quadriatic error
+is very small
+
+SO we can approx
+\[ k^* = \frac{\log(\epsilon/V_b^0)}{-1/(x+1)} = -\log(\epsilon/V_b^0) (x+1)\]
+
+#+BEGIN_SRC gnuplot :file ../img/sequential_k_mr_approx.png :exports none :results none
+  set term png size 600, 300
+  set size ratio 0.5
+  set xrange [1:100]
+  set yrange [0:1000]
+  plot -log((1e-3)/10) * (x+1) with lines
+#+END_SRC
+
+#+ATTR_HTML: image :width 95%
+[[file:../img/sequential_k_mr_approx.png]]
+
+Linear slope grows with TODO Changes slope for iter count wrt mass
+ratio, so can make problem harder, likelly can compute slope from
+constants and get better insight
+
+** PGS vs TGS
+PGS convergence wrt iter (1 substep) vs TGS convergence wrt substeps (1 iter)
+
+Derive this for model problem, should be feasible but I can’t see how
+substepping will be different to iterating in that case
+
+https://matthias-research.github.io/pages/publications/PBDBodies.pdf
 
 * Conclusions
 
