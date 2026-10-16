@@ -197,3 +197,7 @@ like AVBD), would that converge better for impacts?
 Non-iterative solution should be trivial for this problem, we could
 solve system of eq with 2 vars and 2 constraints, assuming vel will
 never change sign, and arrive at $V_b=0$.
+
+* TODO References
+** TODO Convergence for Gauss-Seidel linear solvers
+- Must be in some paper/book
