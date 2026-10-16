@@ -2,20 +2,32 @@
 #+date: <2026-10-12 lun>
 #+author: Oscar
 
-specifically, it sucks too little error per iteration, making it very
+...specifically, it sucks too little error per iteration, making it very
 inefficient for rigid impact problems.
 
 * Problem
 
-We want to solve a perfectly inelastic impact of a body B moving
-towards a body A that is initially at rest, beside a static wall C, so
-that A is sandwiched between B and C.
+We want to solve a perfectly inelastic impact of a rigid body B moving
+towards a rigid body A that is initially resting beside a static wall
+C. A is sandwiched between B and C.
 
 (TODO sketch)
 
-we'll see that solving this simple problem iteratively with sequential
-impulses needs a number of iterations that grows with the mass ratio
-$\frac{m_b}{m_a}$. We'll assume $m_a \leq m_b$.
+** Solution
+In the perfecly inelastic case B will always move towards A, A will
+always move towards C, and C will never move.
+
+With the initial conditions
+\[V_a^0 = 0 ,\quad V_b^0 > 0 ,\quad V_c = 0\]
+
+Due to inelasticity A and B won't bounce, B will transfer momentum to
+A, that will transfer it to C, that will absorb it all. The logical
+solution is
+\[V_a(t+\Delta t) = V_b(t+\Delta t) = 0\]
+
+We'll see that solving this simple problem numerically with sequential
+impulses needs a number of iterations that grows almost linearly with
+the mass ratio $\frac{m_b}{m_a}$. We'll assume $m_a \leq m_b$.
 
 * Inelastic collision response
 
@@ -29,52 +41,44 @@ where $V_{ab}=V_b^--V_a^-$ is the collision velocity and
   w_b = \frac{\frac{1}{m_b}}{\frac{1}{m_a} + \frac{1}{m_b}} = 1-w_a
 \]
 
-In the perfecly inelastic case B will always move towards A, A will
-always move towards C, and C will never move.
+* Sequential Impulses
 
-With the initial conditions
-\[V_a^0 = 0 ,\quad V_b^0 > 0 ,\quad V_c = 0\]
-The solution is
-\[V_a(t+\Delta t) = V_b(t+\Delta t) = 0\]
-Due to inelasticity A and B won't bounce, and all momentum will be
-absorbed by the static object C.
+Sequential impulses solves the impact problem iteratively as a
+sequence of local collision responses between pairs of bodies.
 
-* Sequential Impulses Iteration $k$
-
-Each iteration we'll:
-- Solve AC collision $V_{ac}>=0$ resulting in $V_a^{(k)} = 0$
-- Solve AB collision $V_{ab}>=0$, where $V_{ab} = V_b - V_a$ and $V_a = 0$ (due to AC)
+Each iteration we'll solve collisions AC and AB
+- Solve $V_{ac}^{(k)}>=0$, resulting in $V_a^{(k)} = 0$
+- Solve $V_{ab}^{(k)}>=0$, with $V_{ab}^{(k)} = V_b^{(k)}$ because $V_a^{(k)} = 0$
 
 So we have the recurrence:
-
 \begin{align*}
 V_b^{(k)} &= V_b^{(k-1)} - V_b^{(k-1)} w_b \\
-          &= V_b^{(k-1)} w_a \\
+          &= V_b^{(k-1)} w_a  \quad (\leftarrow w_a=1-w_b)\\
           &= V_b^{(0)} w_a^{k}
 \end{align*}
 
 The mass ratio $\xi = \frac{m_b}{m_a}$ can also be written as
 $\frac{w_a}{1-w_a}$, and therefore the velocity changes on A,B do not
 depend on their individual masses, only on their mass ratio, with $w_a
-= 1/(\xi+1)$.
+= \frac{\xi}{(\xi+1)}$ (derivation omitted).
 
 ** Example
 
-We plot $V_b(k)$ for a specific example with $V_b^0 = 10m/s$,
-$\epsilon = 10^{-3}$, $m_a=1$ and $m_b \in [1..20]$
+We plot $V_b(k)$ for $V_b^0 = 10m/s$, $\epsilon = 10^{-3}$ and $\xi
+\in [1..20]$
 
 #+BEGIN_SRC gnuplot :file ../img/sequential_vb_k.png :exports none :results none
   set term png size 600, 300
   set size ratio 0.5
   set xrange [1:200]
   set yrange [0:0.01]
-  plot 10*(1/(1+1/1.0))**x with lines, \
-       10*(1/(1+1/2.0))**x with lines, \
-       10*(1/(1+1/3.0))**x with lines, \
-       10*(1/(1+1/4.0))**x with lines, \
-       10*(1/(1+1/5.0))**x with lines, \
-       10*(1/(1+1/10.0))**x with lines, \
-       10*(1/(1+1/20.0))**x with lines, \
+  plot 10*(1.0/(1+1))**x with lines, \
+       10*(2.0/(2+1))**x with lines, \
+       10*(3.0/(3+1))**x with lines, \
+       10*(4.0/(4+1))**x with lines, \
+       10*(5.0/(5+1))**x with lines, \
+       10*(10.0/(10+1))**x with lines, \
+       10*(20.0/(20+1))**x with lines, \
        1e-3 with lines
 #+END_SRC
 
@@ -84,70 +88,59 @@ $\epsilon = 10^{-3}$, $m_a=1$ and $m_b \in [1..20]$
 ** How many iterations do we need?
 Due to inelasticity we know that in the limit $V_b^{(\infty)} = 0$. In
 practice we'll iterate until error drops below an absolute threshold
-$V_b^{(k^*)} <= \epsilon$. We can assume $k^*$ is real and isolate it
-taking $\log$ on both sides:
+$V_b^{(k^*)} < \epsilon$, represented by the horizontal line in the
+previous plot.
 
- \[ k^* = \frac{\log(\epsilon/V_b^0)}{\log(w_a)} \]
+We can assume $k^*$ is real and isolate it taking $\log$ on both sides
+of $V_b^{(0)} w_a^{k} = \epsilon$ to obtain:
 
-We can solve for the constants in the previous example and get $k^*
-\in [13, 190]$ for $m_b \in [1..20]$
 
-Next we plot $k^*(\xi)$ with mass ratio $\xi \in [1,100]$
+\[ k^* = \frac{\log(\epsilon/V_b^0)}{\log(w_a)} = \frac{\log(\epsilon/V_b^0)}{\log(\xi/(\xi+1))} \]
+
+We plot $k^*(\xi)$ with the same parameters as above.
+
 #+BEGIN_SRC gnuplot :file ../img/sequential_k_mr.png :exports none :results none
   set term png size 600, 300
   set size ratio 0.5
   set xrange [1:100]
   set yrange [0:1000]
-  plot log((1e-3)/10)/log((1/(1+1/x))) with lines
+  plot log((1e-3)/10)/log((x/(x+1))) with lines lw 2
 #+END_SRC
 
 #+ATTR_HTML: image :width 95%
 [[file:../img/sequential_k_mr.png]]
 
-This looks surprisingly linear, and it *almost* is!
+This looks surprisingly linear... and it *almost* is!
 
-\[ k^* = \frac{\log(\epsilon/V_b^0)}{\log(1/(1+1/x))} \]
+We can show that $\log(\xi/(\xi+1))$ is very close to $-1/(\xi+1)$ for
+$\xi>2$ (see [[Linear Approx]]), so we can approximate $k^*(\xi)$ linearly
+as
+\[ k^* \approx -\log(\epsilon/V_b^0) (\xi+1)\]
 
-with
-\[ 1/(1+1/x) = x/(x+1) \]
-
-Important linear conv wrt mass ratio $\log(1/(1+1/x))$ same as
-$\log(x/(x+1))$ almost exactly same as $x/(x+1)-1 = -1/(x+1)$, for
-$x>2$ it’s almost equal. So we can find linear rel Talylor series of
-$\log(x/(x+1))$ show its very very close to linear, quadriatic error
-is very small
-
-SO we can approx
-\[ k^* = \frac{\log(\epsilon/V_b^0)}{-1/(x+1)} = -\log(\epsilon/V_b^0) (x+1)\]
+and see that the slope $-\log(\epsilon/V_b^0)$ changes very moderately
+with both $V_b$ and $\epsilon$, and that the parameter that
+affects $k^{*}$ the most is the mass ratio $\xi$.
 
 #+BEGIN_SRC gnuplot :file ../img/sequential_k_mr_approx.png :exports none :results none
   set term png size 600, 300
   set size ratio 0.5
   set xrange [1:100]
   set yrange [0:1000]
-  plot -log((1e-3)/10) * (x+1) with lines
+  plot log((1e-3)/10)/log((x/(x+1))) with lines lw 2, \
+       -log((1e-3)/10) * (x+1) with points pt 2 ps 1, \
+       -log((1e-3)/1) * (x+1) with points pt 2 ps 1, \
+       -log((1e-3)/100) * (x+1) with points pt 2 ps 1
+
 #+END_SRC
 
 #+ATTR_HTML: image :width 95%
 [[file:../img/sequential_k_mr_approx.png]]
 
-Linear slope grows with TODO Changes slope for iter count wrt mass
-ratio, so can make problem harder, likelly can compute slope from
-constants and get better insight
-
-** PGS vs TGS
-PGS convergence wrt iter (1 substep) vs TGS convergence wrt substeps (1 iter)
-
-Derive this for model problem, should be feasible but I can’t see how
-substepping will be different to iterating in that case
-
-https://matthias-research.github.io/pages/publications/PBDBodies.pdf
-
-* Conclusions
+* TODO Conclusions
 
 At first glance it looks like the error shrinks with $w_a < 1$ each
 iteration, so the smaller $w_a$, the faster the error decreases, and
-$w_a$ decreases with mass ratio $m_b/m_a$. Relative error reduces
+$w_a$ decreases with mass ratio $\xi=m_b/m_a$. Relative error reduces
 steadily per-iteration.
 
 However, converging below a given *absolute* precision $\epsilon$
@@ -164,13 +157,33 @@ impulses can be warmstarted and improved incrementally over multiple
 timesteps, but that's not an option on the first impact timestep, as
 no previous solution exists.
 
-* TODO Multiple bodies
+SI is very easy to implement, that's why it's so popular, but
+(etc...). Can we do better somehow, without losing all simplicity?
+
+* TODO PGS vs TGS
+PGS convergence wrt iter (1 substep) vs TGS convergence wrt substeps (1 iter)
+
+Derive this for model problem, should be feasible but I can’t see how
+substepping will be different to iterating in that case
+
+https://matthias-research.github.io/pages/publications/PBDBodies.pdf
+
+* TODO Primal Iterative Solve?
+
+How would body-centric primal solver converge for the model problem?
+It would need a stiffness value, that could be increased per iter (ex:
+like AVBD), would that converge better for impacts?
+
+* TODO Multiple bodies and contacts
 
 The problem is not limited to large mass ratios between individual
 bodies, it can also appear when multiple light bodies impact another
 one simultaneously with coherent velocity (ex: a stack of N bricks
 falling on a single one, or avalanche of similar rocks forming a pile
-of rubble)
+of rubble), in that case the bottommost object needs to absorb the
+momentum of all other objects, so object count is
+essentially the same as the mass ratio of a simplified problem where
+N-1 objects have been merged into one.
 
 ** TODO Prove this somehow
 How would N bodies converge, depending on masses… I think if known
@@ -186,12 +199,14 @@ regardless of number of bodies in Bi set
 
 So iter count to achieve same error with more objects grows more than linearly?
 
-* TODO Primal Iterative Solve?
-
-How would body-centric primal solver converge for the model problem?
-It would need a stiffness value, that could be increased per iter (ex:
-like AVBD), would that converge better for impacts?
-
+* TODO Persistent contacts
+- Show that in that case SI needs to resolve the delta vel from
+  gravity (or any other force) every frame, and that warmstarting can
+  help converging if solution does not change (so force is constant,
+  and system is in a stable configuration), by spreading the necessary
+  iterations over timesteps, but that as soon as there's a new impact,
+  the ensure system convergence will be dominated by that impulse
+* TODO Approximating direct solution + refining it with PGS
 * TODO Direct Solution
 
 Non-iterative solution should be trivial for this problem, we could
@@ -201,3 +216,10 @@ never change sign, and arrive at $V_b=0$.
 * TODO References
 ** TODO Convergence for Gauss-Seidel linear solvers
 - Must be in some paper/book
+* TODO Derivations
+** TODO Linear Approx
+(TODO: We should find linear rel Taylor series of $\log(\xi/(\xi+1))
+\approx \xi/(\xi+1)-1 = -1/(\xi+1)$
+show its very very close to linear, quadratic error term is very small, I
+think it's because x/(x+1) tends to 1, and log(1) is 0, so its effect
+as x grows is negligible)
