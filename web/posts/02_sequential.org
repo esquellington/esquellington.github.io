@@ -25,6 +25,9 @@ A, that will transfer it to C, that will absorb it all. Velocities
 will never change sign. The logical solution is
 \[V_a(t+\Delta t) = 0 ,\quad V_b(t+\Delta t) = 0\]
 
+TODO: Argue this is the simplest problem possible, made easy by
+inelasticity no need to consider constraint activation
+
 We'll see that solving this simple problem numerically with sequential
 impulses needs a number of iterations that grows almost linearly with
 the mass ratio $\frac{m_b}{m_a}$.
@@ -168,6 +171,25 @@ never change sign, and arrive at $V_b=0$.
 
 2x2 system for Va,Vb, we can write it and solve by substitution
 
+Write direct eq for N sequential bodies, must be tridiagonal I think?
+Solvable in linear time, similar to what I did in TentaclesMode
+
+** Block-GS
+If we split N bodies in groups and solve direct peoblems for them,
+what’s the best way to split?
+- evenly by count
+- evenly by mass (each group has the aame appeox mass so ratio across
+  groups is small ideally 1:1
+(They must still be connected directly to form a solver subisland fir
+direct solve)
+
+Last option would avoid global mass ratio issue better than group by
+count
+
+Also see effect of subiter in a subgroup vs global iteration without
+subgroups, in princiole subgroups with larger mass ratios would need
+more iter than others so total count would reduce
+
 * TODO PGS vs TGS
 PGS convergence wrt iter (1 substep) vs TGS convergence wrt substeps (1 iter)
 
@@ -218,6 +240,8 @@ regardless of number of bodies in Bi set
 
 So iter count to achieve same error with more objects grows more than linearly?
 
+* TODO Approximating direct solution + refining it with PGS
+Similar to Block-GS above
 * TODO Persistent contacts
 - Show that in that case SI needs to resolve the delta vel from
   gravity (or any other force) every frame, and that warmstarting can
@@ -225,12 +249,11 @@ So iter count to achieve same error with more objects grows more than linearly?
   and system is in a stable configuration), by spreading the necessary
   iterations over timesteps, but that as soon as there's a new impact,
   the ensure system convergence will be dominated by that impulse
-* TODO Approximating direct solution + refining it with PGS
 * TODO References
 ** TODO Convergence for Gauss-Seidel linear solvers
 - Must be in some paper/book
 * TODO Code
-** Impact without acceleration
+** Impact ABC without acceleration
 Implement SI and output table with Va,Vb results, show they decrease
 as we predicted
 #+BEGIN_SRC C++ :includes <stdio.h>
@@ -271,7 +294,7 @@ as we predicted
 | 90 | 0.0019 | 0.0019 |
 | 97 |  0.001 |  0.001 |
 
-** Impact with acceleration (stack)
+** Impact ABC with acceleration
 
 Simulate 2 frames of a stack of 2 bodies under gravity:
 - 1st frame involves impact and gravity vel, both fully absorbed
@@ -319,37 +342,41 @@ Warmstarting would avoid most iter on >2nd frame
 | 1 | 20 | 0.0019 |  0.0019 |
 | 1 | 23 |  0.001 |   0.001 |
 
-** Impact with acceleration (stack), N>=2 bodies
+** Impact N bodies with acceleration
 
 Simulate 2 frames of a stack of N bodies with uniform mass:
 - 1st frame involves impact and gravity vel, both fully absorbed
 - On any frame >2nd, gravity vel must be absorbed again
 Warmstarting would avoid most iter on >2nd frame
+For N bodies, B[0] is static, mass ratio between B[1] and B[2..N-1] is 1:N-2
+
+TODO code could handle all cases for N>2, grav>=0, xi>=1 varying along n<N
 
 #+BEGIN_SRC C++ :includes <stdio.h>
   int main( int argc, char** argv )
   {
-      const int N(5); //1:N-1 mass ratio
-      const float wa(0.5f); //constant mass
-      //const float ma(1), mb(1), xi(mb/ma), wa(xi/(xi+1));
+      const int N(6);
+      const float xi(1.0f), wa(xi/(xi+1));
+      //const float ma(1), mb(1),
       const float eps(1e-3f);
-      const int K(100);
+      const int K(200);
       float V[N] = {}; V[N-1] = 10;
       printf("t k");
       for( int n=0; n<N; n++ )
           printf(" V[%d]", n);
+      int tk(0); //total iter across timesteps
       for( int t=0; t<2; t++ ) //2 frames
       {
           // Integrate t->t+dt
           const float dt(1.0f/60.0f), g(9.8f);
-          for( float& v : V )
-              v += dt*g;
+          for( int n=1; n<N; n++ )
+              V[n] += dt*g;
           int k(0);
           while( k < K && V[N-1] > eps )
           {
-              if( k%20 == 0 )
+              if( k%10 == 0 )
               {
-                  printf("\n%d %d",t,k);
+                  printf("\n%d %d",t,tk);
                   for( int n=0; n<N; n++ )
                       printf(" %2.4f",V[n]);
               }
@@ -357,12 +384,14 @@ Warmstarting would avoid most iter on >2nd frame
               for( int n=1; n<N; n++ )
               {
                   float Vab(V[n]-V[n-1]); //solve AB
-                  V[n-1] += Vab * wa;
-                  V[n] -= Vab * (1-wa);
+                  float wa_n( n==1 ? 0.0f : wa ); //[0] is static
+                  V[n-1] += Vab * wa_n;
+                  V[n] -= Vab * (1-wa_n);
               }
               k++;
+              tk++;
           }
-          printf("\n%d %d",t,k);
+          printf("\n%d %d",t,tk);
           for( int n=0; n<N; n++ )
               printf(" %2.4f",V[n]);
       }
@@ -370,19 +399,39 @@ Warmstarting would avoid most iter on >2nd frame
   }
 #+END_SRC
 
-#+RESULTS:
-| t |  k |   V[0] |   V[1] |   V[2] |   V[3] |    V[4] |
-| 0 |  0 | 0.1633 | 0.1633 | 0.1633 | 0.1633 | 10.1633 |
-| 0 | 20 | 0.2118 | 0.3831 | 0.5015 | 0.5607 |  0.5607 |
-| 0 | 40 | 0.0285 | 0.0515 | 0.0674 | 0.0753 |  0.0753 |
-| 0 | 60 | 0.0038 | 0.0069 | 0.0091 | 0.0101 |  0.0101 |
-| 0 | 80 | 0.0005 | 0.0009 | 0.0012 | 0.0014 |  0.0014 |
-| 0 | 84 | 0.0003 | 0.0006 | 0.0008 | 0.0009 |  0.0009 |
-| 1 |  0 | 0.1637 |  0.164 | 0.1641 | 0.1642 |  0.1642 |
-| 1 | 20 | 0.0088 |  0.016 | 0.0209 | 0.0234 |  0.0234 |
-| 1 | 40 | 0.0012 | 0.0021 | 0.0028 | 0.0031 |  0.0031 |
-| 1 | 52 | 0.0004 | 0.0006 | 0.0008 | 0.0009 |  0.0009 |
+#+tblname: data-table
+| t |   k | V[0] |   V[1] |   V[2] |   V[3] |   V[4] |    V[5] |
+| 0 |   0 |  0.0 | 0.1633 | 0.1633 | 0.1633 | 0.1633 | 10.1633 |
+| 0 |  10 |  0.0 | 0.5771 | 1.0447 |  1.368 | 1.5297 |  1.5297 |
+| 0 |  20 |  0.0 | 0.2118 | 0.3831 | 0.5015 | 0.5607 |  0.5607 |
+| 0 |  30 |  0.0 | 0.0776 | 0.1404 | 0.1838 | 0.2055 |  0.2055 |
+| 0 |  40 |  0.0 | 0.0285 | 0.0515 | 0.0674 | 0.0753 |  0.0753 |
+| 0 |  50 |  0.0 | 0.0104 | 0.0189 | 0.0247 | 0.0276 |  0.0276 |
+| 0 |  60 |  0.0 | 0.0038 | 0.0069 | 0.0091 | 0.0101 |  0.0101 |
+| 0 |  70 |  0.0 | 0.0014 | 0.0025 | 0.0033 | 0.0037 |  0.0037 |
+| 0 |  80 |  0.0 | 0.0005 | 0.0009 | 0.0012 | 0.0014 |  0.0014 |
+| 0 |  84 |  0.0 | 0.0003 | 0.0006 | 0.0008 | 0.0009 |  0.0009 |
+| 1 |  84 |  0.0 | 0.1637 |  0.164 | 0.1641 | 0.1642 |  0.1642 |
+| 1 |  94 |  0.0 | 0.0241 | 0.0436 |  0.057 | 0.0637 |  0.0637 |
+| 1 | 104 |  0.0 | 0.0088 |  0.016 | 0.0209 | 0.0234 |  0.0234 |
+| 1 | 114 |  0.0 | 0.0032 | 0.0059 | 0.0077 | 0.0086 |  0.0086 |
+| 1 | 124 |  0.0 | 0.0012 | 0.0021 | 0.0028 | 0.0031 |  0.0031 |
+| 1 | 134 |  0.0 | 0.0004 | 0.0008 |  0.001 | 0.0012 |  0.0012 |
+| 1 | 136 |  0.0 | 0.0004 | 0.0006 | 0.0008 | 0.0009 |  0.0009 |
 
+#+BEGIN_SRC gnuplot :var data=data-table :file ../img/sequential_xxxx.png :exports none :results none
+  set xrange [0:150]
+  set yrange [0:1]
+  plot data u 2:3 with lines, \
+       data u 2:4 with lines, \
+       data u 2:5 with lines, \
+       data u 2:6 with lines, \
+       data u 2:7 with lines, \
+       data u 2:8 with lines
+#+END_SRC
+
+#+ATTR_HTML: image :width 95%
+[[file:../img/sequential_xxxx.png]]
 
 * TODO Derivations
 ** TODO Linear Approx
@@ -392,4 +441,4 @@ show its very very close to linear, quadratic error term is very small, I
 think it's because x/(x+1) tends to 1, and log(1) is 0, so its effect
 as x grows is negligible)
 * TODO Theory
-- Show that $\xi$ is related to the "condition number" of the linear system
+** TODO Show that $\xi$ is related to the "condition number" of the linear system
