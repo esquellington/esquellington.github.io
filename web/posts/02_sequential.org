@@ -37,7 +37,7 @@ the mass ratio $\frac{m_b}{m_a}$.
 The instantaneous inelastic collision response for AB is
 \[V_a^+ = V_a^- + V_{ab} w_a \]
 \[V_b^+ = V_b^- - V_{ab} w_b \]
-where $V_{ab}=V_b^--V_a^-$ is the collision velocity and
+where $V_{ab}=V_b-V_a$ is the collision velocity and
 \[
   w_a = \frac{\frac{1}{m_a}}{\frac{1}{m_a} + \frac{1}{m_b}}
   ,\quad
@@ -120,9 +120,9 @@ $\xi>2$ (see [[Linear Approx]]), so we can approximate $k^*(\xi)$ linearly
 as
 \[ k^* \approx -\log(\epsilon/V_b^{(0)}) (\xi+1)\]
 
-and see that the slope $-\log(\epsilon/V_b^{(0)})$ changes very moderately
-with both $V_b$ and $\epsilon$, and that the parameter that
-affects $k^{*}$ the most is the mass ratio $\xi$.
+and see that the slope $-\log(\epsilon/V_b^{(0)})$ changes very
+moderately with both $V_b^{(0)}$ and $\epsilon$, and that the
+parameter that affects $k^{*}$ the most is the mass ratio $\xi$.
 
 #+BEGIN_SRC gnuplot :file ../img/sequential_k_mr_approx.png :exports none :results none
   set term png size 600, 300
@@ -141,18 +141,10 @@ affects $k^{*}$ the most is the mass ratio $\xi$.
 
 * TODO Conclusions
 
-At first glance it looks like the error shrinks with $w_a < 1$ each
-iteration, so the smaller $w_a$, the faster the error decreases, and
-$w_a$ decreases with mass ratio $\xi=m_b/m_a$. Relative error reduces
-steadily per-iteration.
-
-However, converging below a given *absolute* precision $\epsilon$
-requires incresingly more iterations as $w_a$ grows.
-
-This means that for fast impacts and large mass ratios $m_b/m_a > 10$
-we need a *lot* of iterations to converge below $\epsilon$. Overall
-the iteration count grows *linearly* with the mass ratio (see last
-plot)
+Converging below a given *absolute* precision $\epsilon$ requires
+proportionally more iterations as $\xi$ grows. Impact speed and
+precision threshold do not matter much, compared to mass ratio, or
+number of bodies.
 
 This makes Sequential Impulses really inefficient for impact
 problems. It's not so bad for persistent contact problems, where
@@ -170,6 +162,25 @@ solve system of eq with 2 vars and 2 constraints, assuming vel will
 never change sign, and arrive at $V_b=0$.
 
 2x2 system for Va,Vb, we can write it and solve by substitution
+
+\begin{align*}
+V_c &= 0 \\
+V_a &= Va + (\lambda_0 - \lambda_1) / m_a \\
+V_b &= Vb - \lambda_1 / m_b
+\end{align*}
+
+solve for lambdas with direct solver \[A \lambda = b\]
+\begin{align*}
+\lambda_0 &= V_{ca}/ (m_a w_a) \\
+\lambda_1 &= V_{ab}/ ((m_a w_a) + (m_b w_b))
+\end{align*}
+But V_ca and V_ab must include lambda_0 lambda_1 as they're
+affected. Not sure, see Tentacles
+
+\begin{bmatrix}
+ a && b \\
+ c && d
+\end{bmatrix}
 
 Write direct eq for N sequential bodies, must be tridiagonal I think?
 Solvable in linear time, similar to what I did in TentaclesMode
@@ -374,7 +385,7 @@ TODO code could handle all cases for N>2, grav>=0, xi>=1 varying along n<N
           const float dt(1.0f/60.0f), g(9.8f);
           for( int n=1; n<N; n++ )
               V[n] += dt*g;
-          int k(0);
+          int k(0); //per-step iter
           while( k < K && V[N-1] > eps )
           {
               if( k%10 == 0 )
@@ -387,7 +398,7 @@ TODO code could handle all cases for N>2, grav>=0, xi>=1 varying along n<N
               for( int n=1; n<N; n++ )
               {
                   float Vab(V[n]-V[n-1]); //solve AB
-                  float wa_n( n==1 ? 0.0f : wa ); //[0] is static
+                  float wa_n( n==1 ? 0.0f : wa ); //B[0] is static
                   V[n-1] += Vab * wa_n;
                   V[n] -= Vab * (1-wa_n);
               }
