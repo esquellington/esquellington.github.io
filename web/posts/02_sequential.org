@@ -13,22 +13,21 @@ C. A is sandwiched between B and C.
 
 (TODO sketch)
 
-** Solution
-In the perfecly inelastic case B will always move towards A, A will
-always move towards C, and C will never move.
+With velocity sign > 0 towards wall C, the initial conditions are:
+\[V_a(0) = 0 ,\quad V_b(0) > 0 ,\quad V_c = 0\]
 
-With the initial conditions
-\[V_a^0 = 0 ,\quad V_b^0 > 0 ,\quad V_c = 0\]
-by convention, velocities are positive along the compression direction.
+We'll assume $m_a \leq m_b$.
+
+** Solution
 
 Due to inelasticity A and B won't bounce, B will transfer momentum to
-A, that will transfer it to C, that will absorb it all. The logical
-solution is
-\[V_a(t+\Delta t) = V_b(t+\Delta t) = 0\]
+A, that will transfer it to C, that will absorb it all. Velocities
+will never change sign. The logical solution is
+\[V_a(t+\Delta t) = 0 ,\quad V_b(t+\Delta t) = 0\]
 
 We'll see that solving this simple problem numerically with sequential
 impulses needs a number of iterations that grows almost linearly with
-the mass ratio $\frac{m_b}{m_a}$. We'll assume $m_a \leq m_b$.
+the mass ratio $\frac{m_b}{m_a}$.
 
 * Inelastic collision response
 
@@ -44,9 +43,9 @@ where $V_{ab}=V_b^--V_a^-$ is the collision velocity and
 
 * Sequential Impulses
 
-Sequential impulses solves the impact problem iteratively as a
-sequence of local collision responses between pairs of bodies. Each
-iteration we'll solve collisions AC and AB
+Sequential impulses solves the problem iteratively as a sequence of
+local collision responses between pairs of bodies. Each iteration
+we'll solve collisions AC and AB
 
 - Solve $V_{ac}^{(k)}>=0$, resulting in $V_a^{(k)} = 0$
 - Solve $V_{ab}^{(k)}>=0$, with $V_{ab}^{(k)} = V_b^{(k)}$ because $V_a^{(k)} = 0$
@@ -175,11 +174,19 @@ PGS convergence wrt iter (1 substep) vs TGS convergence wrt substeps (1 iter)
 Derive this for model problem, should be feasible but I can’t see how
 substepping will be different to iterating in that case
 
+TODO TGS on resting contact may be actually worse, unless problem is
+nonlinear in time, because even if gravity vel is reduced due to
+substeps, the iteration count required to dissipate it using GS does
+NOT reduce proportionally, but slower (see dependicy of k on V0 above)
+
 https://matthias-research.github.io/pages/publications/PBDBodies.pdf
 
 * TODO PGS vs (A)VBD
 - Solve in body-centric way A, B using all collisions on them at once,
   maybe with compliance, see how error decreases
+- Va needs to consider both AC and AB, so I doubt it results in
+  anything that is not Va=0, so it's no different from
+  constraint-centric SI/PGS in this case.
 * TODO Primal Iterative Solve?
 
 How would body-centric primal solver converge for the model problem?
@@ -223,7 +230,7 @@ So iter count to achieve same error with more objects grows more than linearly?
 ** TODO Convergence for Gauss-Seidel linear solvers
 - Must be in some paper/book
 * TODO Code
-** TODO Impact without acceleration
+** Impact without acceleration
 Implement SI and output table with Va,Vb results, show they decrease
 as we predicted
 #+BEGIN_SRC C++ :includes <stdio.h>
@@ -266,7 +273,7 @@ as we predicted
 
 ** Impact with acceleration (stack)
 
-Simulate 2 frames of a stack under gravity:
+Simulate 2 frames of a stack of 2 bodies under gravity:
 - 1st frame involves impact and gravity vel, both fully absorbed
 - On any frame >2nd, gravity vel must be absorbed again
 Warmstarting would avoid most iter on >2nd frame
@@ -274,12 +281,12 @@ Warmstarting would avoid most iter on >2nd frame
 #+BEGIN_SRC C++ :includes <stdio.h>
   int main( int argc, char** argv )
   {
-      const float ma(1), mb(10), xi(mb/ma), wa(xi/(xi+1));
+      const float ma(1), mb(4), xi(mb/ma), wa(xi/(xi+1));
       const float eps(1e-3f);
       const int K(100);
       float Va(0), Vb(10);
       printf("t k V_a V_b");
-      for( int t=0; t<2; t++ ) //30 frames
+      for( int t=0; t<2; t++ ) //2 frames
       {
           // Integrate t->t+dt
           const float dt(1.0f/60.0f), g(9.8f);
@@ -305,15 +312,77 @@ Warmstarting would avoid most iter on >2nd frame
 #+RESULTS:
 | t |  k |    V_a |     V_b |
 | 0 |  0 | 0.1633 | 10.1633 |
-| 0 | 20 | 1.5107 |  1.5107 |
-| 0 | 40 | 0.2246 |  0.2246 |
-| 0 | 60 | 0.0334 |  0.0334 |
-| 0 | 80 |  0.005 |   0.005 |
-| 0 | 97 |  0.001 |   0.001 |
-| 1 |  0 | 0.1643 |  0.1643 |
-| 1 | 20 | 0.0244 |  0.0244 |
-| 1 | 40 | 0.0036 |  0.0036 |
-| 1 | 54 |  0.001 |   0.001 |
+| 0 | 20 | 0.1172 |  0.1172 |
+| 0 | 40 | 0.0014 |  0.0014 |
+| 0 | 42 | 0.0009 |  0.0009 |
+| 1 |  0 | 0.1642 |  0.1642 |
+| 1 | 20 | 0.0019 |  0.0019 |
+| 1 | 23 |  0.001 |   0.001 |
+
+** Impact with acceleration (stack), N>=2 bodies
+
+Simulate 2 frames of a stack of N bodies with uniform mass:
+- 1st frame involves impact and gravity vel, both fully absorbed
+- On any frame >2nd, gravity vel must be absorbed again
+Warmstarting would avoid most iter on >2nd frame
+
+#+BEGIN_SRC C++ :includes <stdio.h>
+  int main( int argc, char** argv )
+  {
+      const int N(5); //1:N-1 mass ratio
+      const float wa(0.5f); //constant mass
+      //const float ma(1), mb(1), xi(mb/ma), wa(xi/(xi+1));
+      const float eps(1e-3f);
+      const int K(100);
+      float V[N] = {}; V[N-1] = 10;
+      printf("t k");
+      for( int n=0; n<N; n++ )
+          printf(" V[%d]", n);
+      for( int t=0; t<2; t++ ) //2 frames
+      {
+          // Integrate t->t+dt
+          const float dt(1.0f/60.0f), g(9.8f);
+          for( float& v : V )
+              v += dt*g;
+          int k(0);
+          while( k < K && V[N-1] > eps )
+          {
+              if( k%20 == 0 )
+              {
+                  printf("\n%d %d",t,k);
+                  for( int n=0; n<N; n++ )
+                      printf(" %2.4f",V[n]);
+              }
+              V[0] = 0.0f; //solve AC
+              for( int n=1; n<N; n++ )
+              {
+                  float Vab(V[n]-V[n-1]); //solve AB
+                  V[n-1] += Vab * wa;
+                  V[n] -= Vab * (1-wa);
+              }
+              k++;
+          }
+          printf("\n%d %d",t,k);
+          for( int n=0; n<N; n++ )
+              printf(" %2.4f",V[n]);
+      }
+      return 0;
+  }
+#+END_SRC
+
+#+RESULTS:
+| t |  k |   V[0] |   V[1] |   V[2] |   V[3] |    V[4] |
+| 0 |  0 | 0.1633 | 0.1633 | 0.1633 | 0.1633 | 10.1633 |
+| 0 | 20 | 0.2118 | 0.3831 | 0.5015 | 0.5607 |  0.5607 |
+| 0 | 40 | 0.0285 | 0.0515 | 0.0674 | 0.0753 |  0.0753 |
+| 0 | 60 | 0.0038 | 0.0069 | 0.0091 | 0.0101 |  0.0101 |
+| 0 | 80 | 0.0005 | 0.0009 | 0.0012 | 0.0014 |  0.0014 |
+| 0 | 84 | 0.0003 | 0.0006 | 0.0008 | 0.0009 |  0.0009 |
+| 1 |  0 | 0.1637 |  0.164 | 0.1641 | 0.1642 |  0.1642 |
+| 1 | 20 | 0.0088 |  0.016 | 0.0209 | 0.0234 |  0.0234 |
+| 1 | 40 | 0.0012 | 0.0021 | 0.0028 | 0.0031 |  0.0031 |
+| 1 | 52 | 0.0004 | 0.0006 | 0.0008 | 0.0009 |  0.0009 |
+
 
 * TODO Derivations
 ** TODO Linear Approx
