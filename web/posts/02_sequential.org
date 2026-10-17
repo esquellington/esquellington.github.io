@@ -19,6 +19,7 @@ always move towards C, and C will never move.
 
 With the initial conditions
 \[V_a^0 = 0 ,\quad V_b^0 > 0 ,\quad V_c = 0\]
+by convention, velocities are positive along the compression direction.
 
 Due to inelasticity A and B won't bounce, B will transfer momentum to
 A, that will transfer it to C, that will absorb it all. The logical
@@ -222,33 +223,29 @@ So iter count to achieve same error with more objects grows more than linearly?
 ** TODO Convergence for Gauss-Seidel linear solvers
 - Must be in some paper/book
 * TODO Code
-
+** TODO Impact without acceleration
 Implement SI and output table with Va,Vb results, show they decrease
 as we predicted
-#+BEGIN_SRC C++
+#+BEGIN_SRC C++ :includes <stdio.h>
   int main( int argc, char** argv )
   {
-      const float ma(1), mb(10);
-      const float xi(mb/ma);
-      const float wa(xi/(xi+1));
+      const float ma(1), mb(10), xi(mb/ma), wa(xi/(xi+1));
       const float eps(1e-3f);
       const int K(100);
       float Va(0), Vb(10);
       int k(0);
-      __builtin_printf("k V_a V_b");
-      while( k < K && Vb > eps) //iterate until convergence
+      printf("k V_a V_b");
+      while( k < K && Vb > eps ) //iterate until convergence
       {
           if( k%10 == 0 )
-              __builtin_printf("\n%d %2.4f %2.4f",k, Va, Vb);
-          // Solve AC
-          Va = 0.0f;
-          // Solve AB
-          float Vab(Vb-Va);
+              printf("\n%d %2.4f %2.4f",k,Va,Vb);
+          Va = 0.0f; //solve AC
+          float Vab(Vb-Va); //solve AB
           Va += Vab * wa;
           Vb -= Vab * (1-wa);
           k++;
       }
-      __builtin_printf("\n%d %2.4f %2.4f",k, Va, Vb);
+      printf("\n%d %2.4f %2.4f",k,Va,Vb);
       return 0;
   }
 #+END_SRC
@@ -266,6 +263,57 @@ as we predicted
 | 80 | 0.0049 | 0.0049 |
 | 90 | 0.0019 | 0.0019 |
 | 97 |  0.001 |  0.001 |
+
+** Impact with acceleration (stack)
+
+Simulate 2 frames of a stack under gravity:
+- 1st frame involves impact and gravity vel, both fully absorbed
+- On any frame >2nd, gravity vel must be absorbed again
+Warmstarting would avoid most iter on >2nd frame
+
+#+BEGIN_SRC C++ :includes <stdio.h>
+  int main( int argc, char** argv )
+  {
+      const float ma(1), mb(10), xi(mb/ma), wa(xi/(xi+1));
+      const float eps(1e-3f);
+      const int K(100);
+      float Va(0), Vb(10);
+      printf("t k V_a V_b");
+      for( int t=0; t<2; t++ ) //30 frames
+      {
+          // Integrate t->t+dt
+          const float dt(1.0f/60.0f), g(9.8f);
+          Va += dt*g;
+          Vb += dt*g;
+          int k(0);
+          while( k < K && Vb > eps )
+          {
+              if( k%20 == 0 )
+                  printf("\n%d %d %2.4f %2.4f",t,k,Va,Vb);
+              Va = 0.0f; //solve AC
+              float Vab(Vb-Va); //solve AB
+              Va += Vab * wa;
+              Vb -= Vab * (1-wa);
+              k++;
+          }
+          printf("\n%d %d %2.4f %2.4f",t,k,Va,Vb);
+      }
+      return 0;
+  }
+#+END_SRC
+
+#+RESULTS:
+| t |  k |    V_a |     V_b |
+| 0 |  0 | 0.1633 | 10.1633 |
+| 0 | 20 | 1.5107 |  1.5107 |
+| 0 | 40 | 0.2246 |  0.2246 |
+| 0 | 60 | 0.0334 |  0.0334 |
+| 0 | 80 |  0.005 |   0.005 |
+| 0 | 97 |  0.001 |   0.001 |
+| 1 |  0 | 0.1643 |  0.1643 |
+| 1 | 20 | 0.0244 |  0.0244 |
+| 1 | 40 | 0.0036 |  0.0036 |
+| 1 | 54 |  0.001 |   0.001 |
 
 * TODO Derivations
 ** TODO Linear Approx
