@@ -46,9 +46,13 @@ syntax highlighting
 #+BEGIN_SRC C++
   int main( int argc, char** argv )
   {
+      __builtin_printf("Hello Org");
       return 0; //yeah
   }
 #+END_SRC
+
+#+RESULTS:
+: Hello Org
 
 ** Images
 Link with description does not display image [[file:../img/ScotchBonnet.png][ojocuidao!]]

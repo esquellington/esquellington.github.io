@@ -44,9 +44,9 @@ where $V_{ab}=V_b^--V_a^-$ is the collision velocity and
 * Sequential Impulses
 
 Sequential impulses solves the impact problem iteratively as a
-sequence of local collision responses between pairs of bodies.
+sequence of local collision responses between pairs of bodies. Each
+iteration we'll solve collisions AC and AB
 
-Each iteration we'll solve collisions AC and AB
 - Solve $V_{ac}^{(k)}>=0$, resulting in $V_a^{(k)} = 0$
 - Solve $V_{ab}^{(k)}>=0$, with $V_{ab}^{(k)} = V_b^{(k)}$ because $V_a^{(k)} = 0$
 
@@ -60,11 +60,11 @@ V_b^{(k)} &= V_b^{(k-1)} - V_b^{(k-1)} w_b \\
 The mass ratio $\xi = \frac{m_b}{m_a}$ can also be written as
 $\frac{w_a}{1-w_a}$, and therefore the velocity changes on A,B do not
 depend on their individual masses, only on their mass ratio, with $w_a
-= \frac{\xi}{(\xi+1)}$ (derivation omitted).
+= \frac{\xi}{\xi+1}$ (derivation omitted).
 
 ** Example
 
-We plot $V_b(k)$ for $V_b^0 = 10m/s$, $\epsilon = 10^{-3}$ and $\xi
+We plot $V_b^{(k)}$ for $V_b^{(0)} = 10m/s$, $\epsilon = 10^{-3}$ and $\xi
 \in [1..20]$
 
 #+BEGIN_SRC gnuplot :file ../img/sequential_vb_k.png :exports none :results none
@@ -95,7 +95,7 @@ We can assume $k^*$ is real and isolate it taking $\log$ on both sides
 of $V_b^{(0)} w_a^{k} = \epsilon$ to obtain:
 
 
-\[ k^* = \frac{\log(\epsilon/V_b^0)}{\log(w_a)} = \frac{\log(\epsilon/V_b^0)}{\log(\xi/(\xi+1))} \]
+\[ k^* = \frac{\log(\epsilon/V_b^{(0)})}{\log(w_a)} = \frac{\log(\epsilon/V_b^{(0)})}{\log(\xi/(\xi+1))} \]
 
 We plot $k^*(\xi)$ with the same parameters as above.
 
@@ -115,9 +115,9 @@ This looks surprisingly linear... and it *almost* is!
 We can show that $\log(\xi/(\xi+1))$ is very close to $-1/(\xi+1)$ for
 $\xi>2$ (see [[Linear Approx]]), so we can approximate $k^*(\xi)$ linearly
 as
-\[ k^* \approx -\log(\epsilon/V_b^0) (\xi+1)\]
+\[ k^* \approx -\log(\epsilon/V_b^{(0)}) (\xi+1)\]
 
-and see that the slope $-\log(\epsilon/V_b^0)$ changes very moderately
+and see that the slope $-\log(\epsilon/V_b^{(0)})$ changes very moderately
 with both $V_b$ and $\epsilon$, and that the parameter that
 affects $k^{*}$ the most is the mass ratio $\xi$.
 
@@ -160,6 +160,14 @@ no previous solution exists.
 SI is very easy to implement, that's why it's so popular, but
 (etc...). Can we do better somehow, without losing all simplicity?
 
+* TODO PGS vs Direct Solution
+
+Non-iterative solution should be trivial for this problem, we could
+solve system of eq with 2 vars and 2 constraints, assuming vel will
+never change sign, and arrive at $V_b=0$.
+
+2x2 system for Va,Vb, we can write it and solve by substitution
+
 * TODO PGS vs TGS
 PGS convergence wrt iter (1 substep) vs TGS convergence wrt substeps (1 iter)
 
@@ -168,6 +176,9 @@ substepping will be different to iterating in that case
 
 https://matthias-research.github.io/pages/publications/PBDBodies.pdf
 
+* TODO PGS vs (A)VBD
+- Solve in body-centric way A, B using all collisions on them at once,
+  maybe with compliance, see how error decreases
 * TODO Primal Iterative Solve?
 
 How would body-centric primal solver converge for the model problem?
@@ -207,15 +218,55 @@ So iter count to achieve same error with more objects grows more than linearly?
   iterations over timesteps, but that as soon as there's a new impact,
   the ensure system convergence will be dominated by that impulse
 * TODO Approximating direct solution + refining it with PGS
-* TODO Direct Solution
-
-Non-iterative solution should be trivial for this problem, we could
-solve system of eq with 2 vars and 2 constraints, assuming vel will
-never change sign, and arrive at $V_b=0$.
-
 * TODO References
 ** TODO Convergence for Gauss-Seidel linear solvers
 - Must be in some paper/book
+* TODO Code
+
+Implement SI and output table with Va,Vb results, show they decrease
+as we predicted
+#+BEGIN_SRC C++
+  int main( int argc, char** argv )
+  {
+      const float ma(1), mb(10);
+      const float xi(mb/ma);
+      const float wa(xi/(xi+1));
+      const float eps(1e-3f);
+      const int K(100);
+      float Va(0), Vb(10);
+      int k(0);
+      __builtin_printf("k V_a V_b");
+      while( k < K && Vb > eps) //iterate until convergence
+      {
+          if( k%10 == 0 )
+              __builtin_printf("\n%d %2.4f %2.4f",k, Va, Vb);
+          // Solve AC
+          Va = 0.0f;
+          // Solve AB
+          float Vab(Vb-Va);
+          Va += Vab * wa;
+          Vb -= Vab * (1-wa);
+          k++;
+      }
+      __builtin_printf("\n%d %2.4f %2.4f",k, Va, Vb);
+      return 0;
+  }
+#+END_SRC
+
+#+RESULTS:
+|  k |    V_a |    V_b |
+|  0 |    0.0 |   10.0 |
+| 10 | 3.8554 | 3.8554 |
+| 20 | 1.4864 | 1.4864 |
+| 30 | 0.5731 | 0.5731 |
+| 40 | 0.2209 | 0.2209 |
+| 50 | 0.0852 | 0.0852 |
+| 60 | 0.0328 | 0.0328 |
+| 70 | 0.0127 | 0.0127 |
+| 80 | 0.0049 | 0.0049 |
+| 90 | 0.0019 | 0.0019 |
+| 97 |  0.001 |  0.001 |
+
 * TODO Derivations
 ** TODO Linear Approx
 (TODO: We should find linear rel Taylor series of $\log(\xi/(\xi+1))
@@ -223,3 +274,5 @@ never change sign, and arrive at $V_b=0$.
 show its very very close to linear, quadratic error term is very small, I
 think it's because x/(x+1) tends to 1, and log(1) is 0, so its effect
 as x grows is negligible)
+* TODO Theory
+- Show that $\xi$ is related to the "condition number" of the linear system
