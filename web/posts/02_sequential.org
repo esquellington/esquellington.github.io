@@ -14,7 +14,7 @@ C. A is sandwiched between B and C.
 (TODO sketch)
 
 With velocity sign > 0 towards wall C, the initial conditions are:
-\[V_a(0) = 0 ,\quad V_b(0) > 0 ,\quad V_c = 0\]
+\[ V_c = 0 ,\quad V_a(0) = 0 ,\quad V_b(0) > 0 \]
 
 We'll assume $m_a \leq m_b$.
 
@@ -163,7 +163,7 @@ no previous solution exists.
 SI is very easy to implement, that's why it's so popular, but
 (etc...). Can we do better somehow, without losing all simplicity?
 
-* TODO PGS vs Direct Solution
+* TODO PGS vs Direct Solution :noexport:
 
 Non-iterative solution should be trivial for this problem, we could
 solve system of eq with 2 vars and 2 constraints, assuming vel will
@@ -190,7 +190,7 @@ Also see effect of subiter in a subgroup vs global iteration without
 subgroups, in princiole subgroups with larger mass ratios would need
 more iter than others so total count would reduce
 
-* TODO PGS vs TGS
+* TODO PGS vs TGS :noexport:
 PGS convergence wrt iter (1 substep) vs TGS convergence wrt substeps (1 iter)
 
 Derive this for model problem, should be feasible but I can’t see how
@@ -203,19 +203,19 @@ NOT reduce proportionally, but slower (see dependicy of k on V0 above)
 
 https://matthias-research.github.io/pages/publications/PBDBodies.pdf
 
-* TODO PGS vs (A)VBD
+* TODO PGS vs (A)VBD :noexport:
 - Solve in body-centric way A, B using all collisions on them at once,
   maybe with compliance, see how error decreases
 - Va needs to consider both AC and AB, so I doubt it results in
   anything that is not Va=0, so it's no different from
   constraint-centric SI/PGS in this case.
-* TODO Primal Iterative Solve?
+* TODO Primal Iterative Solve? :noexport:
 
 How would body-centric primal solver converge for the model problem?
 It would need a stiffness value, that could be increased per iter (ex:
 like AVBD), would that converge better for impacts?
 
-* TODO Multiple bodies and contacts
+* TODO Multiple bodies and contacts :noexport:
 
 The problem is not limited to large mass ratios between individual
 bodies, it can also appear when multiple light bodies impact another
@@ -240,9 +240,9 @@ regardless of number of bodies in Bi set
 
 So iter count to achieve same error with more objects grows more than linearly?
 
-* TODO Approximating direct solution + refining it with PGS
+* TODO Approximating direct solution + refining it with PGS :noexport:
 Similar to Block-GS above
-* TODO Persistent contacts
+* TODO Persistent contacts :noexport:
 - Show that in that case SI needs to resolve the delta vel from
   gravity (or any other force) every frame, and that warmstarting can
   help converging if solution does not change (so force is constant,
@@ -301,7 +301,7 @@ Simulate 2 frames of a stack of 2 bodies under gravity:
 - On any frame >2nd, gravity vel must be absorbed again
 Warmstarting would avoid most iter on >2nd frame
 
-#+BEGIN_SRC C++ :includes <stdio.h>
+#+BEGIN_SRC C++ :includes <stdio.h> :results drawer
   int main( int argc, char** argv )
   {
       const float ma(1), mb(4), xi(mb/ma), wa(xi/(xi+1));
@@ -333,6 +333,7 @@ Warmstarting would avoid most iter on >2nd frame
 #+END_SRC
 
 #+RESULTS:
+:results:
 | t |  k |    V_a |     V_b |
 | 0 |  0 | 0.1633 | 10.1633 |
 | 0 | 20 | 0.1172 |  0.1172 |
@@ -341,6 +342,7 @@ Warmstarting would avoid most iter on >2nd frame
 | 1 |  0 | 0.1642 |  0.1642 |
 | 1 | 20 | 0.0019 |  0.0019 |
 | 1 | 23 |  0.001 |   0.001 |
+:end:
 
 ** Impact N bodies with acceleration
 
@@ -352,10 +354,11 @@ For N bodies, B[0] is static, mass ratio between B[1] and B[2..N-1] is 1:N-2
 
 TODO code could handle all cases for N>2, grav>=0, xi>=1 varying along n<N
 
-#+BEGIN_SRC C++ :includes <stdio.h>
+#+NAME: data-table
+#+BEGIN_SRC C++ :includes <stdio.h> :results drawer
   int main( int argc, char** argv )
   {
-      const int N(6);
+      const int N(5);
       const float xi(1.0f), wa(xi/(xi+1));
       //const float ma(1), mb(1),
       const float eps(1e-3f);
@@ -399,35 +402,35 @@ TODO code could handle all cases for N>2, grav>=0, xi>=1 varying along n<N
   }
 #+END_SRC
 
-#+tblname: data-table
-| t |   k | V[0] |   V[1] |   V[2] |   V[3] |   V[4] |    V[5] |
-| 0 |   0 |  0.0 | 0.1633 | 0.1633 | 0.1633 | 0.1633 | 10.1633 |
-| 0 |  10 |  0.0 | 0.5771 | 1.0447 |  1.368 | 1.5297 |  1.5297 |
-| 0 |  20 |  0.0 | 0.2118 | 0.3831 | 0.5015 | 0.5607 |  0.5607 |
-| 0 |  30 |  0.0 | 0.0776 | 0.1404 | 0.1838 | 0.2055 |  0.2055 |
-| 0 |  40 |  0.0 | 0.0285 | 0.0515 | 0.0674 | 0.0753 |  0.0753 |
-| 0 |  50 |  0.0 | 0.0104 | 0.0189 | 0.0247 | 0.0276 |  0.0276 |
-| 0 |  60 |  0.0 | 0.0038 | 0.0069 | 0.0091 | 0.0101 |  0.0101 |
-| 0 |  70 |  0.0 | 0.0014 | 0.0025 | 0.0033 | 0.0037 |  0.0037 |
-| 0 |  80 |  0.0 | 0.0005 | 0.0009 | 0.0012 | 0.0014 |  0.0014 |
-| 0 |  84 |  0.0 | 0.0003 | 0.0006 | 0.0008 | 0.0009 |  0.0009 |
-| 1 |  84 |  0.0 | 0.1637 |  0.164 | 0.1641 | 0.1642 |  0.1642 |
-| 1 |  94 |  0.0 | 0.0241 | 0.0436 |  0.057 | 0.0637 |  0.0637 |
-| 1 | 104 |  0.0 | 0.0088 |  0.016 | 0.0209 | 0.0234 |  0.0234 |
-| 1 | 114 |  0.0 | 0.0032 | 0.0059 | 0.0077 | 0.0086 |  0.0086 |
-| 1 | 124 |  0.0 | 0.0012 | 0.0021 | 0.0028 | 0.0031 |  0.0031 |
-| 1 | 134 |  0.0 | 0.0004 | 0.0008 |  0.001 | 0.0012 |  0.0012 |
-| 1 | 136 |  0.0 | 0.0004 | 0.0006 | 0.0008 | 0.0009 |  0.0009 |
+#+RESULTS: data-table
+:results:
+| t |  k | V[0] |   V[1] |   V[2] |   V[3] |    V[4] |
+| 0 |  0 |  0.0 | 0.1633 | 0.1633 | 0.1633 | 10.1633 |
+| 0 | 10 |  0.0 | 0.5148 | 0.8788 | 1.0608 |  1.0608 |
+| 0 | 20 |  0.0 | 0.1057 | 0.1804 | 0.2178 |  0.2178 |
+| 0 | 30 |  0.0 | 0.0217 |  0.037 | 0.0447 |  0.0447 |
+| 0 | 40 |  0.0 | 0.0045 | 0.0076 | 0.0092 |  0.0092 |
+| 0 | 50 |  0.0 | 0.0009 | 0.0016 | 0.0019 |  0.0019 |
+| 0 | 54 |  0.0 | 0.0005 | 0.0008 |  0.001 |   0.001 |
+| 1 | 54 |  0.0 | 0.1638 | 0.1642 | 0.1643 |  0.1643 |
+| 1 | 64 |  0.0 | 0.0169 | 0.0288 | 0.0347 |  0.0347 |
+| 1 | 74 |  0.0 | 0.0035 | 0.0059 | 0.0071 |  0.0071 |
+| 1 | 84 |  0.0 | 0.0007 | 0.0012 | 0.0015 |  0.0015 |
+| 1 | 87 |  0.0 | 0.0004 | 0.0008 | 0.0009 |  0.0009 |
+:end:
 
 #+BEGIN_SRC gnuplot :var data=data-table :file ../img/sequential_xxxx.png :exports none :results none
-  set xrange [0:150]
-  set yrange [0:1]
+  set term png size 600, 300
+  set size ratio 0.5
+  set xrange [0:100]
+  set logscale y
+  set yrange [0.0001:10]
   plot data u 2:3 with lines, \
        data u 2:4 with lines, \
        data u 2:5 with lines, \
        data u 2:6 with lines, \
-       data u 2:7 with lines, \
-       data u 2:8 with lines
+       data u 2:7 with lines
+  unset logscale
 #+END_SRC
 
 #+ATTR_HTML: image :width 95%
