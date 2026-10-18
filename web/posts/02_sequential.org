@@ -263,6 +263,16 @@ Similar to Block-GS above
 * TODO References
 ** TODO Convergence for Gauss-Seidel linear solvers
 - Must be in some paper/book
+- Havok
+  https://www.havok.com/blog/how-havoks-constraint-solver-works-pgs-baumgarte/
+  - There's an optional direct solver
+- Roblox
+  https://about.roblox.com/newsroom/2020/08/improving-simulation-performance-advanced-physics-solver
+  - Mensions this "reconditioning the PGS using the sparse LDL
+    decomposition of the constraint matrix of equality
+    constraints. Dense submatrices of the constraint matrix are
+    sparsified using a method we call Body Splitting."
+  - Presentation https://www.youtube.com/watch?v=P-WP1yMOkc4
 * TODO Code
 ** Impact ABC without acceleration
 Implement SI and output table with Va,Vb results, show they decrease
