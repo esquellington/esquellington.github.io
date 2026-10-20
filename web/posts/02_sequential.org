@@ -402,8 +402,7 @@ as we predicted
       printf("k V_a V_b");
       while( k < K && Vb > eps ) //iterate until convergence
       {
-          if( k%10 == 0 )
-              printf("\n%d %2.4f %2.4f",k,Va,Vb);
+          if( k%10 == 0 ) printf("\n%d %2.4f %2.4f",k,Va,Vb);
           Va = 0.0f; //solve AC
           float Vab(Vb-Va); //solve AB
           Va += Vab * wa;
@@ -466,7 +465,6 @@ Warmstarting would avoid most iter on >2nd frame
       return 0;
   }
 #+END_SRC
-
 #+RESULTS:
 :results:
 | t |  k |    V_a |     V_b |
@@ -479,7 +477,7 @@ Warmstarting would avoid most iter on >2nd frame
 | 1 | 23 |  0.001 |   0.001 |
 :end:
 
-** Impact N bodies with acceleration (REUSE GSimulateStack1D<>)
+** Impact 5 bodies with acceleration
 
 Simulate 2 frames of a stack of N bodies with uniform mass:
 - 1st frame involves impact and gravity vel, both fully absorbed
@@ -487,57 +485,30 @@ Simulate 2 frames of a stack of N bodies with uniform mass:
 Warmstarting would avoid most iter on >2nd frame
 For N bodies, B[0] is static, mass ratio between B[1] and B[2..N-1] is 1:N-2
 
-TODO code could handle all cases for N>2, grav>=0, xi>=1 varying along n<N
+NOTE: <<GSimulateStack1D>> syntax tangles func definition into next
+block that uses it, we use ":noweb strip-export" to avoid exporting
+any explicit refs to it (see
+https://orgmode.org/manual/Noweb-Reference-Syntax.html)
 
-#+NAME: table-stack
-#+BEGIN_SRC C++ :includes <stdio.h> :results drawer
+#+NAME: table-stack-5-nows
+#+BEGIN_SRC C++ :includes <stdio.h> :results drawer :noweb strip-export
+  <<GSimulateStack1D>>
   int main( int argc, char** argv )
   {
-      const int N(5);
-      const float xi(1.0f), wa(xi/(xi+1));
-      //const float ma(1), mb(1),
-      const float eps(1e-3f);
-      const int K(200);
-      float V[N] = {}; V[N-1] = 10;
-      printf("t k");
-      for( int n=0; n<N; n++ )
-          printf(" V[%d]", n);
-      int tk(0); //total iter across timesteps
-      for( int t=0; t<2; t++ ) //2 frames
-      {
-          // Integrate t->t+dt
-          const float dt(1.0f/60.0f), g(9.8f);
-          for( int n=1; n<N; n++ )
-              V[n] += dt*g;
-          int k(0); //per-step iter
-          while( k < K && V[N-1] > eps )
-          {
-              if( k%10 == 0 )
-              {
-                  printf("\n%d %d",t,tk);
-                  for( int n=0; n<N; n++ )
-                      printf(" %2.4f",V[n]);
-              }
-              V[0] = 0.0f; //solve AC
-              for( int n=1; n<N; n++ )
-              {
-                  float Vab(V[n]-V[n-1]); //solve AB
-                  float wa_n( n==1 ? 0.0f : wa ); //B[0] is static
-                  V[n-1] += Vab * wa_n;
-                  V[n] -= Vab * (1-wa_n);
-              }
-              k++;
-              tk++;
-          }
-          printf("\n%d %d",t,tk);
-          for( int n=0; n<N; n++ )
-              printf(" %2.4f",V[n]);
-      }
+      const int T(3); const int K(200);
+      GSimulateStack1D<5>( 1.0f, //\xi
+                           10.0f, //V0
+                           9.8f, //G
+                           T, 1.0f/60.0f, //T, dt
+                           1e-3f, //\epsilon
+                           K, //K iter per step T
+                           true, //bWarmstart
+                           1.0f ); //ws_decay01
       return 0;
   }
 #+END_SRC
 
-#+RESULTS: table-stack
+#+RESULTS: table-stack-5-nows
 :results:
 | t |  k | V[0] |   V[1] |   V[2] |   V[3] |    V[4] |
 | 0 |  0 |  0.0 | 0.1633 | 0.1633 | 0.1633 | 10.1633 |
@@ -552,26 +523,31 @@ TODO code could handle all cases for N>2, grav>=0, xi>=1 varying along n<N
 | 1 | 74 |  0.0 | 0.0035 | 0.0059 | 0.0071 |  0.0071 |
 | 1 | 84 |  0.0 | 0.0007 | 0.0012 | 0.0015 |  0.0015 |
 | 1 | 87 |  0.0 | 0.0004 | 0.0008 | 0.0009 |  0.0009 |
+| 2 | 87 |  0.0 | 0.0004 | 0.0007 | 0.0008 |  0.0008 |
 :end:
 
-#+BEGIN_SRC gnuplot :var data=table-stack :file ../img/sequential_stack.png :exports none :results none
+#+BEGIN_SRC gnuplot :var data=table-stack-5-nows :file ../img/sequential_stack-5-nows.png :exports none :results none
   set term png size 600, 300
   set size ratio 0.5
-  set xrange [0:100]
+  unset logscale
+  unset xrange
+  set yrange [1e-3:10]
   set logscale y
-  set yrange [0.0001:10]
   plot data u 2:3 with lines, \
        data u 2:4 with lines, \
        data u 2:5 with lines, \
        data u 2:6 with lines, \
-       data u 2:7 with lines
-  unset logscale
+       data u 2:7 with lines, \
+       data u 2:8 with lines, \
+       data u 2:9 with lines, \
+       data u 2:10 with lines, \
+       data u 2:11 with lines, \
+       data u 2:12 with lines
 #+END_SRC
-
 #+ATTR_HTML: image :width 95%
-[[file:../img/sequential_stack.png]]
+[[file:../img/sequential_stack-5-nows.png]]
 
-** Generic sim impact N bodies with acceleration and warmstarting over multiple steps
+** Impact 10 bodies with acceleration and warmstarting, multiple steps
 
 Warmstarting causes top body to bounce despite purely inelastic
 collision, it get negative (upwards) vel on 1st iter. If we only save
@@ -581,8 +557,48 @@ velocities (small, but negative), which means WS is overestimating
 even if we only apply it on persistent contacts. MAYBE this would not
 happen if we ignored separating contacts though
 
+#+NAME: table-stack-10
+#+BEGIN_SRC C++ :includes <stdio.h> :results drawer :noweb strip-export
+  <<GSimulateStack1D>>
+  int main( int argc, char** argv )
+  {
+      const int T(3); const int K(200);
+      GSimulateStack1D<10>( 1.0f, //\xi
+                            10.0f, //V0
+                            9.8f, //G
+                            T, 1.0f/60.0f, //T, dt
+                            1e-3f, //\epsilon
+                            K, //K iter per step T
+                            true, //bWarmstart
+                            1.0f ); //ws_decay01
+      return 0;
+  }
+#+END_SRC
+#+BEGIN_SRC gnuplot :var data=table-stack-10 :file ../img/sequential_stack-10.png :exports none :results none
+  set term png size 600, 300
+  set size ratio 0.5
+  unset logscale
+  unset xrange
+  set yrange [1e-3:10]
+  set logscale y
+  plot data u 2:3 with lines, \
+       data u 2:4 with lines, \
+       data u 2:5 with lines, \
+       data u 2:6 with lines, \
+       data u 2:7 with lines, \
+       data u 2:8 with lines, \
+       data u 2:9 with lines, \
+       data u 2:10 with lines, \
+       data u 2:11 with lines, \
+       data u 2:12 with lines
+#+END_SRC
+#+ATTR_HTML: image :width 95%
+[[file:../img/sequential_stack-10.png]]
+
+** Implementation of GSimulateStack1D
 Note, func uses printf but include "<stdio.h>" must be added to caller
 main() block due to how org-babel tangles multiple code blocks.
+
 #+NAME: GSimulateStack1D
 #+BEGIN_SRC C++
   template <unsigned int N>
@@ -652,94 +668,6 @@ main() block due to how org-babel tangles multiple code blocks.
       }
   }
 #+END_SRC
-
-#+NAME: table-stack-10
-#+BEGIN_SRC C++ :includes <stdio.h> :results drawer :noweb yes
-  // Tangle func block (req :noweb yes)
-  <<GSimulateStack1D>>
-  // Call func with specific params
-  int main( int argc, char** argv )
-  {
-      const int T(3); const int K(200);
-      GSimulateStack1D<10>( 1.0f, //\xi
-                            10.0f, //V0
-                            9.8f, //G
-                            T, 1.0f/60.0f, //T, dt
-                            1e-3f, //\epsilon
-                            K, //K iter per step T
-                            true, //bWarmstart
-                            1.0f ); //ws_decay01
-      return 0;
-  }
-#+END_SRC
-
-#+RESULTS: table-stack-10
-:results:
-| t |   k | V[0] |    V[1] |    V[2] |    V[3] |    V[4] |    V[5] |   V[6] |    V[7] |    V[8] |    V[9] |
-| 0 |   0 |  0.0 |  0.1633 |  0.1633 |  0.1633 |  0.1633 |  0.1633 | 0.1633 |  0.1633 |  0.1633 | 10.1633 |
-| 0 |  10 |  0.0 |  0.1606 |  0.3882 |  0.6801 |  1.0086 |  1.3315 | 1.6059 |  1.7996 |  1.8965 |  1.8965 |
-| 0 |  20 |  0.0 |  0.2451 |  0.4802 |  0.6987 |  0.8931 |  1.0565 | 1.1831 |  1.2689 |  1.3118 |  1.3118 |
-| 0 |  30 |  0.0 |  0.1879 |  0.3648 |  0.5256 |   0.666 |  0.7821 | 0.8711 |  0.9311 |  0.9611 |  0.9611 |
-| 0 |  40 |  0.0 |  0.1388 |  0.2692 |  0.3876 |  0.4908 |   0.576 | 0.6414 |  0.6853 |  0.7073 |  0.7073 |
-| 0 |  50 |  0.0 |  0.1022 |  0.1983 |  0.2854 |  0.3614 |  0.4241 | 0.4722 |  0.5046 |  0.5208 |  0.5208 |
-| 0 |  60 |  0.0 |  0.0753 |   0.146 |  0.2102 |  0.2661 |  0.3123 | 0.3477 |  0.3715 |  0.3834 |  0.3834 |
-| 0 |  70 |  0.0 |  0.0554 |  0.1075 |  0.1547 |  0.1959 |  0.2299 |  0.256 |  0.2735 |  0.2823 |  0.2823 |
-| 0 |  80 |  0.0 |  0.0408 |  0.0791 |  0.1139 |  0.1442 |  0.1693 | 0.1885 |  0.2014 |  0.2078 |  0.2078 |
-| 0 |  90 |  0.0 |    0.03 |  0.0583 |  0.0839 |  0.1062 |  0.1246 | 0.1388 |  0.1483 |   0.153 |   0.153 |
-| 0 | 100 |  0.0 |  0.0221 |  0.0429 |  0.0618 |  0.0782 |  0.0918 | 0.1022 |  0.1092 |  0.1127 |  0.1127 |
-| 0 | 110 |  0.0 |  0.0163 |  0.0316 |  0.0455 |  0.0576 |  0.0676 | 0.0752 |  0.0804 |   0.083 |   0.083 |
-| 0 | 120 |  0.0 |   0.012 |  0.0233 |  0.0335 |  0.0424 |  0.0497 | 0.0554 |  0.0592 |  0.0611 |  0.0611 |
-| 0 | 130 |  0.0 |  0.0088 |  0.0171 |  0.0246 |  0.0312 |  0.0366 | 0.0408 |  0.0436 |   0.045 |   0.045 |
-| 0 | 140 |  0.0 |  0.0065 |  0.0126 |  0.0181 |   0.023 |   0.027 |   0.03 |  0.0321 |  0.0331 |  0.0331 |
-| 0 | 150 |  0.0 |  0.0048 |  0.0093 |  0.0134 |  0.0169 |  0.0199 | 0.0221 |  0.0236 |  0.0244 |  0.0244 |
-| 0 | 160 |  0.0 |  0.0035 |  0.0068 |  0.0098 |  0.0125 |  0.0146 | 0.0163 |  0.0174 |  0.0179 |  0.0179 |
-| 0 | 170 |  0.0 |  0.0026 |   0.005 |  0.0072 |  0.0092 |  0.0108 |  0.012 |  0.0128 |  0.0132 |  0.0132 |
-| 0 | 180 |  0.0 |  0.0019 |  0.0037 |  0.0053 |  0.0068 |  0.0079 | 0.0088 |  0.0094 |  0.0097 |  0.0097 |
-| 0 | 190 |  0.0 |  0.0014 |  0.0027 |  0.0039 |   0.005 |  0.0058 | 0.0065 |  0.0069 |  0.0072 |  0.0072 |
-| 0 | 200 |  0.0 |   0.001 |   0.002 |  0.0029 |  0.0037 |  0.0043 | 0.0048 |  0.0051 |  0.0053 |  0.0053 |
-| 1 | 200 |  0.0 |  0.1644 |  0.1653 |  0.1662 |   0.167 |  0.1676 | 0.1681 |  0.1684 |  0.1686 |  0.1686 |
-| 1 | 210 |  0.0 |  0.0295 |  0.0564 |  0.0798 |  0.0995 |  0.1152 |  0.127 |  0.1348 |  0.1387 |  0.1387 |
-| 1 | 220 |  0.0 |  0.0204 |  0.0394 |  0.0567 |  0.0717 |   0.084 | 0.0935 |  0.0998 |   0.103 |   0.103 |
-| 1 | 230 |  0.0 |  0.0149 |  0.0289 |  0.0416 |  0.0527 |  0.0618 | 0.0688 |  0.0735 |  0.0759 |  0.0759 |
-| 1 | 240 |  0.0 |   0.011 |  0.0213 |  0.0306 |  0.0388 |  0.0455 | 0.0507 |  0.0542 |  0.0559 |  0.0559 |
-| 1 | 250 |  0.0 |  0.0081 |  0.0157 |  0.0226 |  0.0286 |  0.0335 | 0.0373 |  0.0399 |  0.0411 |  0.0411 |
-| 1 | 260 |  0.0 |  0.0059 |  0.0115 |  0.0166 |   0.021 |  0.0247 | 0.0275 |  0.0294 |  0.0303 |  0.0303 |
-| 1 | 270 |  0.0 |  0.0044 |  0.0085 |  0.0122 |  0.0155 |  0.0182 | 0.0202 |  0.0216 |  0.0223 |  0.0223 |
-| 1 | 280 |  0.0 |  0.0032 |  0.0063 |   0.009 |  0.0114 |  0.0134 | 0.0149 |  0.0159 |  0.0164 |  0.0164 |
-| 1 | 290 |  0.0 |  0.0024 |  0.0046 |  0.0066 |  0.0084 |  0.0098 |  0.011 |  0.0117 |  0.0121 |  0.0121 |
-| 1 | 300 |  0.0 |  0.0017 |  0.0034 |  0.0049 |  0.0062 |  0.0073 | 0.0081 |  0.0086 |  0.0089 |  0.0089 |
-| 1 | 310 |  0.0 |  0.0013 |  0.0025 |  0.0036 |  0.0045 |  0.0053 | 0.0059 |  0.0064 |  0.0066 |  0.0066 |
-| 1 | 320 |  0.0 |  0.0009 |  0.0018 |  0.0026 |  0.0033 |  0.0039 | 0.0044 |  0.0047 |  0.0048 |  0.0048 |
-| 1 | 330 |  0.0 |  0.0007 |  0.0014 |  0.0019 |  0.0025 |  0.0029 | 0.0032 |  0.0034 |  0.0036 |  0.0036 |
-| 1 | 340 |  0.0 |  0.0005 |   0.001 |  0.0014 |  0.0018 |  0.0021 | 0.0024 |  0.0025 |  0.0026 |  0.0026 |
-| 1 | 350 |  0.0 |  0.0004 |  0.0007 |  0.0011 |  0.0013 |  0.0016 | 0.0017 |  0.0019 |  0.0019 |  0.0019 |
-| 1 | 360 |  0.0 |  0.0003 |  0.0005 |  0.0008 |   0.001 |  0.0012 | 0.0013 |  0.0014 |  0.0014 |  0.0014 |
-| 1 | 370 |  0.0 |  0.0002 |  0.0004 |  0.0006 |  0.0007 |  0.0009 | 0.0009 |   0.001 |   0.001 |   0.001 |
-| 1 | 372 |  0.0 |  0.0002 |  0.0004 |  0.0005 |  0.0007 |  0.0008 | 0.0009 |   0.001 |   0.001 |   0.001 |
-| 2 | 372 |  0.0 | -0.0006 | -0.0013 | -0.0018 | -0.0023 | -0.0027 | -0.003 | -0.0032 | -0.0033 | -0.0033 |
-:end:
-
-#+BEGIN_SRC gnuplot :var data=table-stack-10 :file ../img/sequential_stack-10.png :exports none :results none
-  set term png size 600, 300
-  set size ratio 0.5
-  unset logscale
-  unset xrange
-  set yrange [1e-3:10]
-  set logscale y
-  plot data u 2:3 with lines, \
-       data u 2:4 with lines, \
-       data u 2:5 with lines, \
-       data u 2:6 with lines, \
-       data u 2:7 with lines, \
-       data u 2:8 with lines, \
-       data u 2:9 with lines, \
-       data u 2:10 with lines, \
-       data u 2:11 with lines, \
-       data u 2:12 with lines
-#+END_SRC
-
-#+ATTR_HTML: image :width 95%
-[[file:../img/sequential_stack-10.png]]
 
 * TODO Derivations
 ** TODO Linear Approx
