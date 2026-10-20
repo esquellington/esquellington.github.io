@@ -139,7 +139,32 @@ parameter that affects $k^{*}$ the most is the mass ratio $\xi$.
 #+ATTR_HTML: image :width 95%
 [[file:../img/sequential_k_mr_approx.png]]
 
-* TODO Conclusions
+* TODO Multiple bodies and contacts :noexport:
+
+The problem is not limited to large mass ratios between individual
+bodies, it can also appear when multiple light bodies impact another
+one simultaneously with coherent velocity (ex: a stack of N bricks
+falling on a single one, or avalanche of similar rocks forming a pile
+of rubble), in that case the bottommost object needs to absorb the
+momentum of all other objects, so object count is
+essentially the same as the mass ratio of a simplified problem where
+N-1 objects have been merged into one.
+
+** TODO Prove this somehow
+How would N bodies converge, depending on masses… I think if known
+solution is Vi=0 for all, we can always partition a list of bodies
+{Bi} to Wall, A (sandwiched), B=sum Bi fir all other bodies, and
+assume they behave like a single block, so mass ratio mA, mB increases
+with Bi count even if individual bodies have constant mass. This makes
+sense I think and would reuse the same derivation. We’re computing how
+long it takes to converge at the “bottleneck” body A due to mass B,
+regardless of number of bodies in Bi set
+
+** TODO Also prove that "mass ratio" and "number of objects with same mass" are somewhat interchangeable
+
+So iter count to achieve same error with more objects grows more than linearly?
+
+* TODO [#A] Conclusions
 
 Converging below a given *absolute* precision $\epsilon$ requires
 proportionally more iterations as $\xi$ grows. Impact speed and
@@ -155,7 +180,7 @@ no previous solution exists.
 SI is very easy to implement, that's why it's so popular, but
 (etc...). Can we do better somehow, without losing all simplicity?
 
-* TODO PGS vs Direct Solution :noexport:
+* TODO [#A] PGS vs Direct Solution                                 :noexport:
 
 Non-iterative solution should be trivial for this problem, we could
 solve system of eq with 2 vars and 2 constraints, assuming vel will
@@ -201,7 +226,7 @@ Also see effect of subiter in a subgroup vs global iteration without
 subgroups, in princiole subgroups with larger mass ratios would need
 more iter than others so total count would reduce
 
-* TODO PGS vs TGS :noexport:
+* TODO [#C] PGS vs TGS                                             :noexport:
 PGS convergence wrt iter (1 substep) vs TGS convergence wrt substeps (1 iter)
 
 Derive this for model problem, should be feasible but I can’t see how
@@ -219,46 +244,42 @@ NOT reduce proportionally, but slower (see dependicy of k on V0 above)
 
 https://matthias-research.github.io/pages/publications/PBDBodies.pdf
 
-* TODO PGS vs (A)VBD :noexport:
+* TODO [#C] PGS vs (A)VBD                                          :noexport:
 - Solve in body-centric way A, B using all collisions on them at once,
   maybe with compliance, see how error decreases
 - Va needs to consider both AC and AB, so I doubt it results in
   anything that is not Va=0, so it's no different from
   constraint-centric SI/PGS in this case.
-* TODO Primal Iterative Solve? :noexport:
+* TODO [#C] Primal Iterative Solve?                                :noexport:
 
 How would body-centric primal solver converge for the model problem?
 It would need a stiffness value, that could be increased per iter (ex:
 like AVBD), would that converge better for impacts?
 
-* TODO Multiple bodies and contacts :noexport:
+* TODO [#B] Approximate pre-solve + PGS refinement                 :noexport:
+Si aconseguim fer pre-solve approximat (ex: direct solve per a
+moviment linial), i calculem les lambdes, podriem ferles servir com a
+valor de warmstart per a contactes sense historia
 
-The problem is not limited to large mass ratios between individual
-bodies, it can also appear when multiple light bodies impact another
-one simultaneously with coherent velocity (ex: a stack of N bricks
-falling on a single one, or avalanche of similar rocks forming a pile
-of rubble), in that case the bottommost object needs to absorb the
-momentum of all other objects, so object count is
-essentially the same as the mass ratio of a simplified problem where
-N-1 objects have been merged into one.
+Preslolve seria precondition, approx, o prediction mes aviat
 
-** TODO Prove this somehow
-How would N bodies converge, depending on masses… I think if known
-solution is Vi=0 for all, we can always partition a list of bodies
-{Bi} to Wall, A (sandwiched), B=sum Bi fir all other bodies, and
-assume they behave like a single block, so mass ratio mA, mB increases
-with Bi count even if individual bodies have constant mass. This makes
-sense I think and would reuse the same derivation. We’re computing how
-long it takes to converge at the “bottleneck” body A due to mass B,
-regardless of number of bodies in Bi set
+Presictors podrien ser direct solve, primal solve (VBD??) oalgun altre solve que no sigui susceptible a problemes de mass ratio
 
-** TODO Also prove that "mass ratio" and "number of objects with same mass" are somewhat interchangeable
+Direct solve per lm des podris considerar nomes particules, hauria de ser raonablement simple. Sembla un solver d’estatica de fet, com em the finals.
 
-So iter count to achieve same error with more objects grows more than linearly?
+Primal solve hauriande considerar colisions soft, no es greu si valor approx es raonable com a warmstart.
 
-* TODO Approximating direct solution + refining it with PGS :noexport:
-Similar to Block-GS above
-* TODO Persistent contacts :noexport:
+Potser AVBD fa algo semblant? Incrementa stiffness per iter si recordo be
+
+La pregjnta clau es:
+- quantes iter estalviRia aixo? Es si predicio prediu el 50% de l’impuls necessari, quna fraccio d’iter estalvia?
+- pot el presolve warmstart causar sideffects si no es exacte (ex: si no podem garantir que estrictament sub-estima impulsos)
+
+Presolve ignoraria friccio per simplicitat, aixo pot ser problematic?
+
+Presolve could be a Block-GS and then iterate with full PGS
+
+* TODO [#A] Persistent contacts                                    :noexport:
 - Show that in that case SI needs to resolve the delta vel from
   gravity (or any other force) every frame, and that warmstarting can
   help converging if solution does not change (so force is constant,
@@ -283,28 +304,76 @@ Similar to Block-GS above
     experienced... BUT if they did not get impulse they'll have
     lambda0 so it does not matter if they WS... as long as they skip
     the 1st frame after an impulse>0 timestep
+* TODO [#A] Warmstarting Sucks!                                    :noexport:
+Identified multiple issues with WS that maybe deserve their own
+article 03_Warmstarting.org?
 
-* TODO Approximate pre-solve + PGS refinement :noexport:
-Si aconseguim fer pre-solve approximat (ex: direct solve per a
-moviment linial), i calculem les lambdes, podriem ferles servir com a
-valor de warmstart per a contactes sense historia
+- See above [[Persistent contacts][Persistent contacts]], consider adding it here instead
 
-Preslolve seria precondition, approx, o prediction mes aviat
+** TODO Warmstart theory
+WS is not a “guess” of the actual solution, it’s an “assumption” of
+the solution that cannot be fully undone, and that can change it
+completely.
 
-Presictors podrien ser direct solve, primal solve (VBD??) oalgun altre solve que no sigui susceptible a problemes de mass ratio
+It applies impulses indistinguishable from external magic forces that
+change the problem, as opposed to a guess in ConjGrad or similar,
+that starts search from solution “closer” to that solution, but does
+not change the problem or solution to it (unless it perturbs it to
+find a different local minima if problem is not convex) This same
+issue would happen with XPBD or any other GS-like solver where WS
+values need to be applied in the same way PGS would apply local steps
+towards the solution, WS tries to skip these local steps, assuming
+they’d repeat exactly, so it can comtinue from there
 
-Direct solve per lm des podris considerar nomes particules, hauria de ser raonablement simple. Sembla un solver d’estatica de fet, com em the finals.
+It’s practical, but it’s objectively wrong. Some bad cases can be
+avoided with heuristics, but not all I suspect
 
-Primal solve hauriande considerar colisions soft, no es greu si valor approx es raonable com a warmstart.
+Check how WS works in:
+- Box
+- Bullet
+- Jolt
+- ODE
+- PhysX
+- Chipmunk
+- Rapier?
+so far all seem to just use it and scale down maybe
 
-Potser AVBD fa algo semblant? Incrementa stiffness per iter si recordo be
+The fact that this is not improved by substepping is a big red flag, actually.
 
-La pregjnta clau es:
-- quantes iter estalviRia aixo? Es si predicio prediu el 50% de l’impuls necessari, quna fraccio d’iter estalvia?
-- pot el presolve warmstart causar sideffects si no es exacte (ex: si no podem garantir que estrictament sub-estima impulsos)
+Compare with:
+- direct solve preconditioning
+- iterative solve guessing (CG)
+- AVBD “warmstarting”
+Show they converge to same value if “guess” is perturbed, just slower/faster
+** TODO Warmstart invalidation on nonsmoothness
 
-Presolve ignoraria friccio per simplicitat, aixo pot ser problematic?
+When is WS correct? when solution is smooth? Argue/prove it
 
+WS assumes continuous and smooth silution. When this is false for a
+given connected component, we should not apply it to the connected
+component constraint solver, but we can still apply it to other CC
+Sources of nonsmoothness would be:
+- add/remove constraints or bodies
+- apply steong impulses or forces
+- change masses or contraint params “significantly” (includes hitting
+  an angle limit, for example, that is a new active constraint)
+
+When nomsmooth hapoens, we’d zero WS instantly
+
+We could do this by tracking last nonsmooth event timestamp in all
+bodies/constraints/etc (we do detect discont alemready in Pla), and
+then check if WS timestamps are older and invalidate them if so
+
+On mismatched timestamps, we would need to zero WS BEFORE applying to
+the islands (or skip), but also do so next tinestep (or skip storing
+WS values at the end of this frame. This way we’d avoid both prre
+applying stale WS after event, and saving “transient” WS after solving
+post-event (ex: collision).
+
+Alternatively, post-event wemd only save WS if they’re similar
+enough to previous solution (so we can consider it settled)… (but this
+woukd stop us from converging incrementally over frames…) so maybe we
+only allow WS to grow a fractuon per step? Messy…
 * TODO References
 ** TODO Convergence for Gauss-Seidel linear solvers
 - Must be in some paper/book
@@ -516,14 +585,14 @@ happen if we ignored separating contacts though
 #+BEGIN_SRC C++ :includes <stdio.h> :results drawer
   int main( int argc, char** argv )
   {
-      const int N(10);
+      const int N(5);
       const float xi(1.0f), wa(xi/(xi+1));
       //const float ma(1), mb(1),
       const float eps(1e-3f);
       const int K(200);
       const bool bWarmstart(true);
       const float warmstart_decay01(0.99f);
-      float V[N] = {}; V[N-1] = 10;
+      float V[N] = {}; V[N-1] = 100;
       float cached_Vab[N] = {};
       printf("t k");
       for( int n=0; n<N; n++ )
@@ -588,64 +657,35 @@ happen if we ignored separating contacts though
 
 #+RESULTS: table-stack-ws
 :results:
-| t |   k | V[0] |    V[1] |    V[2] |    V[3] |    V[4] |    V[5] |    V[6] |    V[7] |    V[8] |    V[9] |
-| 0 |   0 |  0.0 |  0.1633 |  0.1633 |  0.1633 |  0.1633 |  0.1633 |  0.1633 |  0.1633 |  0.1633 | 10.1633 |
-| 0 |  10 |  0.0 |  0.1606 |  0.3882 |  0.6801 |  1.0086 |  1.3315 |  1.6059 |  1.7996 |  1.8965 |  1.8965 |
-| 0 |  20 |  0.0 |  0.2451 |  0.4802 |  0.6987 |  0.8931 |  1.0565 |  1.1831 |  1.2689 |  1.3118 |  1.3118 |
-| 0 |  30 |  0.0 |  0.1879 |  0.3648 |  0.5256 |   0.666 |  0.7821 |  0.8711 |  0.9311 |  0.9611 |  0.9611 |
-| 0 |  40 |  0.0 |  0.1388 |  0.2692 |  0.3876 |  0.4908 |   0.576 |  0.6414 |  0.6853 |  0.7073 |  0.7073 |
-| 0 |  50 |  0.0 |  0.1022 |  0.1983 |  0.2854 |  0.3614 |  0.4241 |  0.4722 |  0.5046 |  0.5208 |  0.5208 |
-| 0 |  60 |  0.0 |  0.0753 |   0.146 |  0.2102 |  0.2661 |  0.3123 |  0.3477 |  0.3715 |  0.3834 |  0.3834 |
-| 0 |  70 |  0.0 |  0.0554 |  0.1075 |  0.1547 |  0.1959 |  0.2299 |   0.256 |  0.2735 |  0.2823 |  0.2823 |
-| 0 |  80 |  0.0 |  0.0408 |  0.0791 |  0.1139 |  0.1442 |  0.1693 |  0.1885 |  0.2014 |  0.2078 |  0.2078 |
-| 0 |  90 |  0.0 |    0.03 |  0.0583 |  0.0839 |  0.1062 |  0.1246 |  0.1388 |  0.1483 |   0.153 |   0.153 |
-| 0 | 100 |  0.0 |  0.0221 |  0.0429 |  0.0618 |  0.0782 |  0.0918 |  0.1022 |  0.1092 |  0.1127 |  0.1127 |
-| 0 | 110 |  0.0 |  0.0163 |  0.0316 |  0.0455 |  0.0576 |  0.0676 |  0.0752 |  0.0804 |   0.083 |   0.083 |
-| 0 | 120 |  0.0 |   0.012 |  0.0233 |  0.0335 |  0.0424 |  0.0497 |  0.0554 |  0.0592 |  0.0611 |  0.0611 |
-| 0 | 130 |  0.0 |  0.0088 |  0.0171 |  0.0246 |  0.0312 |  0.0366 |  0.0408 |  0.0436 |   0.045 |   0.045 |
-| 0 | 140 |  0.0 |  0.0065 |  0.0126 |  0.0181 |   0.023 |   0.027 |    0.03 |  0.0321 |  0.0331 |  0.0331 |
-| 0 | 150 |  0.0 |  0.0048 |  0.0093 |  0.0134 |  0.0169 |  0.0199 |  0.0221 |  0.0236 |  0.0244 |  0.0244 |
-| 0 | 160 |  0.0 |  0.0035 |  0.0068 |  0.0098 |  0.0125 |  0.0146 |  0.0163 |  0.0174 |  0.0179 |  0.0179 |
-| 0 | 170 |  0.0 |  0.0026 |   0.005 |  0.0072 |  0.0092 |  0.0108 |   0.012 |  0.0128 |  0.0132 |  0.0132 |
-| 0 | 180 |  0.0 |  0.0019 |  0.0037 |  0.0053 |  0.0068 |  0.0079 |  0.0088 |  0.0094 |  0.0097 |  0.0097 |
-| 0 | 190 |  0.0 |  0.0014 |  0.0027 |  0.0039 |   0.005 |  0.0058 |  0.0065 |  0.0069 |  0.0072 |  0.0072 |
-| 0 | 200 |  0.0 |   0.001 |   0.002 |  0.0029 |  0.0037 |  0.0043 |  0.0048 |  0.0051 |  0.0053 |  0.0053 |
-| 1 | 200 |  0.0 |  0.1644 |  0.1653 |  0.1662 |   0.167 |  0.1676 |  0.1681 |  0.1684 |  0.1686 |  0.1686 |
-| 1 | 210 |  0.0 |  0.0295 |  0.0564 |  0.0798 |  0.0995 |  0.1152 |   0.127 |  0.1348 |  0.1387 |  0.1387 |
-| 1 | 220 |  0.0 |  0.0204 |  0.0394 |  0.0567 |  0.0717 |   0.084 |  0.0935 |  0.0998 |   0.103 |   0.103 |
-| 1 | 230 |  0.0 |  0.0149 |  0.0289 |  0.0416 |  0.0527 |  0.0618 |  0.0688 |  0.0735 |  0.0759 |  0.0759 |
-| 1 | 240 |  0.0 |   0.011 |  0.0213 |  0.0306 |  0.0388 |  0.0455 |  0.0507 |  0.0542 |  0.0559 |  0.0559 |
-| 1 | 250 |  0.0 |  0.0081 |  0.0157 |  0.0226 |  0.0286 |  0.0335 |  0.0373 |  0.0399 |  0.0411 |  0.0411 |
-| 1 | 260 |  0.0 |  0.0059 |  0.0115 |  0.0166 |   0.021 |  0.0247 |  0.0275 |  0.0294 |  0.0303 |  0.0303 |
-| 1 | 270 |  0.0 |  0.0044 |  0.0085 |  0.0122 |  0.0155 |  0.0182 |  0.0202 |  0.0216 |  0.0223 |  0.0223 |
-| 1 | 280 |  0.0 |  0.0032 |  0.0063 |   0.009 |  0.0114 |  0.0134 |  0.0149 |  0.0159 |  0.0164 |  0.0164 |
-| 1 | 290 |  0.0 |  0.0024 |  0.0046 |  0.0066 |  0.0084 |  0.0098 |   0.011 |  0.0117 |  0.0121 |  0.0121 |
-| 1 | 300 |  0.0 |  0.0017 |  0.0034 |  0.0049 |  0.0062 |  0.0073 |  0.0081 |  0.0086 |  0.0089 |  0.0089 |
-| 1 | 310 |  0.0 |  0.0013 |  0.0025 |  0.0036 |  0.0045 |  0.0053 |  0.0059 |  0.0064 |  0.0066 |  0.0066 |
-| 1 | 320 |  0.0 |  0.0009 |  0.0018 |  0.0026 |  0.0033 |  0.0039 |  0.0044 |  0.0047 |  0.0048 |  0.0048 |
-| 1 | 330 |  0.0 |  0.0007 |  0.0014 |  0.0019 |  0.0025 |  0.0029 |  0.0032 |  0.0034 |  0.0036 |  0.0036 |
-| 1 | 340 |  0.0 |  0.0005 |   0.001 |  0.0014 |  0.0018 |  0.0021 |  0.0024 |  0.0025 |  0.0026 |  0.0026 |
-| 1 | 350 |  0.0 |  0.0004 |  0.0007 |  0.0011 |  0.0013 |  0.0016 |  0.0017 |  0.0019 |  0.0019 |  0.0019 |
-| 1 | 360 |  0.0 |  0.0003 |  0.0005 |  0.0008 |   0.001 |  0.0012 |  0.0013 |  0.0014 |  0.0014 |  0.0014 |
-| 1 | 370 |  0.0 |  0.0002 |  0.0004 |  0.0006 |  0.0007 |  0.0009 |  0.0009 |   0.001 |   0.001 |   0.001 |
-| 1 | 372 |  0.0 |  0.0002 |  0.0004 |  0.0005 |  0.0007 |  0.0008 |  0.0009 |   0.001 |   0.001 |   0.001 |
-| 2 | 372 |  0.0 | -0.0006 | -0.0013 | -0.0018 | -0.0023 | -0.0027 |  -0.003 | -0.0032 | -0.0033 | -0.0033 |
-| 3 | 372 |  0.0 |  0.0002 | -0.0012 | -0.0025 | -0.0036 | -0.0045 | -0.0052 | -0.0057 | -0.0059 | -0.0059 |
-| 4 | 372 |  0.0 |  0.0026 |  0.0004 | -0.0016 | -0.0033 | -0.0047 | -0.0058 | -0.0065 | -0.0069 | -0.0069 |
-| 5 | 372 |  0.0 |  0.0066 |  0.0037 |   0.001 | -0.0013 | -0.0032 | -0.0047 | -0.0057 | -0.0062 | -0.0062 |
-| 6 | 372 |  0.0 |  0.0122 |  0.0085 |  0.0052 |  0.0023 | -0.0002 |  -0.002 | -0.0033 | -0.0039 | -0.0039 |
-| 7 | 372 |  0.0 |  0.0194 |   0.015 |  0.0109 |  0.0074 |  0.0045 |  0.0023 |  0.0008 |     0.0 |     0.0 |
-| 8 | 372 |  0.0 |  0.0282 |   0.023 |  0.0183 |  0.0142 |  0.0108 |  0.0082 |  0.0064 |  0.0056 |  0.0056 |
-| 8 | 382 |  0.0 |  0.0021 |  0.0039 |  0.0052 |  0.0061 |  0.0065 |  0.0065 |  0.0064 |  0.0056 |  0.0056 |
-| 8 | 392 |  0.0 |  0.0011 |   0.002 |  0.0029 |  0.0035 |  0.0041 |  0.0045 |  0.0047 |  0.0049 |  0.0049 |
-| 8 | 402 |  0.0 |  0.0007 |  0.0014 |   0.002 |  0.0025 |   0.003 |  0.0033 |  0.0035 |  0.0036 |  0.0036 |
-| 8 | 412 |  0.0 |  0.0005 |   0.001 |  0.0015 |  0.0019 |  0.0022 |  0.0024 |  0.0026 |  0.0027 |  0.0027 |
-| 8 | 422 |  0.0 |  0.0004 |  0.0008 |  0.0011 |  0.0014 |  0.0016 |  0.0018 |  0.0019 |   0.002 |   0.002 |
-| 8 | 432 |  0.0 |  0.0003 |  0.0006 |  0.0008 |   0.001 |  0.0012 |  0.0013 |  0.0014 |  0.0015 |  0.0015 |
-| 8 | 442 |  0.0 |  0.0002 |  0.0004 |  0.0006 |  0.0007 |  0.0009 |   0.001 |   0.001 |  0.0011 |  0.0011 |
-| 8 | 445 |  0.0 |  0.0002 |  0.0004 |  0.0005 |  0.0007 |  0.0008 |  0.0009 |  0.0009 |   0.001 |   0.001 |
-| 9 | 445 |  0.0 | -0.0175 | -0.0127 | -0.0083 | -0.0045 | -0.0014 |   0.001 |  0.0027 |  0.0035 |  0.0035 |
-| 9 | 449 |  0.0 |  -0.011 | -0.0092 |  -0.007 | -0.0047 | -0.0026 |  -0.001 |  0.0002 |  0.0008 |  0.0008 |
+| t |   k | V[0] |   V[1] |   V[2] |    V[3] |     V[4] |
+| 0 |   0 |  0.0 | 0.1633 | 0.1633 |  0.1633 | 100.1633 |
+| 0 |  10 |  0.0 | 4.9972 | 8.5308 | 10.2976 |  10.2976 |
+| 0 |  20 |  0.0 | 1.0257 |  1.751 |  2.1137 |   2.1137 |
+| 0 |  30 |  0.0 | 0.2105 | 0.3594 |  0.4339 |   0.4339 |
+| 0 |  40 |  0.0 | 0.0432 | 0.0738 |  0.0891 |   0.0891 |
+| 0 |  50 |  0.0 | 0.0089 | 0.0151 |  0.0183 |   0.0183 |
+| 0 |  60 |  0.0 | 0.0018 | 0.0031 |  0.0038 |   0.0038 |
+| 0 |  69 |  0.0 | 0.0004 | 0.0007 |  0.0009 |   0.0009 |
+| 1 |  69 |  0.0 | 0.1638 | 0.1641 |  0.1642 |   0.1642 |
+| 1 |  79 |  0.0 | 0.0169 | 0.0288 |  0.0347 |   0.0347 |
+| 1 |  89 |  0.0 | 0.0035 | 0.0059 |  0.0071 |   0.0071 |
+| 1 |  99 |  0.0 | 0.0007 | 0.0012 |  0.0015 |   0.0015 |
+| 1 | 102 |  0.0 | 0.0004 | 0.0008 |  0.0009 |   0.0009 |
+| 2 | 102 |  0.0 | 0.0004 | 0.0008 |  0.0009 |   0.0009 |
+| 3 | 102 |  0.0 | 0.0021 | 0.0024 |  0.0026 |   0.0026 |
+| 3 | 109 |  0.0 | 0.0004 | 0.0007 |  0.0009 |   0.0009 |
+| 4 | 109 |  0.0 |  0.002 | 0.0023 |  0.0024 |   0.0024 |
+| 4 | 115 |  0.0 | 0.0005 | 0.0008 |   0.001 |    0.001 |
+| 5 | 115 |  0.0 | 0.0021 | 0.0025 |  0.0027 |   0.0027 |
+| 5 | 122 |  0.0 | 0.0004 | 0.0007 |  0.0009 |   0.0009 |
+| 6 | 122 |  0.0 |  0.002 | 0.0023 |  0.0025 |   0.0025 |
+| 6 | 128 |  0.0 | 0.0005 | 0.0008 |   0.001 |    0.001 |
+| 7 | 128 |  0.0 | 0.0021 | 0.0025 |  0.0027 |   0.0027 |
+| 7 | 135 |  0.0 | 0.0004 | 0.0007 |  0.0009 |   0.0009 |
+| 8 | 135 |  0.0 |  0.002 | 0.0023 |  0.0024 |   0.0024 |
+| 8 | 141 |  0.0 | 0.0005 | 0.0008 |   0.001 |    0.001 |
+| 9 | 141 |  0.0 | 0.0021 | 0.0025 |  0.0026 |   0.0026 |
+| 9 | 148 |  0.0 | 0.0004 | 0.0007 |  0.0009 |   0.0009 |
 :end:
 
 #+BEGIN_SRC gnuplot :var data=table-stack-ws :file ../img/sequential_stack-ws.png :exports none :results none
@@ -658,11 +698,20 @@ happen if we ignored separating contacts though
        data u 2:4 with lines, \
        data u 2:5 with lines, \
        data u 2:6 with lines, \
-       data u 2:7 with lines
+       data u 2:7 with lines, \
+       data u 2:8 with lines, \
+       data u 2:9 with lines, \
+       data u 2:10 with lines, \
+       data u 2:11 with lines, \
+       data u 2:12 with lines
 #+END_SRC
 
 #+ATTR_HTML: image :width 95%
 [[file:../img/sequential_stack-ws.png]]
+
+** TODO Extract general code into a func with params, and call it for differnt cases in C++ blocks instead of repeating it all
+- SimulateStack1D
+- Use it to plot change wrt massratio,epsilon,velocity,gravity,bodies,iterations,timesteps,etc...
 
 * TODO Derivations
 ** TODO Linear Approx
