@@ -571,7 +571,7 @@ TODO code could handle all cases for N>2, grav>=0, xi>=1 varying along n<N
 #+ATTR_HTML: image :width 95%
 [[file:../img/sequential_stack.png]]
 
-** Impact N bodies with acceleration and Warmstarting
+** Impact N bodies with acceleration and Warmstarting multiple steps
 
 Warmstarting causes top body to bounce despite purely inelastic
 collision, it get negative (upwards) vel on 1st iter. If we only save
@@ -581,29 +581,29 @@ velocities (small, but negative), which means WS is overestimating
 even if we only apply it on persistent contacts. MAYBE this would not
 happen if we ignored separating contacts though
 
-#+NAME: table-stack-ws
+#+NAME: table-stack-1d
 #+BEGIN_SRC C++ :includes <stdio.h> :results drawer
-  int main( int argc, char** argv )
+  template <unsigned int N>
+  void GSimulateStack1D( float xi,
+                         float V0,
+                         float G,
+                         float eps,
+                         int T, float dt, //timesteps
+                         int K, //iterations
+                         bool bWarmstart, float ws_decay01 )
   {
-      const int N(5);
-      const float xi(1.0f), wa(xi/(xi+1));
-      //const float ma(1), mb(1),
-      const float eps(1e-3f);
-      const int K(200);
-      const bool bWarmstart(true);
-      const float warmstart_decay01(0.99f);
-      float V[N] = {}; V[N-1] = 100;
+      const float wa(xi/(xi+1));
+      float V[N] = {}; V[N-1] = V0;
       float cached_Vab[N] = {};
       printf("t k");
       for( int n=0; n<N; n++ )
           printf(" V[%d]", n);
       int tk(0); //total iter across timesteps
-      for( int t=0; t<10; t++ ) //2 frames
+      for( int t=0; t<T; t++ ) //2 frames
       {
           // Integrate t->t+dt
-          const float dt(1.0f/60.0f), g(9.8f);
           for( int n=1; n<N; n++ )
-              V[n] += dt*g;
+              V[n] += dt*G;
           int k(0); //per-step iter
 
           // TODO Apply warmstarting, but only after contacts applied
@@ -616,7 +616,7 @@ happen if we ignored separating contacts though
                   float wa_n( n==1 ? 0.0f : wa ); //B[0] is static
                   V[n-1] += cached_Vab[n] * wa_n;
                   V[n] -= cached_Vab[n] * (1-wa_n);
-                  cached_Vab[n] *= warmstart_decay01;
+                  cached_Vab[n] *= ws_decay01;
               }
           }
           while( k < K && V[N-1] > eps )
@@ -651,49 +651,53 @@ happen if we ignored separating contacts though
           for( int n=0; n<N; n++ )
               printf(" %2.4f",V[n]);
       }
+  }
+  int main( int argc, char** argv )
+  {
+      const int T(3); const int K(200);
+      GSimulateStack1D<10>( 1.0f, //\xi
+                            10.0f, //V0
+                            9.8f, //G
+                            1e-3f, //\epsilon
+                            T, 1.0f/60.0f, //T, dt
+                            K, //K iter per step T
+                            true, //bWarmstart
+                            1.0f ); //ws_decay01
       return 0;
   }
 #+END_SRC
 
-#+RESULTS: table-stack-ws
+#+RESULTS: table-stack-1d
 :results:
-| t |   k | V[0] |   V[1] |   V[2] |    V[3] |     V[4] |
-| 0 |   0 |  0.0 | 0.1633 | 0.1633 |  0.1633 | 100.1633 |
-| 0 |  10 |  0.0 | 4.9972 | 8.5308 | 10.2976 |  10.2976 |
-| 0 |  20 |  0.0 | 1.0257 |  1.751 |  2.1137 |   2.1137 |
-| 0 |  30 |  0.0 | 0.2105 | 0.3594 |  0.4339 |   0.4339 |
-| 0 |  40 |  0.0 | 0.0432 | 0.0738 |  0.0891 |   0.0891 |
-| 0 |  50 |  0.0 | 0.0089 | 0.0151 |  0.0183 |   0.0183 |
-| 0 |  60 |  0.0 | 0.0018 | 0.0031 |  0.0038 |   0.0038 |
-| 0 |  69 |  0.0 | 0.0004 | 0.0007 |  0.0009 |   0.0009 |
-| 1 |  69 |  0.0 | 0.1638 | 0.1641 |  0.1642 |   0.1642 |
-| 1 |  79 |  0.0 | 0.0169 | 0.0288 |  0.0347 |   0.0347 |
-| 1 |  89 |  0.0 | 0.0035 | 0.0059 |  0.0071 |   0.0071 |
-| 1 |  99 |  0.0 | 0.0007 | 0.0012 |  0.0015 |   0.0015 |
-| 1 | 102 |  0.0 | 0.0004 | 0.0008 |  0.0009 |   0.0009 |
-| 2 | 102 |  0.0 | 0.0004 | 0.0008 |  0.0009 |   0.0009 |
-| 3 | 102 |  0.0 | 0.0021 | 0.0024 |  0.0026 |   0.0026 |
-| 3 | 109 |  0.0 | 0.0004 | 0.0007 |  0.0009 |   0.0009 |
-| 4 | 109 |  0.0 |  0.002 | 0.0023 |  0.0024 |   0.0024 |
-| 4 | 115 |  0.0 | 0.0005 | 0.0008 |   0.001 |    0.001 |
-| 5 | 115 |  0.0 | 0.0021 | 0.0025 |  0.0027 |   0.0027 |
-| 5 | 122 |  0.0 | 0.0004 | 0.0007 |  0.0009 |   0.0009 |
-| 6 | 122 |  0.0 |  0.002 | 0.0023 |  0.0025 |   0.0025 |
-| 6 | 128 |  0.0 | 0.0005 | 0.0008 |   0.001 |    0.001 |
-| 7 | 128 |  0.0 | 0.0021 | 0.0025 |  0.0027 |   0.0027 |
-| 7 | 135 |  0.0 | 0.0004 | 0.0007 |  0.0009 |   0.0009 |
-| 8 | 135 |  0.0 |  0.002 | 0.0023 |  0.0024 |   0.0024 |
-| 8 | 141 |  0.0 | 0.0005 | 0.0008 |   0.001 |    0.001 |
-| 9 | 141 |  0.0 | 0.0021 | 0.0025 |  0.0026 |   0.0026 |
-| 9 | 148 |  0.0 | 0.0004 | 0.0007 |  0.0009 |   0.0009 |
+| t |   k | V[0] |   V[1] |    V[2] |
+| 0 |   0 |  0.0 | 0.1633 | 10.1633 |
+| 0 |  10 |  0.0 | 3.9184 |  3.9184 |
+| 0 |  20 |  0.0 | 1.5107 |  1.5107 |
+| 0 |  30 |  0.0 | 0.5824 |  0.5824 |
+| 0 |  40 |  0.0 | 0.2246 |  0.2246 |
+| 0 |  50 |  0.0 | 0.0866 |  0.0866 |
+| 0 |  60 |  0.0 | 0.0334 |  0.0334 |
+| 0 |  70 |  0.0 | 0.0129 |  0.0129 |
+| 0 |  80 |  0.0 |  0.005 |   0.005 |
+| 0 |  90 |  0.0 | 0.0019 |  0.0019 |
+| 0 |  97 |  0.0 |  0.001 |   0.001 |
+| 1 |  97 |  0.0 | 0.1643 |  0.1643 |
+| 1 | 107 |  0.0 | 0.0634 |  0.0634 |
+| 1 | 117 |  0.0 | 0.0244 |  0.0244 |
+| 1 | 127 |  0.0 | 0.0094 |  0.0094 |
+| 1 | 137 |  0.0 | 0.0036 |  0.0036 |
+| 1 | 147 |  0.0 | 0.0014 |  0.0014 |
+| 1 | 151 |  0.0 |  0.001 |   0.001 |
+| 2 | 151 |  0.0 | 0.0009 |  0.0009 |
 :end:
 
-#+BEGIN_SRC gnuplot :var data=table-stack-ws :file ../img/sequential_stack-ws.png :exports none :results none
+#+BEGIN_SRC gnuplot :var data=table-stack-1d :file ../img/sequential_stack-1d.png :exports none :results none
   set term png size 600, 300
   set size ratio 0.5
-  set xrange [0:100]
   unset logscale
-  set yrange [-10:10]
+  unset xrange
+  set yrange [1e-3:10]
+  set logscale y
   plot data u 2:3 with lines, \
        data u 2:4 with lines, \
        data u 2:5 with lines, \
@@ -707,7 +711,8 @@ happen if we ignored separating contacts though
 #+END_SRC
 
 #+ATTR_HTML: image :width 95%
-[[file:../img/sequential_stack-ws.png]]
+[[file:../img/sequential_stack-1d.png]]
+
 
 ** TODO Extract general code into a func with params, and call it for differnt cases in C++ blocks instead of repeating it all
 - SimulateStack1D
