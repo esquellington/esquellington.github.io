@@ -388,13 +388,17 @@ only allow WS to grow a fractuon per step? Messy…
     sparsified using a method we call Body Splitting."
   - Presentation https://www.youtube.com/watch?v=P-WP1yMOkc4
 * TODO Code
-** Impact ABC without acceleration
+** TODO Impact ABC with $\xi=10$
 Implement SI and output table with Va,Vb results, show they decrease
 as we predicted
-#+BEGIN_SRC C++ :includes <stdio.h>
+
+TODO PLOT or export table, explain plot mention it matches prediction
+
+#+NAME: table-impact-abc
+#+BEGIN_SRC C++ :includes <stdio.h> :results drawer
   int main( int argc, char** argv )
   {
-      const float ma(1), mb(10), xi(mb/ma), wa(xi/(xi+1));
+      const float xi(10.0f), wa(xi/(xi+1));
       const float eps(1e-3f);
       const int K(100);
       float Va(0), Vb(10);
@@ -402,7 +406,7 @@ as we predicted
       printf("k V_a V_b");
       while( k < K && Vb > eps ) //iterate until convergence
       {
-          if( k%10 == 0 ) printf("\n%d %2.4f %2.4f",k,Va,Vb);
+          if( k%5 == 0 ) printf("\n%d %2.4f %2.4f",k,Va,Vb);
           Va = 0.0f; //solve AC
           float Vab(Vb-Va); //solve AB
           Va += Vab * wa;
@@ -414,127 +418,50 @@ as we predicted
   }
 #+END_SRC
 
-#+RESULTS:
-|  k |    V_a |    V_b |
-|  0 |    0.0 |   10.0 |
-| 10 | 3.8554 | 3.8554 |
-| 20 | 1.4864 | 1.4864 |
-| 30 | 0.5731 | 0.5731 |
-| 40 | 0.2209 | 0.2209 |
-| 50 | 0.0852 | 0.0852 |
-| 60 | 0.0328 | 0.0328 |
-| 70 | 0.0127 | 0.0127 |
-| 80 | 0.0049 | 0.0049 |
-| 90 | 0.0019 | 0.0019 |
-| 97 |  0.001 |  0.001 |
-
-** TODO Impact ABC with acceleration (REUSE GSimulateStack1D<>)
-
-Simulate 2 frames of a stack of 2 bodies under gravity:
-- 1st frame involves impact and gravity vel, both fully absorbed
-- On any frame >2nd, gravity vel must be absorbed again
-Warmstarting would avoid most iter on >2nd frame
-
-#+BEGIN_SRC C++ :includes <stdio.h> :results drawer
-  int main( int argc, char** argv )
-  {
-      const float ma(1), mb(4), xi(mb/ma), wa(xi/(xi+1));
-      const float eps(1e-3f);
-      const int K(100);
-      float Va(0), Vb(10);
-      printf("t k V_a V_b");
-      for( int t=0; t<2; t++ ) //2 frames
-      {
-          // Integrate t->t+dt
-          const float dt(1.0f/60.0f), g(9.8f);
-          Va += dt*g;
-          Vb += dt*g;
-          int k(0);
-          while( k < K && Vb > eps )
-          {
-              if( k%20 == 0 )
-                  printf("\n%d %d %2.4f %2.4f",t,k,Va,Vb);
-              Va = 0.0f; //solve AC
-              float Vab(Vb-Va); //solve AB
-              Va += Vab * wa;
-              Vb -= Vab * (1-wa);
-              k++;
-          }
-          printf("\n%d %d %2.4f %2.4f",t,k,Va,Vb);
-      }
-      return 0;
-  }
+#+BEGIN_SRC gnuplot :var data=table-impact-abc :file ../img/sequential_impact_abc.png :exports none :results none
+  set term png size 600, 300
+  set size ratio 0.5
+  unset logscale
+  unset xrange
+  set yrange [1e-3:10]
+  plot data u 1:2 with linespoints, \
+       data u 1:3 with lines
 #+END_SRC
-#+RESULTS:
-:results:
-| t |  k |    V_a |     V_b |
-| 0 |  0 | 0.1633 | 10.1633 |
-| 0 | 20 | 0.1172 |  0.1172 |
-| 0 | 40 | 0.0014 |  0.0014 |
-| 0 | 42 | 0.0009 |  0.0009 |
-| 1 |  0 | 0.1642 |  0.1642 |
-| 1 | 20 | 0.0019 |  0.0019 |
-| 1 | 23 |  0.001 |   0.001 |
-:end:
+#+ATTR_HTML: image :width 95%
+[[file:../img/sequential_impact_abc.png]]
 
-** Impact 5 bodies with acceleration
+** Impact stack 2 bodies with $\xi=4$
 
-Simulate 2 frames of a stack of N bodies with uniform mass:
+Simulate 2 frames of a stack of 2 bodies with 1:4 mass ratio:
 - 1st frame involves impact and gravity vel, both fully absorbed
 - On any frame >2nd, gravity vel must be absorbed again
 Warmstarting would avoid most iter on >2nd frame
-For N bodies, B[0] is static, mass ratio between B[1] and B[2..N-1] is 1:N-2
 
-NOTE: <<GSimulateStack1D>> syntax tangles func definition into next
-block that uses it, we use ":noweb strip-export" to avoid exporting
-any explicit refs to it (see
-https://orgmode.org/manual/Noweb-Reference-Syntax.html)
-
-#+NAME: table-stack-5-nows
+#+NAME: table-stack-2-no-ws
 #+BEGIN_SRC C++ :includes <stdio.h> :results drawer :noweb strip-export
   <<GSimulateStack1D>>
   int main( int argc, char** argv )
   {
-      const int T(3); const int K(200);
-      GSimulateStack1D<5>( 1.0f, //\xi
+      const int T(5); const int K(200);
+      GSimulateStack1D<3>( 4.0f, //\xi
                            10.0f, //V0
                            9.8f, //G
                            T, 1.0f/60.0f, //T, dt
                            1e-3f, //\epsilon
                            K, //K iter per step T
-                           true, //bWarmstart
+                           false, //bWarmstart
                            1.0f ); //ws_decay01
       return 0;
   }
 #+END_SRC
-
-#+RESULTS: table-stack-5-nows
-:results:
-| t |  k | V[0] |   V[1] |   V[2] |   V[3] |    V[4] |
-| 0 |  0 |  0.0 | 0.1633 | 0.1633 | 0.1633 | 10.1633 |
-| 0 | 10 |  0.0 | 0.5148 | 0.8788 | 1.0608 |  1.0608 |
-| 0 | 20 |  0.0 | 0.1057 | 0.1804 | 0.2178 |  0.2178 |
-| 0 | 30 |  0.0 | 0.0217 |  0.037 | 0.0447 |  0.0447 |
-| 0 | 40 |  0.0 | 0.0045 | 0.0076 | 0.0092 |  0.0092 |
-| 0 | 50 |  0.0 | 0.0009 | 0.0016 | 0.0019 |  0.0019 |
-| 0 | 54 |  0.0 | 0.0005 | 0.0008 |  0.001 |   0.001 |
-| 1 | 54 |  0.0 | 0.1638 | 0.1642 | 0.1643 |  0.1643 |
-| 1 | 64 |  0.0 | 0.0169 | 0.0288 | 0.0347 |  0.0347 |
-| 1 | 74 |  0.0 | 0.0035 | 0.0059 | 0.0071 |  0.0071 |
-| 1 | 84 |  0.0 | 0.0007 | 0.0012 | 0.0015 |  0.0015 |
-| 1 | 87 |  0.0 | 0.0004 | 0.0008 | 0.0009 |  0.0009 |
-| 2 | 87 |  0.0 | 0.0004 | 0.0007 | 0.0008 |  0.0008 |
-:end:
-
-#+BEGIN_SRC gnuplot :var data=table-stack-5-nows :file ../img/sequential_stack-5-nows.png :exports none :results none
+#+BEGIN_SRC gnuplot :var data=table-stack-2-no-ws :file ../img/sequential_stack-2-no-ws.png :exports none :results none
   set term png size 600, 300
   set size ratio 0.5
   unset logscale
   unset xrange
   set yrange [1e-3:10]
   set logscale y
-  plot data u 2:3 with lines, \
-       data u 2:4 with lines, \
+  plot data u 2:4 with lines, \
        data u 2:5 with lines, \
        data u 2:6 with lines, \
        data u 2:7 with lines, \
@@ -545,9 +472,54 @@ https://orgmode.org/manual/Noweb-Reference-Syntax.html)
        data u 2:12 with lines
 #+END_SRC
 #+ATTR_HTML: image :width 95%
-[[file:../img/sequential_stack-5-nows.png]]
+[[file:../img/sequential_stack-2-no-ws.png]]
 
-** Impact 10 bodies with acceleration and warmstarting, multiple steps
+** Impact stack 5 bodies with $\xi=1$
+
+Simulate 2 frames of a stack of N bodies with uniform mass:
+- 1st frame involves impact and gravity vel, both fully absorbed
+- On any frame >2nd, gravity vel must be absorbed again
+Warmstarting would avoid most iter on >2nd frame
+For N bodies, B[0] is static, mass ratio between B[1] and B[2..N-1] is 1:N-2
+
+#+NAME: table-stack-5-no-ws
+#+BEGIN_SRC C++ :includes <stdio.h> :results drawer :noweb strip-export
+  <<GSimulateStack1D>>
+  int main( int argc, char** argv )
+  {
+      const int T(5); const int K(200);
+      GSimulateStack1D<6>( 1.0f, //\xi
+                           10.0f, //V0
+                           9.8f, //G
+                           T, 1.0f/60.0f, //T, dt
+                           1e-3f, //\epsilon
+                           K, //K iter per step T
+                           false, //bWarmstart
+                           1.0f ); //ws_decay01
+      return 0;
+  }
+#+END_SRC
+#+BEGIN_SRC gnuplot :var data=table-stack-5-no-ws :file ../img/sequential_stack-5-no-ws.png :exports none :results none
+  set term png size 600, 300
+  set size ratio 0.5
+  unset logscale
+  unset xrange
+  set yrange [1e-3:10]
+  set logscale y
+  plot data u 2:4 with lines, \
+       data u 2:5 with lines, \
+       data u 2:6 with lines, \
+       data u 2:7 with lines, \
+       data u 2:8 with lines, \
+       data u 2:9 with lines, \
+       data u 2:10 with lines, \
+       data u 2:11 with lines, \
+       data u 2:12 with lines
+#+END_SRC
+#+ATTR_HTML: image :width 95%
+[[file:../img/sequential_stack-5-no-ws.png]]
+
+** Impact stack 10 bodies with $\xi=1$, with warmstarting
 
 Warmstarting causes top body to bounce despite purely inelastic
 collision, it get negative (upwards) vel on 1st iter. If we only save
@@ -562,8 +534,8 @@ happen if we ignored separating contacts though
   <<GSimulateStack1D>>
   int main( int argc, char** argv )
   {
-      const int T(3); const int K(200);
-      GSimulateStack1D<10>( 1.0f, //\xi
+      const int T(5); const int K(200);
+      GSimulateStack1D<11>( 1.0f, //\xi
                             10.0f, //V0
                             9.8f, //G
                             T, 1.0f/60.0f, //T, dt
@@ -581,8 +553,7 @@ happen if we ignored separating contacts though
   unset xrange
   set yrange [1e-3:10]
   set logscale y
-  plot data u 2:3 with lines, \
-       data u 2:4 with lines, \
+  plot data u 2:4 with lines, \
        data u 2:5 with lines, \
        data u 2:6 with lines, \
        data u 2:7 with lines, \
@@ -590,14 +561,23 @@ happen if we ignored separating contacts though
        data u 2:9 with lines, \
        data u 2:10 with lines, \
        data u 2:11 with lines, \
-       data u 2:12 with lines
+       data u 2:12 with lines, \
+       data u 2:13 with lines
 #+END_SRC
 #+ATTR_HTML: image :width 95%
 [[file:../img/sequential_stack-10.png]]
 
 ** Implementation of GSimulateStack1D
-Note, func uses printf but include "<stdio.h>" must be added to caller
+NOTE:, func uses printf but include "<stdio.h>" must be added to caller
 main() block due to how org-babel tangles multiple code blocks.
+
+NOTE: To call it from other blocks, use "noweb" syntax
+<<GSimulateStack1D>>, that inserts func definition into any block
+(even if defined earlier). Use ":noweb strip-export" in caller block
+to avoid inserting code verbatim and exporting the <<src>> text.
+(see https://orgmode.org/manual/Noweb-Reference-Syntax.html)
+
+TODO ADD printf freq instead of hardcoded to every 20 iter
 
 #+NAME: GSimulateStack1D
 #+BEGIN_SRC C++
@@ -647,7 +627,9 @@ main() block due to how org-babel tangles multiple code blocks.
               {
                   float Vab(V[n]-V[n-1]); //solve AB
                   float wa_n( n==1 ? 0.0f : wa ); //B[0] is static
-                  if( Vab < 0.0f ) //req separating contact (TODO not sure if correct, we should clamp total not per-iter)
+                  // req separating contact (TODO not sure if correct,
+                  // we should clamp total not per-iter)
+                  if( Vab < 0.0f )
                       Vab = 0.0f;
 
                   V[n-1] += Vab * wa_n;
