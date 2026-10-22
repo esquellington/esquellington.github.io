@@ -256,29 +256,6 @@ How would body-centric primal solver converge for the model problem?
 It would need a stiffness value, that could be increased per iter (ex:
 like AVBD), would that converge better for impacts?
 
-* TODO [#B] Approximate pre-solve + PGS refinement                 :noexport:
-Si aconseguim fer pre-solve approximat (ex: direct solve per a
-moviment linial), i calculem les lambdes, podriem ferles servir com a
-valor de warmstart per a contactes sense historia
-
-Preslolve seria precondition, approx, o prediction mes aviat
-
-Presictors podrien ser direct solve, primal solve (VBD??) oalgun altre solve que no sigui susceptible a problemes de mass ratio
-
-Direct solve per lm des podris considerar nomes particules, hauria de ser raonablement simple. Sembla un solver d’estatica de fet, com em the finals.
-
-Primal solve hauriande considerar colisions soft, no es greu si valor approx es raonable com a warmstart.
-
-Potser AVBD fa algo semblant? Incrementa stiffness per iter si recordo be
-
-La pregjnta clau es:
-- quantes iter estalviRia aixo? Es si predicio prediu el 50% de l’impuls necessari, quna fraccio d’iter estalvia?
-- pot el presolve warmstart causar sideffects si no es exacte (ex: si no podem garantir que estrictament sub-estima impulsos)
-
-Presolve ignoraria friccio per simplicitat, aixo pot ser problematic?
-
-Presolve could be a Block-GS and then iterate with full PGS
-
 * TODO [#A] Persistent contacts                                    :noexport:
 - Show that in that case SI needs to resolve the delta vel from
   gravity (or any other force) every frame, and that warmstarting can
@@ -304,6 +281,29 @@ Presolve could be a Block-GS and then iterate with full PGS
     experienced... BUT if they did not get impulse they'll have
     lambda0 so it does not matter if they WS... as long as they skip
     the 1st frame after an impulse>0 timestep
+* TODO [#B] Approximate pre-solve + PGS refinement                 :noexport:
+Si aconseguim fer pre-solve approximat (ex: direct solve per a
+moviment linial), i calculem les lambdes, podriem ferles servir com a
+valor de warmstart per a contactes sense historia
+
+Preslolve seria precondition, approx, o prediction mes aviat
+
+Presictors podrien ser direct solve, primal solve (VBD??) oalgun altre solve que no sigui susceptible a problemes de mass ratio
+
+Direct solve per lm des podris considerar nomes particules, hauria de ser raonablement simple. Sembla un solver d’estatica de fet, com em the finals.
+
+Primal solve hauriande considerar colisions soft, no es greu si valor approx es raonable com a warmstart.
+
+Potser AVBD fa algo semblant? Incrementa stiffness per iter si recordo be
+
+La pregjnta clau es:
+- quantes iter estalviRia aixo? Es si predicio prediu el 50% de l’impuls necessari, quna fraccio d’iter estalvia?
+- pot el presolve warmstart causar sideffects si no es exacte (ex: si no podem garantir que estrictament sub-estima impulsos)
+
+Presolve ignoraria friccio per simplicitat, aixo pot ser problematic?
+
+Presolve could be a Block-GS and then iterate with full PGS
+
 * TODO [#A] Warmstarting Sucks!                                    :noexport:
 Identified multiple issues with WS that maybe deserve their own
 article 03_Warmstarting.org?
@@ -329,14 +329,22 @@ It’s practical, but it’s objectively wrong. Some bad cases can be
 avoided with heuristics, but not all I suspect
 
 Check how WS works in:
-- Box
-- Bullet
-- Jolt
-- ODE
-- PhysX
-- Chipmunk
-- Rapier?
-so far all seem to just use it and scale down maybe
+- Box2D/3D just uses scale 0 or 1, global toggle (see https://github.com/erincatto/box2d/blob/main/src/contact_solver.c)
+- Bullet global multiplier, 0.85 by default (see https://github.com/bulletphysics/bullet3/blob/master/src/Bullet3Dynamics/ConstraintSolver/b3ContactSolverInfo.h)
+- Jolt (see https://github.com/jrouwe/JoltPhysics/blob/master/Jolt/Physics/Constraints/ContactConstraintManager.cpp)
+- Chipmunk2D uses cached impulses (see
+  https://codeberg.org/slembcke/Chipmunk2D/src/branch/master/src/cpSpaceStep.c),
+  no mention to warm
+- Rapier? (see https://docs.rs/rapier3d/0.9.2/i686-pc-windows-msvc/rapier3d/dynamics/struct.IntegrationParameters.html#1)
+  uses a "warmstart_coefficient" like Bullet, but also
+  "warmstart_correction_slope parameter" (default value 10.0) designed
+  to suppress excessive warm start impulses after strong impacts and
+  improve stability.
+  - Avian is similar
+- PhysX (omg code is a mess, it uses something like contact patch
+  pesistence but impulses are not clearly stored+reused, code is terrible)
+- ODE (apparently it does NOT use WS for contacts, but it does for joints)
+- MuJoCo warmstarts accelerations (but that may be a guess, not a WS assumption)
 
 The fact that this is not improved by substepping is a big red flag, actually.
 
@@ -382,11 +390,11 @@ only allow WS to grow a fractuon per step? Messy…
   - There's an optional direct solver
 - Roblox
   https://about.roblox.com/newsroom/2020/08/improving-simulation-performance-advanced-physics-solver
+  - Presentation https://www.youtube.com/watch?v=P-WP1yMOkc4
   - Mensions this "reconditioning the PGS using the sparse LDL
     decomposition of the constraint matrix of equality
     constraints. Dense submatrices of the constraint matrix are
     sparsified using a method we call Body Splitting."
-  - Presentation https://www.youtube.com/watch?v=P-WP1yMOkc4
 * TODO Code
 ** TODO Impact ABC with $\xi=10$
 Implement SI and output table with Va,Vb results, show they decrease
