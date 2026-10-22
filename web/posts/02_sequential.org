@@ -148,8 +148,8 @@ parameter that affects $k^{*}$ the most is the mass ratio $\xi$.
   set xrange [1:100]
   set yrange [0:1000]
   plot log((1e-3)/10)/log((x/(x+1))) with lines lw 2, \
-       -log((1e-3)/10) * (x+1) with points pt 2 ps 1, \
        -log((1e-3)/1) * (x+1) with points pt 2 ps 1, \
+       -log((1e-3)/10) * (x+1) with points pt 2 ps 1, \
        -log((1e-3)/100) * (x+1) with points pt 2 ps 1
   unset xrange
   unset yrange
@@ -199,7 +199,7 @@ no previous solution exists.
 SI is very easy to implement, that's why it's so popular, but
 (etc...). Can we do better somehow, without losing all simplicity?
 
-* TODO [#A] Direct Solution                                        :noexport:
+* TODO [#A] [[Direct Solution]]                                        :noexport:
 
 If we assume all constraints are Active, due to compressive init state
 and inelssticity, so all constraints become equalities, and we can
@@ -209,6 +209,8 @@ system of equations.
 Non-iterative solution should be trivial for this problem, we could
 solve system of eq with 2 vars and 2 constraints, assuming vel will
 never change sign, and arrive at $V_b=0$.
+
+we assume body 0 has infinite mass
 
 Instantaneous Impulses per body $i$ from its contacts with prev/next
 bodies
@@ -220,8 +222,6 @@ static body 0 could just have $1/m_0 = 0$
 
 Constraints 0..N-1 on post-impact velocities $V_i^+$
 \[ C_i = V_{i+1}^+ - V_{i}^+ + \geq 0 \]
-
-expand lambdas into constraint eq and solve for them?
 
 Not sure about sign conventions, revisit SI convention and stick to
 that here too...
@@ -235,7 +235,7 @@ this must be the same as
 \[ K \lambda = b \]
 \[ b = \begin{bmatrix}
    V_1^- - V_0^- \\
-   V_1^- - V_1^-
+   V_2^- - V_1^-
    \end{bmatrix}
 \]
 
@@ -248,13 +248,15 @@ this must be the same as
 
 2x2 system for Va,Vb, we can write it and solve by substitution
 
-\begin{bmatrix}
- a && b \\
- c && d
-\end{bmatrix}
-
 Write eq, will compute trace and det -> show that eigenvalues ratio is
 related to mass ratio
+
+assuming 1/m0 = 0
+trace = - invm0 - 2*invm1 - invm2
+det = 1nvm1*(invm1+invm2) - invm1^2 = invm1*invm2
+
+OK! so eval are 2*invm1 and invm2 or similar... that's what I
+expected, their divison is basically $\xi$ with some constant scaling
 
 Si construim problema directe (2bodies) els eigenval son facils de
 trobar, relacionarlos amb mass estio hauria de ser trivial!!
@@ -342,7 +344,6 @@ longer to converge?
         - When we finish DS with ActSet, we could run another pass of
           PGS to verify there's no pulling contacts, and refine the output?
 - Is this similar to what Baraff/Faure/Stewart/Trinkle/Anitescu/Potra were doing?
-
 * TODO [#C] PGS vs TGS                                             :noexport:
 PGS convergence wrt iter (1 substep) vs TGS convergence wrt substeps (1 iter)
 
@@ -712,6 +713,7 @@ think it's because x/(x+1) tends to 1, and log(1) is 0, so its effect
 as x grows is negligible)
 * TODO Theory
 ** TODO Show that $\xi$ is related to the "condition number" of the linear system
+DONE in "Direct Solver" section
 * TODO [#A] FOLLOWUP: Warmstarting Blows!                          :noexport:
 Identified multiple issues with WS that maybe deserve their own
 article 03_Warmstarting.org?
