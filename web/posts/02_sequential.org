@@ -18,6 +18,13 @@ With velocity sign > 0 towards wall C, the initial conditions are:
 
 We'll assume $m_a \leq m_b$.
 
+** Collision Constraints
+
+Collisions introduce the following inequality constraints on relative
+collision velocities $V_{ab}=V_b-V_a$.
+
+\[V_{ca}(t+\Delta t) \geq 0 ,\quad V_{ab}(t+\Delta t) \geq 0 \]
+
 ** Solution
 
 Due to inelasticity A and B won't bounce, B will transfer momentum to
@@ -35,9 +42,12 @@ the mass ratio $\frac{m_b}{m_a}$.
 * Inelastic collision response
 
 The instantaneous inelastic collision response for AB is
-\[V_a^+ = V_a^- + V_{ab} w_a \]
-\[V_b^+ = V_b^- - V_{ab} w_b \]
-where $V_{ab}=V_b-V_a$ is the collision velocity and
+\begin{align*}
+V_a^+ &= V_a^- + V_{ab} w_a \\
+V_b^+ &= V_b^- - V_{ab} w_b
+\end{align*}
+
+where
 \[
   w_a = \frac{\frac{1}{m_a}}{\frac{1}{m_a} + \frac{1}{m_b}}
   ,\quad
@@ -50,10 +60,14 @@ Sequential impulses solves the problem iteratively as a sequence of
 local collision responses between pairs of bodies. Each iteration
 we'll solve collisions AC and AB
 
-- Solve $V_{ac}^{(k)}>=0$, resulting in $V_a^{(k)} = 0$
-- Solve $V_{ab}^{(k)}>=0$, with $V_{ab}^{(k)} = V_b^{(k)}$ because $V_a^{(k)} = 0$
+- Solve $V_{ca}^{(k)} \geq 0$, resulting in $V_a^{(k)} = 0$
+- Solve $V_{ab}^{(k)} \geq 0$, with $V_{ab}^{(k)} = V_b^{(k)}$ because $V_a^{(k)} = 0$
 
-So we have the recurrence:
+We can assume all collision constraints are Active, due to compressive
+init state and inelssticity, so all constraint inequalities become
+equalities.
+
+We have the recurrence:
 \begin{align*}
 V_b^{(k)} &= V_b^{(k-1)} - V_b^{(k-1)} w_b \\
           &= V_b^{(k-1)} w_a  \quad (\leftarrow w_a=1-w_b)\\
@@ -83,6 +97,8 @@ We plot $V_b^{(k)}$ for $V_b^{(0)} = 10m/s$, $\epsilon = 10^{-3}$ and $\xi
        10*(10.0/(10+1))**x with lines, \
        10*(20.0/(20+1))**x with lines, \
        1e-3 with lines
+  unset xrange
+  unset yrange
 #+END_SRC
 
 #+ATTR_HTML: image :width 95%
@@ -108,6 +124,8 @@ We plot $k^*(\xi)$ with the same parameters as above.
   set xrange [1:100]
   set yrange [0:1000]
   plot log((1e-3)/10)/log((x/(x+1))) with lines lw 2
+  unset xrange
+  unset yrange
 #+END_SRC
 
 #+ATTR_HTML: image :width 95%
@@ -133,7 +151,8 @@ parameter that affects $k^{*}$ the most is the mass ratio $\xi$.
        -log((1e-3)/10) * (x+1) with points pt 2 ps 1, \
        -log((1e-3)/1) * (x+1) with points pt 2 ps 1, \
        -log((1e-3)/100) * (x+1) with points pt 2 ps 1
-
+  unset xrange
+  unset yrange
 #+END_SRC
 
 #+ATTR_HTML: image :width 95%
@@ -180,7 +199,12 @@ no previous solution exists.
 SI is very easy to implement, that's why it's so popular, but
 (etc...). Can we do better somehow, without losing all simplicity?
 
-* TODO [#A] PGS vs Direct Solution                                 :noexport:
+* TODO [#A] Direct Solution                                        :noexport:
+
+All constraints are Active, due to compressive init state and
+inelssticity, so all constraints become equalities in this case, and
+we can solve for all collision impulses simultaneously solving a
+linear system of equations
 
 Non-iterative solution should be trivial for this problem, we could
 solve system of eq with 2 vars and 2 constraints, assuming vel will
@@ -207,9 +231,34 @@ affected. Not sure, see Tentacles
  c && d
 \end{bmatrix}
 
-Write direct eq for N sequential bodies, must be tridiagonal I think?
-Solvable in linear time, similar to what I did in TentaclesMode
+Si construim problema directe (2bodies) els eigenval son facils de
+trobar, relacionarlos amb mass estio hauria de ser trivial!!
 
+Solve same system for m_c = infinite or not, to see how it would be
+have if there was no fixed ground (I think all bodies would move down
+equally fast (and if restitution coeff >0 then the last one should be
+ejected as in Newton's craddle?)
+
+** N>2 bodies
+Write direct eq for N sequential bodies, must be tiangular or
+tridiagonal I think? Solvable in linear time, similar to what I did
+in TentaclesMode
+
+** NOTES/TODO
+Impprtant: in the general case the constraint is on RELTIVE vel not
+absolute, male sure we write it properly for the N body case and
+linear sys solve Linear sys solves for instant Vel ppst collision,
+using instant vel Pre-collision
+
+This means we cannot write it as per pair SOMUTIONS, i think, we need
+to write eq for lambdas and solve for lambdas, not just isolate
+individual lambdas as if they were standalone
+
+Precinditioning podria reduir el problema del mass ratio amb pocs
+objectes, crec, pero dubto que pugui resoldre o millorar notablement
+el cas de molts objectes uniformes aliniats. Per que? Rao teorica ha
+de ser interessant, eigenvalues matriu i cond number pot ser bo i
+convergir malment?
 ** Block-GS
 If we split N bodies in groups and solve direct peoblems for them,
 what’s the best way to split?
@@ -304,84 +353,6 @@ Presolve ignoraria friccio per simplicitat, aixo pot ser problematic?
 
 Presolve could be a Block-GS and then iterate with full PGS
 
-* TODO [#A] Warmstarting Sucks!                                    :noexport:
-Identified multiple issues with WS that maybe deserve their own
-article 03_Warmstarting.org?
-
-- See above [[Persistent contacts][Persistent contacts]], consider adding it here instead
-
-** TODO Warmstart theory
-WS is not a “guess” of the actual solution, it’s an “assumption” of
-the solution that cannot be fully undone, and that can change it
-completely.
-
-It applies impulses indistinguishable from external magic forces that
-change the problem, as opposed to a guess in ConjGrad or similar,
-that starts search from solution “closer” to that solution, but does
-not change the problem or solution to it (unless it perturbs it to
-find a different local minima if problem is not convex) This same
-issue would happen with XPBD or any other GS-like solver where WS
-values need to be applied in the same way PGS would apply local steps
-towards the solution, WS tries to skip these local steps, assuming
-they’d repeat exactly, so it can comtinue from there
-
-It’s practical, but it’s objectively wrong. Some bad cases can be
-avoided with heuristics, but not all I suspect
-
-Check how WS works in:
-- Box2D/3D just uses scale 0 or 1, global toggle (see https://github.com/erincatto/box2d/blob/main/src/contact_solver.c)
-- Bullet global multiplier, 0.85 by default (see https://github.com/bulletphysics/bullet3/blob/master/src/Bullet3Dynamics/ConstraintSolver/b3ContactSolverInfo.h)
-- Jolt (see https://github.com/jrouwe/JoltPhysics/blob/master/Jolt/Physics/Constraints/ContactConstraintManager.cpp)
-- Chipmunk2D uses cached impulses (see
-  https://codeberg.org/slembcke/Chipmunk2D/src/branch/master/src/cpSpaceStep.c),
-  no mention to warm
-- Rapier? (see https://docs.rs/rapier3d/0.9.2/i686-pc-windows-msvc/rapier3d/dynamics/struct.IntegrationParameters.html#1)
-  uses a "warmstart_coefficient" like Bullet, but also
-  "warmstart_correction_slope parameter" (default value 10.0) designed
-  to suppress excessive warm start impulses after strong impacts and
-  improve stability.
-  - Avian is similar
-- PhysX (omg code is a mess, it uses something like contact patch
-  pesistence but impulses are not clearly stored+reused, code is terrible)
-- ODE (apparently it does NOT use WS for contacts, but it does for joints)
-- MuJoCo warmstarts accelerations (but that may be a guess, not a WS assumption)
-
-The fact that this is not improved by substepping is a big red flag, actually.
-
-Compare with:
-- direct solve preconditioning
-- iterative solve guessing (CG)
-- AVBD “warmstarting”
-Show they converge to same value if “guess” is perturbed, just slower/faster
-** TODO Warmstart invalidation on nonsmoothness
-
-When is WS correct? when solution is smooth? Argue/prove it
-
-WS assumes continuous and smooth silution. When this is false for a
-given connected component, we should not apply it to the connected
-component constraint solver, but we can still apply it to other CC
-Sources of nonsmoothness would be:
-- add/remove constraints or bodies
-- apply steong impulses or forces
-- change masses or contraint params “significantly” (includes hitting
-  an angle limit, for example, that is a new active constraint)
-
-When nomsmooth hapoens, we’d zero WS instantly
-
-We could do this by tracking last nonsmooth event timestamp in all
-bodies/constraints/etc (we do detect discont alemready in Pla), and
-then check if WS timestamps are older and invalidate them if so
-
-On mismatched timestamps, we would need to zero WS BEFORE applying to
-the islands (or skip), but also do so next tinestep (or skip storing
-WS values at the end of this frame. This way we’d avoid both prre
-applying stale WS after event, and saving “transient” WS after solving
-post-event (ex: collision).
-
-Alternatively, post-event wemd only save WS if they’re similar
-enough to previous solution (so we can consider it settled)… (but this
-woukd stop us from converging incrementally over frames…) so maybe we
-only allow WS to grow a fractuon per step? Messy…
 * TODO References
 ** TODO Convergence for Gauss-Seidel linear solvers
 - Must be in some paper/book
@@ -429,24 +400,23 @@ TODO PLOT or export table, explain plot mention it matches prediction
 #+BEGIN_SRC gnuplot :var data=table-impact-abc :file ../img/sequential_impact_abc.png :exports none :results none
   set term png size 600, 300
   set size ratio 0.5
-  unset logscale
-  unset xrange
   set yrange [1e-3:10]
   plot data u 1:2 with linespoints, \
        data u 1:3 with lines
+  unset yrange
 #+END_SRC
 #+ATTR_HTML: image :width 95%
 [[file:../img/sequential_impact_abc.png]]
 
 ** Impact stack 2 bodies with $\xi=4$
 
-Simulate 2 frames of a stack of 2 bodies with 1:4 mass ratio:
+Simulate 5 frames of a stack of 2 bodies with 1:4 mass ratio:
 - 1st frame involves impact and gravity vel, both fully absorbed
 - On any frame >2nd, gravity vel must be absorbed again
 Warmstarting would avoid most iter on >2nd frame
 
 #+NAME: table-stack-2-no-ws
-#+BEGIN_SRC C++ :includes <stdio.h> :results drawer :noweb strip-export
+#+BEGIN_SRC C++ :includes <stdio.h> :results drawer :noweb strip-export :exports results
   <<GSimulateStack1D>>
   int main( int argc, char** argv )
   {
@@ -465,8 +435,6 @@ Warmstarting would avoid most iter on >2nd frame
 #+BEGIN_SRC gnuplot :var data=table-stack-2-no-ws :file ../img/sequential_stack-2-no-ws.png :exports none :results none
   set term png size 600, 300
   set size ratio 0.5
-  unset logscale
-  unset xrange
   set yrange [1e-3:10]
   set logscale y
   plot data u 2:4 with lines, \
@@ -478,20 +446,22 @@ Warmstarting would avoid most iter on >2nd frame
        data u 2:10 with lines, \
        data u 2:11 with lines, \
        data u 2:12 with lines
+  unset yrange
+  unset logscale
 #+END_SRC
 #+ATTR_HTML: image :width 95%
 [[file:../img/sequential_stack-2-no-ws.png]]
 
 ** Impact stack 5 bodies with $\xi=1$
 
-Simulate 2 frames of a stack of N bodies with uniform mass:
+Simulate 5 frames of a stack of N bodies with uniform mass:
 - 1st frame involves impact and gravity vel, both fully absorbed
 - On any frame >2nd, gravity vel must be absorbed again
 Warmstarting would avoid most iter on >2nd frame
 For N bodies, B[0] is static, mass ratio between B[1] and B[2..N-1] is 1:N-2
 
 #+NAME: table-stack-5-no-ws
-#+BEGIN_SRC C++ :includes <stdio.h> :results drawer :noweb strip-export
+#+BEGIN_SRC C++ :includes <stdio.h> :results drawer :noweb strip-export :exports results
   <<GSimulateStack1D>>
   int main( int argc, char** argv )
   {
@@ -510,8 +480,6 @@ For N bodies, B[0] is static, mass ratio between B[1] and B[2..N-1] is 1:N-2
 #+BEGIN_SRC gnuplot :var data=table-stack-5-no-ws :file ../img/sequential_stack-5-no-ws.png :exports none :results none
   set term png size 600, 300
   set size ratio 0.5
-  unset logscale
-  unset xrange
   set yrange [1e-3:10]
   set logscale y
   plot data u 2:4 with lines, \
@@ -523,6 +491,8 @@ For N bodies, B[0] is static, mass ratio between B[1] and B[2..N-1] is 1:N-2
        data u 2:10 with lines, \
        data u 2:11 with lines, \
        data u 2:12 with lines
+  unset yrange
+  unset logscale
 #+END_SRC
 #+ATTR_HTML: image :width 95%
 [[file:../img/sequential_stack-5-no-ws.png]]
@@ -537,12 +507,15 @@ velocities (small, but negative), which means WS is overestimating
 even if we only apply it on persistent contacts. MAYBE this would not
 happen if we ignored separating contacts though
 
+IMPORTANT: emphasize we enable WS on 2nd step, that's why 5 steps show
+2 peaks with 300 and 200 iter first and just a few iter after that
+
 #+NAME: table-stack-10
-#+BEGIN_SRC C++ :includes <stdio.h> :results drawer :noweb strip-export
+#+BEGIN_SRC C++ :includes <stdio.h> :results drawer :noweb strip-export :exports results
   <<GSimulateStack1D>>
   int main( int argc, char** argv )
   {
-      const int T(5); const int K(200);
+      const int T(5); const int K(500);
       GSimulateStack1D<11>( 1.0f, //\xi
                             10.0f, //V0
                             9.8f, //G
@@ -557,8 +530,6 @@ happen if we ignored separating contacts though
 #+BEGIN_SRC gnuplot :var data=table-stack-10 :file ../img/sequential_stack-10.png :exports none :results none
   set term png size 600, 300
   set size ratio 0.5
-  unset logscale
-  unset xrange
   set yrange [1e-3:10]
   set logscale y
   plot data u 2:4 with lines, \
@@ -571,6 +542,8 @@ happen if we ignored separating contacts though
        data u 2:11 with lines, \
        data u 2:12 with lines, \
        data u 2:13 with lines
+  unset yrange
+  unset logscale
 #+END_SRC
 #+ATTR_HTML: image :width 95%
 [[file:../img/sequential_stack-10.png]]
@@ -587,6 +560,9 @@ to avoid inserting code verbatim and exporting the <<src>> text.
 
 TODO ADD printf freq instead of hardcoded to every 20 iter
 
+TODO Flag steps that end with any negative speed in red (maybe output
+column so that gnuplot can just plot green/red)
+
 #+NAME: GSimulateStack1D
 #+BEGIN_SRC C++
   template <unsigned int N>
@@ -602,7 +578,7 @@ TODO ADD printf freq instead of hardcoded to every 20 iter
       for( int n=0; n<N; n++ )
           printf(" V[%d]", n);
       int tk(0); //total iter across timesteps
-      for( int t=0; t<T; t++ ) //2 frames
+      for( int t=0; t<T; t++ ) //T frames
       {
           // Integrate t->t+dt
           for( int n=1; n<N; n++ )
@@ -668,7 +644,98 @@ think it's because x/(x+1) tends to 1, and log(1) is 0, so its effect
 as x grows is negligible)
 * TODO Theory
 ** TODO Show that $\xi$ is related to the "condition number" of the linear system
+* TODO [#A] FOLLOWUP: Warmstarting Blows!                          :noexport:
+Identified multiple issues with WS that maybe deserve their own
+article 03_Warmstarting.org?
 
+- See above [[Persistent contacts][Persistent contacts]], consider adding it here instead
+
+Blows, because it can eject bodies with spurious velocities if it
+over-estimates current impulses from previous ones
+
+** TODO Warmstart theory
+WS is not a “guess” of the actual solution, it’s an “assumption” of
+the solution that cannot be fully undone, and that can change it
+completely.
+
+It applies impulses indistinguishable from external magic forces that
+change the problem, as opposed to a guess in ConjGrad or similar,
+that starts search from solution “closer” to that solution, but does
+not change the problem or solution to it (unless it perturbs it to
+find a different local minima if problem is not convex) This same
+issue would happen with XPBD or any other GS-like solver where WS
+values need to be applied in the same way PGS would apply local steps
+towards the solution, WS tries to skip these local steps, assuming
+they’d repeat exactly, so it can comtinue from there
+
+It’s practical, but it’s objectively wrong. Some bad cases can be
+avoided with heuristics, but not all I suspect
+
+The fact that this is not improved by substepping is a big red flag, actually.
+
+Compare with:
+- direct solve preconditioning
+- iterative solve guessing (CG)
+- AVBD “warmstarting”
+Show they converge to same value if “guess” is perturbed, just slower/faster
+** TODO Warmstart and variable timesteps
+ Also show var timesteps are bad for warmstart because longer
+ timesteps will apply larger lambdas than necessary on later steps
+ with shorter timestep, because gravity integration over longer time
+ on prev step will over-estimate current one, and will randomly eject
+ top bodies!?
+** TODO Warmstart invalidation on nonsmoothness
+
+When is WS correct? when solution is smooth? Argue/prove it
+
+WS assumes continuous and smooth silution. When this is false for a
+given connected component, we should not apply it to the connected
+component constraint solver, but we can still apply it to other CC
+Sources of nonsmoothness would be:
+- add/remove constraints or bodies
+- apply steong impulses or forces
+- change masses or contraint params “significantly” (includes hitting
+  an angle limit, for example, that is a new active constraint)
+
+When nomsmooth hapoens, we’d zero WS instantly
+
+We could do this by tracking last nonsmooth event timestamp in all
+bodies/constraints/etc (we do detect discont alemready in Pla), and
+then check if WS timestamps are older and invalidate them if so
+
+On mismatched timestamps, we would need to zero WS BEFORE applying to
+the islands (or skip), but also do so next tinestep (or skip storing
+WS values at the end of this frame. This way we’d avoid both prre
+applying stale WS after event, and saving “transient” WS after solving
+post-event (ex: collision).
+
+Alternatively, post-event wemd only save WS if they’re similar
+enough to previous solution (so we can consider it settled)… (but this
+woukd stop us from converging incrementally over frames…) so maybe we
+only allow WS to grow a fractuon per step? Messy…
+** TODO WS in popular physics engines
+Check how WS works in:
+- Box2D/3D just uses scale 0 or 1, global toggle (see https://github.com/erincatto/box2d/blob/main/src/contact_solver.c)
+- Bullet global multiplier, 0.85 by default (see https://github.com/bulletphysics/bullet3/blob/master/src/Bullet3Dynamics/ConstraintSolver/b3ContactSolverInfo.h)
+- Jolt (see https://github.com/jrouwe/JoltPhysics/blob/master/Jolt/Physics/Constraints/ContactConstraintManager.cpp)
+- Chipmunk2D uses cached impulses (see
+  https://codeberg.org/slembcke/Chipmunk2D/src/branch/master/src/cpSpaceStep.c),
+  no mention to warm
+- Rapier? (see https://docs.rs/rapier3d/0.9.2/i686-pc-windows-msvc/rapier3d/dynamics/struct.IntegrationParameters.html#1)
+  uses a "warmstart_coefficient" like Bullet, but also
+  "warmstart_correction_slope parameter" (default value 10.0) designed
+  to suppress excessive warm start impulses after strong impacts and
+  improve stability.
+  - Avian is similar
+- PhysX (omg code is a mess, it uses something like contact patch
+  pesistence but impulses are not clearly stored+reused, code is terrible)
+- ODE (apparently it does NOT use WS for contacts, but it does for joints)
+- MuJoCo warmstarts accelerations (but that may be a guess, not a WS assumption)
+
+** TODO References
+Citar paper Catto on explica caching, si ho fa, a veure si enumera drawbacks
+
+* LOCAL VARIABLES                                                  :noexport:
 Local Variables:
 org-confirm-babel-evaluate: nil
 End:

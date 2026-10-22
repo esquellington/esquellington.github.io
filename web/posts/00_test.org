@@ -40,20 +40,6 @@ Equation
 Numbered equation with colors
 \begin{equation} \alpha = {\color[RGB]{247,189,0} \beta} \end{equation}
 
-** Code
-C++ code, requires loading appropriate theme in publish.el to get nice
-syntax highlighting
-#+BEGIN_SRC C++
-  int main( int argc, char** argv )
-  {
-      __builtin_printf("Hello Org");
-      return 0; //yeah
-  }
-#+END_SRC
-
-#+RESULTS:
-: Hello Org
-
 ** Images
 Link with description does not display image [[file:../img/ScotchBonnet.png][ojocuidao!]]
 
@@ -76,16 +62,123 @@ Table works as expected, with customizable width
 | 2 |  4 |  8 |
 | 3 |  9 | 27 |
 
-Gnuplot SRC works, BUT result does not display inline unless I add an
-extra return after #+RESULTS: before the image link
-#+BEGIN_SRC gnuplot :var data=data-table :file ../img/table.png
+#+NAME: gnuplot-example
+#+BEGIN_SRC gnuplot :var data=data-table :results file :file ../img/table.png :exports both
   plot data u 1:2 with lines, \
        data u 1:3 with lines
 #+END_SRC
 
-#+RESULTS:
-
+#+RESULTS: gnuplot-example
 [[file:../img/table.png]]
+
+** Code
+Requires loading appropriate theme in publish.el to get nice
+syntax highlighting, ex (load-theme 'ample-zen t)
+*** C++
+#+BEGIN_SRC C++ :includes <stdio.h>
+  int main( int argc, char** argv )
+  {
+      printf("Hello Org");
+      return 0; //yeah
+  }
+#+END_SRC
+
+#+RESULTS:
+: Hello Org
+
+*** TODO Lua                                                       :noexport:
+TODO: syntax highlight works in .org but not in exported html, not sure why
+NOTE: to use Luajit, must set '(org-babel-lua-command "luajit")
+#+BEGIN_SRC lua :results output
+  function multiply( a, b )
+     return a * b
+  end
+  local x = 2
+  local y = 3
+  print( multiply(x,y) )
+#+END_SRC
+
+** TODO Maxima                                                     :noexport:
+
+It's cool but syntax and docs are quite obscure and
+old-fashioned. Probably best to try sympy/numpy instead
+
+See https://orgmode.org/worg//org-contrib/babel/languages/ob-doc-maxima.html
+
+#+NAME: maxima-solve
+#+BEGIN_SRC maxima :exports both :results output
+  eq: x**2-16 = 0;
+  solution: solve(eq, x);
+  print(solution);
+#+END_SRC
+
+#+RESULTS: maxima-solve
+: [x = - 4, x = 4]
+
+#+NAME: maxima-matrix-latex
+#+BEGIN_SRC maxima :exports both :results raw
+  M: matrix ([3, 1], [2, 4]);
+  tex(M);
+#+END_SRC
+
+#+NAME: maxima-matrix-eigen-numeric
+#+BEGIN_SRC maxima :exports both :results output
+  M: matrix ([3, 1], [2, 4]);
+  print(M);
+  print(eivals(M));
+  print(eivects(M));
+#+END_SRC
+
+#+RESULTS: maxima-matrix-eigen-numeric
+: [ 3  1 ]
+: [      ]
+: [ 2  4 ]
+: [[5, 2], [1, 1]]
+: [[[5, 2], [1, 1]], [[[1, 2]], [[1, - 1]]]]
+
+#+NAME: maxima-matrix-eigen-symbolic
+#+BEGIN_SRC maxima :exports both :results output
+  M: matrix ([a, b], [c, d]);
+  print(eivals(M));
+  print(invert(M));
+#+END_SRC
+
+#+RESULTS: maxima-matrix-eigen-symbolic
+#+begin_example
+          2                    2
+    sqrt(d  - 2 a d + 4 b c + a ) - d - a
+[[- -------------------------------------,
+                      2
+                                     2                    2
+                               sqrt(d  - 2 a d + 4 b c + a ) + d + a
+                               -------------------------------------], [1, 1]]
+                                                 2
+[      d             b     ]
+[  ---------   - --------- ]
+[  a d - b c     a d - b c ]
+[                          ]
+[       c           a      ]
+[ - ---------   ---------  ]
+[   a d - b c   a d - b c  ]
+#+end_example
+
+#+name: maxima-plot3d
+#+begin_src maxima :results file graphics :exports results :file ../img/maxima-3d.png
+  programmode: false;
+  plot3d(atan(-x^2+y^3/4),[x,-4,4],[y,-4,4],[grid,50,50],[gnuplot_pm3d,true]);
+#+end_src
+
+** TODO Octave/Matlab                                              :noexport:
+TODO: fails to eval due to missing octave, installed through Snap but
+it failed, didn't try apt-get as it brings a ton of deps
+#+BEGIN_SRC octave
+disp('Hello World!')
+b = [4; 9; 2] # Column vector
+A = [ 3 4 5;
+      1 3 1;
+      3 5 9 ]
+x = A \ b     # Solve the system Ax = b
+#+END_SRC
 
 ** Graphviz
 
@@ -146,3 +239,7 @@ produces
 *all of your base are belong to us*
 *all of your base are belong to us*
 *all of your base are belong to us*
+* LOCAL VARIABLES                                                  :noexport:
+Local Variables:
+org-confirm-babel-evaluate: nil
+End:
