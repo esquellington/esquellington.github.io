@@ -266,6 +266,8 @@ have if there was no fixed ground (I think all bodies would move down
 equally fast (and if restitution coeff >0 then the last one should be
 ejected as in Newton's craddle?)
 
+** TODO Implement direct solver (invert 2x2) and verify correct
+- Plain inversion, show that result is 0?
 ** N>2 bodies
 Write direct eq for N sequential bodies, must be tiangular or
 tridiagonal I think? Solvable in linear time, similar to what I did
@@ -274,6 +276,8 @@ in TentaclesMode
 I thin it's a Symmetric Tridiagonal matrix
 https://en.wikipedia.org/wiki/Tridiagonal_matrix
 
+Write system and eigenvals but no need to solve... unless it's very
+easy (what's the shortest direct solver?)
 ** NOTES/TODO
 Impprtant: in the general case the constraint is on RELTIVE vel not
 absolute, male sure we write it properly for the N body case and
@@ -304,26 +308,6 @@ count
 Also see effect of subiter in a subgroup vs global iteration without
 subgroups, in princiole subgroups with larger mass ratios would need
 more iter than others so total count would reduce
-** TODO What would be a "perfect" iterative solver for realtime?
-What would be perfect is a simple iter solver like PGS that tracks
-convergence to solution and simultaneously builds an “incremental
-factorization” of the direct solve matrix, cheaply, so that if PGS
-detects it’s not converging well, it can automatically switch to a
-Direct solve to improve convergence, having done prt of the work (so
-no waste trying PgS first and switching, and PGS would still be enough
-for simpler cases, most common) Extra points if this can be alternate,
-so we switch from PGS to partially Direct depending on current
-convergence
-
-GMRES with local Krylov subsçacr and periodic resets seems a good
-inspiration, and maybe ADMM too, not sure. Odea seems too obvious to
-be new --> APPARENTLY it's not a good idea to combine PGS or other
-iterative "Fixed Point" solvers with Krylov ones, because Krylov
-assumes some invariants in the iterates/search directions that PGS
-cannot guarantee, so we cannot easily build useful Krylov
-representation while doing PGS work... Would still be cool to "try",
-ex: what if Krylov is approximate, does that fail or it just takes
-longer to converge?
 ** TODO What if constraints are not necessarily Active?
 - This is VERY MUCH OUT OF SCOPE
 - We'd need a full (M)LCP solver that solves equality and inequality constraints
@@ -344,6 +328,26 @@ longer to converge?
         - When we finish DS with ActSet, we could run another pass of
           PGS to verify there's no pulling contacts, and refine the output?
 - Is this similar to what Baraff/Faure/Stewart/Trinkle/Anitescu/Potra were doing?
+* TODO What would be a "perfect" iterative solver for realtime?    :noexport:
+What would be perfect is a simple iter solver like PGS that tracks
+convergence to solution and simultaneously builds an “incremental
+factorization” of the direct solve matrix, cheaply, so that if PGS
+detects it’s not converging well, it can automatically switch to a
+Direct solve to improve convergence, having done prt of the work (so
+no waste trying PgS first and switching, and PGS would still be enough
+for simpler cases, most common) Extra points if this can be alternate,
+so we switch from PGS to partially Direct depending on current
+convergence
+
+GMRES with local Krylov subsçacr and periodic resets seems a good
+inspiration, and maybe ADMM too, not sure. Odea seems too obvious to
+be new --> APPARENTLY it's not a good idea to combine PGS or other
+iterative "Fixed Point" solvers with Krylov ones, because Krylov
+assumes some invariants in the iterates/search directions that PGS
+cannot guarantee, so we cannot easily build useful Krylov
+representation while doing PGS work... Would still be cool to "try",
+ex: what if Krylov is approximate, does that fail or it just takes
+longer to converge?
 * TODO [#C] PGS vs TGS                                             :noexport:
 PGS convergence wrt iter (1 substep) vs TGS convergence wrt substeps (1 iter)
 
