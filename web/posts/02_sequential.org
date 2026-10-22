@@ -201,35 +201,60 @@ SI is very easy to implement, that's why it's so popular, but
 
 * TODO [#A] Direct Solution                                        :noexport:
 
-All constraints are Active, due to compressive init state and
-inelssticity, so all constraints become equalities in this case, and
-we can solve for all collision impulses simultaneously solving a
-linear system of equations
+If we assume all constraints are Active, due to compressive init state
+and inelssticity, so all constraints become equalities, and we can
+solve for all collision impulses simultaneously solving a linear
+system of equations.
 
 Non-iterative solution should be trivial for this problem, we could
 solve system of eq with 2 vars and 2 constraints, assuming vel will
 never change sign, and arrive at $V_b=0$.
 
+Instantaneous Impulses per body $i$ from its contacts with prev/next
+bodies
+\[ V_i^+ = V_i^- + \frac{1}{m_i} (\lambda_{c_i} - \lambda_{c_{i-1}}) \]
+each body will get 2 contacts with their neighbours, except bottom/top ones that get one.
+
+static body 0 could just have $1/m_0 = 0$
+\[ V_0^+ = V_0^- = 0 \]
+
+Constraints 0..N-1 on post-impact velocities $V_i^+$
+\[ C_i = V_{i+1}^+ - V_{i}^+ + \geq 0 \]
+
+expand lambdas into constraint eq and solve for them?
+
+Not sure about sign conventions, revisit SI convention and stick to
+that here too...
+
+\[ C_0 = V_1^+ - V_0^+ = (V_1^- + 1/m_1 (\lambda_1 - \lambda_0)) - (V_0^- + 1/m_0 (\lambda_0)) \]
+\[ C_1 = V_2^+ - V_1^+ = (V_2^- + 1/m_2 (- \lambda_1)) - (V_1^- + 1/m_1 (\lambda_1 - \lambda_0)) \]
+
+this must be the same as
+\[ (JWJ^T)\lambda = -C \]
+
+\[ K \lambda = b \]
+\[ b = \begin{bmatrix}
+   V_1^- - V_0^- \\
+   V_1^- - V_1^-
+   \end{bmatrix}
+\]
+
+\[
+   K = \begin{bmatrix}
+   -(1/m_0+1/m_1) && 1/m_1 \\
+   1/m_1 && -(1/m_1+1/m_2)
+   \end{bmatrix}
+\]
+
 2x2 system for Va,Vb, we can write it and solve by substitution
-
-\begin{align*}
-V_c &= 0 \\
-V_a &= Va + (\lambda_0 - \lambda_1) / m_a \\
-V_b &= Vb - \lambda_1 / m_b
-\end{align*}
-
-solve for lambdas with direct solver \[A \lambda = b\]
-\begin{align*}
-\lambda_0 &= V_{ca}/ (m_a w_a) \\
-\lambda_1 &= V_{ab}/ ((m_a w_a) + (m_b w_b))
-\end{align*}
-But V_ca and V_ab must include lambda_0 lambda_1 as they're
-affected. Not sure, see Tentacles
 
 \begin{bmatrix}
  a && b \\
  c && d
 \end{bmatrix}
+
+Write eq, will compute trace and det -> show that eigenvalues ratio is
+related to mass ratio
 
 Si construim problema directe (2bodies) els eigenval son facils de
 trobar, relacionarlos amb mass estio hauria de ser trivial!!
@@ -243,6 +268,9 @@ ejected as in Newton's craddle?)
 Write direct eq for N sequential bodies, must be tiangular or
 tridiagonal I think? Solvable in linear time, similar to what I did
 in TentaclesMode
+
+I thin it's a Symmetric Tridiagonal matrix
+https://en.wikipedia.org/wiki/Tridiagonal_matrix
 
 ** NOTES/TODO
 Impprtant: in the general case the constraint is on RELTIVE vel not
@@ -274,6 +302,46 @@ count
 Also see effect of subiter in a subgroup vs global iteration without
 subgroups, in princiole subgroups with larger mass ratios would need
 more iter than others so total count would reduce
+** TODO What would be a "perfect" iterative solver for realtime?
+What would be perfect is a simple iter solver like PGS that tracks
+convergence to solution and simultaneously builds an “incremental
+factorization” of the direct solve matrix, cheaply, so that if PGS
+detects it’s not converging well, it can automatically switch to a
+Direct solve to improve convergence, having done prt of the work (so
+no waste trying PgS first and switching, and PGS would still be enough
+for simpler cases, most common) Extra points if this can be alternate,
+so we switch from PGS to partially Direct depending on current
+convergence
+
+GMRES with local Krylov subsçacr and periodic resets seems a good
+inspiration, and maybe ADMM too, not sure. Odea seems too obvious to
+be new --> APPARENTLY it's not a good idea to combine PGS or other
+iterative "Fixed Point" solvers with Krylov ones, because Krylov
+assumes some invariants in the iterates/search directions that PGS
+cannot guarantee, so we cannot easily build useful Krylov
+representation while doing PGS work... Would still be cool to "try",
+ex: what if Krylov is approximate, does that fail or it just takes
+longer to converge?
+** TODO What if constraints are not necessarily Active?
+- This is VERY MUCH OUT OF SCOPE
+- We'd need a full (M)LCP solver that solves equality and inequality constraints
+- The simplest category I think are Active Set solvers, that just
+  solve the problem for each true/false combination of constraint activations.
+*** TODO Write ActiveSet solver for 2 body case, should be simple enough
+*** TODO Could we infer the ActiveSet using some PGS iterations? how many?
+- If we KNOW the AS, LCP is just a linear solve, I think.
+- Can we approximate AS from a few PGS iter, check which lambdas are
+  >0, and that means they're Active?
+  - Could write a sample that runs PGS and counts how many iter until
+    AS is correct (EVEN if lambdas are not yet) --> at this point we
+    could switch to an LCP->Direct solver with a constant AS
+    - AND maybe we could amortize some of the PGS work to build the
+      LCP direct sytem?
+      - OR EVEN, accept the PGS solution if it converged well enough!
+        - So this is a valid PGS/Direct hybrid
+        - When we finish DS with ActSet, we could run another pass of
+          PGS to verify there's no pulling contacts, and refine the output?
+- Is this similar to what Baraff/Faure/Stewart/Trinkle/Anitescu/Potra were doing?
 
 * TODO [#C] PGS vs TGS                                             :noexport:
 PGS convergence wrt iter (1 substep) vs TGS convergence wrt substeps (1 iter)
@@ -353,20 +421,7 @@ Presolve ignoraria friccio per simplicitat, aixo pot ser problematic?
 
 Presolve could be a Block-GS and then iterate with full PGS
 
-* TODO References
-** TODO Convergence for Gauss-Seidel linear solvers
-- Must be in some paper/book
-- Havok
-  https://www.havok.com/blog/how-havoks-constraint-solver-works-pgs-baumgarte/
-  - There's an optional direct solver
-- Roblox
-  https://about.roblox.com/newsroom/2020/08/improving-simulation-performance-advanced-physics-solver
-  - Presentation https://www.youtube.com/watch?v=P-WP1yMOkc4
-  - Mensions this "reconditioning the PGS using the sparse LDL
-    decomposition of the constraint matrix of equality
-    constraints. Dense submatrices of the constraint matrix are
-    sparsified using a method we call Body Splitting."
-* TODO Code
+* TODO Examples
 ** TODO Impact ABC with $\xi=10$
 Implement SI and output table with Va,Vb results, show they decrease
 as we predicted
@@ -635,6 +690,19 @@ column so that gnuplot can just plot green/red)
   }
 #+END_SRC
 
+* TODO References
+** TODO Convergence for Gauss-Seidel linear solvers
+- Must be in some paper/book
+- Havok
+  https://www.havok.com/blog/how-havoks-constraint-solver-works-pgs-baumgarte/
+  - There's an optional direct solver
+- Roblox
+  https://about.roblox.com/newsroom/2020/08/improving-simulation-performance-advanced-physics-solver
+  - Presentation https://www.youtube.com/watch?v=P-WP1yMOkc4
+  - Mensions this "reconditioning the PGS using the sparse LDL
+    decomposition of the constraint matrix of equality
+    constraints. Dense submatrices of the constraint matrix are
+    sparsified using a method we call Body Splitting."
 * TODO Derivations
 ** TODO Linear Approx
 (TODO: We should find linear rel Taylor series of $\log(\xi/(\xi+1))
