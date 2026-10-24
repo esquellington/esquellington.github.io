@@ -8,20 +8,22 @@ inefficient for rigid impact problems.
 * Problem
 
 We want to solve a perfectly inelastic impact of a rigid body B moving
-towards a rigid body A that is initially resting beside a static wall
-C. A is sandwiched between B and C.
+towards a rigid body A that is initially resting on the ground C. A is
+sandwiched between B and C.
 
-(TODO sketch)
+(TODO sketch: ground plance C, body A, body B, positive vel dir downwards)
 
-With velocity sign > 0 towards wall C, the initial conditions are:
+With the sign convention that velocities are positive towards ground
+C, the initial conditions are:
+
 \[ V_c = 0 ,\quad V_a(0) = 0 ,\quad V_b(0) > 0 \]
 
-We'll assume $m_a \leq m_b$.
+Masses are arbitrary, but we'll assume $m_a \leq m_b$.
 
 ** Collision Constraints
 
 Collisions introduce the following inequality constraints on relative
-collision velocities $V_{ab}=V_b-V_a$.
+velocities $V_{ab}=V_a-V_b$.
 
 \[V_{ca}(t+\Delta t) \geq 0 ,\quad V_{ab}(t+\Delta t) \geq 0 \]
 
@@ -43,8 +45,8 @@ the mass ratio $\frac{m_b}{m_a}$.
 
 The instantaneous inelastic collision response for AB is
 \begin{align*}
-V_a^+ &= V_a^- + V_{ab} w_a \\
-V_b^+ &= V_b^- - V_{ab} w_b
+V_a^+ &= V_a^- - V_{ab} w_a \\
+V_b^+ &= V_b^- + V_{ab} w_b
 \end{align*}
 
 where
@@ -61,7 +63,7 @@ local collision responses between pairs of bodies. Each iteration
 we'll solve collisions AC and AB
 
 - Solve $V_{ca}^{(k)} \geq 0$, resulting in $V_a^{(k)} = 0$
-- Solve $V_{ab}^{(k)} \geq 0$, with $V_{ab}^{(k)} = V_b^{(k)}$ because $V_a^{(k)} = 0$
+- Solve $V_{ab}^{(k)} \geq 0$, with $V_{ab}^{(k)} = -V_b^{(k)}$ because $V_a^{(k)} = 0$
 
 We can assume all collision constraints are Active, due to compressive
 init state and inelssticity, so all constraint inequalities become
@@ -84,7 +86,8 @@ depend on their individual masses, only on their mass ratio, with $w_a
 We plot $V_b^{(k)}$ for $V_b^{(0)} = 10m/s$, $\epsilon = 10^{-3}$ and $\xi
 \in [1..20]$
 
-#+BEGIN_SRC gnuplot :file ../img/sequential_vb_k.png :exports none :results none
+#+NAME: image-vb_k
+#+BEGIN_SRC gnuplot :file ../img/sequential_vb_k.png :exports results
   set term png size 600, 300
   set size ratio 0.5
   set xrange [1:200]
@@ -101,7 +104,7 @@ We plot $V_b^{(k)}$ for $V_b^{(0)} = 10m/s$, $\epsilon = 10^{-3}$ and $\xi
   unset yrange
 #+END_SRC
 
-#+ATTR_HTML: image :width 95%
+#+RESULTS: image-vb_k
 [[file:../img/sequential_vb_k.png]]
 
 ** How many iterations do we need?
@@ -118,7 +121,8 @@ of $V_b^{(0)} w_a^{k} = \epsilon$ to obtain:
 
 We plot $k^*(\xi)$ with the same parameters as above.
 
-#+BEGIN_SRC gnuplot :file ../img/sequential_k_mr.png :exports none :results none
+#+NAME: image-k_mr
+#+BEGIN_SRC gnuplot :file ../img/sequential_k_mr.png :exports results
   set term png size 600, 300
   set size ratio 0.5
   set xrange [1:100]
@@ -128,7 +132,7 @@ We plot $k^*(\xi)$ with the same parameters as above.
   unset yrange
 #+END_SRC
 
-#+ATTR_HTML: image :width 95%
+#+RESULTS: image-k_mr
 [[file:../img/sequential_k_mr.png]]
 
 This looks surprisingly linear... and it *almost* is!
@@ -142,7 +146,8 @@ and see that the slope $-\log(\epsilon/V_b^{(0)})$ changes very
 moderately with both $V_b^{(0)}$ and $\epsilon$, and that the
 parameter that affects $k^{*}$ the most is the mass ratio $\xi$.
 
-#+BEGIN_SRC gnuplot :file ../img/sequential_k_mr_approx.png :exports none :results none
+#+NAME: image-k_mr_approx
+#+BEGIN_SRC gnuplot :file ../img/sequential_k_mr_approx.png :exports results
   set term png size 600, 300
   set size ratio 0.5
   set xrange [1:100]
@@ -155,7 +160,7 @@ parameter that affects $k^{*}$ the most is the mass ratio $\xi$.
   unset yrange
 #+END_SRC
 
-#+ATTR_HTML: image :width 95%
+#+RESULTS: image-k_mr_approx
 [[file:../img/sequential_k_mr_approx.png]]
 
 * TODO Multiple bodies and contacts :noexport:
@@ -221,10 +226,10 @@ static body 0 could just have $1/m_0 = 0$
 \[ V_0^+ = V_0^- = 0 \]
 
 Constraints 0..N-1 on post-impact velocities $V_i^+$
-\[ C_i = V_{i+1}^+ - V_{i}^+ + \geq 0 \]
+\[ C_i = V_{i+1}^+ - V_{i}^+ \geq 0 \]
 
-Not sure about sign conventions, revisit SI convention and stick to
-that here too...
+Sign convention: Positive velocities go UP, from i to i+1
+TODO: revisit SI convention and enforce up
 
 \[ C_0 = V_1^+ - V_0^+ = (V_1^- + 1/m_1 (\lambda_1 - \lambda_0)) - (V_0^- + 1/m_0 (\lambda_0)) \]
 \[ C_1 = V_2^+ - V_1^+ = (V_2^- + 1/m_2 (- \lambda_1)) - (V_1^- + 1/m_1 (\lambda_1 - \lambda_0)) \]
@@ -447,9 +452,9 @@ TODO PLOT or export table, explain plot mention it matches prediction
       {
           if( k%5 == 0 ) printf("\n%d %2.4f %2.4f",k,Va,Vb);
           Va = 0.0f; //solve AC
-          float Vab(Vb-Va); //solve AB
-          Va += Vab * wa;
-          Vb -= Vab * (1-wa);
+          float Vab(Va-Vb); //solve AB
+          Va -= Vab * wa;
+          Vb += Vab * (1-wa);
           k++;
       }
       printf("\n%d %2.4f %2.4f",k,Va,Vb);
@@ -457,7 +462,8 @@ TODO PLOT or export table, explain plot mention it matches prediction
   }
 #+END_SRC
 
-#+BEGIN_SRC gnuplot :var data=table-impact-abc :file ../img/sequential_impact_abc.png :exports none :results none
+#+NAME: image-impact-abc
+#+BEGIN_SRC gnuplot :var data=table-impact-abc :file ../img/sequential_impact_abc.png :exports results
   set term png size 600, 300
   set size ratio 0.5
   set yrange [1e-3:10]
@@ -465,7 +471,8 @@ TODO PLOT or export table, explain plot mention it matches prediction
        data u 1:3 with lines
   unset yrange
 #+END_SRC
-#+ATTR_HTML: image :width 95%
+
+#+RESULTS: image-impact-abc
 [[file:../img/sequential_impact_abc.png]]
 
 ** Impact stack 2 bodies with $\xi=4$
@@ -492,7 +499,9 @@ Warmstarting would avoid most iter on >2nd frame
       return 0;
   }
 #+END_SRC
-#+BEGIN_SRC gnuplot :var data=table-stack-2-no-ws :file ../img/sequential_stack-2-no-ws.png :exports none :results none
+
+#+NAME: image-stack-2-no-ws
+#+BEGIN_SRC gnuplot :var data=table-stack-2-no-ws :file ../img/sequential_stack-2-no-ws.png :exports results
   set term png size 600, 300
   set size ratio 0.5
   set yrange [1e-3:10]
@@ -509,7 +518,8 @@ Warmstarting would avoid most iter on >2nd frame
   unset yrange
   unset logscale
 #+END_SRC
-#+ATTR_HTML: image :width 95%
+
+#+RESULTS: image-stack-2-no-ws
 [[file:../img/sequential_stack-2-no-ws.png]]
 
 ** Impact stack 5 bodies with $\xi=1$
@@ -537,7 +547,9 @@ For N bodies, B[0] is static, mass ratio between B[1] and B[2..N-1] is 1:N-2
       return 0;
   }
 #+END_SRC
-#+BEGIN_SRC gnuplot :var data=table-stack-5-no-ws :file ../img/sequential_stack-5-no-ws.png :exports none :results none
+
+#+NAME: image-stack-5-no-ws
+#+BEGIN_SRC gnuplot :var data=table-stack-5-no-ws :file ../img/sequential_stack-5-no-ws.png :exports results
   set term png size 600, 300
   set size ratio 0.5
   set yrange [1e-3:10]
@@ -554,7 +566,8 @@ For N bodies, B[0] is static, mass ratio between B[1] and B[2..N-1] is 1:N-2
   unset yrange
   unset logscale
 #+END_SRC
-#+ATTR_HTML: image :width 95%
+
+#+RESULTS: image-stack-5-no-ws
 [[file:../img/sequential_stack-5-no-ws.png]]
 
 ** Impact stack 10 bodies with $\xi=1$, with warmstarting
@@ -587,7 +600,9 @@ IMPORTANT: emphasize we enable WS on 2nd step, that's why 5 steps show
       return 0;
   }
 #+END_SRC
-#+BEGIN_SRC gnuplot :var data=table-stack-10 :file ../img/sequential_stack-10.png :exports none :results none
+
+#+NAME: image-stack-10
+#+BEGIN_SRC gnuplot :var data=table-stack-10 :file ../img/sequential_stack-10.png :exports results
   set term png size 600, 300
   set size ratio 0.5
   set yrange [1e-3:10]
@@ -605,7 +620,8 @@ IMPORTANT: emphasize we enable WS on 2nd step, that's why 5 steps show
   unset yrange
   unset logscale
 #+END_SRC
-#+ATTR_HTML: image :width 95%
+
+#+RESULTS: image-stack-10
 [[file:../img/sequential_stack-10.png]]
 
 ** Implementation of GSimulateStack1D
@@ -653,11 +669,12 @@ column so that gnuplot can just plot green/red)
               for( int n=1; n<N; n++ )
               {
                   float wa_n( n==1 ? 0.0f : wa ); //B[0] is static
-                  V[n-1] += cached_Vab[n] * wa_n;
-                  V[n] -= cached_Vab[n] * (1-wa_n);
+                  V[n-1] -= cached_Vab[n] * wa_n;
+                  V[n] += cached_Vab[n] * (1-wa_n);
                   cached_Vab[n] *= ws_decay01;
               }
           }
+          // Solve/refine constraints after warmstarting
           while( k < K && V[N-1] > epsilon )
           {
               if( k%10 == 0 )
@@ -669,19 +686,17 @@ column so that gnuplot can just plot green/red)
               V[0] = 0.0f; //solve AC
               for( int n=1; n<N; n++ )
               {
-                  float Vab(V[n]-V[n-1]); //solve AB
+                  float Vab( V[n-1] - V[n] ); //solve AB
                   float wa_n( n==1 ? 0.0f : wa ); //B[0] is static
                   // req separating contact (TODO not sure if correct,
                   // we should clamp total not per-iter)
-                  if( Vab < 0.0f )
+                  if( Vab > 0.0f )
                       Vab = 0.0f;
 
-                  V[n-1] += Vab * wa_n;
-                  V[n] -= Vab * (1-wa_n);
+                  V[n-1] -= Vab * wa_n;
+                  V[n] += Vab * (1-wa_n);
 
-                  // Warmstarting (cached delta vel, should be lambda
-                  // impulse but we don't save masses) --> save after
-                  // 2nd step
+                  // Update warmstarting after 1st step
                   if( bWarmstart && t>0 )
                       cached_Vab[n] += Vab;
               }
