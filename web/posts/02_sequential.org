@@ -90,15 +90,15 @@ We plot $V_b^{(k)}$ for $V_b^{(0)} = 10m/s$, $\epsilon = 10^{-3}$ and $\xi
 #+BEGIN_SRC gnuplot :file ../img/sequential_vb_k.png :exports results
   set term png size 600, 300
   set size ratio 0.5
-  set xrange [1:200]
+  set xrange [1:300]
   set yrange [0:0.01]
-  plot 10*(1.0/(1+1))**x with lines, \
-       10*(2.0/(2+1))**x with lines, \
-       10*(3.0/(3+1))**x with lines, \
-       10*(4.0/(4+1))**x with lines, \
-       10*(5.0/(5+1))**x with lines, \
-       10*(10.0/(10+1))**x with lines, \
-       10*(20.0/(20+1))**x with lines, \
+  plot 10*(1.0/(1+1))**x title "V_b(k), xi=1" with lines, \
+       10*(2.0/(2+1))**x title "V_b(k), xi=2" with lines, \
+       10*(3.0/(3+1))**x title "V_b(k), xi=3" with lines, \
+       10*(4.0/(4+1))**x title "V_b(k), xi=4" with lines, \
+       10*(5.0/(5+1))**x title "V_b(k), xi=5" with lines, \
+       10*(10.0/(10+1))**x title "V_b(k), xi=10" with lines, \
+       10*(20.0/(20+1))**x title "V_b(k), xi=20" with lines, \
        1e-3 with lines
   unset xrange
   unset yrange
@@ -127,7 +127,7 @@ We plot $k^*(\xi)$ with the same parameters as above.
   set size ratio 0.5
   set xrange [1:100]
   set yrange [0:1000]
-  plot log((1e-3)/10)/log((x/(x+1))) with lines lw 2
+  plot log((1e-3)/10)/log((x/(x+1))) title "k^*(xi)" with lines lw 2
   unset xrange
   unset yrange
 #+END_SRC
@@ -138,11 +138,11 @@ We plot $k^*(\xi)$ with the same parameters as above.
 This looks surprisingly linear... and it *almost* is!
 
 We can show that $\log(\xi/(\xi+1))$ is very close to $-1/(\xi+1)$ for
-$\xi>2$ (see [[Linear Approx]]), so we can approximate $k^*(\xi)$ linearly
+$\xi>2$ (see [[Linear Approx]]), so we can approximate $k^*(\xi)$
 as
 \[ k^* \approx -\log(\epsilon/V_b^{(0)}) (\xi+1)\]
 
-and see that the slope $-\log(\epsilon/V_b^{(0)})$ changes very
+From this linear approximation we can see that the slope $-\log(\epsilon/V_b^{(0)})$ changes very
 moderately with both $V_b^{(0)}$ and $\epsilon$, and that the
 parameter that affects $k^{*}$ the most is the mass ratio $\xi$.
 
@@ -163,30 +163,56 @@ parameter that affects $k^{*}$ the most is the mass ratio $\xi$.
 #+RESULTS: image-k_mr_approx
 [[file:../img/sequential_k_mr_approx.png]]
 
-* TODO Multiple bodies and contacts :noexport:
+** Simulating impact ABC with $\xi=10$
+We can implement SI for the ABC impact problem and plot $V_a,V_b$ over
+iterations $k$. The results match the
 
-The problem is not limited to large mass ratios between individual
-bodies, it can also appear when multiple light bodies impact another
-one simultaneously with coherent velocity (ex: a stack of N bricks
-falling on a single one, or avalanche of similar rocks forming a pile
-of rubble), in that case the bottommost object needs to absorb the
-momentum of all other objects, so object count is
-essentially the same as the mass ratio of a simplified problem where
-N-1 objects have been merged into one.
+TODO PLOT or export table, explain plot mention it matches prediction
 
-** TODO Prove this somehow
-How would N bodies converge, depending on masses… I think if known
-solution is Vi=0 for all, we can always partition a list of bodies
-{Bi} to Wall, A (sandwiched), B=sum Bi fir all other bodies, and
-assume they behave like a single block, so mass ratio mA, mB increases
-with Bi count even if individual bodies have constant mass. This makes
-sense I think and would reuse the same derivation. We’re computing how
-long it takes to converge at the “bottleneck” body A due to mass B,
-regardless of number of bodies in Bi set
+#+BEGIN_EXPORT html
+<details>
+#+END_EXPORT
 
-** TODO Also prove that "mass ratio" and "number of objects with same mass" are somewhat interchangeable
+#+NAME: table-impact-abc
+#+BEGIN_SRC C++ :includes <stdio.h> :results drawer
+  int main( int argc, char** argv )
+  {
+      const float xi(10.0f), wa(xi/(xi+1));
+      const float eps(1e-3f);
+      const int K(100);
+      float Va(0), Vb(10);
+      int k(0);
+      printf("k V_a V_b");
+      while( k < K && Vb > eps ) //iterate until convergence
+      {
+          if( k%5 == 0 ) printf("\n%d %2.4f %2.4f",k,Va,Vb);
+          Va = 0.0f; //solve AC
+          float Vab(Va-Vb); //solve AB
+          Va -= Vab * wa;
+          Vb += Vab * (1-wa);
+          k++;
+      }
+      printf("\n%d %2.4f %2.4f",k,Va,Vb);
+      return 0;
+  }
+#+END_SRC
 
-So iter count to achieve same error with more objects grows more than linearly?
+#+BEGIN_EXPORT html
+</details>
+#+END_EXPORT
+
+#+NAME: image-impact-abc
+#+BEGIN_SRC gnuplot :var data=table-impact-abc :file ../img/sequential_impact_abc.png :exports results
+  set term png size 600, 300
+  set size ratio 0.5
+  set yrange [1e-3:10]
+  plot data u 1:2 with linespoints title "V_a(k)", \
+       data u 1:3 with lines title "V_b(k)"
+  unset yrange
+#+END_SRC
+
+#+RESULTS: image-impact-abc
+[[file:../img/sequential_impact_abc.png]]
 
 * TODO [#A] Conclusions
 
@@ -204,7 +230,7 @@ no previous solution exists.
 SI is very easy to implement, that's why it's so popular, but
 (etc...). Can we do better somehow, without losing all simplicity?
 
-* TODO [#A] [[Direct Solution]]                                        :noexport:
+* TODO [#A] Direct Solution
 
 If we assume all constraints are Active, due to compressive init state
 and inelssticity, so all constraints become equalities, and we can
@@ -271,8 +297,60 @@ have if there was no fixed ground (I think all bodies would move down
 equally fast (and if restitution coeff >0 then the last one should be
 ejected as in Newton's craddle?)
 
+*** TODO Show that $\xi$ is related to the "condition number" of the linear system
+DONE in "Direct Solver" section
+
 ** TODO Implement direct solver (invert 2x2) and verify correct
 - Plain inversion, show that result is 0?
+* TODO References
+** TODO Convergence for Gauss-Seidel linear solvers
+- Must be in some paper/book
+- Havok
+  https://www.havok.com/blog/how-havoks-constraint-solver-works-pgs-baumgarte/
+  - There's an optional direct solver
+- Roblox
+  https://about.roblox.com/newsroom/2020/08/improving-simulation-performance-advanced-physics-solver
+  - Presentation https://www.youtube.com/watch?v=P-WP1yMOkc4
+  - Mensions this "reconditioning the PGS using the sparse LDL
+    decomposition of the constraint matrix of equality
+    constraints. Dense submatrices of the constraint matrix are
+    sparsified using a method we call Body Splitting."
+* TODO Derivations
+** TODO Linear Approx
+(TODO: We should find linear rel Taylor series of $\log(\xi/(\xi+1))
+\approx \xi/(\xi+1)-1 = -1/(\xi+1)$
+show its very very close to linear, quadratic error term is very small, I
+think it's because x/(x+1) tends to 1, and log(1) is 0, so its effect
+as x grows is negligible)
+* ------------------------- NEXT POST: MULTIPLE BODIES             :noexport:
+* TODO Multiple bodies and contacts                                :noexport:
+
+TODO: Try to derive convergence for N>2 bodies, is there a similar recurrence?
+
+The problem is not limited to large mass ratios between individual
+bodies, it can also appear when multiple light bodies impact another
+one simultaneously with coherent velocity (ex: a stack of N bricks
+falling on a single one, or avalanche of similar rocks forming a pile
+of rubble), in that case the bottommost object needs to absorb the
+momentum of all other objects, so object count is
+essentially the same as the mass ratio of a simplified problem where
+N-1 objects have been merged into one.
+
+** TODO Prove this somehow
+How would N bodies converge, depending on masses… I think if known
+solution is Vi=0 for all, we can always partition a list of bodies
+{Bi} to Wall, A (sandwiched), B=sum Bi fir all other bodies, and
+assume they behave like a single block, so mass ratio mA, mB increases
+with Bi count even if individual bodies have constant mass. This makes
+sense I think and would reuse the same derivation. We’re computing how
+long it takes to converge at the “bottleneck” body A due to mass B,
+regardless of number of bodies in Bi set
+
+** TODO Also prove that "mass ratio" and "number of objects with same mass" are somewhat interchangeable
+
+So iter count to achieve same error with more objects grows more than linearly?
+
+* Direct Solution                                                  :noexport:
 ** N>2 bodies
 Write direct eq for N sequential bodies, must be tiangular or
 tridiagonal I think? Solvable in linear time, similar to what I did
@@ -298,21 +376,6 @@ objectes, crec, pero dubto que pugui resoldre o millorar notablement
 el cas de molts objectes uniformes aliniats. Per que? Rao teorica ha
 de ser interessant, eigenvalues matriu i cond number pot ser bo i
 convergir malment?
-** Block-GS
-If we split N bodies in groups and solve direct peoblems for them,
-what’s the best way to split?
-- evenly by count
-- evenly by mass (each group has the aame appeox mass so ratio across
-  groups is small ideally 1:1
-(They must still be connected directly to form a solver subisland fir
-direct solve)
-
-Last option would avoid global mass ratio issue better than group by
-count
-
-Also see effect of subiter in a subgroup vs global iteration without
-subgroups, in princiole subgroups with larger mass ratios would need
-more iter than others so total count would reduce
 ** TODO What if constraints are not necessarily Active?
 - This is VERY MUCH OUT OF SCOPE
 - We'd need a full (M)LCP solver that solves equality and inequality constraints
@@ -333,57 +396,24 @@ more iter than others so total count would reduce
         - When we finish DS with ActSet, we could run another pass of
           PGS to verify there's no pulling contacts, and refine the output?
 - Is this similar to what Baraff/Faure/Stewart/Trinkle/Anitescu/Potra were doing?
-* TODO What would be a "perfect" iterative solver for realtime?    :noexport:
-What would be perfect is a simple iter solver like PGS that tracks
-convergence to solution and simultaneously builds an “incremental
-factorization” of the direct solve matrix, cheaply, so that if PGS
-detects it’s not converging well, it can automatically switch to a
-Direct solve to improve convergence, having done prt of the work (so
-no waste trying PgS first and switching, and PGS would still be enough
-for simpler cases, most common) Extra points if this can be alternate,
-so we switch from PGS to partially Direct depending on current
-convergence
+** Block-GS
+If we split N bodies in groups and solve direct peoblems for them,
+what’s the best way to split?
+- evenly by count
+- evenly by mass (each group has the aame appeox mass so ratio across
+  groups is small ideally 1:1
+(They must still be connected directly to form a solver subisland fir
+direct solve)
 
-GMRES with local Krylov subsçacr and periodic resets seems a good
-inspiration, and maybe ADMM too, not sure. Odea seems too obvious to
-be new --> APPARENTLY it's not a good idea to combine PGS or other
-iterative "Fixed Point" solvers with Krylov ones, because Krylov
-assumes some invariants in the iterates/search directions that PGS
-cannot guarantee, so we cannot easily build useful Krylov
-representation while doing PGS work... Would still be cool to "try",
-ex: what if Krylov is approximate, does that fail or it just takes
-longer to converge?
-* TODO [#C] PGS vs TGS                                             :noexport:
-PGS convergence wrt iter (1 substep) vs TGS convergence wrt substeps (1 iter)
+Last option would avoid global mass ratio issue better than group by
+count
 
-Derive this for model problem, should be feasible but I can’t see how
-substepping will be different to iterating in that case
+Also see effect of subiter in a subgroup vs global iteration without
+subgroups, in princiole subgroups with larger mass ratios would need
+more iter than others so total count would reduce
 
-For impacts reducing timestep does NOT make it better. Because they’re
-instantaneous, and vel does not depend on timestep, we’ll still need
-the same number of total iter to converge/absorb initial heavy vel
-through light bottleneck body
-
-TODO TGS on resting contact may be actually worse, unless problem is
-nonlinear in time, because even if gravity vel is reduced due to
-substeps, the iteration count required to dissipate it using GS does
-NOT reduce proportionally, but slower (see dependicy of k on V0 above)
-
-https://matthias-research.github.io/pages/publications/PBDBodies.pdf
-
-* TODO [#C] PGS vs (A)VBD                                          :noexport:
-- Solve in body-centric way A, B using all collisions on them at once,
-  maybe with compliance, see how error decreases
-- Va needs to consider both AC and AB, so I doubt it results in
-  anything that is not Va=0, so it's no different from
-  constraint-centric SI/PGS in this case.
-* TODO [#C] Primal Iterative Solve?                                :noexport:
-
-How would body-centric primal solver converge for the model problem?
-It would need a stiffness value, that could be increased per iter (ex:
-like AVBD), would that converge better for impacts?
-
-* TODO [#A] Persistent contacts                                    :noexport:
+* ------------------------- NEXT POST: PERSISTENT/STACKS           :noexport:
+* TODO [#A] FOLLOWUP Persistent contacts                           :noexport:
 - Show that in that case SI needs to resolve the delta vel from
   gravity (or any other force) every frame, and that warmstarting can
   help converging if solution does not change (so force is constant,
@@ -408,73 +438,7 @@ like AVBD), would that converge better for impacts?
     experienced... BUT if they did not get impulse they'll have
     lambda0 so it does not matter if they WS... as long as they skip
     the 1st frame after an impulse>0 timestep
-* TODO [#B] Approximate pre-solve + PGS refinement                 :noexport:
-Si aconseguim fer pre-solve approximat (ex: direct solve per a
-moviment linial), i calculem les lambdes, podriem ferles servir com a
-valor de warmstart per a contactes sense historia
-
-Preslolve seria precondition, approx, o prediction mes aviat
-
-Presictors podrien ser direct solve, primal solve (VBD??) oalgun altre solve que no sigui susceptible a problemes de mass ratio
-
-Direct solve per lm des podris considerar nomes particules, hauria de ser raonablement simple. Sembla un solver d’estatica de fet, com em the finals.
-
-Primal solve hauriande considerar colisions soft, no es greu si valor approx es raonable com a warmstart.
-
-Potser AVBD fa algo semblant? Incrementa stiffness per iter si recordo be
-
-La pregjnta clau es:
-- quantes iter estalviRia aixo? Es si predicio prediu el 50% de l’impuls necessari, quna fraccio d’iter estalvia?
-- pot el presolve warmstart causar sideffects si no es exacte (ex: si no podem garantir que estrictament sub-estima impulsos)
-
-Presolve ignoraria friccio per simplicitat, aixo pot ser problematic?
-
-Presolve could be a Block-GS and then iterate with full PGS
-
-* TODO Examples
-** TODO Impact ABC with $\xi=10$
-Implement SI and output table with Va,Vb results, show they decrease
-as we predicted
-
-TODO PLOT or export table, explain plot mention it matches prediction
-
-#+NAME: table-impact-abc
-#+BEGIN_SRC C++ :includes <stdio.h> :results drawer
-  int main( int argc, char** argv )
-  {
-      const float xi(10.0f), wa(xi/(xi+1));
-      const float eps(1e-3f);
-      const int K(100);
-      float Va(0), Vb(10);
-      int k(0);
-      printf("k V_a V_b");
-      while( k < K && Vb > eps ) //iterate until convergence
-      {
-          if( k%5 == 0 ) printf("\n%d %2.4f %2.4f",k,Va,Vb);
-          Va = 0.0f; //solve AC
-          float Vab(Va-Vb); //solve AB
-          Va -= Vab * wa;
-          Vb += Vab * (1-wa);
-          k++;
-      }
-      printf("\n%d %2.4f %2.4f",k,Va,Vb);
-      return 0;
-  }
-#+END_SRC
-
-#+NAME: image-impact-abc
-#+BEGIN_SRC gnuplot :var data=table-impact-abc :file ../img/sequential_impact_abc.png :exports results
-  set term png size 600, 300
-  set size ratio 0.5
-  set yrange [1e-3:10]
-  plot data u 1:2 with linespoints, \
-       data u 1:3 with lines
-  unset yrange
-#+END_SRC
-
-#+RESULTS: image-impact-abc
-[[file:../img/sequential_impact_abc.png]]
-
+* TODO (WIP) Impact Stacks under gravity
 ** Impact stack 2 bodies with $\xi=4$
 
 Simulate 5 frames of a stack of 2 bodies with 1:4 mass ratio:
@@ -506,15 +470,8 @@ Warmstarting would avoid most iter on >2nd frame
   set size ratio 0.5
   set yrange [1e-3:10]
   set logscale y
-  plot data u 2:4 with lines, \
-       data u 2:5 with lines, \
-       data u 2:6 with lines, \
-       data u 2:7 with lines, \
-       data u 2:8 with lines, \
-       data u 2:9 with lines, \
-       data u 2:10 with lines, \
-       data u 2:11 with lines, \
-       data u 2:12 with lines
+  plot data u 2:4 title "V_1" with lines, \
+       data u 2:5 title "V_2" with lines
   unset yrange
   unset logscale
 #+END_SRC
@@ -554,15 +511,11 @@ For N bodies, B[0] is static, mass ratio between B[1] and B[2..N-1] is 1:N-2
   set size ratio 0.5
   set yrange [1e-3:10]
   set logscale y
-  plot data u 2:4 with lines, \
-       data u 2:5 with lines, \
-       data u 2:6 with lines, \
-       data u 2:7 with lines, \
-       data u 2:8 with lines, \
-       data u 2:9 with lines, \
-       data u 2:10 with lines, \
-       data u 2:11 with lines, \
-       data u 2:12 with lines
+  plot data u 2:4 title "V_1" with lines, \
+       data u 2:5 title "V_2" with lines, \
+       data u 2:6 title "V_3" with lines, \
+       data u 2:7 title "V_4" with lines, \
+       data u 2:8 title "V_5" with lines
   unset yrange
   unset logscale
 #+END_SRC
@@ -607,16 +560,16 @@ IMPORTANT: emphasize we enable WS on 2nd step, that's why 5 steps show
   set size ratio 0.5
   set yrange [1e-3:10]
   set logscale y
-  plot data u 2:4 with lines, \
-       data u 2:5 with lines, \
-       data u 2:6 with lines, \
-       data u 2:7 with lines, \
-       data u 2:8 with lines, \
-       data u 2:9 with lines, \
-       data u 2:10 with lines, \
-       data u 2:11 with lines, \
-       data u 2:12 with lines, \
-       data u 2:13 with lines
+  plot data u 2:4 title "V_1" with lines, \
+       data u 2:5 title "V_2" with lines, \
+       data u 2:6 title "V_3" with lines, \
+       data u 2:7 title "V_4" with lines, \
+       data u 2:8 title "V_5" with lines, \
+       data u 2:9 title "V_6" with lines, \
+       data u 2:10 title "V_7" with lines, \
+       data u 2:11 title "V_8" with lines, \
+       data u 2:12 title "V_9" with lines, \
+       data u 2:13 title "V_{10}" with lines
   unset yrange
   unset logscale
 #+END_SRC
@@ -710,29 +663,80 @@ column so that gnuplot can just plot green/red)
   }
 #+END_SRC
 
-* TODO References
-** TODO Convergence for Gauss-Seidel linear solvers
-- Must be in some paper/book
-- Havok
-  https://www.havok.com/blog/how-havoks-constraint-solver-works-pgs-baumgarte/
-  - There's an optional direct solver
-- Roblox
-  https://about.roblox.com/newsroom/2020/08/improving-simulation-performance-advanced-physics-solver
-  - Presentation https://www.youtube.com/watch?v=P-WP1yMOkc4
-  - Mensions this "reconditioning the PGS using the sparse LDL
-    decomposition of the constraint matrix of equality
-    constraints. Dense submatrices of the constraint matrix are
-    sparsified using a method we call Body Splitting."
-* TODO Derivations
-** TODO Linear Approx
-(TODO: We should find linear rel Taylor series of $\log(\xi/(\xi+1))
-\approx \xi/(\xi+1)-1 = -1/(\xi+1)$
-show its very very close to linear, quadratic error term is very small, I
-think it's because x/(x+1) tends to 1, and log(1) is 0, so its effect
-as x grows is negligible)
-* TODO Theory
-** TODO Show that $\xi$ is related to the "condition number" of the linear system
-DONE in "Direct Solver" section
+* ------------------------- END OF POST                            :noexport:
+* TODO [#C] PGS vs TGS                                             :noexport:
+PGS convergence wrt iter (1 substep) vs TGS convergence wrt substeps (1 iter)
+
+Derive this for model problem, should be feasible but I can’t see how
+substepping will be different to iterating in that case
+
+For impacts reducing timestep does NOT make it better. Because they’re
+instantaneous, and vel does not depend on timestep, we’ll still need
+the same number of total iter to converge/absorb initial heavy vel
+through light bottleneck body
+
+TODO TGS on resting contact may be actually worse, unless problem is
+nonlinear in time, because even if gravity vel is reduced due to
+substeps, the iteration count required to dissipate it using GS does
+NOT reduce proportionally, but slower (see dependicy of k on V0 above)
+
+https://matthias-research.github.io/pages/publications/PBDBodies.pdf
+
+* TODO [#C] PGS vs (A)VBD                                          :noexport:
+- Solve in body-centric way A, B using all collisions on them at once,
+  maybe with compliance, see how error decreases
+- Va needs to consider both AC and AB, so I doubt it results in
+  anything that is not Va=0, so it's no different from
+  constraint-centric SI/PGS in this case.
+* TODO [#C] Primal Iterative Solve?                                :noexport:
+
+How would body-centric primal solver converge for the model problem?
+It would need a stiffness value, that could be increased per iter (ex:
+like AVBD), would that converge better for impacts?
+
+* TODO [#B] Approximate pre-solve + PGS refinement                 :noexport:
+Si aconseguim fer pre-solve approximat (ex: direct solve per a
+moviment linial), i calculem les lambdes, podriem ferles servir com a
+valor de warmstart per a contactes sense historia
+
+Preslolve seria precondition, approx, o prediction mes aviat
+
+Presictors podrien ser direct solve, primal solve (VBD??) oalgun altre solve que no sigui susceptible a problemes de mass ratio
+
+Direct solve per lm des podris considerar nomes particules, hauria de ser raonablement simple. Sembla un solver d’estatica de fet, com em the finals.
+
+Primal solve hauriande considerar colisions soft, no es greu si valor approx es raonable com a warmstart.
+
+Potser AVBD fa algo semblant? Incrementa stiffness per iter si recordo be
+
+La pregjnta clau es:
+- quantes iter estalviRia aixo? Es si predicio prediu el 50% de l’impuls necessari, quna fraccio d’iter estalvia?
+- pot el presolve warmstart causar sideffects si no es exacte (ex: si no podem garantir que estrictament sub-estima impulsos)
+
+Presolve ignoraria friccio per simplicitat, aixo pot ser problematic?
+
+Presolve could be a Block-GS and then iterate with full PGS
+
+* TODO [#B] What would be a "perfect" iterative solver for realtime? :noexport:
+What would be perfect is a simple iter solver like PGS that tracks
+convergence to solution and simultaneously builds an “incremental
+factorization” of the direct solve matrix, cheaply, so that if PGS
+detects it’s not converging well, it can automatically switch to a
+Direct solve to improve convergence, having done prt of the work (so
+no waste trying PgS first and switching, and PGS would still be enough
+for simpler cases, most common) Extra points if this can be alternate,
+so we switch from PGS to partially Direct depending on current
+convergence
+
+GMRES with local Krylov subsçacr and periodic resets seems a good
+inspiration, and maybe ADMM too, not sure. Odea seems too obvious to
+be new --> APPARENTLY it's not a good idea to combine PGS or other
+iterative "Fixed Point" solvers with Krylov ones, because Krylov
+assumes some invariants in the iterates/search directions that PGS
+cannot guarantee, so we cannot easily build useful Krylov
+representation while doing PGS work... Would still be cool to "try",
+ex: what if Krylov is approximate, does that fail or it just takes
+longer to converge?
 * TODO [#A] FOLLOWUP: Warmstarting Blows!                          :noexport:
 Identified multiple issues with WS that maybe deserve their own
 article 03_Warmstarting.org?
