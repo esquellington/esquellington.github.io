@@ -14,36 +14,35 @@ sandwiched between B and C.
 (TODO sketch: ground plance C, body A, body B, positive vel dir downwards)
 
 With the sign convention that velocities are positive towards ground
-C, the initial conditions are:
+C, the pre-collision initial conditions are:
 
-\[ V_c = 0 ,\quad V_a(0) = 0 ,\quad V_b(0) > 0 \]
+\[ V_a(0) = 0 ,\quad V_b(0) > 0 ,\quad V_c = 0 \]
 
 Masses are arbitrary, but we'll assume $m_a \leq m_b$.
 
 ** Collision Constraints
 
 Collisions introduce the following inequality constraints on relative
-velocities $V_{ab}=V_a-V_b$.
+post-collision velocities $V_{ij}=V_i-V_j$.
 
-\[V_{ca}(t+\Delta t) \geq 0 ,\quad V_{ab}(t+\Delta t) \geq 0 \]
+\[V_{ca}^* \geq 0 ,\quad V_{ab}^* \geq 0 \]
 
 ** Solution
 
-Due to inelasticity A and B won't bounce, B will transfer momentum to
-A, that will transfer it to C, that will absorb it all. Velocities
-will never change sign. The logical solution is
-\[V_a(t+\Delta t) = 0 ,\quad V_b(t+\Delta t) = 0\]
+Due to inelasticity, A vs B ad B vs C will never bounce. B will
+transfer momentum to A, that will transfer it to C, that will absorb
+it completely. Velocities will never change sign. The "intuitive"
+solution for post-collision velocities is
+\[V_a^* = 0 ,\quad V_b^* = 0\]
 
-TODO: Argue this is the simplest problem possible, made easy by
-inelasticity no need to consider constraint activation
-
-We'll see that solving this simple problem numerically with sequential
-impulses needs a number of iterations that grows almost linearly with
-the mass ratio $\frac{m_b}{m_a}$.
+This is the simplest collision problem involving 2 dynamic bodies
+A,B. We'll see that solving it numerically with sequential impulses
+needs a number of iterations that grows linearly with the mass ratio
+$\frac{m_b}{m_a}$.
 
 * Inelastic collision response
 
-The instantaneous inelastic collision response for AB is
+The pairwise instantaneous inelastic collision response for AB is
 \begin{align*}
 V_a^+ &= V_a^- - V_{ab} w_a \\
 V_b^+ &= V_b^- + V_{ab} w_b
@@ -164,10 +163,11 @@ parameter that affects $k^{*}$ the most is the mass ratio $\xi$.
 [[file:../img/sequential_k_mr_approx.png]]
 
 ** Simulating impact ABC with $\xi=10$
-We can implement SI for the ABC impact problem and plot $V_a,V_b$ over
-iterations $k$. The results match the
+We can implement a trivial Sequantial Impulses solver for the ABC
+impact problem and plot $V_a,V_b$ over iterations $k$. The numerical
+results match the predicted behaviour.
 
-TODO PLOT or export table, explain plot mention it matches prediction
+TODO maybe plot for various mass ratios and repro full first plot?
 
 #+BEGIN_EXPORT html
 <details>
@@ -196,6 +196,32 @@ TODO PLOT or export table, explain plot mention it matches prediction
       return 0;
   }
 #+END_SRC
+
+#+RESULTS: table-impact-abc
+:results:
+|  k |    V_a |    V_b |
+|  0 |    0.0 |   10.0 |
+|  5 | 6.2092 | 6.2092 |
+| 10 | 3.8554 | 3.8554 |
+| 15 | 2.3939 | 2.3939 |
+| 20 | 1.4864 | 1.4864 |
+| 25 |  0.923 |  0.923 |
+| 30 | 0.5731 | 0.5731 |
+| 35 | 0.3558 | 0.3558 |
+| 40 | 0.2209 | 0.2209 |
+| 45 | 0.1372 | 0.1372 |
+| 50 | 0.0852 | 0.0852 |
+| 55 | 0.0529 | 0.0529 |
+| 60 | 0.0328 | 0.0328 |
+| 65 | 0.0204 | 0.0204 |
+| 70 | 0.0127 | 0.0127 |
+| 75 | 0.0079 | 0.0079 |
+| 80 | 0.0049 | 0.0049 |
+| 85 |  0.003 |  0.003 |
+| 90 | 0.0019 | 0.0019 |
+| 95 | 0.0012 | 0.0012 |
+| 97 |  0.001 |  0.001 |
+:end:
 
 #+BEGIN_EXPORT html
 </details>
@@ -233,51 +259,155 @@ SI is very easy to implement, that's why it's so popular, but
 * TODO [#A] Direct Solution
 
 If we assume all constraints are Active, due to compressive init state
-and inelssticity, so all constraints become equalities, and we can
-solve for all collision impulses simultaneously solving a linear
-system of equations.
+and inelssticity, all constraints become equalities, and we can solve
+for all collisions simultaneously solving a linear system of
+equations.
+
+Contact constraint is a "gap function" G(pi,pj)>0, deriving results in
+velocity constraint
+
+We'll rename C,A,B into 0,1,2, ordered away from ground
 
 Non-iterative solution should be trivial for this problem, we could
 solve system of eq with 2 vars and 2 constraints, assuming vel will
 never change sign, and arrive at $V_b=0$.
 
-we assume body 0 has infinite mass
+Sign convention: Positive velocities go UP, from i to i+1 (opposite
+from ABC example before)
 
-Instantaneous Impulses per body $i$ from its contacts with prev/next
-bodies
-\[ V_i^+ = V_i^- + \frac{1}{m_i} (\lambda_{c_i} - \lambda_{c_{i-1}}) \]
-each body will get 2 contacts with their neighbours, except bottom/top ones that get one.
-
-static body 0 could just have $1/m_0 = 0$
-\[ V_0^+ = V_0^- = 0 \]
+** Collision Constraints
 
 Constraints 0..N-1 on post-impact velocities $V_i^+$
-\[ C_i = V_{i+1}^+ - V_{i}^+ \geq 0 \]
+\[ C_{i+1,i} = V_{i+1}^+ - V_{i}^+ \geq 0 \]
 
-Sign convention: Positive velocities go UP, from i to i+1
-TODO: revisit SI convention and enforce up
+** Collision Impulses
 
-\[ C_0 = V_1^+ - V_0^+ = (V_1^- + 1/m_1 (\lambda_1 - \lambda_0)) - (V_0^- + 1/m_0 (\lambda_0)) \]
-\[ C_1 = V_2^+ - V_1^+ = (V_2^- + 1/m_2 (- \lambda_1)) - (V_1^- + 1/m_1 (\lambda_1 - \lambda_0)) \]
+TODO NOT SURE ABOUT lambda signs... prev impulse should be UP next
+shold be DOWN --> ah that's correct because Ci corresponds to Vi-1
+---> no it's wrong, for V1, C0 must be positive (unless lambda is <0)
 
-this must be the same as
-\[ (JWJ^T)\lambda = -C \]
+Instantaneous impulses per body $i$ from its contacts with bodies below/above
+\[ V_i^+ = V_i^- + \frac{1}{m_i} (\lambda_{i,i-1} - \lambda_{i,i+1}) \]
 
-\[ K \lambda = b \]
+Impulses must only push objects apart, so $\lambda_i \geq 0$.
+
+in a stack, each body gets 2 contacts with their neighbours
+below/above, except for the bottom/top bodies that get 1.
+
+we assume body 0 has infinite mass, so $1/m_0 = 0$
+\[ V_0^+ = V_0^- = 0 \]
+
+** Simultaneous solution
+
+We'll solve for the impulses that fullfill all constraints simultaneously
+\begin{eqnarray*}
+C_{1,0} &= V_1^+ - V_0^+ &= (V_1^- + \frac{1}{m_1} (\lambda_0 - \lambda_1)) - (V_0^- + \frac{1}{m_0} (-\lambda_0)) \\
+C_{2,1} &= V_2^+ - V_1^+ &= (V_2^- + \frac{1}{m_2} (\lambda_1)) - (V_1^- + \frac{1}{m_1} (\lambda_0 - \lambda_1))
+\end{eqnarray*}
+
+same as
+\[ A \lambda = b \]
+
+with
+\[
+   A = \begin{bmatrix}
+   1/m_0+1/m_1 & -1/m_1 \\
+   1/m_1 & 1/m_1+1/m_2
+   \end{bmatrix}
+\]
 \[ b = \begin{bmatrix}
-   V_1^- - V_0^- \\
-   V_2^- - V_1^-
+   V_0^- - V_1^- \\
+   V_1^- - V_2^-
+   \end{bmatrix}
+\]
+
+this must be the same as, where are Jacobians (dC/dv1,dC/dv2?) they'll
+be constant +-1 I think, so A must be symmetric. It has the SAME symmetric
+structure as TentaclesMode 4x4 matrix K
+\[ K \lambda = (JWJ^T)\lambda = -C \]
+
+\[
+   J
+   = \begin{bmatrix}
+   dC10/dV1 & dC10/dV2 \\
+   dC21/dV1 & dC21/dV2
+   \end{bmatrix}
+   = \begin{bmatrix}
+    1 & 0 \\
+   -1 & 1
    \end{bmatrix}
 \]
 
 \[
-   K = \begin{bmatrix}
-   -(1/m_0+1/m_1) && 1/m_1 \\
-   1/m_1 && -(1/m_1+1/m_2)
+   JW
+   = \begin{bmatrix}
+    r_1 & 0 \\
+    -r1 & r2
    \end{bmatrix}
 \]
 
-2x2 system for Va,Vb, we can write it and solve by substitution
+\[
+   JWJt
+   = \begin{bmatrix}
+    r_1 & -r1 \\
+    -r1 & r1+r2
+   \end{bmatrix}
+\]
+
+*** Solution
+
+IMPORTANT: with symmetric A, the result is the expected V2=V1=V0
+#+NAME: maxima-matrix-eigen-symbolic
+#+BEGIN_SRC maxima :exports both :results output
+  A: matrix( [r1, -r1], [-r1, r1+r2] );
+  b: matrix( [v0-v1], [v1-v2] );
+  print(A);
+  print(b);
+  print("----");
+  print(expand(determinant(A)));
+  /*
+  print("----");
+  print(eivals(A));
+  print(expand(eivals(A)));
+  */
+  print("----");
+  l: invert(A) . b;
+  print(expand(l));
+  print("----> v1 = v1 + r1 * (l0-l1)");
+  print("----> v2 = v2 + r2 * l1");
+  print( expand(v1 + r1*(l[1] - l[2]) ) );
+  print( expand(v2 + r2*l[2] ) );
+#+END_SRC
+
+#+RESULTS: maxima-matrix-eigen-symbolic
+#+begin_example
+[  r1    - r1   ]
+[               ]
+[ - r1  r2 + r1 ]
+[ v0 - v1 ]
+[         ]
+[ v1 - v2 ]
+----
+r1 r2
+----
+[    v2    v1   v0   v0 ]
+[ (- --) - -- + -- + -- ]
+[    r2    r1   r2   r1 ]
+[                       ]
+[        v0   v2        ]
+[        -- - --        ]
+[        r2   r2        ]
+----> v1 = v1 + r1 * (l0-l1)
+----> v2 = v2 + r2 * l1
+[v0]
+[v0]
+#+end_example
+2x2 system for Va,Vb, we can write it and solve by substitution, show
+solution for lambda 1,2 and vel 1, 2
+
+** Condition number
+
+TODO WRONG written for prev matrix with wrong lambda signs
 
 Write eq, will compute trace and det -> show that eigenvalues ratio is
 related to mass ratio
@@ -381,6 +511,7 @@ convergir malment?
 - We'd need a full (M)LCP solver that solves equality and inequality constraints
 - The simplest category I think are Active Set solvers, that just
   solve the problem for each true/false combination of constraint activations.
+- See https://en.wikipedia.org/wiki/Linear_complementarity_problem
 *** TODO Write ActiveSet solver for 2 body case, should be simple enough
 *** TODO Could we infer the ActiveSet using some PGS iterations? how many?
 - If we KNOW the AS, LCP is just a linear solve, I think.
