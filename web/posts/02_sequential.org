@@ -793,7 +793,9 @@ column so that gnuplot can just plot green/red)
       }
   }
 #+END_SRC
-
+* ------------------------- NEXT POST: ROTATION and mass ratio     :noexport:
+* TODO Can rotation intro large mass ratios due to distance fro CoM? :noexport:
+I suspecy it CAN, GS denominatots depend on length not just masses, so it can happen that long arms increase “effective mass ratio” even for small actual mass ratios? Would that be an “angular inertia ratio”?  Should be possible to analyze it in detail for 2 bodies and make predictions!
 * ------------------------- END OF POST                            :noexport:
 * TODO [#C] PGS vs TGS                                             :noexport:
 PGS convergence wrt iter (1 substep) vs TGS convergence wrt substeps (1 iter)
