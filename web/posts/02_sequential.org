@@ -115,7 +115,6 @@ previous plot.
 We can assume $k^*$ is real and isolate it taking $\log$ on both sides
 of $V_b^{(0)} w_a^{k} = \epsilon$ to obtain:
 
-
 \[ k^* = \frac{\log(\epsilon/V_b^{(0)})}{\log(w_a)} = \frac{\log(\epsilon/V_b^{(0)})}{\log(\xi/(\xi+1))} \]
 
 We plot $k^*(\xi)$ with the same parameters as above.
@@ -161,6 +160,10 @@ parameter that affects $k^{*}$ the most is the mass ratio $\xi$.
 
 #+RESULTS: image-k_mr_approx
 [[file:../img/sequential_k_mr_approx.png]]
+
+Note: If we checked convergence as $|V_b^{(k)}-V_b^{(k-1)}| <
+\epsilon$ we could derive a very similar relationship, slightly more
+complex but with the same trend.
 
 ** Simulating impact ABC with $\xi=10$
 We can implement a trivial Sequantial Impulses solver for the ABC
@@ -287,7 +290,7 @@ shold be DOWN --> ah that's correct because Ci corresponds to Vi-1
 ---> no it's wrong, for V1, C0 must be positive (unless lambda is <0)
 
 Instantaneous impulses per body $i$ from its contacts with bodies below/above
-\[ V_i^+ = V_i^- + \frac{1}{m_i} (\lambda_{i,i-1} - \lambda_{i,i+1}) \]
+\[ V_i^+ = V_i^- + \frac{1}{m_i} (\lambda_{i,i-1} - \lambda_{i+1,i}) \]
 
 Impulses must only push objects apart, so $\lambda_i \geq 0$.
 
@@ -311,15 +314,17 @@ same as
 with
 \[
    A = \begin{bmatrix}
-   1/m_0+1/m_1 & -1/m_1 \\
-   1/m_1 & 1/m_1+1/m_2
-   \end{bmatrix}
+         1/m_0+1/m_1 & -1/m_1 \\
+         -1/m_1 & 1/m_1+1/m_2
+       \end{bmatrix}
+   ,\quad
+   b = \begin{bmatrix}
+         V_0^- - V_1^- \\
+         V_1^- - V_2^-
+       \end{bmatrix}
 \]
-\[ b = \begin{bmatrix}
-   V_0^- - V_1^- \\
-   V_1^- - V_2^-
-   \end{bmatrix}
-\]
+
+*** With constraint Jacobians (TEMP may not export, this is the generic solution)
 
 this must be the same as, where are Jacobians (dC/dv1,dC/dv2?) they'll
 be constant +-1 I think, so A must be symmetric. It has the SAME symmetric
@@ -361,35 +366,41 @@ IMPORTANT: with symmetric A, the result is the expected V2=V1=V0
 #+BEGIN_SRC maxima :exports both :results output
   A: matrix( [r1, -r1], [-r1, r1+r2] );
   b: matrix( [v0-v1], [v1-v2] );
-  print(A);
-  print(b);
-  print("----");
+  /*print(A);
+  print(b);*/
+  print("--> Det(A)");
   print(expand(determinant(A)));
+  print("--> Inv(A)");
+  print(expand(invert(A)));
   /*
-  print("----");
-  print(eivals(A));
+  print("--> Eivals(A)");
+  print(eivals(A)[1][1]);
+  print(eivals(A)[1][2]);
+  print(expand(eivals(A)[1][1] / eivals(A)[1][2]));
   print(expand(eivals(A)));
-  */
-  print("----");
+  ,*/
+  print("--> l0, l1");
   l: invert(A) . b;
   print(expand(l));
-  print("----> v1 = v1 + r1 * (l0-l1)");
-  print("----> v2 = v2 + r2 * l1");
+  print("--> v1 = v1 + r1 * (l0-l1)");
   print( expand(v1 + r1*(l[1] - l[2]) ) );
+  print("--> v2 = v2 + r2 * l1");
   print( expand(v2 + r2*l[2] ) );
 #+END_SRC
 
 #+RESULTS: maxima-matrix-eigen-symbolic
 #+begin_example
-[  r1    - r1   ]
-[               ]
-[ - r1  r2 + r1 ]
-[ v0 - v1 ]
-[         ]
-[ v1 - v2 ]
-----
+--> Det(A)
 r1 r2
-----
+--> Inv(A)
+[ 1    1   1  ]
+[ -- + --  -- ]
+[ r2   r1  r2 ]
+[             ]
+[   1      1  ]
+[   --     -- ]
+[   r2     r2 ]
+--> l0, l1
 [    v2    v1   v0   v0 ]
 [ (- --) - -- + -- + -- ]
 [    r2    r1   r2   r1 ]
@@ -397,20 +408,19 @@ r1 r2
 [        v0   v2        ]
 [        -- - --        ]
 [        r2   r2        ]
-----> v1 = v1 + r1 * (l0-l1)
-----> v2 = v2 + r2 * l1
+--> v1 = v1 + r1 * (l0-l1)
 [v0]
+--> v2 = v2 + r2 * l1
 [v0]
 #+end_example
-2x2 system for Va,Vb, we can write it and solve by substitution, show
-solution for lambda 1,2 and vel 1, 2
+Solution is what we expected, V1=V0=0 and V2=V0=0
 
 ** Condition number
 
-TODO WRONG written for prev matrix with wrong lambda signs
+Condition number = $\kappa(A) = |\frac{\alpha_{\text{max}}}{\alpha_{\text{min}}}|$
 
 Write eq, will compute trace and det -> show that eigenvalues ratio is
-related to mass ratio
+related to mass ratio $\xi$
 
 assuming 1/m0 = 0
 trace = - invm0 - 2*invm1 - invm2
@@ -418,6 +428,8 @@ det = 1nvm1*(invm1+invm2) - invm1^2 = invm1*invm2
 
 OK! so eval are 2*invm1 and invm2 or similar... that's what I
 expected, their divison is basically $\xi$ with some constant scaling
+
+TODO find relationship with mass ratio
 
 Si construim problema directe (2bodies) els eigenval son facils de
 trobar, relacionarlos amb mass estio hauria de ser trivial!!
@@ -441,7 +453,7 @@ DONE in "Direct Solver" section
 - Roblox
   https://about.roblox.com/newsroom/2020/08/improving-simulation-performance-advanced-physics-solver
   - Presentation https://www.youtube.com/watch?v=P-WP1yMOkc4
-  - Mensions this "reconditioning the PGS using the sparse LDL
+  - Mentions this "reconditioning the PGS using the sparse LDL
     decomposition of the constraint matrix of equality
     constraints. Dense submatrices of the constraint matrix are
     sparsified using a method we call Body Splitting."
@@ -832,23 +844,37 @@ Si aconseguim fer pre-solve approximat (ex: direct solve per a
 moviment linial), i calculem les lambdes, podriem ferles servir com a
 valor de warmstart per a contactes sense historia
 
-Preslolve seria precondition, approx, o prediction mes aviat
+Preslolve seria Prediction, no Pre-condition
 
-Presictors podrien ser direct solve, primal solve (VBD??) oalgun altre solve que no sigui susceptible a problemes de mass ratio
+Predictors podrien ser direct solve, primal solve (VBD??) o algun
+altre solve que no sigui susceptible a problemes de mass ratio
 
-Direct solve per lm des podris considerar nomes particules, hauria de ser raonablement simple. Sembla un solver d’estatica de fet, com em the finals.
+Direct solve approx podris considerar nomes particules i contactes al
+llarg de la normal, sense friccio, hauria de ser raonablement
+simple. Sembla un solver d’estatica de fet, com al The Finals.
 
-Primal solve hauriande considerar colisions soft, no es greu si valor approx es raonable com a warmstart.
+Primal solve hauriande considerar colisions soft, no es greu si valor
+approx es raonable com a warmstart.
 
-Potser AVBD fa algo semblant? Incrementa stiffness per iter si recordo be
+ePotser AVBD fa algo semblant? Incrementa stiffness per iter si
+recordo be
 
-La pregjnta clau es:
-- quantes iter estalviRia aixo? Es si predicio prediu el 50% de l’impuls necessari, quna fraccio d’iter estalvia?
-- pot el presolve warmstart causar sideffects si no es exacte (ex: si no podem garantir que estrictament sub-estima impulsos)
+La pregunta clau es:
+- quantes iter estalviria aixo? Es si predicio prediu el 50% de
+  l’impuls necessari, quna fraccio d’iter estalvia?
+- pot el presolve warmstart causar sideffects si no es exacte (ex: si
+  no podem garantir que estrictament sub-estima impulsos)
 
 Presolve ignoraria friccio per simplicitat, aixo pot ser problematic?
+Si pq friccio dissipa energia i pot reduir normal impulses necessaris
+per mantenir objectes separats, per tant si la ignorem el resultat
+sera sobre o sub-estimar impulsos. En 2D potser val la pena SI
+resoldre friccio, almenys aproximada (ex: com a penalty/soft
+bidireccional, sense complementaritat, per evitar que contribueixi a
+l'Active Set i reduir el cost total.
 
-Presolve could be a Block-GS and then iterate with full PGS
+Presolve could be a Block-GS and then iterate with full PGS, no need
+to solve whole system with Pre-solve
 
 * TODO [#B] What would be a "perfect" iterative solver for realtime? :noexport:
 What would be perfect is a simple iter solver like PGS that tracks
