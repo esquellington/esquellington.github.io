@@ -57,9 +57,9 @@ where
 
 * Sequential Impulses
 
-Sequential impulses solves the problem iteratively as a sequence of
-local collision responses between pairs of bodies. Each iteration
-we'll solve collisions AC and AB
+Sequential impulses solves the problem as a sequence of local
+collision responses between pairs of bodies that is iterated until
+convergence. Each iteration $k$ we'll solve collisions AC and AB:
 
 - Solve $V_{ca}^{(k)} \geq 0$, resulting in $V_a^{(k)} = 0$
 - Solve $V_{ab}^{(k)} \geq 0$, with $V_{ab}^{(k)} = -V_b^{(k)}$ because $V_a^{(k)} = 0$
@@ -300,22 +300,24 @@ below/above, except for the bottom/top bodies that get 1.
 we assume body 0 has infinite mass, so $1/m_0 = 0$
 \[ V_0^+ = V_0^- = 0 \]
 
-** Simultaneous solution
+** Simultaneous collision solution
 
 We'll solve for the impulses that fullfill all constraints simultaneously
 \begin{eqnarray*}
-C_{1,0} &= V_1^+ - V_0^+ &= (V_1^- + \frac{1}{m_1} (\lambda_0 - \lambda_1)) - (V_0^- + \frac{1}{m_0} (-\lambda_0)) \\
-C_{2,1} &= V_2^+ - V_1^+ &= (V_2^- + \frac{1}{m_2} (\lambda_1)) - (V_1^- + \frac{1}{m_1} (\lambda_0 - \lambda_1))
+C_{1,0} &= (V_1^- + \frac{1}{m_1} (\lambda_{1,0} - \lambda_{2,1})) - (V_0^- + \frac{1}{m_0} (-\lambda_{1,0})) \\
+C_{2,1} &= (V_2^- + \frac{1}{m_2} (\lambda_{2,1})) - (V_1^- + \frac{1}{m_1} (\lambda_{1,0} - \lambda_{2,1}))
 \end{eqnarray*}
 
-same as
-\[ A \lambda = b \]
-
-with
+same as $A \lambda = b$ with
 \[
    A = \begin{bmatrix}
-         1/m_0+1/m_1 & -1/m_1 \\
-         -1/m_1 & 1/m_1+1/m_2
+         \frac{1}{m_0}+\frac{1}{m_1} & -\frac{1}{m_1} \\
+         -\frac{1}{m_1} & \frac{1}{m_1}+\frac{1}{m_2}
+       \end{bmatrix}
+   ,\quad
+   \lambda = \begin{bmatrix}
+         \lambda_{1,0} \\
+         \lambda_{2,1}
        \end{bmatrix}
    ,\quad
    b = \begin{bmatrix}
@@ -359,9 +361,11 @@ structure as TentaclesMode 4x4 matrix K
    \end{bmatrix}
 \]
 
-*** Solution
+*** Symbolic solution
 
-IMPORTANT: with symmetric A, the result is the expected V2=V1=V0
+IMPORTANT: The result from Maxima the expected V2=V1=V0, not sure if I
+should list full solve or just report result, maybe as an Appendix
+section at the end?
 #+NAME: maxima-matrix-eigen-symbolic
 #+BEGIN_SRC maxima :exports both :results output
   A: matrix( [r1, -r1], [-r1, r1+r2] );
@@ -413,9 +417,13 @@ r1 r2
 --> v2 = v2 + r2 * l1
 [v0]
 #+end_example
-Solution is what we expected, V1=V0=0 and V2=V0=0
+The symbolic solution is what we expected, V1=V0=0 and V2=V0=0,
+regardless initial velocity Vb or mass ratio. When solved numerically,
+the direct solver may still struggle with matrices that have a large
+condition number, see below
 
-** Condition number
+*** Numeric solution
+*** TODO Condition number
 
 Condition number = $\kappa(A) = |\frac{\alpha_{\text{max}}}{\alpha_{\text{min}}}|$
 
@@ -439,11 +447,97 @@ have if there was no fixed ground (I think all bodies would move down
 equally fast (and if restitution coeff >0 then the last one should be
 ejected as in Newton's craddle?)
 
-*** TODO Show that $\xi$ is related to the "condition number" of the linear system
+**** TODO Show that $\xi$ is related to the "condition number" of the linear system
 DONE in "Direct Solver" section
+*** 4 bodies, 3 constraints case
+4 bodies, 3 constraints
+\[
+   A = \begin{bmatrix}
+         \frac{1}{m_0}+\frac{1}{m_1} & -\frac{1}{m_1} & 0\\
+         -\frac{1}{m_1} & \frac{1}{m_1}+\frac{1}{m_2} & -\frac{1}{m_2}\\
+         0 & -\frac{1}{m_2} & \frac{1}{m_2}+\frac{1}{m_3}
+       \end{bmatrix}
+\]
+\[
+   \lambda = \begin{bmatrix}
+         \lambda_{1,0} \\
+         \lambda_{2,1} \\
+         \lambda_{3,2}
+       \end{bmatrix}
+   ,\quad
+   b = \begin{bmatrix}
+         V_0^- - V_1^- \\
+         V_1^- - V_2^- \\
+         V_2^- - V_3^-
+       \end{bmatrix}
+\]
 
-** TODO Implement direct solver (invert 2x2) and verify correct
-- Plain inversion, show that result is 0?
+#+NAME: maxima-matrix-eigen-symbolic-3C
+#+BEGIN_SRC maxima :exports both :results output
+  A: matrix( [r1, -r1, 0], [-r1, r1+r2, -r2], [0, -r2, r2+r3] );
+  b: matrix( [v0-v1], [v1-v2], [v2-v3] );
+  print(A);
+  print(b);
+  print("--> Det(A)");
+  print(expand(determinant(A)));
+  print("--> Inv(A)");
+  print(expand(invert(A)));
+  print("--> l0, l1");
+  l: invert(A) . b;
+  print(expand(l));
+  print("--> v1");
+  print( expand(v1 + r1*(l[1] - l[2]) ) );
+  print("--> v2");
+  print( expand(v2 + r2*(l[2] - l[3]) ) );
+  print("--> v3");
+  print( expand(v3 + r3*l[3] ) );
+#+END_SRC
+
+#+RESULTS: maxima-matrix-eigen-symbolic-3C
+#+begin_example
+[  r1    - r1       0    ]
+[                        ]
+[ - r1  r2 + r1   - r2   ]
+[                        ]
+[  0     - r2    r3 + r2 ]
+[ v0 - v1 ]
+[         ]
+[ v1 - v2 ]
+[         ]
+[ v2 - v3 ]
+--> Det(A)
+r1 r2 r3
+--> Inv(A)
+[ 1    1    1   1    1   1  ]
+[ -- + -- + --  -- + --  -- ]
+[ r3   r2   r1  r3   r2  r3 ]
+[                           ]
+[   1    1      1    1   1  ]
+[   -- + --     -- + --  -- ]
+[   r3   r2     r3   r2  r3 ]
+[                           ]
+[      1          1      1  ]
+[      --         --     -- ]
+[      r3         r3     r3 ]
+--> l0, l1
+[    v3    v2   v1   v0   v0   v0 ]
+[ (- --) - -- - -- + -- + -- + -- ]
+[    r3    r2   r1   r3   r2   r1 ]
+[                                 ]
+[         v3    v2   v0   v0      ]
+[      (- --) - -- + -- + --      ]
+[         r3    r2   r3   r2      ]
+[                                 ]
+[             v0   v3             ]
+[             -- - --             ]
+[             r3   r3             ]
+--> v1
+[v0]
+--> v2
+[v0]
+--> v3
+[v0]
+#+end_example
 * TODO References
 ** TODO Convergence for Gauss-Seidel linear solvers
 - Must be in some paper/book
@@ -457,13 +551,15 @@ DONE in "Direct Solver" section
     decomposition of the constraint matrix of equality
     constraints. Dense submatrices of the constraint matrix are
     sparsified using a method we call Body Splitting."
-* TODO Derivations
+* TODO Derivations/Appendix
 ** TODO Linear Approx
 (TODO: We should find linear rel Taylor series of $\log(\xi/(\xi+1))
 \approx \xi/(\xi+1)-1 = -1/(\xi+1)$
 show its very very close to linear, quadratic error term is very small, I
 think it's because x/(x+1) tends to 1, and log(1) is 0, so its effect
 as x grows is negligible)
+** TODO Linear System Solve
+- Maxima solve
 * ------------------------- NEXT POST: MULTIPLE BODIES             :noexport:
 * TODO Multiple bodies and contacts                                :noexport:
 
