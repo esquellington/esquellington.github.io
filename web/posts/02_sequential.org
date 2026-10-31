@@ -937,6 +937,16 @@ substeps, the iteration count required to dissipate it using GS does
 NOT reduce proportionally, but slower (see dependicy of k on V0 above)
 
 https://matthias-research.github.io/pages/publications/PBDBodies.pdf
+** TODO TGS and mass ratio
+They mention it works better but that cannot be from impulses alone,
+because mass ratio is still bad during maybe it’s because TGS allows
+stiffer baumgarte so less overlap at lrge mass ratios, but velocities
+would not be improved by that (unless baumgarte slows them down
+too?!) but that’s a bit tangential, still depends on baumgarte coeffs,
+and for strong impacts not sure it’s always stable?
+
+Solver2d blog post es interessant i descriu la majoria de solvers i
+massrstio i warmstarting, see https://box2d.org/posts/2024/02/solver2d/
 
 * TODO [#C] PGS vs (A)VBD                                          :noexport:
 - Solve in body-centric way A, B using all collisions on them at once,
