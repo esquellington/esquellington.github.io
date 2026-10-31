@@ -361,7 +361,7 @@ structure as TentaclesMode 4x4 matrix K
    \end{bmatrix}
 \]
 
-*** Symbolic solution
+*** GOOD Symbolic solution
 
 IMPORTANT: The result from Maxima the expected V2=V1=V0, not sure if I
 should list full solve or just report result, maybe as an Appendix
@@ -422,7 +422,7 @@ regardless initial velocity Vb or mass ratio. When solved numerically,
 the direct solver may still struggle with matrices that have a large
 condition number, see below
 
-*** Numeric solution
+*** TODO Numeric solution
 *** TODO Condition number
 
 Condition number = $\kappa(A) = |\frac{\alpha_{\text{max}}}{\alpha_{\text{min}}}|$
@@ -449,7 +449,7 @@ ejected as in Newton's craddle?)
 
 **** TODO Show that $\xi$ is related to the "condition number" of the linear system
 DONE in "Direct Solver" section
-*** 4 bodies, 3 constraints case
+*** GOOD 4 bodies, 3 constraints case
 4 bodies, 3 constraints
 \[
    A = \begin{bmatrix}
@@ -560,6 +560,8 @@ think it's because x/(x+1) tends to 1, and log(1) is 0, so its effect
 as x grows is negligible)
 ** TODO Linear System Solve
 - Maxima solve
+** TODO Condition Number?
+- Any details would go here
 * ------------------------- NEXT POST: MULTIPLE BODIES             :noexport:
 * TODO Multiple bodies and contacts                                :noexport:
 
@@ -901,6 +903,19 @@ column so that gnuplot can just plot green/red)
       }
   }
 #+END_SRC
+* ------------------------- NEXT POST: OVERCONSTRAINED             :noexport:
+* TODO FOLLOWUP Overconstrained                                    :noexport:
+- Analyze what happens in SI/PGS 1D boxes when bottom/top boxes are
+  kinematic and have incompatible velocities?
+- SI/PGS at velocity-level would oscilate velocities I think
+- Direct solve would fail (singular matrix K, easily seen with 3
+  bodies where only middle one is dynamic, det(K) = m1*m2 and m2=0 so
+  det = 0
+- How does mass ratio affect "bounces" on m1 vs m0 and m2 below/above,
+  must tend to infinity as 1/m2 tends to 0, which means no solution exists
+- How do position-level constraints behave? Avian blog mentioned they
+  jitter more in XPBD-pos than in PGS-vel
+- Try least-squares direct solver (normal equations?)
 * ------------------------- NEXT POST: ROTATION and mass ratio     :noexport:
 * TODO Can rotation intro large mass ratios due to distance fro CoM? :noexport:
 I suspecy it CAN, GS denominatots depend on length not just masses, so it can happen that long arms increase “effective mass ratio” even for small actual mass ratios? Would that be an “angular inertia ratio”?  Should be possible to analyze it in detail for 2 bodies and make predictions!
