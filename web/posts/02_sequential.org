@@ -440,7 +440,7 @@ expected, their divison is basically $\xi$ with some constant scaling
 TODO find relationship with mass ratio
 
 Si construim problema directe (2bodies) els eigenval son facils de
-trobar, relacionarlos amb mass estio hauria de ser trivial!!
+trobar, relacionarlos amb mass ratio hauria de ser trivial!!
 
 Solve same system for m_c = infinite or not, to see how it would be
 have if there was no fixed ground (I think all bodies would move down
@@ -596,7 +596,7 @@ Write direct eq for N sequential bodies, must be tiangular or
 tridiagonal I think? Solvable in linear time, similar to what I did
 in TentaclesMode
 
-I thin it's a Symmetric Tridiagonal matrix
+I think it's a Symmetric Tridiagonal matrix
 https://en.wikipedia.org/wiki/Tridiagonal_matrix
 
 Write system and eigenvals but no need to solve... unless it's very
@@ -638,7 +638,7 @@ convergir malment?
           PGS to verify there's no pulling contacts, and refine the output?
 - Is this similar to what Baraff/Faure/Stewart/Trinkle/Anitescu/Potra were doing?
 ** Block-GS
-If we split N bodies in groups and solve direct peoblems for them,
+If we split N bodies in groups and solve direct problems for them,
 what’s the best way to split?
 - evenly by count
 - evenly by mass (each group has the aame appeox mass so ratio across
@@ -650,7 +650,7 @@ Last option would avoid global mass ratio issue better than group by
 count
 
 Also see effect of subiter in a subgroup vs global iteration without
-subgroups, in princiole subgroups with larger mass ratios would need
+subgroups, in principle subgroups with larger mass ratios would need
 more iter than others so total count would reduce
 
 * ------------------------- NEXT POST: PERSISTENT/STACKS           :noexport:
@@ -915,10 +915,40 @@ column so that gnuplot can just plot green/red)
   must tend to infinity as 1/m2 tends to 0, which means no solution exists
 - How do position-level constraints behave? Avian blog mentioned they
   jitter more in XPBD-pos than in PGS-vel
-- Try least-squares direct solver (normal equations?)
+- Try least-squares direct solver (normal equations?) for
+  overconstrained case, see what result it returns and whether it's
+  useful
 * ------------------------- NEXT POST: ROTATION and mass ratio     :noexport:
 * TODO Can rotation intro large mass ratios due to distance fro CoM? :noexport:
-I suspecy it CAN, GS denominatots depend on length not just masses, so it can happen that long arms increase “effective mass ratio” even for small actual mass ratios? Would that be an “angular inertia ratio”?  Should be possible to analyze it in detail for 2 bodies and make predictions!
+I suspecy it CAN, GS denominatots depend on length not just masses, so
+it can happen that long arms increase “effective mass ratio” even for
+small actual mass ratios? Would that be an “angular inertia ratio”?
+Should be possible to analyze it in detail for 2 bodies and make
+predictions!
+- Should write lin eq for K and lambdas in terms of inv masses and inv
+  angular inertias for 2D bodies, and assuming mass ratio is 1, see
+  effect of inertia ratio, likely it will play a very similar role as
+  mass ratio for particles
+- I suspect Direct eqs will be the same, just replacing \[r_i =
+  1/m_i\] with \[r_i=1/m_i + 1/I_i * d^2\], where I is ang inertia and
+  d is the "perpendicular distance" from contact to CoM, and that
+  whole second term will have the same role as "invmass" for mass
+  ratio convergence calculations, so it's not just I, it also involves
+  distance to contact, the farther the large the "mass", so, for
+  uniform bodies with constant mass and ang inertia, if they're very
+  long convergence will decrease if contacts happen near/far CoM -->
+  this is not a common result, I think, seems interesting
+- What's the simplest example with 2 contacts that shows this? 2 equal
+  boxes, both very long, body A vertical and body B horizontal, vertical
+  has short side resting on ground, the other falls horizontal on it
+  and the left corner collides with the top short edge on A, so, the
+  contact has a very large "inertia ratio" (small on A, large on B?)
+  - Draw it, I'm sure we can fabricate an example
+** TODO Derived in iPad drawing, for uniform m,I, elongated bodies can cause this
+- Main factor is perp dstance to contact, if m,I are concentrated near
+  CoM, then far contact points at dist d can have arbitrarily large
+  inv inertia factor that grows with d^2, and "angular" $\xi$ can grow
+  proportionally, total $\xi$ dominated by angular term
 * ------------------------- END OF POST                            :noexport:
 * TODO [#C] PGS vs TGS                                             :noexport:
 PGS convergence wrt iter (1 substep) vs TGS convergence wrt substeps (1 iter)
@@ -959,6 +989,18 @@ massrstio i warmstarting, see https://box2d.org/posts/2024/02/solver2d/
 How would body-centric primal solver converge for the model problem?
 It would need a stiffness value, that could be increased per iter (ex:
 like AVBD), would that converge better for impacts?
+
+* TODO [#C] 1D stack mixing contacts and soft constraints
+Contacts are stiff, constraints may be soft, show interplay between
+masses and stifnesses
+
+Pure 1D “stack” with 1 contact and 1 constraint first, show how
+condition number changes
+
+Stiffness means time-dependent so no longer instantaneous contact,
+must consider timestep
+
+Can we derive direct system and infer PGS behaviour based on stiffnesses/masses?
 
 * TODO [#B] Approximate pre-solve + PGS refinement                 :noexport:
 Si aconseguim fer pre-solve approximat (ex: direct solve per a
