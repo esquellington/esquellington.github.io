@@ -602,6 +602,9 @@ Compare with:
 - iterative solve guessing (CG)
 - AVBD “warmstarting”
 Show they converge to same value if “guess” is perturbed, just slower/faster
+
+Warmstarting assumes the Active Set did not change from last timestep,
+or, at least, that no constraints became inactive
 ** TODO Warmstart and variable timesteps
  Also show var timesteps are bad for warmstart because longer
  timesteps will apply larger lambdas than necessary on later steps
