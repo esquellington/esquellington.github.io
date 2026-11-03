@@ -40,7 +40,13 @@ A,B. We'll see that solving it numerically with sequential impulses
 needs a number of iterations that grows linearly with the mass ratio
 $\frac{m_b}{m_a}$.
 
-* Inelastic collision response
+* Sequential Impulses
+
+Sequential impulses solves the problem as a sequence of local
+collision responses between pairs of bodies that is iterated until
+convergence.
+
+** Inelastic pairwise response
 
 The pairwise instantaneous inelastic collision response for AB is
 \begin{align*}
@@ -55,18 +61,15 @@ where
   w_b = \frac{\frac{1}{m_b}}{\frac{1}{m_a} + \frac{1}{m_b}} = 1-w_a
 \]
 
-* Sequential Impulses
+** Iterative solution
 
-Sequential impulses solves the problem as a sequence of local
-collision responses between pairs of bodies that is iterated until
-convergence. Each iteration $k$ we'll solve collisions AC and AB:
-
+Each iteration $k$ we'll solve collisions AC and AB:
 - Solve $V_{ca}^{(k)} \geq 0$, resulting in $V_a^{(k)} = 0$
 - Solve $V_{ab}^{(k)} \geq 0$, with $V_{ab}^{(k)} = -V_b^{(k)}$ because $V_a^{(k)} = 0$
 
 We can assume all collision constraints are Active, due to compressive
-init state and inelssticity, so all constraint inequalities become
-equalities.
+initial state and inelasticity, so all constraint inequalities become
+*equalities*.
 
 We have the recurrence:
 \begin{align*}
@@ -242,34 +245,10 @@ TODO maybe plot for various mass ratios and repro full first plot?
 #+RESULTS: image-impact-abc
 [[file:../img/sequential_impact_abc.png]]
 
-* TODO [#A] Conclusions
-
-Sequential Impulses converges to the expected solution, but requires a
-number of iterations that grows linearly with $\xi$. Iteration count
-also depends logarithmically on impact speed $V_b^{(0)}$ and precision
-$\epsilon$, so their effect is much weaker.
-
-Convergence can be improved for persistent contacts using
-/warmstarting/, by reusing approximate results across timesteps and
-refining them, with the assumption they will eventually converge to
-the right answer in a small number of iterations per timestep. This is
-not an option on the first impact timestep, as no previous solution
-exists.
-
-Sequential Impulses with warmstarting is very easy to implement, which
-explains its popularity in realtime simulation, but its slow
-convergence rate limits applicability to small mass ratios, tipically
-below $1:10$. This is mentioned in the user manual for most realtime
-physics engines, and is often enforced during authoring or at runtime,
-which limits the range of situations that can be represented
-realistically, and can result in objects feeling too light or too
-heavy.
-
-Warmstarting saves the day and allows SI to work in practice with a
-resonable number of iterations, but unfortunately it's not free of
-sideffects. See "Warmstarting Blows!"
-
-* TODO [#A] Direct Solution
+* SI for inequalities
+- Explain briefly how SI changes if constraints are ineq, individual
+  constraints may be active/inactive
+* TODO [#A] Direct Solution of the contact equality problem
 
 If we assume all constraints are Active, due to compressive init state
 and inelssticity, all constraints become equalities, and we can solve
@@ -544,6 +523,33 @@ r1 r2 r3
 --> v3
 [v0]
 #+end_example
+* TODO [#A] Conclusions
+
+Sequential Impulses converges to the expected solution, but requires a
+number of iterations that grows linearly with $\xi$. Iteration count
+also depends logarithmically on impact speed $V_b^{(0)}$ and precision
+$\epsilon$, so their effect is much weaker.
+
+Convergence can be improved for persistent contacts using
+/warmstarting/, by reusing approximate results across timesteps and
+refining them, with the assumption they will eventually converge to
+the right answer in a small number of iterations per timestep. This is
+not an option on the first impact timestep, as no previous solution
+exists.
+
+Sequential Impulses with warmstarting is very easy to implement, which
+explains its popularity in realtime simulation, but its slow
+convergence rate limits applicability to small mass ratios, tipically
+below $1:10$. This is mentioned in the user manual for most realtime
+physics engines, and is often enforced during authoring or at runtime,
+which limits the range of situations that can be represented
+realistically, and can result in objects feeling too light or too
+heavy.
+
+Warmstarting saves the day and allows SI to work in practice with a
+resonable number of iterations, but unfortunately it's not free of
+sideffects. See "Warmstarting Blows!"
+
 * TODO References
 ** TODO Convergence for Gauss-Seidel linear solvers
 - Must be in some paper/book
@@ -568,7 +574,8 @@ as x grows is negligible)
 - Maxima solve
 ** TODO Condition Number?
 - Any details would go here
-* TODO [#A] -------- FOLLOWUP: Warmstarting Blows!                 :noexport:
+* TODO [#A] -------- NEXT POST: Warmstarting Blows!                :noexport:
+
 Identified multiple issues with WS that maybe deserve their own
 article 03_Warmstarting.org?
 
@@ -658,14 +665,18 @@ Check how WS works in:
   pesistence but impulses are not clearly stored+reused, code is terrible)
 - ODE (apparently it does NOT use WS for contacts, but it does for joints)
 - MuJoCo warmstarts accelerations (but that may be a guess, not a WS assumption)
-
+** Conclusion
+Warmstarting is really helpful when lambdas are the same or larger
+than last timestep, but can introduce undesired sideffects when that's
+not true.
 ** TODO References
 Citar paper Catto on explica caching, si ho fa, a veure si enumera drawbacks
 
-* ------------------------- NEXT POST: MULTIPLE BODIES             :noexport:
+* TODO [#A] -------- NEXT POST: MULTIPLE BODIES                    :noexport:
 ** TODO Multiple bodies and contacts
 
-TODO: Try to derive convergence for N>2 bodies, is there a similar recurrence?
+TODO: Try to derive convergence for N>2 bodies, is there a similar
+recurrence?
 
 The problem is not limited to large mass ratios between individual
 bodies, it can also appear when multiple light bodies impact another
@@ -689,8 +700,8 @@ regardless of number of bodies in Bi set
 *** TODO Also prove that "mass ratio" and "number of objects with same mass" are somewhat interchangeable
 
 So iter count to achieve same error with more objects grows more than linearly?
-** PGS solution
-** Direct Solution
+** PGS solution for active/inactive
+** Direct Solution for active/inactive
 *** N>2 bodies
 Write direct eq for N sequential bodies, must be tiangular or
 tridiagonal I think? Solvable in linear time, similar to what I did
@@ -758,7 +769,7 @@ Also see effect of subiter in a subgroup vs global iteration without
 subgroups, in principle subgroups with larger mass ratios would need
 more iter than others so total count would reduce
 
-* ------------------------- NEXT POST: PERSISTENT/STACKS           :noexport:
+* TODO [#A] -------- NEXT POST: PERSISTENT/STACKS                  :noexport:
 ** TODO [#A] FOLLOWUP Persistent contacts                          :noexport:
 - Show that in that case SI needs to resolve the delta vel from
   gravity (or any other force) every frame, and that warmstarting can
@@ -1008,7 +1019,7 @@ column so that gnuplot can just plot green/red)
       }
   }
 #+END_SRC
-* ------------------------- NEXT POST: OVERCONSTRAINED             :noexport:
+* TODO [#B] -------- NEXT POST: OVERCONSTRAINED                    :noexport:
 ** TODO FOLLOWUP Overconstrained                                   :noexport:
 - Analyze what happens in SI/PGS 1D boxes when bottom/top boxes are
   kinematic and have incompatible velocities?
@@ -1023,7 +1034,7 @@ column so that gnuplot can just plot green/red)
 - Try least-squares direct solver (normal equations?) for
   overconstrained case, see what result it returns and whether it's
   useful
-* ------------------------- NEXT POST: ROTATION and mass ratio     :noexport:
+* TODO [#B] -------- NEXT POST: ROTATION and mass ratio            :noexport:
 ** TODO Can rotation intro large mass ratios due to distance fro CoM? :noexport:
 I suspecy it CAN, GS denominatots depend on length not just masses, so
 it can happen that long arms increase “effective mass ratio” even for
@@ -1054,7 +1065,6 @@ predictions!
   CoM, then far contact points at dist d can have arbitrarily large
   inv inertia factor that grows with d^2, and "angular" $\xi$ can grow
   proportionally, total $\xi$ dominated by angular term
-* ------------------------- END OF POST                            :noexport:
 * TODO [#C] PGS vs TGS                                             :noexport:
 PGS convergence wrt iter (1 substep) vs TGS convergence wrt substeps (1 iter)
 
@@ -1089,13 +1099,19 @@ massrstio i warmstarting, see https://box2d.org/posts/2024/02/solver2d/
 - Va needs to consider both AC and AB, so I doubt it results in
   anything that is not Va=0, so it's no different from
   constraint-centric SI/PGS in this case.
-* TODO [#C] Primal Iterative Solve?                                :noexport:
+* TODO [#C] Primal-Dual Iterative Solve?                           :noexport:
 
 How would body-centric primal solver converge for the model problem?
 It would need a stiffness value, that could be increased per iter (ex:
 like AVBD), would that converge better for impacts?
 
-* TODO [#C] 1D stack mixing contacts and soft constraints
+During dual solve, contraint centric PGS, accumulate info on primal
+(DoF), so that later we can re-solve primal using approx data on all
+their constraints
+
+Similar idea to CBD experiment, try with rigids
+
+* TODO [#C] 1D stack mixing contacts and soft constraints          :noexport:
 Contacts are stiff, constraints may be soft, show interplay between
 masses and stifnesses
 
@@ -1106,6 +1122,49 @@ Stiffness means time-dependent so no longer instantaneous contact,
 must consider timestep
 
 Can we derive direct system and infer PGS behaviour based on stiffnesses/masses?
+
+* TODO [#B] What would be a "perfect" iterative solver for realtime? :noexport:
+What would be perfect is a simple iter solver like PGS that tracks
+convergence to solution and simultaneously builds an “incremental
+factorization” of the direct solve matrix, cheaply, so that if PGS
+detects it’s not converging well, it can automatically switch to a
+Direct solve to improve convergence, having done prt of the work (so
+no waste trying PgS first and switching, and PGS would still be enough
+for simpler cases, most common) Extra points if this can be alternate,
+so we switch from PGS to partially Direct depending on current
+convergence
+
+During pGS we should both track convergence, detect it's slow, but
+still do useful work towards convergence, and at the same time build
+“matrix” that, if necessary, will allow more accurate solve, using
+maybe curremt active set (bitmask on active contacts) to
+dondirect-like solve.  After high order solve verify and refine again
+with PGS, detect any missing active set contraints and more
+importantly, excess active that did “pull”, AND try to correct them
+locally
+
+Can this improve mass ratio and warmstart issues?
+
+Also, compare CPU effort with similarly converged PGS, likely with lots of iter
+
+** Krylov-like?
+GMRES with local Krylov subspace and periodic resets seems a good
+inspiration, and maybe ADMM too, not sure. Odea seems too obvious to
+be new --> APPARENTLY it's not a good idea to combine PGS or other
+iterative "Fixed Point" solvers with Krylov ones, because Krylov
+assumes some invariants in the iterates/search directions that PGS
+cannot guarantee, so we cannot easily build useful Krylov
+representation while doing PGS work... Would still be cool to "try",
+ex: what if Krylov is approximate, does that fail or it just takes
+longer to converge?
+
+** MinSpanTree and Longest Path
+What anout 1st PGS pass solves and identifies active constraints, then we build MST or longest path of those active constraints and solve using direct solver linear time, then solve again with PGS until convergence, potentially interleaving direct solves
+MST and longest paths could use local constraint inveffmass ratio as measure to select the “worst path” for PGS propagation due to masses, and focus on solving that
+
+What’s the cost? MST can be found with MFSet so it’s almost linear, then solve should also be linear time, like featherstone, or linear time dynamics fro Baraff, then cyclic constraints would just use PGS.
+
+MST could be reused over iter assuming Active(Sub)Set is still valid.
 
 * TODO [#B] Approximate pre-solve + PGS refinement                 :noexport:
 Si aconseguim fer pre-solve approximat (ex: direct solve per a
@@ -1144,26 +1203,21 @@ l'Active Set i reduir el cost total.
 Presolve could be a Block-GS and then iterate with full PGS, no need
 to solve whole system with Pre-solve
 
-* TODO [#B] What would be a "perfect" iterative solver for realtime? :noexport:
-What would be perfect is a simple iter solver like PGS that tracks
-convergence to solution and simultaneously builds an “incremental
-factorization” of the direct solve matrix, cheaply, so that if PGS
-detects it’s not converging well, it can automatically switch to a
-Direct solve to improve convergence, having done prt of the work (so
-no waste trying PgS first and switching, and PGS would still be enough
-for simpler cases, most common) Extra points if this can be alternate,
-so we switch from PGS to partially Direct depending on current
-convergence
+* TODO [#B] General 1D problems                                    :noexport:
 
-GMRES with local Krylov subsçacr and periodic resets seems a good
-inspiration, and maybe ADMM too, not sure. Odea seems too obvious to
-be new --> APPARENTLY it's not a good idea to combine PGS or other
-iterative "Fixed Point" solvers with Krylov ones, because Krylov
-assumes some invariants in the iterates/search directions that PGS
-cannot guarantee, so we cannot easily build useful Krylov
-representation while doing PGS work... Would still be cool to "try",
-ex: what if Krylov is approximate, does that fail or it just takes
-longer to converge?
+Box1D: Don’t call it this, but the SeaImp experiments are basically
+box1d single propagarion chain experiments, irreductible but already
+show most interesting phenomena
+
+Also, see what happems with overconstrained problems, analyticlally,
+in 1D. See that direct solve will FAIL because there’s no exact
+solution, show how it looks, show least squares solution
+
+Connection between contact peoblem and linear system of eq can be seen
+2-way actually, looking at system can we visualize a body
+configuration that reproduces the same system? Does visualizing it
+tell anything qualitative about it?
+
 * LOCAL VARIABLES                                                  :noexport:
 Local Variables:
 org-confirm-babel-evaluate: nil
