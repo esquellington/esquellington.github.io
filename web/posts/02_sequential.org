@@ -46,7 +46,7 @@ Sequential impulses solves the problem as a sequence of local
 collision responses between pairs of bodies that is iterated until
 convergence.
 
-** Inelastic pairwise response
+** Inelastic pairesponse
 
 The pairwise instantaneous inelastic collision response for AB is
 \begin{align*}
@@ -671,7 +671,6 @@ than last timestep, but can introduce undesired sideffects when that's
 not true.
 ** TODO References
 Citar paper Catto on explica caching, si ho fa, a veure si enumera drawbacks
-
 * TODO [#A] -------- NEXT POST: MULTIPLE BODIES                    :noexport:
 ** TODO Multiple bodies and contacts
 
@@ -768,7 +767,9 @@ count
 Also see effect of subiter in a subgroup vs global iteration without
 subgroups, in principle subgroups with larger mass ratios would need
 more iter than others so total count would reduce
-
+** REFS
+Discusses MLCP solvers and relaxation, projected-CR and even direct solvers, for reformulation of contact problem (using smoothified energies, I think)
+https://arxiv.org/pdf/1907.04587
 * TODO [#A] -------- NEXT POST: PERSISTENT/STACKS                  :noexport:
 ** TODO [#A] FOLLOWUP Persistent contacts                          :noexport:
 - Show that in that case SI needs to resolve the delta vel from
