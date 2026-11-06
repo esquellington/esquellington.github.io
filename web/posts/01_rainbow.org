@@ -1,3 +1,4 @@
+#+STARTUP: indent overview
 #+title: That time I saw a weird rainbow
 #+date: <2024-11-17 dom>
 #+author: Oscar

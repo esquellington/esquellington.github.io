@@ -1,3 +1,4 @@
+#+STARTUP: indent overview
 #+title: Test Post
 #+date: <2024-11-17 dom>
 #+author: Oscar

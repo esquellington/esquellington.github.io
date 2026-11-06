@@ -1,9 +1,13 @@
+#+STARTUP: indent overview
 #+title: Sequential Impulses Sucks!
 #+date: <2026-10-12 lun>
 #+author: Oscar
 
 ...specifically, it sucks too little error per iteration, making it very
 inefficient for rigid impact problems.
+
+SUMMARY: sucks, simple case 2 bodies, no warmstarting, all equalities,
+NO direct solver
 
 * Problem
 
@@ -168,9 +172,10 @@ Note: If we checked convergence as $|V_b^{(k)}-V_b^{(k-1)}| <
 complex but with the same trend.
 
 ** Simulating impact ABC with $\xi=10$
-We can implement a trivial Sequantial Impulses solver for the ABC
+We can implement a trivial Sequential Impulses solver for the ABC
 impact problem and plot $V_a,V_b$ over iterations $k$. The numerical
-results match the predicted behaviour.
+results match the analytic prediction for $\xi=10$ in Figure1, and
+converge below $\epsilon=10^{-3}$ in $k=97$ iterations.
 
 TODO maybe plot for various mass ratios and repro full first plot?
 
@@ -184,7 +189,7 @@ TODO maybe plot for various mass ratios and repro full first plot?
   {
       const float xi(10.0f), wa(xi/(xi+1));
       const float eps(1e-3f);
-      const int K(100);
+      const int K(200);
       float Va(0), Vb(10);
       int k(0);
       printf("k V_a V_b");
@@ -201,32 +206,6 @@ TODO maybe plot for various mass ratios and repro full first plot?
       return 0;
   }
 #+END_SRC
-
-#+RESULTS: table-impact-abc
-:results:
-|  k |    V_a |    V_b |
-|  0 |    0.0 |   10.0 |
-|  5 | 6.2092 | 6.2092 |
-| 10 | 3.8554 | 3.8554 |
-| 15 | 2.3939 | 2.3939 |
-| 20 | 1.4864 | 1.4864 |
-| 25 |  0.923 |  0.923 |
-| 30 | 0.5731 | 0.5731 |
-| 35 | 0.3558 | 0.3558 |
-| 40 | 0.2209 | 0.2209 |
-| 45 | 0.1372 | 0.1372 |
-| 50 | 0.0852 | 0.0852 |
-| 55 | 0.0529 | 0.0529 |
-| 60 | 0.0328 | 0.0328 |
-| 65 | 0.0204 | 0.0204 |
-| 70 | 0.0127 | 0.0127 |
-| 75 | 0.0079 | 0.0079 |
-| 80 | 0.0049 | 0.0049 |
-| 85 |  0.003 |  0.003 |
-| 90 | 0.0019 | 0.0019 |
-| 95 | 0.0012 | 0.0012 |
-| 97 |  0.001 |  0.001 |
-:end:
 
 #+BEGIN_EXPORT html
 </details>
@@ -245,297 +224,19 @@ TODO maybe plot for various mass ratios and repro full first plot?
 #+RESULTS: image-impact-abc
 [[file:../img/sequential_impact_abc.png]]
 
-* SI for inequalities
-- Explain briefly how SI changes if constraints are ineq, individual
-  constraints may be active/inactive
-* TODO [#A] Direct Solution of the contact equality problem
-
-If we assume all constraints are Active, due to compressive init state
-and inelssticity, all constraints become equalities, and we can solve
-for all collisions simultaneously solving a linear system of
-equations.
-
-Contact constraint is a "gap function" G(pi,pj)>0, deriving results in
-velocity constraint
-
-We'll rename C,A,B into 0,1,2, ordered away from ground
-
-Non-iterative solution should be trivial for this problem, we could
-solve system of eq with 2 vars and 2 constraints, assuming vel will
-never change sign, and arrive at $V_b=0$.
-
-Sign convention: Positive velocities go UP, from i to i+1 (opposite
-from ABC example before)
-
-** Collision Constraints
-
-Constraints 0..N-1 on post-impact velocities $V_i^+$
-\[ C_{i+1,i} = V_{i+1}^+ - V_{i}^+ \geq 0 \]
-
-** Collision Impulses
-
-Instantaneous impulses per body $i$ from its contacts with bodies below/above
-\[ V_i^+ = V_i^- + \frac{1}{m_i} (\lambda_{i,i-1} - \lambda_{i+1,i}) \]
-
-Impulses must only push objects apart, so $\lambda_i \geq 0$.
-
-in a stack, each body gets 2 contacts with their neighbours
-below/above, except for the bottom/top bodies that get 1.
-
-we assume body 0 has infinite mass, so $1/m_0 = 0$
-\[ V_0^+ = V_0^- = 0 \]
-
-** Simultaneous collision solution
-
-We'll solve for the impulses that fullfill all constraints simultaneously
-\begin{eqnarray*}
-C_{1,0} &= (V_1^- + \frac{1}{m_1} (\lambda_{1,0} - \lambda_{2,1})) - (V_0^- + \frac{1}{m_0} (-\lambda_{1,0})) \\
-C_{2,1} &= (V_2^- + \frac{1}{m_2} (\lambda_{2,1})) - (V_1^- + \frac{1}{m_1} (\lambda_{1,0} - \lambda_{2,1}))
-\end{eqnarray*}
-
-can be rewritten as $A \lambda = b$ with
-\[
-   A = \begin{bmatrix}
-         \frac{1}{m_0}+\frac{1}{m_1} & -\frac{1}{m_1} \\
-         -\frac{1}{m_1} & \frac{1}{m_1}+\frac{1}{m_2}
-       \end{bmatrix}
-   ,\quad
-   \lambda = \begin{bmatrix}
-         \lambda_{1,0} \\
-         \lambda_{2,1}
-       \end{bmatrix}
-   ,\quad
-   b = \begin{bmatrix}
-         V_0^- - V_1^- \\
-         V_1^- - V_2^-
-       \end{bmatrix}
-\]
-
-*** With constraint Jacobians (TEMP may not export, this is the generic solution)
-
-this must be the same as, where are Jacobians (dC/dv1,dC/dv2?) they'll
-be constant +-1 I think, so A must be symmetric. It has the SAME symmetric
-structure as TentaclesMode 4x4 matrix K
-\[ K \lambda = (JWJ^T)\lambda = -C \]
-
-\[
-   J
-   = \begin{bmatrix}
-   dC10/dV1 & dC10/dV2 \\
-   dC21/dV1 & dC21/dV2
-   \end{bmatrix}
-   = \begin{bmatrix}
-    1 & 0 \\
-   -1 & 1
-   \end{bmatrix}
-\]
-
-\[
-   JW
-   = \begin{bmatrix}
-    r_1 & 0 \\
-    -r1 & r2
-   \end{bmatrix}
-\]
-
-\[
-   JWJt
-   = \begin{bmatrix}
-    r_1 & -r1 \\
-    -r1 & r1+r2
-   \end{bmatrix}
-\]
-
-*** GOOD Symbolic solution
-
-IMPORTANT: The result from Maxima the expected V2=V1=V0, not sure if I
-should list full solve or just report result, maybe as an Appendix
-section at the end?
-#+NAME: maxima-matrix-eigen-symbolic
-#+BEGIN_SRC maxima :exports both :results output
-  A: matrix( [r1, -r1], [-r1, r1+r2] );
-  b: matrix( [v0-v1], [v1-v2] );
-  /*print(A);
-  print(b);*/
-  print("--> Det(A)");
-  print(expand(determinant(A)));
-  print("--> Inv(A)");
-  print(expand(invert(A)));
-  /*
-  print("--> Eivals(A)");
-  print(eivals(A)[1][1]);
-  print(eivals(A)[1][2]);
-  print(expand(eivals(A)[1][1] / eivals(A)[1][2]));
-  print(expand(eivals(A)));
-  ,*/
-  print("--> l0, l1");
-  l: invert(A) . b;
-  print(expand(l));
-  print("--> v1 = v1 + r1 * (l0-l1)");
-  print( expand(v1 + r1*(l[1] - l[2]) ) );
-  print("--> v2 = v2 + r2 * l1");
-  print( expand(v2 + r2*l[2] ) );
-#+END_SRC
-
-#+RESULTS: maxima-matrix-eigen-symbolic
-#+begin_example
---> Det(A)
-r1 r2
---> Inv(A)
-[ 1    1   1  ]
-[ -- + --  -- ]
-[ r2   r1  r2 ]
-[             ]
-[   1      1  ]
-[   --     -- ]
-[   r2     r2 ]
---> l0, l1
-[    v2    v1   v0   v0 ]
-[ (- --) - -- + -- + -- ]
-[    r2    r1   r2   r1 ]
-[                       ]
-[        v0   v2        ]
-[        -- - --        ]
-[        r2   r2        ]
---> v1 = v1 + r1 * (l0-l1)
-[v0]
---> v2 = v2 + r2 * l1
-[v0]
-#+end_example
-The symbolic solution is what we expected, V1=V0=0 and V2=V0=0,
-regardless initial velocity Vb or mass ratio. When solved numerically,
-the direct solver may still struggle with matrices that have a large
-condition number, see below
-
-*** TODO Numeric solution
-*** TODO Condition number
-
-Condition number = $\kappa(A) = |\frac{\alpha_{\text{max}}}{\alpha_{\text{min}}}|$
-
-Write eq, will compute trace and det -> show that eigenvalues ratio is
-related to mass ratio $\xi$
-
-assuming 1/m0 = 0
-trace = - invm0 - 2*invm1 - invm2
-det = 1nvm1*(invm1+invm2) - invm1^2 = invm1*invm2
-
-OK! so eval are 2*invm1 and invm2 or similar... that's what I
-expected, their divison is basically $\xi$ with some constant scaling
-
-TODO find relationship with mass ratio
-
-Si construim problema directe (2bodies) els eigenval son facils de
-trobar, relacionarlos amb mass ratio hauria de ser trivial!!
-
-Solve same system for m_c = infinite or not, to see how it would be
-have if there was no fixed ground (I think all bodies would move down
-equally fast (and if restitution coeff >0 then the last one should be
-ejected as in Newton's craddle?)
-
-**** TODO Show that $\xi$ is related to the "condition number" of the linear system
-DONE in "Direct Solver" section
-*** GOOD 4 bodies, 3 constraints case
-4 bodies, 3 constraints
-\[
-   A = \begin{bmatrix}
-         \frac{1}{m_0}+\frac{1}{m_1} & -\frac{1}{m_1} & 0\\
-         -\frac{1}{m_1} & \frac{1}{m_1}+\frac{1}{m_2} & -\frac{1}{m_2}\\
-         0 & -\frac{1}{m_2} & \frac{1}{m_2}+\frac{1}{m_3}
-       \end{bmatrix}
-\]
-\[
-   \lambda = \begin{bmatrix}
-         \lambda_{1,0} \\
-         \lambda_{2,1} \\
-         \lambda_{3,2}
-       \end{bmatrix}
-   ,\quad
-   b = \begin{bmatrix}
-         V_0^- - V_1^- \\
-         V_1^- - V_2^- \\
-         V_2^- - V_3^-
-       \end{bmatrix}
-\]
-
-#+NAME: maxima-matrix-eigen-symbolic-3C
-#+BEGIN_SRC maxima :exports both :results output
-  A: matrix( [r1, -r1, 0], [-r1, r1+r2, -r2], [0, -r2, r2+r3] );
-  b: matrix( [v0-v1], [v1-v2], [v2-v3] );
-  print(A);
-  print(b);
-  print("--> Det(A)");
-  print(expand(determinant(A)));
-  print("--> Inv(A)");
-  print(expand(invert(A)));
-  print("--> l0, l1");
-  l: invert(A) . b;
-  print(expand(l));
-  print("--> v1");
-  print( expand(v1 + r1*(l[1] - l[2]) ) );
-  print("--> v2");
-  print( expand(v2 + r2*(l[2] - l[3]) ) );
-  print("--> v3");
-  print( expand(v3 + r3*l[3] ) );
-#+END_SRC
-
-#+RESULTS: maxima-matrix-eigen-symbolic-3C
-#+begin_example
-[  r1    - r1       0    ]
-[                        ]
-[ - r1  r2 + r1   - r2   ]
-[                        ]
-[  0     - r2    r3 + r2 ]
-[ v0 - v1 ]
-[         ]
-[ v1 - v2 ]
-[         ]
-[ v2 - v3 ]
---> Det(A)
-r1 r2 r3
---> Inv(A)
-[ 1    1    1   1    1   1  ]
-[ -- + -- + --  -- + --  -- ]
-[ r3   r2   r1  r3   r2  r3 ]
-[                           ]
-[   1    1      1    1   1  ]
-[   -- + --     -- + --  -- ]
-[   r3   r2     r3   r2  r3 ]
-[                           ]
-[      1          1      1  ]
-[      --         --     -- ]
-[      r3         r3     r3 ]
---> l0, l1
-[    v3    v2   v1   v0   v0   v0 ]
-[ (- --) - -- - -- + -- + -- + -- ]
-[    r3    r2   r1   r3   r2   r1 ]
-[                                 ]
-[         v3    v2   v0   v0      ]
-[      (- --) - -- + -- + --      ]
-[         r3    r2   r3   r2      ]
-[                                 ]
-[             v0   v3             ]
-[             -- - --             ]
-[             r3   r3             ]
---> v1
-[v0]
---> v2
-[v0]
---> v3
-[v0]
-#+end_example
-* TODO [#A] Conclusions
+* Conclusions
 
 Sequential Impulses converges to the expected solution, but requires a
 number of iterations that grows linearly with $\xi$. Iteration count
-also depends logarithmically on impact speed $V_b^{(0)}$ and precision
+grows logarithmically with impact speed $V_b^{(0)}$ and precision
 $\epsilon$, so their effect is much weaker.
 
 Convergence can be improved for persistent contacts using
-/warmstarting/, by reusing approximate results across timesteps and
-refining them, with the assumption they will eventually converge to
-the right answer in a small number of iterations per timestep. This is
-not an option on the first impact timestep, as no previous solution
-exists.
+/warmstarting/ (TODO link to Warmstarting Post) , by reusing
+approximate results across timesteps and refining them, with the
+assumption they will eventually converge to the right answer in a
+small number of iterations per timestep. This is not an option on the
+first impact timestep, as no previous solution exists.
 
 Sequential Impulses with warmstarting is very easy to implement, which
 explains its popularity in realtime simulation, but its slow
@@ -570,109 +271,27 @@ sideffects. See "Warmstarting Blows!"
 show its very very close to linear, quadratic error term is very small, I
 think it's because x/(x+1) tends to 1, and log(1) is 0, so its effect
 as x grows is negligible)
-** TODO Linear System Solve
-- Maxima solve
-** TODO Condition Number?
-- Any details would go here
-* TODO [#A] -------- NEXT POST: Warmstarting Blows!                :noexport:
+* TODO [#A] PART 2: Multiple simultaneous collisions               :noexport:
 
-Identified multiple issues with WS that maybe deserve their own
-article 03_Warmstarting.org?
+SUMMARY: Simple IMPACT case N bodies with var mass ratio, still
+Equalities, no time-stepping or warmstarting, just instant collision
 
-- See above [[Persistent contacts][Persistent contacts]], consider adding it here instead
+up and down solve order are approx equivalent
+*** TODO Problem statement
 
-Blows, because it can eject bodies with spurious velocities if it
-over-estimates current impulses from previous ones
+1D N+1 objects, where 0 is ground
 
-** TODO Warmstart theory
-WS is not a “guess” of the actual solution, it’s an “assumption” of
-the solution that cannot be fully undone, and that can change it
-completely.
+Problem with indices 0..N with 0 static ground, 1/m0 = 0
 
-It applies impulses indistinguishable from external magic forces that
-change the problem, as opposed to a guess in ConjGrad or similar,
-that starts search from solution “closer” to that solution, but does
-not change the problem or solution to it (unless it perturbs it to
-find a different local minima if problem is not convex) This same
-issue would happen with XPBD or any other GS-like solver where WS
-values need to be applied in the same way PGS would apply local steps
-towards the solution, WS tries to skip these local steps, assuming
-they’d repeat exactly, so it can comtinue from there
+COPY from DIRECT SOLVE below, including sign convention etc
 
-It’s practical, but it’s objectively wrong. Some bad cases can be
-avoided with heuristics, but not all I suspect
+**** Collision Constraints
 
-The fact that this is not improved by substepping is a big red flag, actually.
+Constraints 0..N-1 on post-impact velocities $V_i^+$
+\[ C_{i+1,i} = V_{i+1}^+ - V_{i}^+ \geq 0 \]
 
-Compare with:
-- direct solve preconditioning
-- iterative solve guessing (CG)
-- AVBD “warmstarting”
-Show they converge to same value if “guess” is perturbed, just slower/faster
 
-Warmstarting assumes the Active Set did not change from last timestep,
-or, at least, that no constraints became inactive
-** TODO Warmstart and variable timesteps
- Also show var timesteps are bad for warmstart because longer
- timesteps will apply larger lambdas than necessary on later steps
- with shorter timestep, because gravity integration over longer time
- on prev step will over-estimate current one, and will randomly eject
- top bodies!?
-** TODO Warmstart invalidation on nonsmoothness
-
-When is WS correct? when solution is smooth? Argue/prove it
-
-WS assumes continuous and smooth silution. When this is false for a
-given connected component, we should not apply it to the connected
-component constraint solver, but we can still apply it to other CC
-Sources of nonsmoothness would be:
-- add/remove constraints or bodies
-- apply steong impulses or forces
-- change masses or contraint params “significantly” (includes hitting
-  an angle limit, for example, that is a new active constraint)
-
-When nomsmooth hapoens, we’d zero WS instantly
-
-We could do this by tracking last nonsmooth event timestamp in all
-bodies/constraints/etc (we do detect discont alemready in Pla), and
-then check if WS timestamps are older and invalidate them if so
-
-On mismatched timestamps, we would need to zero WS BEFORE applying to
-the islands (or skip), but also do so next tinestep (or skip storing
-WS values at the end of this frame. This way we’d avoid both prre
-applying stale WS after event, and saving “transient” WS after solving
-post-event (ex: collision).
-
-Alternatively, post-event wemd only save WS if they’re similar
-enough to previous solution (so we can consider it settled)… (but this
-woukd stop us from converging incrementally over frames…) so maybe we
-only allow WS to grow a fractuon per step? Messy…
-** TODO WS in popular physics engines
-Check how WS works in:
-- Box2D/3D just uses scale 0 or 1, global toggle (see https://github.com/erincatto/box2d/blob/main/src/contact_solver.c)
-- Bullet global multiplier, 0.85 by default (see https://github.com/bulletphysics/bullet3/blob/master/src/Bullet3Dynamics/ConstraintSolver/b3ContactSolverInfo.h)
-- Jolt (see https://github.com/jrouwe/JoltPhysics/blob/master/Jolt/Physics/Constraints/ContactConstraintManager.cpp)
-- Chipmunk2D uses cached impulses (see
-  https://codeberg.org/slembcke/Chipmunk2D/src/branch/master/src/cpSpaceStep.c),
-  no mention to warm
-- Rapier? (see https://docs.rs/rapier3d/0.9.2/i686-pc-windows-msvc/rapier3d/dynamics/struct.IntegrationParameters.html#1)
-  uses a "warmstart_coefficient" like Bullet, but also
-  "warmstart_correction_slope parameter" (default value 10.0) designed
-  to suppress excessive warm start impulses after strong impacts and
-  improve stability.
-  - Avian is similar
-- PhysX (omg code is a mess, it uses something like contact patch
-  pesistence but impulses are not clearly stored+reused, code is terrible)
-- ODE (apparently it does NOT use WS for contacts, but it does for joints)
-- MuJoCo warmstarts accelerations (but that may be a guess, not a WS assumption)
-** Conclusion
-Warmstarting is really helpful when lambdas are the same or larger
-than last timestep, but can introduce undesired sideffects when that's
-not true.
-** TODO References
-Citar paper Catto on explica caching, si ho fa, a veure si enumera drawbacks
-* TODO [#A] -------- NEXT POST: MULTIPLE BODIES                    :noexport:
-** TODO Multiple bodies and contacts
+*** TODO Analytic or Numeric solution for multiple collisions
 
 TODO: Try to derive convergence for N>2 bodies, is there a similar
 recurrence?
@@ -686,8 +305,9 @@ momentum of all other objects, so object count is
 essentially the same as the mass ratio of a simplified problem where
 N-1 objects have been merged into one.
 
-*** TODO Prove this somehow
-How would N bodies converge, depending on masses… I think if known
+**** TODO Prove this somehow
+
+How would N bodies converge, depending on masses I think if known
 solution is Vi=0 for all, we can always partition a list of bodies
 {Bi} to Wall, A (sandwiched), B=sum Bi fir all other bodies, and
 assume they behave like a single block, so mass ratio mA, mB increases
@@ -696,82 +316,17 @@ sense I think and would reuse the same derivation. We’re computing how
 long it takes to converge at the “bottleneck” body A due to mass B,
 regardless of number of bodies in Bi set
 
-*** TODO Also prove that "mass ratio" and "number of objects with same mass" are somewhat interchangeable
+Write recurrence for body V_N depending on V_N-1...V_0 per iter
 
+**** TODO Also prove that "mass ratio" and "number of objects with same mass" are somewhat interchangeable
 So iter count to achieve same error with more objects grows more than linearly?
-** PGS solution for active/inactive
-** Direct Solution for active/inactive
-*** N>2 bodies
-Write direct eq for N sequential bodies, must be tiangular or
-tridiagonal I think? Solvable in linear time, similar to what I did
-in TentaclesMode
-
-I think it's a Symmetric Tridiagonal matrix
-https://en.wikipedia.org/wiki/Tridiagonal_matrix
-
-Write system and eigenvals but no need to solve... unless it's very
-easy (what's the shortest direct solver?)
-*** NOTES/TODO
-Impprtant: in the general case the constraint is on RELTIVE vel not
-absolute, male sure we write it properly for the N body case and
-linear sys solve Linear sys solves for instant Vel ppst collision,
-using instant vel Pre-collision
-
-This means we cannot write it as per pair SOMUTIONS, i think, we need
-to write eq for lambdas and solve for lambdas, not just isolate
-individual lambdas as if they were standalone
-
-Precinditioning podria reduir el problema del mass ratio amb pocs
-objectes, crec, pero dubto que pugui resoldre o millorar notablement
-el cas de molts objectes uniformes aliniats. Per que? Rao teorica ha
-de ser interessant, eigenvalues matriu i cond number pot ser bo i
-convergir malment?
-*** TODO What if constraints are not necessarily Active?
-- This is VERY MUCH OUT OF SCOPE
-- We'd need a full (M)LCP solver that solves equality and inequality constraints
-- The simplest category I think are Active Set solvers, that just
-  solve the problem for each true/false combination of constraint activations.
-- See https://en.wikipedia.org/wiki/Linear_complementarity_problem
-- Are there projected-CG/MINRES/GMRES similar to projected-GS?
-  - Apparently some exist, not sure how they work
-- Siconos te una llista de solvers amb refs a papers, inclou bruteforce, lemke, pgs i cg proj
-  https://siconos.readthedocs.io/en/latest/Docs/sphinx/users_guide/lcp_solvers.html
-  - See also https://nonsmooth.gricad-pages.univ-grenoble-alpes.fr/siconos/users_guide/problems_and_solvers/lcp.html
-**** TODO Write ActiveSet solver for 2 body case, should be simple enough
-**** TODO Could we infer the ActiveSet using some PGS iterations? how many?
-- If we KNOW the AS, LCP is just a linear solve, I think.
-- Can we approximate AS from a few PGS iter, check which lambdas are
-  >0, and that means they're Active?
-  - Could write a sample that runs PGS and counts how many iter until
-    AS is correct (EVEN if lambdas are not yet) --> at this point we
-    could switch to an LCP->Direct solver with a constant AS
-    - AND maybe we could amortize some of the PGS work to build the
-      LCP direct sytem?
-      - OR EVEN, accept the PGS solution if it converged well enough!
-        - So this is a valid PGS/Direct hybrid
-        - When we finish DS with ActSet, we could run another pass of
-          PGS to verify there's no pulling contacts, and refine the output?
-- Is this similar to what Baraff/Faure/Stewart/Trinkle/Anitescu/Potra were doing?
-*** Block-GS
-If we split N bodies in groups and solve direct problems for them,
-what’s the best way to split?
-- evenly by count
-- evenly by mass (each group has the aame appeox mass so ratio across
-  groups is small ideally 1:1
-(They must still be connected directly to form a solver subisland fir
-direct solve)
-
-Last option would avoid global mass ratio issue better than group by
-count
-
-Also see effect of subiter in a subgroup vs global iteration without
-subgroups, in principle subgroups with larger mass ratios would need
-more iter than others so total count would reduce
-** REFS
-Discusses MLCP solvers and relaxation, projected-CR and even direct solvers, for reformulation of contact problem (using smoothified energies, I think)
-https://arxiv.org/pdf/1907.04587
-* TODO [#A] -------- NEXT POST: PERSISTENT/STACKS                  :noexport:
-** TODO [#A] FOLLOWUP Persistent contacts                          :noexport:
+* TODO [#A] PART 3: PERSISTENT contacts and Warmstarting           :noexport:
+SUMMARY: Solve multiple steps, persistent stack should stabilize, NO
+WARMSTART YET
+** SI for inequalities
+- Explain briefly how SI changes if constraints are ineq, individual
+  constraints may be active/inactive
+** TODO Persistent contacts and time-stepping
 - Show that in that case SI needs to resolve the delta vel from
   gravity (or any other force) every frame, and that warmstarting can
   help converging if solution does not change (so force is constant,
@@ -796,7 +351,13 @@ https://arxiv.org/pdf/1907.04587
     experienced... BUT if they did not get impulse they'll have
     lambda0 so it does not matter if they WS... as long as they skip
     the 1st frame after an impulse>0 timestep
-** TODO (WIP) Impact Stacks under gravity
+
+SUMMARY: Time-stepping, persistent contacts, temporal coherence and
+Warmstarting, that SEEMS to be great BUTTTTTT...
+
+Explain PGS with Warmstarting
+
+** TODO (WIP) Impact Stacks under gravity, Examples
 *** Impact stack 2 bodies with $\xi=4$
 
 Simulate 5 frames of a stack of 2 bodies with 1:4 mass ratio:
@@ -1020,7 +581,464 @@ column so that gnuplot can just plot green/red)
       }
   }
 #+END_SRC
+* TODO [#A] PART 4: Warmstarting Blows!                            :noexport:
+
+SUMMARY: Warmstarting looked great in prev pos, BUT has serious drawbacks
+
+Identified multiple issues with WS that maybe deserve their own
+article 03_Warmstarting.org?
+
+- See above [[Persistent contacts][Persistent contacts]], consider adding it here instead
+
+Blows, because it can eject bodies with spurious velocities if it
+over-estimates current impulses from previous ones
+
+** TODO Warmstart theory
+WS is not a “guess” of the actual solution, it’s an “assumption” of
+the solution that cannot be fully undone, and that can change it
+completely.
+
+It applies impulses indistinguishable from external magic forces that
+change the problem, as opposed to a guess in ConjGrad or similar,
+that starts search from solution “closer” to that solution, but does
+not change the problem or solution to it (unless it perturbs it to
+find a different local minima if problem is not convex) This same
+issue would happen with XPBD or any other GS-like solver where WS
+values need to be applied in the same way PGS would apply local steps
+towards the solution, WS tries to skip these local steps, assuming
+they’d repeat exactly, so it can comtinue from there
+
+It’s practical, but it’s objectively wrong. Some bad cases can be
+avoided with heuristics, but not all I suspect
+
+The fact that this is not improved by substepping is a big red flag, actually.
+
+Compare with:
+- direct solve preconditioning
+- iterative solve guessing (CG)
+- AVBD “warmstarting”
+Show they converge to same value if “guess” is perturbed, just slower/faster
+
+Warmstarting assumes the Active Set did not change from last timestep,
+or, at least, that no constraints became inactive
+** TODO Warmstart and variable timesteps
+ Also show var timesteps are bad for warmstart because longer
+ timesteps will apply larger lambdas than necessary on later steps
+ with shorter timestep, because gravity integration over longer time
+ on prev step will over-estimate current one, and will randomly eject
+ top bodies!?
+** TODO Warmstart invalidation on nonsmoothness
+
+When is WS correct? when solution is smooth? Argue/prove it
+
+WS assumes continuous and smooth silution. When this is false for a
+given connected component, we should not apply it to the connected
+component constraint solver, but we can still apply it to other CC
+Sources of nonsmoothness would be:
+- add/remove constraints or bodies
+- apply steong impulses or forces
+- change masses or contraint params “significantly” (includes hitting
+  an angle limit, for example, that is a new active constraint)
+
+When nomsmooth hapoens, we’d zero WS instantly
+
+We could do this by tracking last nonsmooth event timestamp in all
+bodies/constraints/etc (we do detect discont alemready in Pla), and
+then check if WS timestamps are older and invalidate them if so
+
+On mismatched timestamps, we would need to zero WS BEFORE applying to
+the islands (or skip), but also do so next tinestep (or skip storing
+WS values at the end of this frame. This way we’d avoid both prre
+applying stale WS after event, and saving “transient” WS after solving
+post-event (ex: collision).
+
+Alternatively, post-event wemd only save WS if they’re similar
+enough to previous solution (so we can consider it settled)… (but this
+woukd stop us from converging incrementally over frames…) so maybe we
+only allow WS to grow a fractuon per step? Messy…
+** TODO WS in popular physics engines
+Check how WS works in:
+- Box2D/3D just uses scale 0 or 1, global toggle (see https://github.com/erincatto/box2d/blob/main/src/contact_solver.c)
+- Bullet global multiplier, 0.85 by default (see https://github.com/bulletphysics/bullet3/blob/master/src/Bullet3Dynamics/ConstraintSolver/b3ContactSolverInfo.h)
+- Jolt (see https://github.com/jrouwe/JoltPhysics/blob/master/Jolt/Physics/Constraints/ContactConstraintManager.cpp)
+- Chipmunk2D uses cached impulses (see
+  https://codeberg.org/slembcke/Chipmunk2D/src/branch/master/src/cpSpaceStep.c),
+  no mention to warm
+- Rapier? (see https://docs.rs/rapier3d/0.9.2/i686-pc-windows-msvc/rapier3d/dynamics/struct.IntegrationParameters.html#1)
+  uses a "warmstart_coefficient" like Bullet, but also
+  "warmstart_correction_slope parameter" (default value 10.0) designed
+  to suppress excessive warm start impulses after strong impacts and
+  improve stability.
+  - Avian is similar
+- PhysX (omg code is a mess, it uses something like contact patch
+  pesistence but impulses are not clearly stored+reused, code is terrible)
+- ODE (apparently it does NOT use WS for contacts, but it does for joints)
+- MuJoCo warmstarts accelerations (but that may be a guess, not a WS assumption)
+** Conclusion
+Warmstarting is really helpful when lambdas are the same or larger
+than last timestep, but can introduce undesired sideffects when that's
+not true.
+** TODO References
+Citar paper Catto on explica caching, si ho fa, a veure si enumera drawbacks
+* TODO [#A] PART 5: Direct Solve                                   :noexport:
+SUMMARY: Show how problem can be solved directly as a lin sys of eq, non-iterative
+** TODO [#A] Direct Solution of the contact equality problem
+
+If we assume all constraints are Active, due to compressive init state
+and inelssticity, all constraints become equalities, and we can solve
+for all collisions simultaneously solving a linear system of
+equations.
+
+Contact constraint is a "gap function" G(pi,pj)>0, deriving results in
+velocity constraint
+
+We'll rename C,A,B into 0,1,2, ordered away from ground
+
+Non-iterative solution should be trivial for this problem, we could
+solve system of eq with 2 vars and 2 constraints, assuming vel will
+never change sign, and arrive at $V_b=0$.
+
+Sign convention: Positive velocities go UP, from i to i+1 (opposite
+from ABC example before)
+*** Collision Constraints
+
+Constraints 0..N-1 on post-impact velocities $V_i^+$
+\[ C_{i+1,i} = V_{i+1}^+ - V_{i}^+ \geq 0 \]
+
+*** Collision Impulses
+
+Instantaneous impulses per body $i$ from its contacts with bodies below/above
+\[ V_i^+ = V_i^- + \frac{1}{m_i} (\lambda_{i,i-1} - \lambda_{i+1,i}) \]
+
+Impulses must only push objects apart, so $\lambda_i \geq 0$.
+
+in a stack, each body gets 2 contacts with their neighbours
+below/above, except for the bottom/top bodies that get 1.
+
+we assume body 0 has infinite mass, so $1/m_0 = 0$
+\[ V_0^+ = V_0^- = 0 \]
+
+*** Simultaneous collision solution
+
+We'll solve for the impulses that fullfill all constraints simultaneously
+\begin{eqnarray*}
+C_{1,0} &= (V_1^- + \frac{1}{m_1} (\lambda_{1,0} - \lambda_{2,1})) - (V_0^- + \frac{1}{m_0} (-\lambda_{1,0})) \\
+C_{2,1} &= (V_2^- + \frac{1}{m_2} (\lambda_{2,1})) - (V_1^- + \frac{1}{m_1} (\lambda_{1,0} - \lambda_{2,1}))
+\end{eqnarray*}
+
+can be rewritten as $A \lambda = b$ with
+\[
+   A = \begin{bmatrix}
+         \frac{1}{m_0}+\frac{1}{m_1} & -\frac{1}{m_1} \\
+         -\frac{1}{m_1} & \frac{1}{m_1}+\frac{1}{m_2}
+       \end{bmatrix}
+   ,\quad
+   \lambda = \begin{bmatrix}
+         \lambda_{1,0} \\
+         \lambda_{2,1}
+       \end{bmatrix}
+   ,\quad
+   b = \begin{bmatrix}
+         V_0^- - V_1^- \\
+         V_1^- - V_2^-
+       \end{bmatrix}
+\]
+
+**** With constraint Jacobians (TEMP may not export, this is the generic solution)
+
+this must be the same as, where are Jacobians (dC/dv1,dC/dv2?) they'll
+be constant +-1 I think, so A must be symmetric. It has the SAME symmetric
+structure as TentaclesMode 4x4 matrix K
+\[ K \lambda = (JWJ^T)\lambda = -C \]
+
+\[
+   J
+   = \begin{bmatrix}
+   dC10/dV1 & dC10/dV2 \\
+   dC21/dV1 & dC21/dV2
+   \end{bmatrix}
+   = \begin{bmatrix}
+    1 & 0 \\
+   -1 & 1
+   \end{bmatrix}
+\]
+
+\[
+   JW
+   = \begin{bmatrix}
+    r_1 & 0 \\
+    -r1 & r2
+   \end{bmatrix}
+\]
+
+\[
+   JWJt
+   = \begin{bmatrix}
+    r_1 & -r1 \\
+    -r1 & r1+r2
+   \end{bmatrix}
+\]
+
+**** GOOD Symbolic solution
+
+IMPORTANT: The result from Maxima the expected V2=V1=V0, not sure if I
+should list full solve or just report result, maybe as an Appendix
+section at the end?
+#+NAME: maxima-matrix-eigen-symbolic
+#+BEGIN_SRC maxima :exports both :results output
+  A: matrix( [r1, -r1], [-r1, r1+r2] );
+  b: matrix( [v0-v1], [v1-v2] );
+  /*print(A);
+  print(b);*/
+  print("--> Det(A)");
+  print(expand(determinant(A)));
+  print("--> Inv(A)");
+  print(expand(invert(A)));
+  /*
+  print("--> Eivals(A)");
+  print(eivals(A)[1][1]);
+  print(eivals(A)[1][2]);
+  print(expand(eivals(A)[1][1] / eivals(A)[1][2]));
+  print(expand(eivals(A)));
+  ,*/
+  print("--> l0, l1");
+  l: invert(A) . b;
+  print(expand(l));
+  print("--> v1 = v1 + r1 * (l0-l1)");
+  print( expand(v1 + r1*(l[1] - l[2]) ) );
+  print("--> v2 = v2 + r2 * l1");
+  print( expand(v2 + r2*l[2] ) );
+#+END_SRC
+
+#+RESULTS: maxima-matrix-eigen-symbolic
+#+begin_example
+--> Det(A)
+r1 r2
+--> Inv(A)
+[ 1    1   1  ]
+[ -- + --  -- ]
+[ r2   r1  r2 ]
+[             ]
+[   1      1  ]
+[   --     -- ]
+[   r2     r2 ]
+--> l0, l1
+[    v2    v1   v0   v0 ]
+[ (- --) - -- + -- + -- ]
+[    r2    r1   r2   r1 ]
+[                       ]
+[        v0   v2        ]
+[        -- - --        ]
+[        r2   r2        ]
+--> v1 = v1 + r1 * (l0-l1)
+[v0]
+--> v2 = v2 + r2 * l1
+[v0]
+#+end_example
+The symbolic solution is what we expected, V1=V0=0 and V2=V0=0,
+regardless initial velocity Vb or mass ratio. When solved numerically,
+the direct solver may still struggle with matrices that have a large
+condition number, see below
+
+**** TODO Numeric solution
+**** TODO Condition number
+
+Condition number = $\kappa(A) = |\frac{\alpha_{\text{max}}}{\alpha_{\text{min}}}|$
+
+Write eq, will compute trace and det -> show that eigenvalues ratio is
+related to mass ratio $\xi$
+
+assuming 1/m0 = 0
+trace = - invm0 - 2*invm1 - invm2
+det = 1nvm1*(invm1+invm2) - invm1^2 = invm1*invm2
+
+OK! so eval are 2*invm1 and invm2 or similar... that's what I
+expected, their divison is basically $\xi$ with some constant scaling
+
+TODO find relationship with mass ratio
+
+Si construim problema directe (2bodies) els eigenval son facils de
+trobar, relacionarlos amb mass ratio hauria de ser trivial!!
+
+Solve same system for m_c = infinite or not, to see how it would be
+have if there was no fixed ground (I think all bodies would move down
+equally fast (and if restitution coeff >0 then the last one should be
+ejected as in Newton's craddle?)
+
+***** TODO Show that $\xi$ is related to the "condition number" of the linear system
+DONE in "Direct Solver" section
+**** GOOD 4 bodies, 3 constraints case
+4 bodies, 3 constraints
+\[
+   A = \begin{bmatrix}
+         \frac{1}{m_0}+\frac{1}{m_1} & -\frac{1}{m_1} & 0\\
+         -\frac{1}{m_1} & \frac{1}{m_1}+\frac{1}{m_2} & -\frac{1}{m_2}\\
+         0 & -\frac{1}{m_2} & \frac{1}{m_2}+\frac{1}{m_3}
+       \end{bmatrix}
+\]
+\[
+   \lambda = \begin{bmatrix}
+         \lambda_{1,0} \\
+         \lambda_{2,1} \\
+         \lambda_{3,2}
+       \end{bmatrix}
+   ,\quad
+   b = \begin{bmatrix}
+         V_0^- - V_1^- \\
+         V_1^- - V_2^- \\
+         V_2^- - V_3^-
+       \end{bmatrix}
+\]
+
+#+NAME: maxima-matrix-eigen-symbolic-3C
+#+BEGIN_SRC maxima :exports both :results output
+  A: matrix( [r1, -r1, 0], [-r1, r1+r2, -r2], [0, -r2, r2+r3] );
+  b: matrix( [v0-v1], [v1-v2], [v2-v3] );
+  print(A);
+  print(b);
+  print("--> Det(A)");
+  print(expand(determinant(A)));
+  print("--> Inv(A)");
+  print(expand(invert(A)));
+  print("--> l0, l1");
+  l: invert(A) . b;
+  print(expand(l));
+  print("--> v1");
+  print( expand(v1 + r1*(l[1] - l[2]) ) );
+  print("--> v2");
+  print( expand(v2 + r2*(l[2] - l[3]) ) );
+  print("--> v3");
+  print( expand(v3 + r3*l[3] ) );
+#+END_SRC
+
+#+RESULTS: maxima-matrix-eigen-symbolic-3C
+#+begin_example
+[  r1    - r1       0    ]
+[                        ]
+[ - r1  r2 + r1   - r2   ]
+[                        ]
+[  0     - r2    r3 + r2 ]
+[ v0 - v1 ]
+[         ]
+[ v1 - v2 ]
+[         ]
+[ v2 - v3 ]
+--> Det(A)
+r1 r2 r3
+--> Inv(A)
+[ 1    1    1   1    1   1  ]
+[ -- + -- + --  -- + --  -- ]
+[ r3   r2   r1  r3   r2  r3 ]
+[                           ]
+[   1    1      1    1   1  ]
+[   -- + --     -- + --  -- ]
+[   r3   r2     r3   r2  r3 ]
+[                           ]
+[      1          1      1  ]
+[      --         --     -- ]
+[      r3         r3     r3 ]
+--> l0, l1
+[    v3    v2   v1   v0   v0   v0 ]
+[ (- --) - -- - -- + -- + -- + -- ]
+[    r3    r2   r1   r3   r2   r1 ]
+[                                 ]
+[         v3    v2   v0   v0      ]
+[      (- --) - -- + -- + --      ]
+[         r3    r2   r3   r2      ]
+[                                 ]
+[             v0   v3             ]
+[             -- - --             ]
+[             r3   r3             ]
+--> v1
+[v0]
+--> v2
+[v0]
+--> v3
+[v0]
+#+end_example
+
+*** TODO (PROCESS) N>2 bodies
+Write direct eq for N sequential bodies, must be tiangular or
+tridiagonal I think? Solvable in linear time, similar to what I did
+in TentaclesMode
+
+I think it's a Symmetric Tridiagonal matrix
+https://en.wikipedia.org/wiki/Tridiagonal_matrix
+
+Write system and eigenvals but no need to solve... unless it's very
+easy (what's the shortest direct solver?)
+
+** TODO [#B] Direct Solution of the contact inequalities problem
+*** NOTES/TODO
+Impprtant: in the general case the constraint is on RELTIVE vel not
+absolute, male sure we write it properly for the N body case and
+linear sys solve Linear sys solves for instant Vel ppst collision,
+using instant vel Pre-collision
+
+This means we cannot write it as per pair SOMUTIONS, i think, we need
+to write eq for lambdas and solve for lambdas, not just isolate
+individual lambdas as if they were standalone
+
+Precinditioning podria reduir el problema del mass ratio amb pocs
+objectes, crec, pero dubto que pugui resoldre o millorar notablement
+el cas de molts objectes uniformes aliniats. Per que? Rao teorica ha
+de ser interessant, eigenvalues matriu i cond number pot ser bo i
+convergir malment?
+*** TODO What if constraints are not necessarily Active?
+- This is VERY MUCH OUT OF SCOPE
+- We'd need a full (M)LCP solver that solves equality and inequality constraints
+- The simplest category I think are Active Set solvers, that just
+  solve the problem for each true/false combination of constraint activations.
+- See https://en.wikipedia.org/wiki/Linear_complementarity_problem
+- Are there projected-CG/MINRES/GMRES similar to projected-GS?
+  - Apparently some exist, not sure how they work
+- Siconos te una llista de solvers amb refs a papers, inclou bruteforce, lemke, pgs i cg proj
+  https://siconos.readthedocs.io/en/latest/Docs/sphinx/users_guide/lcp_solvers.html
+  - See also https://nonsmooth.gricad-pages.univ-grenoble-alpes.fr/siconos/users_guide/problems_and_solvers/lcp.html
+**** TODO Write ActiveSet solver for 2 body case, should be simple enough
+**** TODO Could we infer the ActiveSet using some PGS iterations? how many?
+- If we KNOW the AS, LCP is just a linear solve, I think.
+- Can we approximate AS from a few PGS iter, check which lambdas are
+  >0, and that means they're Active?
+  - Could write a sample that runs PGS and counts how many iter until
+    AS is correct (EVEN if lambdas are not yet) --> at this point we
+    could switch to an LCP->Direct solver with a constant AS
+    - AND maybe we could amortize some of the PGS work to build the
+      LCP direct sytem?
+      - OR EVEN, accept the PGS solution if it converged well enough!
+        - So this is a valid PGS/Direct hybrid
+        - When we finish DS with ActSet, we could run another pass of
+          PGS to verify there's no pulling contacts, and refine the output?
+- Is this similar to what Baraff/Faure/Stewart/Trinkle/Anitescu/Potra were doing?
+*** Block-GS
+If we split N bodies in groups and solve direct problems for them,
+what’s the best way to split?
+- evenly by count
+- evenly by mass (each group has the aame appeox mass so ratio across
+  groups is small ideally 1:1
+(They must still be connected directly to form a solver subisland fir
+direct solve)
+
+Last option would avoid global mass ratio issue better than group by
+count
+
+Also see effect of subiter in a subgroup vs global iteration without
+subgroups, in principle subgroups with larger mass ratios would need
+more iter than others so total count would reduce
+
+** TODO Derivations/Appendix
+*** TODO Linear System Solve
+- Maxima solve
+*** TODO Condition Number?
+- Any details would go here
+
+** REFS
+Discusses MLCP solvers and relaxation, projected-CR and even direct solvers, for reformulation of contact problem (using smoothified energies, I think)
+https://arxiv.org/pdf/1907.04587
+
 * TODO [#B] -------- NEXT POST: OVERCONSTRAINED                    :noexport:
+SUMMARY: OC system is overdetermined, no solution except least
+squares, jitter with SeqImp, failure with Direct
 ** TODO FOLLOWUP Overconstrained                                   :noexport:
 - Analyze what happens in SI/PGS 1D boxes when bottom/top boxes are
   kinematic and have incompatible velocities?
@@ -1066,7 +1084,8 @@ predictions!
   CoM, then far contact points at dist d can have arbitrarily large
   inv inertia factor that grows with d^2, and "angular" $\xi$ can grow
   proportionally, total $\xi$ dominated by angular term
-* TODO [#C] PGS vs TGS                                             :noexport:
+* TODO [#B] NEXT: OTHER SOLVERS                                    :noexport:
+** TODO [#C] PGS vs TGS
 PGS convergence wrt iter (1 substep) vs TGS convergence wrt substeps (1 iter)
 
 Derive this for model problem, should be feasible but I can’t see how
@@ -1083,7 +1102,7 @@ substeps, the iteration count required to dissipate it using GS does
 NOT reduce proportionally, but slower (see dependicy of k on V0 above)
 
 https://matthias-research.github.io/pages/publications/PBDBodies.pdf
-** TODO TGS and mass ratio
+*** TODO TGS and mass ratio
 They mention it works better but that cannot be from impulses alone,
 because mass ratio is still bad during maybe it’s because TGS allows
 stiffer baumgarte so less overlap at lrge mass ratios, but velocities
@@ -1094,13 +1113,13 @@ and for strong impacts not sure it’s always stable?
 Solver2d blog post es interessant i descriu la majoria de solvers i
 massrstio i warmstarting, see https://box2d.org/posts/2024/02/solver2d/
 
-* TODO [#C] PGS vs (A)VBD                                          :noexport:
+** TODO [#C] PGS vs (A)VBD
 - Solve in body-centric way A, B using all collisions on them at once,
   maybe with compliance, see how error decreases
 - Va needs to consider both AC and AB, so I doubt it results in
   anything that is not Va=0, so it's no different from
   constraint-centric SI/PGS in this case.
-* TODO [#C] Primal-Dual Iterative Solve?                           :noexport:
+** TODO [#C] Primal-Dual Iterative Solve?
 
 How would body-centric primal solver converge for the model problem?
 It would need a stiffness value, that could be increased per iter (ex:
@@ -1112,19 +1131,7 @@ their constraints
 
 Similar idea to CBD experiment, try with rigids
 
-* TODO [#C] 1D stack mixing contacts and soft constraints          :noexport:
-Contacts are stiff, constraints may be soft, show interplay between
-masses and stifnesses
-
-Pure 1D “stack” with 1 contact and 1 constraint first, show how
-condition number changes
-
-Stiffness means time-dependent so no longer instantaneous contact,
-must consider timestep
-
-Can we derive direct system and infer PGS behaviour based on stiffnesses/masses?
-
-* TODO [#B] What would be a "perfect" iterative solver for realtime? :noexport:
+** TODO [#B] What would be a "perfect" iterative solver for realtime?
 What would be perfect is a simple iter solver like PGS that tracks
 convergence to solution and simultaneously builds an “incremental
 factorization” of the direct solve matrix, cheaply, so that if PGS
@@ -1148,7 +1155,7 @@ Can this improve mass ratio and warmstart issues?
 
 Also, compare CPU effort with similarly converged PGS, likely with lots of iter
 
-** Krylov-like?
+*** Krylov-like?
 GMRES with local Krylov subspace and periodic resets seems a good
 inspiration, and maybe ADMM too, not sure. Odea seems too obvious to
 be new --> APPARENTLY it's not a good idea to combine PGS or other
@@ -1159,7 +1166,7 @@ representation while doing PGS work... Would still be cool to "try",
 ex: what if Krylov is approximate, does that fail or it just takes
 longer to converge?
 
-** MinSpanTree and Longest Path
+*** MinSpanTree and Longest Path
 What anout 1st PGS pass solves and identifies active constraints, then we build MST or longest path of those active constraints and solve using direct solver linear time, then solve again with PGS until convergence, potentially interleaving direct solves
 MST and longest paths could use local constraint inveffmass ratio as measure to select the “worst path” for PGS propagation due to masses, and focus on solving that
 
@@ -1167,7 +1174,7 @@ What’s the cost? MST can be found with MFSet so it’s almost linear, then sol
 
 MST could be reused over iter assuming Active(Sub)Set is still valid.
 
-* TODO [#B] Approximate pre-solve + PGS refinement                 :noexport:
+** TODO [#B] Approximate pre-solve + PGS refinement
 Si aconseguim fer pre-solve approximat (ex: direct solve per a
 moviment linial), i calculem les lambdes, podriem ferles servir com a
 valor de warmstart per a contactes sense historia
@@ -1214,10 +1221,29 @@ Also, see what happems with overconstrained problems, analyticlally,
 in 1D. See that direct solve will FAIL because there’s no exact
 solution, show how it looks, show least squares solution
 
-Connection between contact peoblem and linear system of eq can be seen
+Connection between contact problem and linear system of eq can be seen
 2-way actually, looking at system can we visualize a body
 configuration that reproduces the same system? Does visualizing it
 tell anything qualitative about it?
+
+** TODO Solve1D Constraints non-adjacent
+- Contacts between adjacent
+- Cnstraints can connect any object pair, non-adjacent, either hard or
+  soft, springs, etc.
+- This means matrix A is not necessarily tridiagonal, constraint graph
+  can even be complete, but dof are still 1D and normals just a sign,
+- This models the “worst case” for 2D or 3D too
+** TODO 1D stack mixing contacts and soft constraints              :noexport:
+Contacts are stiff, constraints may be soft, show interplay between
+masses and stifnesses
+
+Pure 1D “stack” with 1 contact and 1 constraint first, show how
+condition number changes
+
+Stiffness means time-dependent so no longer instantaneous contact,
+must consider timestep
+
+Can we derive direct system and infer PGS behaviour based on stiffnesses/masses?
 
 * LOCAL VARIABLES                                                  :noexport:
 Local Variables:
