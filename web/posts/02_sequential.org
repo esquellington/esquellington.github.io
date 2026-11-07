@@ -271,13 +271,13 @@ sideffects. See "Warmstarting Blows!"
 show its very very close to linear, quadratic error term is very small, I
 think it's because x/(x+1) tends to 1, and log(1) is 0, so its effect
 as x grows is negligible)
-* TODO [#A] PART 2: Multiple simultaneous collisions               :noexport:
+* TODO [#A] ------- PART 2: Multiple simultaneous collisions
 
 SUMMARY: Simple IMPACT case N bodies with var mass ratio, still
 Equalities, no time-stepping or warmstarting, just instant collision
 
 up and down solve order are approx equivalent
-*** TODO Problem statement
+** TODO Problem statement
 
 1D N+1 objects, where 0 is ground
 
@@ -285,13 +285,42 @@ Problem with indices 0..N with 0 static ground, 1/m0 = 0
 
 COPY from DIRECT SOLVE below, including sign convention etc
 
-**** Collision Constraints
+If we assume all constraints are Active, due to compressive init state
+and inelssticity, all constraints become equalities, and we can solve
+for all collisions simultaneously solving a linear system of
+equations.
+
+Contact constraint is a "gap function" G(pi,pj)>0, deriving results in
+velocity constraint
+
+We'll rename C,A,B into 0,1,2, ordered away from ground
+
+Non-iterative solution should be trivial for this problem, we could
+solve system of eq with 2 vars and 2 constraints, assuming vel will
+never change sign, and arrive at $V_b=0$.
+
+Sign convention: Positive velocities go UP, from i to i+1 (opposite
+from ABC example before)
+** Collision Constraints
 
 Constraints 0..N-1 on post-impact velocities $V_i^+$
 \[ C_{i+1,i} = V_{i+1}^+ - V_{i}^+ \geq 0 \]
 
+** Collision Impulses
 
-*** TODO Analytic or Numeric solution for multiple collisions
+Instantaneous PAIRWISE impulses from $C_{i+1,i}$
+\[ V_i^+ = V_i^- - \frac{1}{m_i} \lambda_{i+1,i} \]
+\[ V_{i+1}^+ = V_{i+1}^- + \frac{1}{m_{i+1}} \lambda_{i+1,i} \]
+
+Impulses must only push objects apart, so $\lambda \geq 0$.
+
+in a stack, each body gets 2 contacts with their neighbours
+below/above, except for the bottom/top bodies that get 1.
+
+we assume body 0 has infinite mass, so $1/m_0 = 0$
+\[ V_0^+ = V_0^- = 0 \]
+
+** TODO Analytic or Numeric solution for multiple collisions
 
 TODO: Try to derive convergence for N>2 bodies, is there a similar
 recurrence?
@@ -305,7 +334,7 @@ momentum of all other objects, so object count is
 essentially the same as the mass ratio of a simplified problem where
 N-1 objects have been merged into one.
 
-**** TODO Prove this somehow
+*** TODO Prove this somehow
 
 How would N bodies converge, depending on masses I think if known
 solution is Vi=0 for all, we can always partition a list of bodies
@@ -318,7 +347,7 @@ regardless of number of bodies in Bi set
 
 Write recurrence for body V_N depending on V_N-1...V_0 per iter
 
-**** TODO Also prove that "mass ratio" and "number of objects with same mass" are somewhat interchangeable
+*** TODO Also prove that "mass ratio" and "number of objects with same mass" are somewhat interchangeable
 So iter count to achieve same error with more objects grows more than linearly?
 * TODO [#A] PART 3: PERSISTENT contacts and Warmstarting           :noexport:
 SUMMARY: Solve multiple steps, persistent stack should stabilize, NO
@@ -1025,12 +1054,6 @@ count
 Also see effect of subiter in a subgroup vs global iteration without
 subgroups, in principle subgroups with larger mass ratios would need
 more iter than others so total count would reduce
-
-** TODO Derivations/Appendix
-*** TODO Linear System Solve
-- Maxima solve
-*** TODO Condition Number?
-- Any details would go here
 
 ** REFS
 Discusses MLCP solvers and relaxation, projected-CR and even direct solvers, for reformulation of contact problem (using smoothified energies, I think)
