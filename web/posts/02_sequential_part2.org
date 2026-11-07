@@ -457,6 +457,50 @@ absorb the momentum of all other objects, so object count is
 essentially the same as the mass ratio of a simplified problem where
 N-1 objects have been merged into one.
 
+recurrencia
+\[ V_n^k = V_n^{k-1} + V_{n,n-1}^{k-1} w_{n,n-1} \]
+\[ V_{n-1}^k = V_{n-1}^{k-1} + V_{n-1,n-2}^{k-1} w_{n-1,n-2} \]
+
+Assume $w_{n,n-1}$ is constant $w$, except for n=1 that is 1
+
+Later expand w wrt $\xi$ but initially no need
+
+** Hypothesis
+
+Assume $V_N^{k} = V_N^{(0)} w^{\frac{k}{(N-1)}}$
+
+We plot $V_b^{(k)}$ for $V_b^{(0)} = 10m/s$, $\epsilon = 10^{-3}$ and
+$\xi = 1$ so $w=0.5$
+
+TODO NOT CORRECT DOES NOT MATCH table results
+
+#+NAME: image-vN_k
+#+BEGIN_SRC gnuplot :file ../img/sequential_vN_k.png :exports results
+  set term png size 600, 300
+  set size ratio 0.5
+  set xrange [1:1200]
+  set yrange [0:0.01]
+  plot 1e-3 with dots lc 'black', \
+       10*(0.5**(x/(4*(2-1)))) title "V_b(k), N=2" with lines, \
+       10*(0.5**(x/(4*(3-1)))) title "V_b(k), N=3" with lines, \
+       10*(0.5**(x/(4*(4-1)))) title "V_b(k), N=4" with lines, \
+       10*(0.5**(x/(4*(5-1)))) title "V_b(k), N=5" with lines, \
+       10*(0.5**(x/(4*(10-1)))) title "V_b(k), N=10" with lines, \
+       10*(0.5**(x/(4*(20-1)))) title "V_b(k), N=20" with lines
+  unset xrange
+  unset yrange
+#+END_SRC
+
+#+RESULTS: image-vN_k
+[[file:../img/sequential_vN_k.png]]
+
+** Condition Number of direct system should be $w^N$ or similar if this is true
+- For constant masses, cond number of direct linear system should grow
+  with both w and N, or at least show that eigenvalues go from w to
+  w^N? MUST be related to recurrence, IIRC this was connected through
+  the characteristic polynomial of the recurrence, likely same as the
+  poly for the eigenvalue problem
+
 ** TODO Prove this somehow
 
 How would N bodies converge, depending on masses I think if known
@@ -470,7 +514,6 @@ regardless of number of bodies in Bi set
 
 MAY depend on solve order, if top-to-bottom, I think num bodies is the
 same as mass ratio, but if not then it takes longer to converge
-
 
 * LOCAL VARIABLES                                                  :noexport:
 Local Variables:
