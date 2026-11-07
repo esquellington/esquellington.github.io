@@ -214,6 +214,32 @@ TODO maybe plot for various mass ratios and repro full first plot?
   }
 #+END_SRC
 
+#+RESULTS: table-impact-abc
+:results:
+|  k |    V_a |    V_b |
+|  0 |    0.0 |   10.0 |
+|  5 | 6.2092 | 6.2092 |
+| 10 | 3.8554 | 3.8554 |
+| 15 | 2.3939 | 2.3939 |
+| 20 | 1.4864 | 1.4864 |
+| 25 |  0.923 |  0.923 |
+| 30 | 0.5731 | 0.5731 |
+| 35 | 0.3558 | 0.3558 |
+| 40 | 0.2209 | 0.2209 |
+| 45 | 0.1372 | 0.1372 |
+| 50 | 0.0852 | 0.0852 |
+| 55 | 0.0529 | 0.0529 |
+| 60 | 0.0328 | 0.0328 |
+| 65 | 0.0204 | 0.0204 |
+| 70 | 0.0127 | 0.0127 |
+| 75 | 0.0079 | 0.0079 |
+| 80 | 0.0049 | 0.0049 |
+| 85 |  0.003 |  0.003 |
+| 90 | 0.0019 | 0.0019 |
+| 95 | 0.0012 | 0.0012 |
+| 97 |  0.001 |  0.001 |
+:end:
+
 #+BEGIN_EXPORT html
 </details>
 #+END_EXPORT
@@ -280,94 +306,7 @@ sideffects. (TODO link to Warmstarting Post)
 show its very very close to linear, quadratic error term is very small, I
 think it's because x/(x+1) tends to 1, and log(1) is 0, so its effect
 as x grows is negligible)
-* TODO [#A] ------- PART 2 -------  Multiple simultaneous collisions
-
-SUMMARY: Simple IMPACT case N bodies with var mass ratio, still
-Equalities, no time-stepping or warmstarting, just instant collision
-** Problem
-
-We want to solve a perfectly inelastic impact of a rigid body $N$ on a
-stack of $N+1$ bodies, where body $0$ is the static ground and bodies
-$1..N$ are dynamic.
-
-Sign convention: Positive velocities go UP, from i to i+1 (opposite
-from ABC example before)
-
-TODO: Diagram
-
-the pre-collision initial conditions are:
-\[ V_{0..N-1}^{(0)} = 0 ,\quad V_N^{(0)} < 0 \]
-
-Collisions introduce the following inequality constraints on
-post-collision relative velocities, with $V_{ij}=V_i-V_j$.
-
-\[ C_{i+1,i} = V_{i+1}^* - V_{i}^* \geq 0 \]
-
-For any magnitude, a superindex $^{(0)}$ indicates pre-collision
-initial condition, and $^*$ indicates post-collision global
-solution.
-
-Masses are arbitrary, but we'll assume $1/m_0 = 0$ and $m_{i} \leq m_{i+1}$.
-
-*** Solution
-
-Similar to the restricted problem (TODO LINK), the intuitive *global
-solution* for post-collision velocities is
-\[V_{i}^* = 0 ,\quad i \in [0,N] \]
-
-** Sequential Impulses
-*** Local Response
-
-Contact constraint is a "gap function" G(pi,pj)>0, deriving results in
-constraints on post-impact velocities $V_i^+$
-\[ C_{i+1,i} = V_{i+1}^+ - V_{i}^+ \geq 0 \]
-
-Instantaneous *local* impulses from $C_{i+1,i}$
-\[ V_i^+ = V_i^- - \frac{1}{m_i} \lambda_{i+1,i} \]
-\[ V_{i+1}^+ = V_{i+1}^- + \frac{1}{m_{i+1}} \lambda_{i+1,i} \]
-
-Collision impulses must only push objects apart, so $\lambda \geq 0$.
-
-we assume body 0 has infinite mass, so $1/m_0 = 0$
-\[ V_0^+ = V_0^- = 0 \]
-
-*** Iterative solution
-
-Each iteration $k$ we'll solve C_i in order
-
-*** TODO Analytic convergence
-
-TODO: Try to derive convergence for N>2 bodies, is there a similar
-recurrence for V_n^k??
-
-The problem is not limited to large mass ratios between individual
-bodies, it can also appear when multiple light bodies impact another
-one simultaneously with coherent velocity (ex: a stack of N bricks
-falling on a single one, or avalanche of similar rocks forming a pile
-of rubble), in that case the bottommost object needs to absorb the
-momentum of all other objects, so object count is
-essentially the same as the mass ratio of a simplified problem where
-N-1 objects have been merged into one.
-
-**** TODO Prove this somehow
-
-How would N bodies converge, depending on masses I think if known
-solution is Vi=0 for all, we can always partition a list of bodies
-{Bi} to Wall, A (sandwiched), B=sum Bi fir all other bodies, and
-assume they behave like a single block, so mass ratio mA, mB increases
-with Bi count even if individual bodies have constant mass. This makes
-sense I think and would reuse the same derivation. We’re computing how
-long it takes to converge at the “bottleneck” body A due to mass B,
-regardless of number of bodies in Bi set
-
-Write recurrence for body V_N depending on V_N-1...V_0 per iter
-
-**** TODO Also prove that "mass ratio" and "number of objects with same mass" are somewhat interchangeable
-So iter count to achieve same error with more objects grows more than linearly?
-
-** TODO Numeric solution
-Show up and down solve order are approx equivalent
-
+* TODO PART 2 --> [[file:02_sequential_part2.org]]
 * TODO [#A] PART 3: PERSISTENT contacts and Warmstarting           :noexport:
 SUMMARY: Solve multiple steps, persistent stack should stabilize, NO
 WARMSTART YET
@@ -558,6 +497,8 @@ TODO ADD printf freq instead of hardcoded to every 20 iter
 
 TODO Flag steps that end with any negative speed in red (maybe output
 column so that gnuplot can just plot green/red)
+
+TODO PARAM to support inequalities and make it a full PGS or just GS
 
 #+NAME: GSimulateStack1D
 #+BEGIN_SRC C++

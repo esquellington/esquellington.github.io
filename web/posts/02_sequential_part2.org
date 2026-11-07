@@ -1,0 +1,336 @@
+#+STARTUP: indent overview
+#+title: Multiple simultaneous collisions
+#+date: <2026-10-12 lun>
+#+author: Oscar
+
+See [[file:02_sequential.org]]
+
+SUMMARY: Simple IMPACT case N bodies with var mass ratio, still
+Equalities, no time-stepping or warmstarting, just instant collision
+* Problem
+
+We want to solve a perfectly inelastic impact of a rigid body $N$ on a
+stack of $N+1$ bodies, where body $0$ is the static ground and bodies
+$1..N$ are dynamic.
+
+Sign convention: Positive velocities go UP, from i to i+1 (opposite
+from ABC example before)
+
+TODO: Diagram
+
+the pre-collision initial conditions are:
+\[ V_{0..N-1}^{(0)} = 0 ,\quad V_N^{(0)} < 0 \]
+
+Collisions introduce the following inequality constraints on
+post-collision relative velocities, with $V_{ij}=V_i-V_j$.
+
+\[ C_{i+1,i} = V_{i+1}^* - V_{i}^* \geq 0 \]
+
+For any magnitude, a superindex $^{(0)}$ indicates pre-collision
+initial condition, and $^*$ indicates post-collision global
+solution.
+
+Masses are arbitrary, but we'll assume $1/m_0 = 0$ and $m_{i} \leq m_{i+1}$.
+
+** Solution
+
+Similar to the restricted problem (TODO LINK), the intuitive *global
+solution* for post-collision velocities is
+\[V_{i}^* = 0 ,\quad i \in [0,N] \]
+
+* Sequential Impulses
+** Local Response
+
+Contact constraint is a "gap function" $G_{a,b} = p_a-p_b > 0$,
+deriving results in constraints on post-impact velocities $V_i^+$
+
+\[ C_{i+1,i} = V_{i+1}^+ - V_{i}^+ \geq 0 \]
+
+Instantaneous *local* impulses from $C_{i+1,i}$
+\[ V_i^+ = V_i^- - \frac{1}{m_i} \lambda_{i+1,i} \]
+\[ V_{i+1}^+ = V_{i+1}^- + \frac{1}{m_{i+1}} \lambda_{i+1,i} \]
+
+Collision impulses must only push objects apart, so $\lambda \geq 0$.
+
+we assume body 0 has infinite mass, so $1/m_0 = 0$
+\[ V_0^+ = V_0^- = 0 \]
+
+** Iterative solution
+
+Each iteration $k$ we'll solve C_i in order
+
+** TODO [#B] Analytic convergence
+
+TODO: Try to derive convergence for N>2 bodies, is there a similar
+recurrence for V_n^k?? MAY NOT BE POSSIBLE
+
+Write recurrence for body V_N depending on V_N-1...V_0 per iter
+
+Deterime iter count to converge with N objects, does it grows more
+than linearly?
+
+The convergence problem is not limited to large mass ratios between
+individual bodies, it can also appear when multiple light bodies
+impact another one simultaneously with coherent velocity (ex: a stack
+of N bricks falling on a single one, or avalanche of similar rocks
+forming a pile of rubble), in that case the bottommost object needs to
+absorb the momentum of all other objects, so object count is
+essentially the same as the mass ratio of a simplified problem where
+N-1 objects have been merged into one.
+
+*** TODO Prove this somehow
+
+How would N bodies converge, depending on masses I think if known
+solution is Vi=0 for all, we can always partition a list of bodies
+{Bi} to Wall, A (sandwiched), B=sum Bi fir all other bodies, and
+assume they behave like a single block, so mass ratio mA, mB increases
+with Bi count even if individual bodies have constant mass. This makes
+sense I think and would reuse the same derivation. We’re computing how
+long it takes to converge at the “bottleneck” body A due to mass B,
+regardless of number of bodies in Bi set
+
+MAY depend on solve order, if top-to-bottom, I think num bodies is the
+same as mass ratio, but if not then it takes longer to converge
+
+* TODO [#A] Numeric solution
+Show up and down solve order are approx equivalent
+
+REUSE GSimulateStack1D code, but without warmstarting
+
+** Impact stack 2 bodies with $\xi=10$
+
+This is the same as PART1, but implemented generically, same results,
+97 iter to converge below $\epsilon$
+
+#+NAME: table-stack2-T1-mr10-v10-eps1e3
+#+BEGIN_SRC C++ :includes <stdio.h> :results drawer :noweb strip-export :exports results
+  <<GSimulateStack1D>>
+  int main( int argc, char** argv )
+  {
+      const int K(200);
+      GSimulateStack1D<3>( 10.0f, //\xi
+                           10.0f, //V0
+                           0.0f, //G
+                           1, 0.0f, //T, dt
+                           1e-3f, //\epsilon
+                           K, //K iter per step T
+                           true, //bBottomToTop
+                           false, //bWarmstart
+                           1.0f ); //ws_decay01
+      return 0;
+  }
+#+END_SRC
+
+#+NAME: image-stack2-T1-mr10-v10-eps1e3
+#+BEGIN_SRC gnuplot :var data=table-stack2-T1-mr10-v10-eps1e3 :file ../img/sequential-image-stack2-T1-mr10-v10-eps1e3.png :exports results
+  set term png size 600, 300
+  set size ratio 0.5
+  set yrange [1e-4:10]
+  set logscale y
+  plot data u 2:4 title "V_1" with lines, \
+       data u 2:5 title "V_2" with lines
+  unset yrange
+  unset logscale
+#+END_SRC
+
+#+RESULTS: image-stack2-T1-mr10-v10-eps1e3
+[[file:../img/sequential-image-stack2-T1-mr10-v10-eps1e3.png]]
+
+** Impact stack 10 bodies with $\xi=1$
+
+Solving in bottom-to-top order
+
+#+NAME: table-stack10-T1-mr1-v10-eps1e3-b2t
+#+BEGIN_SRC C++ :includes <stdio.h> :results drawer :noweb strip-export :exports results
+  <<GSimulateStack1D>>
+  int main( int argc, char** argv )
+  {
+      const int K(500);
+      GSimulateStack1D<11>( 1.0f, //\xi
+                            10.0f, //V0
+                            0.0f, //G
+                            1, 0.0f, //T, dt
+                            1e-3f, //\epsilon
+                            K, //K iter per step T
+                            true, //bottom-to-top
+                            false, //bWarmstart
+                            1.0f ); //ws_decay01
+      return 0;
+  }
+#+END_SRC
+
+#+NAME: image-stack10-T1-mr1-v10-eps1e3-b2t
+#+BEGIN_SRC gnuplot :var data=table-stack10-T1-mr1-v10-eps1e3-b2t :file ../img/sequential-image-stack10-T1-mr1-v10-eps1e3-b2t.png :exports results
+  set term png size 600, 300
+  set size ratio 0.5
+  set yrange [1e-4:10]
+  set logscale y
+  plot data u 2:4 title "V_1" with lines, \
+       data u 2:5 title "V_2" with lines, \
+       data u 2:8 title "V_5" with lines, \
+       data u 2:13 title "V_{10}" with lines
+  unset yrange
+  unset logscale
+#+END_SRC
+
+#+RESULTS: image-stack10-T1-mr1-v10-eps1e3-b2t
+[[file:../img/sequential-image-stack10-T1-mr1-v10-eps1e3-b2t.png]]
+
+Solving in top-to-bottom order
+
+#+NAME: table-stack10-T1-mr1-v10-eps1e3-t2b
+#+BEGIN_SRC C++ :includes <stdio.h> :results drawer :noweb strip-export :exports results
+  <<GSimulateStack1D>>
+  int main( int argc, char** argv )
+  {
+      const int K(500);
+      GSimulateStack1D<11>( 1.0f, //\xi
+                            10.0f, //V0
+                            0.0f, //G
+                            1, 0.0f, //T, dt
+                            1e-3f, //\epsilon
+                            K, //K iter per step T
+                            false, //bottom-to-top
+                            false, //bWarmstart
+                            1.0f ); //ws_decay01
+      return 0;
+  }
+#+END_SRC
+
+#+NAME: image-stack10-T1-mr1-v10-eps1e3-t2b
+#+BEGIN_SRC gnuplot :var data=table-stack10-T1-mr1-v10-eps1e3-t2b :file ../img/sequential-image-stack10-T1-mr1-v10-eps1e3-t2b.png :exports results
+  set term png size 600, 300
+  set size ratio 0.5
+  set yrange [1e-4:10]
+  set logscale y
+  plot data u 2:4 title "V_1" with lines, \
+       data u 2:5 title "V_2" with lines, \
+       data u 2:8 title "V_5" with lines, \
+       data u 2:13 title "V_{10}" with lines
+  unset yrange
+  unset logscale
+#+END_SRC
+
+#+RESULTS: image-stack10-T1-mr1-v10-eps1e3-t2b
+[[file:../img/sequential-image-stack10-T1-mr1-v10-eps1e3-t2b.png]]
+
+** Implementation of GSimulateStack1D                             :noexport:
+NOTE:, func uses printf but include "<stdio.h>" must be added to caller
+main() block due to how org-babel tangles multiple code blocks.
+
+NOTE: To call it from other blocks, use "noweb" syntax
+<<GSimulateStack1D>>, that inserts func definition into any block
+(even if defined earlier). Use ":noweb strip-export" in caller block
+to avoid inserting code verbatim and exporting the <<src>> text.
+(see https://orgmode.org/manual/Noweb-Reference-Syntax.html)
+
+TODO CODE assumes vel down are POSITIVE, so Vab is negated wrt eq
+above, consider reconciling code convention with the "genaral case"
+with positive-up
+
+TODO ADD printf freq instead of hardcoded to every 20 iter
+
+TODO Flag steps that end with any negative speed in red (maybe output
+column so that gnuplot can just plot green/red)
+
+TODO PARAM to support inequalities and make it a full PGS or just GS
+
+#+NAME: GSimulateStack1D
+#+BEGIN_SRC C++ :includes <stdio.h> :exports none
+  template <unsigned int N>
+  void GSimulateStack1D( float xi, float V0, float G, //massratio, vel, grav
+                         int T, float dt, //steps and timestep
+                         float epsilon, int K, //precision and iterations
+                         bool bBottomToTop, //solve from bottom to top
+                         bool bWarmstart, float ws_decay01 ) //warmstarting
+  {
+      const float wa(xi/(xi+1));
+      float V[N] = {}; V[N-1] = V0;
+      float cached_Vab[N] = {};
+      printf("t k");
+      for( int n=0; n<N; n++ )
+          printf(" V[%d]", n);
+      int tk(0); //total iter across timesteps
+      for( int t=0; t<T; t++ ) //T frames
+      {
+          // Integrate t->t+dt
+          for( int n=1; n<N; n++ )
+              V[n] += dt*G;
+          int k(0); //per-step iter
+
+          // TODO Apply warmstarting, but only after contacts applied
+          // their 2nd impulse, not 1st (persisted for >1 steps, save on
+          // 2nd step, apply on 3rd)
+          if( bWarmstart && t>1 )
+          {
+              for( int n=1; n<N; n++ )
+              {
+                  float wa_n( n==1 ? 0.0f : wa ); //B[0] is static
+                  V[n-1] -= cached_Vab[n] * wa_n;
+                  V[n] += cached_Vab[n] * (1-wa_n);
+                  cached_Vab[n] *= ws_decay01;
+              }
+          }
+          // Solve/refine constraints after warmstarting
+          while( k < K && V[N-1] > epsilon )
+          {
+              if( k%10 == 0 )
+              {
+                  printf("\n%d %d",t,tk);
+                  for( int n=0; n<N; n++ )
+                      printf(" %2.4f",V[n]);
+              }
+              if( bBottomToTop )
+              {
+                  V[0] = 0.0f;
+                  for( int n=1; n<N; n++ )
+                  {
+                      float Vab( V[n-1] - V[n] ); //solve AB
+                      float wa_n( n==1 ? 0.0f : wa ); //B[0] is static
+                      // req separating contact (TODO not sure if correct,
+                      // we should clamp total not per-iter)
+                      if( Vab > 0.0f )
+                          Vab = 0.0f;
+
+                      V[n-1] -= Vab * wa_n;
+                      V[n] += Vab * (1-wa_n);
+
+                      // Update warmstarting after 1st step
+                      if( bWarmstart && t>0 )
+                          cached_Vab[n] += Vab;
+                  }
+              }
+              else //top-to-bottom
+              {
+                  V[0] = 0.0f;
+                  for( int n=N-1; n>0; n-- )
+                  {
+                      float Vab( V[n-1] - V[n] ); //solve AB
+                      float wa_n( n==1 ? 0.0f : wa ); //B[0] is static
+                      // req separating contact (TODO not sure if correct,
+                      // we should clamp total not per-iter)
+                      if( Vab > 0.0f )
+                          Vab = 0.0f;
+
+                      V[n-1] -= Vab * wa_n;
+                      V[n] += Vab * (1-wa_n);
+
+                      // Update warmstarting after 1st step
+                      if( bWarmstart && t>0 )
+                          cached_Vab[n] += Vab;
+                  }
+              }
+              k++;
+              tk++;
+          }
+          printf("\n%d %d",t,tk);
+          for( int n=0; n<N; n++ )
+              printf(" %2.4f",V[n]);
+      }
+  }
+#+END_SRC
+
+* LOCAL VARIABLES                                                  :noexport:
+Local Variables:
+org-confirm-babel-evaluate: nil
+End:
