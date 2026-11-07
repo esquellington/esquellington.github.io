@@ -41,7 +41,7 @@ solution* for post-collision velocities is
 * Sequential Impulses
 ** Local Response
 
-Contact constraint is a "gap function" $G_{a,b} = p_a-p_b > 0$,
+Contact constraint is a "gap function" $G_{a,b} = p_a-p_b \geq 0$,
 deriving results in constraints on post-impact velocities $V_i^+$
 
 \[ C_{i+1,i} = V_{i+1}^+ - V_{i}^+ \geq 0 \]
@@ -93,9 +93,8 @@ MAY depend on solve order, if top-to-bottom, I think num bodies is the
 same as mass ratio, but if not then it takes longer to converge
 
 * TODO [#A] Numeric solution
-Show up and down solve order are approx equivalent
 
-REUSE GSimulateStack1D code, but without warmstarting
+REUSE GSimulateStack1D code, but without warmstarting, try top/bottom ordering
 
 ** Impact stack 2 bodies with $\xi=10$
 
@@ -127,7 +126,8 @@ This is the same as PART1, but implemented generically, same results,
   set size ratio 0.5
   set yrange [1e-4:10]
   set logscale y
-  plot data u 2:4 title "V_1" with lines, \
+  plot 1e-3 with dots lc 'black', \
+       data u 2:4 title "V_1" with lines, \
        data u 2:5 title "V_2" with lines
   unset yrange
   unset logscale
@@ -165,7 +165,8 @@ Solving in bottom-to-top order
   set size ratio 0.5
   set yrange [1e-4:10]
   set logscale y
-  plot data u 2:4 title "V_1" with lines, \
+  plot 1e-3 with dots lc 'black', \
+       data u 2:4 title "V_1" with lines, \
        data u 2:5 title "V_2" with lines, \
        data u 2:8 title "V_5" with lines, \
        data u 2:13 title "V_{10}" with lines
@@ -203,7 +204,8 @@ Solving in top-to-bottom order
   set size ratio 0.5
   set yrange [1e-4:10]
   set logscale y
-  plot data u 2:4 title "V_1" with lines, \
+  plot 1e-3 with dots lc 'black', \
+       data u 2:4 title "V_1" with lines, \
        data u 2:5 title "V_2" with lines, \
        data u 2:8 title "V_5" with lines, \
        data u 2:13 title "V_{10}" with lines
@@ -213,6 +215,44 @@ Solving in top-to-bottom order
 
 #+RESULTS: image-stack10-T1-mr1-v10-eps1e3-t2b
 [[file:../img/sequential-image-stack10-T1-mr1-v10-eps1e3-t2b.png]]
+
+** Impact stack 5 bodies with $\xi=1$
+
+#+NAME: table-stack5-T1-mr1-v10-eps1e3-b2t
+#+BEGIN_SRC C++ :includes <stdio.h> :results drawer :noweb strip-export :exports results
+  <<GSimulateStack1D>>
+  int main( int argc, char** argv )
+  {
+      const int K(500);
+      GSimulateStack1D<6>( 1.0f, //\xi
+                           10.0f, //V0
+                           0.0f, //G
+                           1, 0.0f, //T, dt
+                           1e-3f, //\epsilon
+                           K, //K iter per step T
+                           true, //bottom-to-top
+                           false, //bWarmstart
+                           1.0f ); //ws_decay01
+      return 0;
+  }
+#+END_SRC
+
+#+NAME: image-stack5-T1-mr1-v10-eps1e3-b2t
+#+BEGIN_SRC gnuplot :var data=table-stack5-T1-mr1-v10-eps1e3-b2t :file ../img/sequential-image-stack5-T1-mr1-v10-eps1e3-b2t.png :exports results
+  set term png size 600, 300
+  set size ratio 0.5
+  set yrange [1e-4:10]
+  set logscale y
+  plot 1e-3 with dots lc 'black', \
+       data u 2:4 title "V_1" with lines, \
+       data u 2:5 title "V_2" with lines, \
+       data u 2:8 title "V_5" with lines
+  unset yrange
+  unset logscale
+#+END_SRC
+
+#+RESULTS: image-stack5-T1-mr1-v10-eps1e3-b2t
+[[file:../img/sequential-image-stack5-T1-mr1-v10-eps1e3-b2t.png]]
 
 ** Implementation of GSimulateStack1D                             :noexport:
 NOTE:, func uses printf but include "<stdio.h>" must be added to caller
@@ -227,6 +267,8 @@ to avoid inserting code verbatim and exporting the <<src>> text.
 TODO CODE assumes vel down are POSITIVE, so Vab is negated wrt eq
 above, consider reconciling code convention with the "genaral case"
 with positive-up
+
+TODO IMPLEMENT with LAMBDAS not with VEL, assume m1=1
 
 TODO ADD printf freq instead of hardcoded to every 20 iter
 

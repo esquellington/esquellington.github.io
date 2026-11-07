@@ -105,14 +105,14 @@ We plot $V_b^{(k)}$ for $V_b^{(0)} = 10m/s$, $\epsilon = 10^{-3}$ and $\xi
   set size ratio 0.5
   set xrange [1:300]
   set yrange [0:0.01]
-  plot 10*(1.0/(1+1))**x title "V_b(k), xi=1" with lines, \
+  plot 1e-3 with dots lc 'black', \
+       10*(1.0/(1+1))**x title "V_b(k), xi=1" with lines, \
        10*(2.0/(2+1))**x title "V_b(k), xi=2" with lines, \
        10*(3.0/(3+1))**x title "V_b(k), xi=3" with lines, \
        10*(4.0/(4+1))**x title "V_b(k), xi=4" with lines, \
        10*(5.0/(5+1))**x title "V_b(k), xi=5" with lines, \
        10*(10.0/(10+1))**x title "V_b(k), xi=10" with lines, \
-       10*(20.0/(20+1))**x title "V_b(k), xi=20" with lines, \
-       1e-3 with lines
+       10*(20.0/(20+1))**x title "V_b(k), xi=20" with lines
   unset xrange
   unset yrange
 #+END_SRC
@@ -123,8 +123,8 @@ We plot $V_b^{(k)}$ for $V_b^{(0)} = 10m/s$, $\epsilon = 10^{-3}$ and $\xi
 ** How many iterations do we need?
 Due to inelasticity we know that in the limit $V_b^{(\infty)} = 0$. In
 practice we'll iterate until error drops below an absolute threshold
-$V_b^{(k^*)} < \epsilon$, represented by the horizontal line in the
-previous plot.
+$V_b^{(k^*)} < \epsilon$, represented by the horizontal dotted line in
+the previous plot.
 
 We can assume $k^*$ is real and isolate it taking $\log$ on both sides
 of $V_b^{(0)} w_a^{k} = \epsilon$
@@ -345,6 +345,9 @@ Warmstarting, that SEEMS to be great BUTTTTTT...
 Explain PGS with Warmstarting
 
 ** TODO (WIP) Impact Stacks under gravity, Examples
+TODO REVISIT these after Part2 that solves instant multibody
+collision, no timestepping, but better plots, update these
+
 *** Impact stack 2 bodies with $\xi=4$
 
 Simulate 5 frames of a stack of 2 bodies with 1:4 mass ratio:
