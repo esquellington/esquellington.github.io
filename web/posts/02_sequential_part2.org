@@ -151,7 +151,7 @@ This is the same as PART1, but implemented generically, same results,
   <<GSimulateStack1D>>
   int main( int argc, char** argv )
   {
-      const int K(500);
+      const int K(1500);
       GSimulateStack1D<6>( 1.0f, //\xi
                            10.0f, //V0
                            0.0f, //G
@@ -181,11 +181,6 @@ This is the same as PART1, but implemented generically, same results,
 
 #+RESULTS: image-stack5-T1-mr1-v10-eps1e3-b2t
 [[file:../img/sequential-image-stack5-T1-mr1-v10-eps1e3-b2t.png]]
-
-With 5 objects we need 83 iter to converge, mass ratio between 4 top objects
-and 1 bottom object is 1:4, so object count affects convergence more
-than mass ratio (as iter count for 1:4 mr for just 2 bodies is around
-40, so 1/2 the iter req for 5 objects with equal masses)
 
 ** Impact stack 10 bodies with $\xi=1$
 
@@ -268,12 +263,6 @@ convergence curves
 #+RESULTS: image-stack10-T1-mr1-v10-eps1e3-t2b
 [[file:../img/sequential-image-stack10-T1-mr1-v10-eps1e3-t2b.png]]
 
-With 10 objects we need 307 iter to converge, mass ratio between 9 top
-objects and 1 bottom object is 1:9, so object count affects
-convergence more than mass ratio (as iter count for 1:9 mr for just 2
-bodies would be around 90, so < 1/3 the iter req for 10 objects with
-equal masses)
-
 ** Impact stack 20 bodies with $\xi=1$
 
 #+NAME: table-stack20-T1-mr1-v10-eps1e3-b2t
@@ -314,18 +303,66 @@ equal masses)
 #+RESULTS: image-stack20-T1-mr1-v10-eps1e3-b2t
 [[file:../img/sequential-image-stack20-T1-mr1-v10-eps1e3-b2t.png]]
 
-With 10 objects we need 1100 iter to converge, mass ratio between 19
+** Iter wrt N
+
+#+CAPTION: iter count per N bodies
+#+ATTR_HTML: :width 50%
+#+NAME: table-iter-per-N
+| N bodies | Mass ratio | iter(N) | iter(2) |
+|        2 |        1:1 |      14 |      14 |
+|        3 |        1:2 |      31 |      23 |
+|        4 |        1:3 |      54 |      33 |
+|        5 |        1:4 |      83 |      42 |
+|        6 |        1:5 |     117 |      51 |
+|        7 |        1:6 |     157 |      60 |
+|        8 |        1:7 |     202 |      69 |
+|        9 |        1:8 |     252 |      79 |
+|       10 |        1:9 |     307 |      88 |
+|       11 |       1:10 |     367 |      97 |
+|       12 |       1:11 |     432 |     106 |
+|       13 |       1:12 |     502 |     116 |
+|       14 |       1:13 |     576 |     125 |
+|       15 |       1:14 |     655 |     134 |
+|       16 |       1:15 |     739 |     143 |
+|       17 |       1:16 |     827 |     152 |
+|       18 |       1:17 |     920 |     162 |
+|       19 |       1:18 |    1018 |     171 |
+|       20 |       1:19 |    1119 |     180 |
+|       21 |       1:20 |    1225 |     189 |
+
+#+NAME: plot-iter-per-N
+#+BEGIN_SRC gnuplot :var data=table-iter-per-N :results file :file ../img/plot-iter-per-N.png :exports results
+  plot data u 1:3 title 'iter(N)' with lines, \
+       data u 1:4 title 'iter(xi=1:N-1)' with lines
+#+END_SRC
+
+#+RESULTS: plot-iter-per-N
+[[file:../img/plot-iter-per-N.png]]
+
+With 5 objects we need 83 iter to converge, mass ratio between 4 top objects
+and 1 bottom object is 1:4, so object count affects convergence more
+than mass ratio (as iter count for 1:4 mr for just 2 bodies is around
+40, so 1/2 the iter req for 5 objects with equal masses)
+
+With 10 objects we need 307 iter to converge, mass ratio between 9 top
+objects and 1 bottom object is 1:9, so object count affects
+convergence more than mass ratio (as iter count for 1:9 mr for just 2
+bodies would be around 90, so < 1/3 the iter req for 10 objects with
+equal masses)
+
+With 20 objects we need 1100 iter to converge, mass ratio between 19
 top objects and 1 bottom object is 1:19, so object count affects
 convergence more than mass ratio (as iter count for 1:19 mr for just 2
 bodies would be around 180, so < 1/6 the iter req for 20 objects with
 equal masses)
 
-5 bodies -> 2x iter than 1:4
-10 bodies -> 3x iter than 1:9
-20 bodies -> 6x iter than 1:19
-
 So iter count seems to grow linearly with body count too, and linearly
-on "mass ratio", so combined iter count seems to grow with approx $\xi(N-1)$
+on "mass ratio", so combined iter count seems to grow with approx
+$\xi(N-1)$ where xi is the "mass ratio of the analogous 2 body
+problem", which is 1:(N-1) too
+
+SO iter count is QUADRATIC, and cost is CUBIC, because cost per iter
+also grows with N
 
 ** Implementation of GSimulateStack1D                             :noexport:
 NOTE:, func uses printf but include "<stdio.h>" must be added to caller

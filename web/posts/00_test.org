@@ -55,7 +55,7 @@ But explicit link does does
 Table works as expected, with customizable width
 #+CAPTION: example
 #+ATTR_HTML: :width 50%
-#+tblname: data-table
+#+NAME: data-table
 | x | y1 | y2 |
 |---+----+----|
 | 0 |  0 |  0 |
