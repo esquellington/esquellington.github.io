@@ -61,8 +61,6 @@ Each iteration $k$ we'll solve C_i in order
 
 * Numeric solution
 
-REUSE GSimulateStack1D code, but without warmstarting, try top/bottom ordering
-
 ** Impact stack 2 bodies with $\xi=10$
 
 This is the same as PART1, but implemented generically, same results,
@@ -82,7 +80,8 @@ This is the same as PART1, but implemented generically, same results,
                            K, //K iter per step T
                            true, //bBottomToTop
                            false, //bWarmstart
-                           1.0f ); //ws_decay01
+                           1.0f, //ws_decay01
+                           true ); //bPrintAsOrgTable
       return 0;
   }
 #+END_SRC
@@ -119,7 +118,8 @@ This is the same as PART1, but implemented generically, same results,
                            K, //K iter per step T
                            true, //bottom-to-top
                            false, //bWarmstart
-                           1.0f ); //ws_decay01
+                           1.0f, //ws_decay01
+                           true ); //bPrintAsOrgTable
       return 0;
   }
 #+END_SRC
@@ -159,7 +159,8 @@ Solving in bottom-to-top order
                             K, //K iter per step T
                             true, //bottom-to-top
                             false, //bWarmstart
-                            1.0f ); //ws_decay01
+                            1.0f, //ws_decay01
+                            true ); //bPrintAsOrgTable
       return 0;
   }
 #+END_SRC
@@ -199,7 +200,8 @@ convergence curves
                             K, //K iter per step T
                             false, //bottom-to-top
                             false, //bWarmstart
-                            1.0f ); //ws_decay01
+                            1.0f, //ws_decay01
+                            true ); //bPrintAsOrgTable
       return 0;
   }
 #+END_SRC
@@ -238,7 +240,8 @@ convergence curves
                             K, //K iter per step T
                             true, //bottom-to-top
                             false, //bWarmstart
-                            1.0f ); //ws_decay01
+                            1.0f, //ws_decay01
+                            true ); //bPrintAsOrgTable
       return 0;
   }
 #+END_SRC
@@ -261,6 +264,60 @@ convergence curves
 
 #+RESULTS: image-stack20-T1-mr1-v10-eps1e3-b2t
 [[file:../img/sequential-image-stack20-T1-mr1-v10-eps1e3-b2t.png]]
+
+** TODO Plot(n,k) $V_n^k$ as surface to see convergence wrt N,K
+
+Eix vertical es body n in eix horitzontal es iter k in K
+F(x,y) es vel d’aquell body en aquella iter
+
+Hauria de sortir superficie que tendeix a 0 amb k per tots els bodies, pero bN es el que mes tarda
+
+Pot revelar estructura, i es facil de puntar usant dades existents per n,k
+
+Tall vertical/horitzontal haurien de mostrar com “convergeix” en cada eix
+
+- See https://gnuplotting.org/tag/colormap/
+- See http://gnuplot.info/docs_4.2/node332.html#matrix_ascii
+
+#+NAME: output_test_plot3d
+#+BEGIN_SRC C++ :includes <stdio.h> :results file :file output_test_plot3d.txt :noweb strip-export :exports results
+  <<GSimulateStack1D>>
+  int main( int argc, char** argv )
+  {
+      const int K(2000);
+      GSimulateStack1D<21>( 1.0f, //\xi
+                            10.0f, //V0
+                            0.0f, //G
+                            1, 0.0f, //T, dt
+                            1e-3f, //\epsilon
+                            K, //K iter per step T
+                            true, //bottom-to-top
+                            false, //bWarmstart
+                            1.0f, //ws_decay01
+                            false ); //bPrintAsOrgTable, false to splot as matrix
+      return 0;
+  }
+#+END_SRC
+
+#+RESULTS: output_test_plot3d
+[[file:output_test_plot3d.txt]]
+
+#+BEGIN_SRC gnuplot :file ../img/test_plot3d.png :exports results
+  set term png size 800, 400
+  set size ratio 0.5
+  #set zrange [1e-4:10]
+  #set logscale z
+  #set palette jet #cubehelix
+  set palette defined (0 "green", 0.1 "white", 1 "dark-red") #red->white error, green converged
+  set logscale cb #logarithmic palette to highlight error near 0
+  splot 'output_test_plot3d.txt' matrix u 2:1:3 with pm3d #x(1) col, y(2) row, z(3) value
+  unset zrange
+  unset logscale
+  set palette
+#+END_SRC
+
+#+RESULTS:
+[[file:../img/test_plot3d.png]]
 
 ** Table iter wrt N                                               :noexport:
 No point in exporting table, but was manualy generated, so keep
@@ -342,14 +399,18 @@ TODO PARAM to support inequalities and make it a full PGS or just GS
                          int T, float dt, //steps and timestep
                          float epsilon, int K, //precision and iterations
                          bool bBottomToTop, //solve from bottom to top
-                         bool bWarmstart, float ws_decay01 ) //warmstarting
+                         bool bWarmstart, float ws_decay01, //warmstarting
+                         bool bPrintAsOrgTable ) //Org-Table or plain matrix Iter(k) x Body(n)
   {
       const float wa(xi/(xi+1));
       float V[N] = {}; V[N-1] = V0;
       float cached_Vab[N] = {};
-      printf("t k");
-      for( int n=0; n<N; n++ )
-          printf(" V[%d]", n);
+      if( bPrintAsOrgTable ) //table header
+      {
+          printf("t k");
+          for( int n=0; n<N; n++ )
+              printf(" V[%d]", n);
+      }
       int tk(0); //total iter across timesteps
       for( int t=0; t<T; t++ ) //T frames
       {
@@ -374,9 +435,12 @@ TODO PARAM to support inequalities and make it a full PGS or just GS
           // Solve/refine constraints after warmstarting
           while( k < K && V[N-1] > epsilon )
           {
-              if( k%10 == 0 )
+              if( k%10 == 0 || !bPrintAsOrgTable ) //TEMP: no skip unless table, add skip count param instead
               {
-                  printf("\n%d %d",t,tk);
+                  if( bPrintAsOrgTable )
+                      printf("\n%d %d",t,tk);
+                  else
+                      printf("\n");
                   for( int n=0; n<N; n++ )
                       printf(" %2.4f",V[n]);
               }
@@ -423,7 +487,11 @@ TODO PARAM to support inequalities and make it a full PGS or just GS
               k++;
               tk++;
           }
-          printf("\n%d %d",t,tk);
+          // V[i] for last iter k in current timestep t
+          if( bPrintAsOrgTable )
+              printf("\n%d %d",t,tk);
+          else
+              printf("\n");
           for( int n=0; n<N; n++ )
               printf(" %2.4f",V[n]);
       }
