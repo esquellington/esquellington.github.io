@@ -60,7 +60,6 @@ we assume body 0 has infinite mass, so $1/m_0 = 0$
 Each iteration $k$ we'll solve C_i in order
 
 * Numeric solution
-
 ** Impact stack 2 bodies with $\xi=10$
 
 This is the same as PART1, but implemented generically, same results,
@@ -72,7 +71,7 @@ This is the same as PART1, but implemented generically, same results,
   int main( int argc, char** argv )
   {
       const int K(1000);
-      GSimulateStack1D<3>( 100.0f, //\xi
+      GSimulateStack1D<3>( 10.0f, //\xi
                            10.0f, //V0
                            0.0f, //G
                            1, 0.0f, //T, dt
@@ -267,18 +266,6 @@ convergence curves
 
 ** TODO Plot(n,k) $V_n^k$ as surface to see convergence wrt N,K
 
-Eix vertical es body n in eix horitzontal es iter k in K
-F(x,y) es vel d’aquell body en aquella iter
-
-Hauria de sortir superficie que tendeix a 0 amb k per tots els bodies, pero bN es el que mes tarda
-
-Pot revelar estructura, i es facil de puntar usant dades existents per n,k
-
-Tall vertical/horitzontal haurien de mostrar com “convergeix” en cada eix
-
-- See https://gnuplotting.org/tag/colormap/
-- See http://gnuplot.info/docs_4.2/node332.html#matrix_ascii
-
 #+NAME: sequential_splot_Vnk
 #+BEGIN_SRC C++ :includes <stdio.h> :results file :file sequential_splot_Vnk.txt :noweb strip-export :exports results
   <<GSimulateStack1D>>
@@ -310,8 +297,9 @@ Tall vertical/horitzontal haurien de mostrar com “convergeix” en cada eix
   set zlabel 'V_n^k'
   #set logscale z
   set logscale cb #logarithmic palette to highlight error near 0
-  set palette defined (0 "dark-green", 0.25 "white", 1 "dark-red") #red->white error, green=converged
-  splot 'sequential_splot_Vnk.txt' matrix u 2:1:3 with pm3d #x(1) col, y(2) row, z(3) value
+  # Palette = red->white error, green=converged, range is [0,1] for zrange [min,max]
+  set palette defined (0 "dark-green", 0.25 "white", 1 "dark-red")
+  splot 'sequential_splot_Vnk.txt' matrix u 2:1:3 title '' with pm3d #x(1) col, y(2) row, z(3) value
   unset zrange
   unset logscale
   set palette #reset to default palette
@@ -323,9 +311,25 @@ Tall vertical/horitzontal haurien de mostrar com “convergeix” en cada eix
 #+RESULTS:
 [[file:../img/sequential_splot_Vnk.png]]
 
+*** TODO DRAFT and REFS                                          :noexport:
+Eix vertical es body n in eix horitzontal es iter k in K
+F(x,y) es vel d’aquell body en aquella iter
+
+Hauria de sortir superficie que tendeix a 0 amb k per tots els bodies, pero bN es el que mes tarda
+
+Pot revelar estructura, i es facil de puntar usant dades existents per n,k
+
+Tall vertical/horitzontal haurien de mostrar com “convergeix” en cada
+eix
+
+- See https://gnuplotting.org/tag/colormap/
+- See http://gnuplot.info/docs_4.2/node332.html#matrix_ascii
+
 ** Table iter wrt N                                               :noexport:
-No point in exporting table, but was manualy generated, so keep
+No point in exporting table, it was manualy generated, so keep
 explicit and tag with noexport
+
+last colum is 2 bodies with $\xi=1:N-1$
 
 #+CAPTION: iter count per N bodies
 #+ATTR_HTML: :width 50%
@@ -372,6 +376,9 @@ combined iter count grows *quadratically* with $N \xi = N(N-1)$.
 
 Computational cost grows *cubically* with $N$, as per iter is linear
 in $N$, and we need $N^2$ iter.
+
+TODO this is not clear, finish [[Analytic convergence]] first before
+drawing any conclusions
 
 ** Implementation of GSimulateStack1D                             :noexport:
 NOTE:, func uses printf but include "<stdio.h>" must be added to caller
@@ -446,44 +453,26 @@ TODO PARAM to support inequalities and make it a full PGS or just GS
                   for( int n=0; n<N; n++ )
                       printf(" %2.4f",V[n]);
               }
-              if( bBottomToTop )
+              //Solve N-1 constraints b2t or t2b
               {
                   V[0] = 0.0f;
                   for( int n=1; n<N; n++ )
                   {
-                      float Vab( V[n-1] - V[n] ); //solve AB
-                      float wa_n( n==1 ? 0.0f : wa ); //B[0] is static
+                      const int c( bBottomToTop ? n : N-n ); //constraint index
+
+                      float Vab( V[c-1] - V[c] ); //solve AB
+                      float wa_n( c==1 ? 0.0f : wa ); //B[0] is static
                       // req separating contact (TODO not sure if correct,
                       // we should clamp total not per-iter)
                       if( Vab > 0.0f )
                           Vab = 0.0f;
 
-                      V[n-1] -= Vab * wa_n;
-                      V[n] += Vab * (1-wa_n);
+                      V[c-1] -= Vab * wa_n;
+                      V[c] += Vab * (1-wa_n);
 
                       // Update warmstarting after 1st step
                       if( bWarmstart && t>0 )
-                          cached_Vab[n] += Vab;
-                  }
-              }
-              else //top-to-bottom
-              {
-                  V[0] = 0.0f;
-                  for( int n=N-1; n>0; n-- )
-                  {
-                      float Vab( V[n-1] - V[n] ); //solve AB
-                      float wa_n( n==1 ? 0.0f : wa ); //B[0] is static
-                      // req separating contact (TODO not sure if correct,
-                      // we should clamp total not per-iter)
-                      if( Vab > 0.0f )
-                          Vab = 0.0f;
-
-                      V[n-1] -= Vab * wa_n;
-                      V[n] += Vab * (1-wa_n);
-
-                      // Update warmstarting after 1st step
-                      if( bWarmstart && t>0 )
-                          cached_Vab[n] += Vab;
+                          cached_Vab[c] += Vab;
                   }
               }
               k++;
@@ -537,26 +526,40 @@ Later expand w wrt $\xi$ but initially no need
 
 ** Hypothesis
 
+For 2 bodies:
+\[ V_b^{k} = V_b^{(0)} w^k\]
+\[ k^* \approx -\log(\epsilon/V_b^{(0)}) (\xi+1)\]
+
+For N bodies
 Assume $V_N^{k} = V_N^{(0)} w^{\frac{k}{(N-1)}}$
-
-We plot $V_b^{(k)}$ for $V_b^{(0)} = 10m/s$, $\epsilon = 10^{-3}$ and
-$\xi = 1$ so $w=0.5$
-
 TODO NOT CORRECT DOES NOT MATCH table results
+
+This seems reasonable but does not match:
+\[ k^* \approx -\log(\epsilon/V_b^{(0)}) (\xi+1) N^2\]
+
+Best match is something like this, but not sure why, accurate for N=[2,100]
+\[ k^* \approx -\log(\epsilon/V_b^{(0)}) (0.25) (N+2)^2\]
+Which could be, for $w=0.5$, so maybe try for different w?
+\[ k^* \approx -\log(\epsilon/V_b^{(0)}) (w(N+2))^2\]
+
+
+w = (1-0.5*1/n-1)
 
 #+NAME: image-vN_k
 #+BEGIN_SRC gnuplot :file ../img/sequential_vN_k.png :exports results
   set term png size 600, 300
   set size ratio 0.5
-  set xrange [1:1200]
-  set yrange [0:0.01]
-  plot 1e-3 with dots lc 'black', \
-       10*(0.5**(x/(4*(2-1)))) title "V_b(k), N=2" with lines, \
-       10*(0.5**(x/(4*(3-1)))) title "V_b(k), N=3" with lines, \
-       10*(0.5**(x/(4*(4-1)))) title "V_b(k), N=4" with lines, \
-       10*(0.5**(x/(4*(5-1)))) title "V_b(k), N=5" with lines, \
-       10*(0.5**(x/(4*(10-1)))) title "V_b(k), N=10" with lines, \
-       10*(0.5**(x/(4*(20-1)))) title "V_b(k), N=20" with lines
+  #set xrange [1:1200]
+  #set yrange [0:0.01]
+  #plot 1e-3 with dots lc 'black', \
+  #     10*(0.5**(x/(4*(10-1)))) title "V_b(k), N=10" with lines, \
+  #     10*(0.5**(x/(4*(20-1)))) title "V_b(k), N=20" with lines
+  #plot 1e-3 with dots lc 'black', \
+  #     10*(1-0.5/(10-1))**x title "V_b(k), N=10" with lines, \
+  #     10*(1-0.5/(20-1))**x title "V_b(k), N=20" with lines
+  set xrange [0:21]
+  plot -log((1e-3)/10) * (0.25) * (x+2)**2 with lines title 'best match up to 100', \
+       -log((1e-3)/10) * (x+1) with lines
   unset xrange
   unset yrange
 #+END_SRC

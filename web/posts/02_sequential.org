@@ -672,6 +672,19 @@ than last timestep, but can introduce undesired sideffects when that's
 not true.
 ** TODO References
 Citar paper Catto on explica caching, si ho fa, a veure si enumera drawbacks
+* TODO [#C] PART 4.5 Solve Order Matters?                          :noexport:
+Provar b2t, t2b, zigzag b2t2b i random, veure si algun ordre
+convergeix notablement millor, sospito que zigzag ho fara pero no
+n’estic segur
+
+Intentar fer amb un sol loop transformant iter idx en comstraint idx
+
+Ref Erleben on va fer experiments semblants
+
+Considerar part X, potser fer veure que no hi ha un ordre optim per tots els casos
+
+--> Ho vaig provar, canviant bBottomToTop amb k%2==2 i no sembla que
+    millori, AL CONTRARI, es pitjor?? amb N=10 passa de 300 a 350 iter approx
 * TODO [#A] PART 5: Direct Solve                                   :noexport:
 SUMMARY: Show how problem can be solved directly as a lin sys of eq, non-iterative
 ** TODO [#A] Direct Solution of the contact equality problem
@@ -1021,7 +1034,6 @@ more iter than others so total count would reduce
 ** REFS
 Discusses MLCP solvers and relaxation, projected-CR and even direct solvers, for reformulation of contact problem (using smoothified energies, I think)
 https://arxiv.org/pdf/1907.04587
-
 * TODO [#B] -------- NEXT POST: OVERCONSTRAINED                    :noexport:
 SUMMARY: OC system is overdetermined, no solution except least
 squares, jitter with SeqImp, failure with Direct
