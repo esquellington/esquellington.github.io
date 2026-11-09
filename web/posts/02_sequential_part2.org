@@ -526,13 +526,32 @@ Later expand w wrt $\xi$ but initially no need
 
 ** Hypothesis
 
-For 2 bodies:
+For 2 bodies:-
 \[ V_b^{k} = V_b^{(0)} w^k\]
 \[ k^* \approx -\log(\epsilon/V_b^{(0)}) (\xi+1)\]
 
-For N bodies
-Assume $V_N^{k} = V_N^{(0)} w^{\frac{k}{(N-1)}}$
-TODO NOT CORRECT DOES NOT MATCH table results
+For N bodies, for $k>N$
+\[ V_N^{k} = V_N^{(0)} w^{ \frac{N(N-1)}{2} + (k-N)(N-1)} \]
+
+does not seem correct, converges way too fast
+
+#+NAME: image-vN_k
+#+BEGIN_SRC gnuplot :file ../img/sequential_vN_k.png :exports results
+  set term png size 600, 300
+  set size ratio 0.5
+  set xrange [10:100]
+  #set yrange [0:0.01]
+  plot 1e-3 with dots lc 'black', \
+       10*(1-0.5/(10-1))**( 10*9/2 + (x-10)) title "V_b(k), N=10" with lines
+  #10*(1-0.5/(10-1))**( (10*(10-1)/2.0) + (x-10))) title "V_b(k), N=10" with lines
+  unset xrange
+  unset yrange
+#+END_SRC
+
+#+RESULTS: image-vN_k
+[[file:../img/sequential_vN_k.png]]
+
+OLD WAY
 
 This seems reasonable but does not match:
 \[ k^* \approx -\log(\epsilon/V_b^{(0)}) (\xi+1) N^2\]
@@ -542,30 +561,28 @@ Best match is something like this, but not sure why, accurate for N=[2,100]
 Which could be, for $w=0.5$, so maybe try for different w?
 \[ k^* \approx -\log(\epsilon/V_b^{(0)}) (w(N+2))^2\]
 
+Recurrence is "double", wrt iterations and
+bodies-per-iterations... similar to a nested integral? can we write it
+as 2 nested summatoriums. May not have closed form solution I guess, 3
+body case was very easy
 
 w = (1-0.5*1/n-1)
 
-#+NAME: image-vN_k
-#+BEGIN_SRC gnuplot :file ../img/sequential_vN_k.png :exports results
+#+NAME: image-kN
+#+BEGIN_SRC gnuplot :file ../img/sequential_kN.png :exports results
   set term png size 600, 300
   set size ratio 0.5
-  #set xrange [1:1200]
-  #set yrange [0:0.01]
-  #plot 1e-3 with dots lc 'black', \
-  #     10*(0.5**(x/(4*(10-1)))) title "V_b(k), N=10" with lines, \
-  #     10*(0.5**(x/(4*(20-1)))) title "V_b(k), N=20" with lines
-  #plot 1e-3 with dots lc 'black', \
-  #     10*(1-0.5/(10-1))**x title "V_b(k), N=10" with lines, \
-  #     10*(1-0.5/(20-1))**x title "V_b(k), N=20" with lines
   set xrange [0:21]
-  plot -log((1e-3)/10) * (0.25) * (x+2)**2 with lines title 'best match up to 100', \
-       -log((1e-3)/10) * (x+1) with lines
+  plot -log((1e-3)/10) * (0.25) * (x+2)**2 with lines title 'best match for k^* up to 100', \
+       log((1e-3)/10)/(log(0.5)) with linespoints, \
+       -log((1e-3)/10) * (x+1) with lines, \
+       log((1e-3)/10)/log(x/(x+1)) with lines
   unset xrange
   unset yrange
 #+END_SRC
 
-#+RESULTS: image-vN_k
-[[file:../img/sequential_vN_k.png]]
+#+RESULTS: image-kN
+[[file:../img/sequential_kN.png]]
 
 ** Condition Number of direct system should be $w^N$ or similar if this is true
 - For constant masses, cond number of direct linear system should grow
