@@ -80,7 +80,7 @@ This is the same as PART1, but implemented generically, same results,
                            true, //bBottomToTop
                            false, //bWarmstart
                            1.0f, //ws_decay01
-                           true ); //bPrintAsOrgTable
+                           2 ); //2 -> org-table
       return 0;
   }
 #+END_SRC
@@ -118,7 +118,7 @@ This is the same as PART1, but implemented generically, same results,
                            true, //bottom-to-top
                            false, //bWarmstart
                            1.0f, //ws_decay01
-                           true ); //bPrintAsOrgTable
+                           2 ); //2 -> org-table
       return 0;
   }
 #+END_SRC
@@ -159,7 +159,7 @@ Solving in bottom-to-top order
                             true, //bottom-to-top
                             false, //bWarmstart
                             1.0f, //ws_decay01
-                            true ); //bPrintAsOrgTable
+                            2 ); //2 -> org-table
       return 0;
   }
 #+END_SRC
@@ -200,7 +200,7 @@ convergence curves
                             false, //bottom-to-top
                             false, //bWarmstart
                             1.0f, //ws_decay01
-                            true ); //bPrintAsOrgTable
+                            2 ); //2 -> org-table
       return 0;
   }
 #+END_SRC
@@ -240,7 +240,7 @@ convergence curves
                             true, //bottom-to-top
                             false, //bWarmstart
                             1.0f, //ws_decay01
-                            true ); //bPrintAsOrgTable
+                            2 ); //2 -> org-table
       return 0;
   }
 #+END_SRC
@@ -281,7 +281,7 @@ convergence curves
                             true, //bottom-to-top
                             false, //bWarmstart
                             1.0f, //ws_decay01
-                            false ); //bPrintAsOrgTable, false to splot as matrix
+                            1 ); //1 -> matrix
       return 0;
   }
 #+END_SRC
@@ -369,6 +369,7 @@ Extra rows, not plotted but keep quadratic shape
 |      101 |      1:100 |   21863 |     926 |
 |      151 |      1:150 |   44618 |     ?? |
 |      201 |      1:200 |   74659 |     ?? |
+
 ** Plot iter(N) and iter($\xi$)
 
 #+NAME: plot-iter-per-N
@@ -389,6 +390,54 @@ in $N$, and we need $N^2$ iter.
 
 TODO this is not clear, finish [[Analytic convergence]] first before
 drawing any conclusions
+
+** TODO Generate table automatically calling GSimulateStack1D     :noexport:
+#+NAME: table-iter-per-N-auto
+#+BEGIN_SRC C++ :includes <stdio.h> :results drawer :noweb strip-export :exports results
+  <<GSimulateStack1D>>
+  int main( int argc, char** argv )
+  {
+      const int K(200000);
+      const float xi(1.0f);
+      const float V0(10.0f);
+      const float eps(1e-3f);
+      printf("3 %d\n", GSimulateStack1D    <3>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("4 %d\n", GSimulateStack1D    <4>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("5 %d\n", GSimulateStack1D    <5>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("6 %d\n", GSimulateStack1D    <6>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("7 %d\n", GSimulateStack1D    <7>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("8 %d\n", GSimulateStack1D    <8>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("9 %d\n", GSimulateStack1D    <9>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("10 %d\n", GSimulateStack1D  <10>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("11 %d\n", GSimulateStack1D  <11>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("12 %d\n", GSimulateStack1D  <12>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("13 %d\n", GSimulateStack1D  <13>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("14 %d\n", GSimulateStack1D  <14>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("15 %d\n", GSimulateStack1D  <15>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("16 %d\n", GSimulateStack1D  <16>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("17 %d\n", GSimulateStack1D  <17>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("18 %d\n", GSimulateStack1D  <18>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("19 %d\n", GSimulateStack1D  <19>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("20 %d\n", GSimulateStack1D  <20>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("21 %d\n", GSimulateStack1D  <21>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("51 %d\n", GSimulateStack1D  <51>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("101 %d\n", GSimulateStack1D<101>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("151 %d\n", GSimulateStack1D<151>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("201 %d\n", GSimulateStack1D<201>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      return 0;
+  }
+#+END_SRC
+
+** TODO Plot iter(N) from automatic table above
+#+NAME: plot-iter-per-N-auto
+#+BEGIN_SRC gnuplot :var data=table-iter-per-N-auto :results file :file ../img/plot-iter-per-N-auto.png :exports results
+  set term png size 600, 300
+  set size ratio 0.5
+  plot data u 1:2 title 'iter(N)' with lines
+#+END_SRC
+
+#+RESULTS: plot-iter-per-N-auto
+[[file:../img/plot-iter-per-N-auto.png]]
 
 ** Implementation of GSimulateStack1D                             :noexport:
 NOTE:, func uses printf but include "<stdio.h>" must be added to caller
@@ -414,17 +463,17 @@ TODO PARAM to support inequalities and make it a full PGS or just GS
 #+NAME: GSimulateStack1D
 #+BEGIN_SRC C++ :includes <stdio.h> :exports none
   template <unsigned int N>
-  void GSimulateStack1D( float xi, float V0, float G, //massratio, vel, grav
-                         int T, float dt, //steps and timestep
-                         float epsilon, int K, //precision and iterations
-                         bool bBottomToTop, //solve from bottom to top
-                         bool bWarmstart, float ws_decay01, //warmstarting
-                         bool bPrintAsOrgTable ) //Org-Table or plain matrix Iter(k) x Body(n)
+  int GSimulateStack1D( float xi, float V0, float G, //massratio, vel, grav
+                        int T, float dt, //steps and timestep
+                        float epsilon, int K, //precision and iterations
+                        bool bBottomToTop, //solve from bottom to top
+                        bool bWarmstart, float ws_decay01, //warmstarting
+                        int print_method ) //0 nothing, 1 plain matrix Iter(k) x Body(n), 2 Org-Table
   {
       const float wa(xi/(xi+1));
       float V[N] = {}; V[N-1] = V0;
       float cached_Vab[N] = {};
-      if( bPrintAsOrgTable ) //table header
+      if( print_method == 2 ) //org-table header
       {
           printf("t k");
           for( int n=0; n<N; n++ )
@@ -454,15 +503,18 @@ TODO PARAM to support inequalities and make it a full PGS or just GS
           // Solve/refine constraints after warmstarting
           while( k < K && V[N-1] > epsilon )
           {
-              const int cPeriod( N <= 21 ? 10 : N <= 51 ? 100 : 1000 ); //reduce period otherwise N>20 is super verbose
-              if( (k % cPeriod) == 0 || !bPrintAsOrgTable ) //TEMP: no skip unless table, add skip count param instead
+              if( print_method > 0 ) //any print
               {
-                  if( bPrintAsOrgTable )
-                      printf("\n%d %d",t,tk);
-                  else
-                      printf("\n");
-                  for( int n=0; n<N; n++ )
-                      printf(" %2.4f",V[n]);
+                  const int cPeriod( N <= 21 ? 10 : N <= 51 ? 100 : 1000 ); //reduce period otherwise N>20 is super verbose
+                  if( (k % cPeriod) == 0 || print_method != 2 ) //TEMP: no skip unless table, add skip count param instead
+                  {
+                      if( print_method == 2 ) //org-table
+                          printf("\n%d %d",t,tk);
+                      else
+                          printf("\n");
+                      for( int n=0; n<N; n++ )
+                          printf(" %2.4f",V[n]);
+                  }
               }
               //Solve N-1 constraints b2t or t2b
               {
@@ -490,13 +542,18 @@ TODO PARAM to support inequalities and make it a full PGS or just GS
               tk++;
           }
           // V[i] for last iter k in current timestep t
-          if( bPrintAsOrgTable )
-              printf("\n%d %d",t,tk);
-          else
-              printf("\n");
-          for( int n=0; n<N; n++ )
-              printf(" %2.4f",V[n]);
+          if( print_method > 0 ) //any print
+          {
+              if( print_method == 2 ) //org-table
+                  printf("\n%d %d",t,tk);
+              else
+                  printf("\n");
+              for( int n=0; n<N; n++ )
+                  printf(" %2.4f",V[n]);
+          }
       }
+      // Return total iter count
+      return tk;
   }
 #+END_SRC
 
@@ -535,7 +592,49 @@ Assume $w_{n,n-1}$ is constant $w$, except for n=1 that is 1
 
 Later expand w wrt $\xi$ but initially no need
 
-** Hypothesis
+** Best match for $k^*(N)$ found by trial-error
+
+Best match is something like this, but not sure why, I've found it by
+intuition and trial and error and accurate for N=[2,100]
+
+\[ k^* \approx -\log(\epsilon/V_b^{(0)}) (0.25) (N+2)^2\]
+
+Which could be, for $w=0.5$, so maybe try for different w?
+\[ k^* \approx -\log(\epsilon/V_b^{(0)}) w^2 (N+2)^2\]
+
+It's not guaranteed this would hold for w!=0.5, likely not, but it's
+remarkable how well it fits up to N=100, seems an acceptable result
+even if not analytic, and shows the quadratic scaling
+
+Best match is QUITE ACCURATE up to N=100, where it estimates 24000 and
+the numeric value is approx 22000, at N=150 it estimates appox 52000
+and numeric is 44000, at n=200 it estimates 95K and numeric is 75K, so
+it's less and less accurate.
+
+Plot below shows how closely numeric/predicted values match
+
+#+NAME: image-kN
+#+BEGIN_SRC gnuplot :var data=table-iter-per-N :file ../img/sequential_kN.png :exports results
+  set term png size 600, 300
+  set size ratio 0.5
+  set xrange [0:220]
+  plot -log((1e-3)/10) * (0.25) * (x+2)**2 with lines title 'best match for k^* up to 100', \
+       data u 1:3 title 'data iter(N)' with lines, \
+       log((1e-3)/10)/log(x/(x+1)) with lines
+  unset xrange
+  unset yrange
+#+END_SRC
+
+#+RESULTS: image-kN
+[[file:../img/sequential_kN.png]]
+
+*** TODO Try with different $V_N^0$ and $\epsilon$
+Confirm approximation holds --> NOT really, for V0=1 numeric iter is
+50% of predicted value. For V0>10 they match better, but clearly not accurate
+
+Also fails for any mass ratio != 1:1 (w=0.5), huge difference
+
+** Hypothesis for actual solution (does not work)
 
 For 2 bodies:-
 \[ V_b^{k} = V_b^{(0)} w^k\]
@@ -585,42 +684,6 @@ problem", it's a different one that gets a reapplied impulse from both
 above and below every iter k. WHICH is similar to time-stepping a
 stable stack, where gravity gets reapplied, but in this case to all
 bodies not just N-i "top of the subproblem"
-
-** OTHER WAY THAT DOES NOT WORK but has best match for k^*(N)
-
-Best match is something like this, but not sure why, I've found it by
-intuition and trial and error and accurate for N=[2,100]
-
-\[ k^* \approx -\log(\epsilon/V_b^{(0)}) (0.25) (N+2)^2\]
-
-Which could be, for $w=0.5$, so maybe try for different w?
-\[ k^* \approx -\log(\epsilon/V_b^{(0)}) w^2 (N+2)^2\]
-
-It's not guaranteed this would hold for w!=0.5, likely not, but it's
-remarkable how well it fits up to N=100, seems an acceptable result
-even if not analytic, and shows the quadratic scaling
-
-Best match is QUITE ACCURATE up to N=100, where it estimates 24000 and
-the numeric value is approx 22000, at N=150 it estimates appox 52000
-and numeric is 4400, at n=200 it estimates 95K and numeric is 75K, so
-it's less and less accurate.
-
-Plot below shows how closely numeric/predicted values match
-
-#+NAME: image-kN
-#+BEGIN_SRC gnuplot :var data=table-iter-per-N :file ../img/sequential_kN.png :exports results
-  set term png size 600, 300
-  set size ratio 0.5
-  set xrange [0:21]
-  plot -log((1e-3)/10) * (0.25) * (x+2)**2 with lines title 'best match for k^* up to 100', \
-       data u 1:3 title 'data iter(N)' with lines, \
-       log((1e-3)/10)/log(x/(x+1)) with lines
-  unset xrange
-  unset yrange
-#+END_SRC
-
-#+RESULTS: image-kN
-[[file:../img/sequential_kN.png]]
 
 ** DETAILS
 Crec que convergeix mes lent perquè body N nomes intercNvia vel amb N-1. A la 1a iter les seves vel aon molt diferents, Delta es VN, pero a partir d ela 2a iter ja son molt semblants, de manera que VN es redueix menys i menys. El mateix passa amb N-1 en iters 2 i 3, etc…
