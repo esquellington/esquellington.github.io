@@ -148,9 +148,10 @@ surprisingly linear... it *almost* is!
 #+RESULTS: image-k_mr
 [[file:../img/sequential_k_mr.png]]
 
-We can show that $\log(\xi/(\xi+1))$ is very close to $-1/(\xi+1)$ for
-$\xi>2$ (see [[Linear Approx]]), so we can approximate $k^*(\xi)$
-as
+We can show that denominator $\log(\xi/(\xi+1))$ is very close to
+$-1/(\xi+1)$ for $\xi>2$ (see [[Linear Approx]]), so we can approximate
+$k^*$ as
+
 \[ k^* \approx -\log(\epsilon/V_b^{(0)}) (\xi+1)\]
 
 From this linear approximation we can see that the slope $-\log(\epsilon/V_b^{(0)})$ changes very
@@ -306,6 +307,31 @@ sideffects. (TODO link to Warmstarting Post)
 show its very very close to linear, quadratic error term is very small, I
 think it's because x/(x+1) tends to 1, and log(1) is 0, so its effect
 as x grows is negligible)
+
+From Wolfram Alpha expanding "taylor series log(x/(x+1))", the result
+is
+\[ log(x/(1 + x)) = - \sum_{k=1}^\infty ((-1)^k (-1/(1 + x))^k)/k \]
+
+which matches $-1/(x+1)$ for 1st order approx, and as x grows the
+quadratic term goes fast to 0, so it's a GOOD approximation indeed
+
+TEMP: Actual difference between exact and linear tends to approx 4.5,
+try to justify it
+#+BEGIN_SRC gnuplot :file ../img/tmp.png :exports results
+  set term png size 600, 300
+  set size ratio 0.5
+  set xrange [1:1000]
+  set yrange [0:10]
+  #linear model - accurate solution = approx 4.5
+  plot (-log((1e-3)/10) * (x+1)) - log((1e-3)/10)/log((x/(x+1))) with lines lw 2, \
+       4.5 with dots
+  unset xrange
+  unset yrange
+#+END_SRC
+
+#+RESULTS:
+[[file:../img/tmp.png]]
+
 * TODO PART 2 --> [[file:02_sequential_part2.org]]
 * TODO [#A] PART 3: PERSISTENT contacts and Warmstarting           :noexport:
 SUMMARY: Solve multiple steps, persistent stack should stabilize, NO
@@ -1082,6 +1108,11 @@ predictions!
   CoM, then far contact points at dist d can have arbitrarily large
   inv inertia factor that grows with d^2, and "angular" $\xi$ can grow
   proportionally, total $\xi$ dominated by angular term
+** TODO Do multiple contacts per pair A,B influence convergence?
+I suspect they do, and can both increase and reduce total iter count,
+would be interesting to prove but not really necessary. I suspect
+worse case of a perfectly vertical stack won't change significantly
+wrt 1D case.
 * TODO [#B] NEXT: OTHER SOLVERS                                    :noexport:
 ** TODO [#C] PGS vs TGS
 PGS convergence wrt iter (1 substep) vs TGS convergence wrt substeps (1 iter)
