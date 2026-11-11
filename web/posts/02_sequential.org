@@ -313,10 +313,13 @@ is
 \[ log(x/(1 + x)) = - \sum_{k=1}^\infty ((-1)^k (-1/(1 + x))^k)/k \]
 
 which matches $-1/(x+1)$ for 1st order approx, and as x grows the
-quadratic term goes fast to 0, so it's a GOOD approximation indeed
+quadratic term goes fast to 0, so it's a GOOD approximation
+indeed. ALSO the sum of 1/x^2 to x=infinity converges, so all terms
+above quadratic add up to some kind of constant and don't affect the
+curve shape, likely this causes the 4.5 term mentioned below
 
 TEMP: Actual difference between exact and linear tends to approx 4.5,
-try to justify it
+try to justify it (see prev paragraph)
 #+BEGIN_SRC gnuplot :file ../img/tmp.png :exports results
   set term png size 600, 300
   set size ratio 0.5
