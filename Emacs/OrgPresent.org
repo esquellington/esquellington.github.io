@@ -1,0 +1,158 @@
+#+STARTUP: indent overview
+Welcome to my org-present test
+* Intro
+What are we talking about?
+[[file:function.png]]
+* Middle
+Meat
+** Some
+** Details
+** Here
+*** Even mode retails
+* Conclusions
+This is good because:
+- reason
+- also this
+- don't forget
+* Appendix
+Optional content just in case
+
+Some fancy math to impress
+\[ \alpha \sum_i^\infty \frac{i}{\beta^{i} \]
+* Addendum                                                         :noexport:
+Latin words sound fancy
+* Details                                                          :noexport:
+** TODO elisp customization of org-present                    :TESTTAG:TAG2:
+Eval this code to customize org-present behaviour
+#+BEGIN_SRC elisp :results none
+  (defun my/org-present-start-hook ()
+    (message "OP-START")
+    (setq org-present-text-scale 2) ;;default 5, too large!
+    (org-present-big)
+    (org-display-inline-images)
+    (org-latex-preview '(16)) ;16 -> show all formulas (C-u C-u org-latex-preview)
+    (setq header-line-format "💬") ;Custom header in all slides
+    (setq cursor-type nil) ;Hide cursor directly instead of buggy (org-present-hide-cursor)
+    (setq buffer-read-only t)) ;Similar to (org-present-read-only), but avoids interferring with cursor
+
+  (defun my/org-present-quit-hook ()
+    (message "OP-QUIT")
+    (org-present-small)
+    (org-remove-inline-images)
+    (org-latex-preview '(64)) ;64 -> hide all formulas (C-u C-u C-u org-latex-preview)
+    (setq header-line-format nil)
+    (setq cursor-type t) ;(org-present-show-cursor)
+    (setq buffer-read-only nil)) ;Similar to (org-present-read-write), but avoids interferring with cursor
+
+  (defun my/org-present-heading-has-tag-noexport-p ()
+    ;;(interactive)
+    (let (lt tag is-noexport)
+      (setq lt (org-get-tags))
+      (setq is-noexport nil)
+      (while lt
+        (setq tag (pop lt))
+        (when (string-match-p tag "noexport")
+          ;;(message "FOUND!")
+          (setq is-noexport t)))
+      is-noexport))
+
+  (defun my/org-present-prepare-slide (buffer-name heading)
+    ;; (message heading)
+    ;; Skip :noexport:
+    ;; TODO here we should skip and go to next, but not sure how!? calling
+    ;; org-present-next, maybe we need to intercept org-present calls to
+    ;; (org-get-next/last-sibling) and skip there instead
+
+    ;;temp try to move to next sibling (TODO
+    ;;org-present-prepare-slide does not know if we're moving to
+    ;;next/prev, but we should) --> this doesn-t work,
+    ;;org-get-next-sibling runs too late
+    ;; (org-get-next-sibling)
+    (when (my/org-present-heading-has-tag-noexport-p)
+      (message "TODO: should skip :noexport: " heading))
+    ;; (let (lt tag)
+    ;;   (setq lt (org-get-tags))
+    ;;   (while lt
+    ;;     (setq tag (pop lt))
+    ;;     (when (string-match-p tag "noexport")
+
+    ;;       (message "TODO: should skip :noexport: " heading))))
+    ;; Show only top-level headlines
+    (org-overview)
+    ;; Unfold the current entry
+    (org-fold-show-entry)
+    ;; Show only direct subheadings of the slide but don't expand them by default
+    (org-fold-show-children))
+
+  ;; Register hooks with org-present
+  (add-hook 'org-present-mode-hook 'my/org-present-start-hook)
+  (add-hook 'org-present-mode-quit-hook 'my/org-present-quit-hook)
+  (add-hook 'org-present-after-navigate-functions 'my/org-present-prepare-slide)
+
+  ;; Easier keybindings during org-present
+  (define-key org-present-mode-keymap (kbd "n") 'org-present-next)
+  (define-key org-present-mode-keymap (kbd "p") 'org-present-prev)
+  (define-key org-present-mode-keymap (kbd "q") 'org-present-quit)
+  (define-key org-present-mode-keymap (kbd "t") 'org-present-toggle-one-big-page)
+
+  ;; Show/Hide (TODO ideally same keybinding would toggle instead of e/E) TODO
+  ;; could make method my/org-fold-toggle-XXXX that checks if open/closed and
+  ;; toggles TODO is there a predicate to check if visible? there must
+  (define-key org-present-mode-keymap (kbd "e") 'org-fold-show-entry) ;current node text entry right below
+  (define-key org-present-mode-keymap (kbd "c") 'org-fold-show-children) ;current node direct children
+  (define-key org-present-mode-keymap (kbd "s") 'org-fold-show-subtree) ;current node entire subtree
+
+  ;; Hide
+  (define-key org-present-mode-keymap (kbd "E") 'org-fold-hide-entry)
+  (define-key org-present-mode-keymap (kbd "S") 'org-fold-hide-subtree)
+  ;; NOTE: hide children without hiding entry is not possible apparently, would
+  ;; need to hide all, show entry and show children
+  (defun my/org-fold-hide-children ()
+    (interactive)
+    (org-fold-hide-subtree) ;TODO IF visible
+    (org-fold-show-entry)) ;;TODO IF it was visible
+  (define-key org-present-mode-keymap (kbd "C") 'my/org-fold-hide-children)
+
+  (setq lb (org-get-tags))
+  (while lb
+    (setq be (pop lb))
+    (message be))
+
+  ;;----- EXPERIMENTS
+  ;; Required to draw emoji properly
+  ;;(set-fontset-font t 'emoji (font-spec :family "Segoe UI Emoji") nil 'prepend)
+
+  ;; Remove all hooks to avoid them interferring
+  ;; (setq org-present-mode-hook nil)
+  ;; (setq org-present-mode-quit-hook nil)
+  ;; (setq org-present-after-navigate-functions nil)
+
+  ;; Cursor shape
+  ;; (setq cursor-type 'hollow)
+
+  ;; From org-present docs, but I don't like it much, prefer SystemCrafters way
+  ;; (eval-after-load "org-present"
+  ;;   '(progn
+  ;;      (add-hook 'org-present-mode-hook
+  ;;                (lambda ()
+  ;;                  (org-present-big)
+  ;;                  (org-display-inline-images)
+  ;;                  (org-present-hide-cursor)
+  ;;                  (org-present-read-only)))
+  ;;      (add-hook 'org-present-mode-quit-hook
+  ;;                (lambda ()
+  ;;                  (org-present-small)
+  ;;                  (org-remove-inline-images)
+  ;;                  (org-present-show-cursor)
+  ;;                  (org-present-read-write)))))
+
+#+END_SRC
+
+** TODO [#A] Skip :noexport: headers during org-present
+- Hard to do in hooks, may need to patch org-present instead, maybe
+  contrib?
+- Calls to (org-get-next-sibling) and (org-get-last-sibling) should skip any :noexport:
+** GOOD [#B] Better keybindings, original ones are weird and unnecessary
+- Favour "toggle" keybindings, instead of enable/disable separate ones
+** TODO [#C] SETUP code requires org-present-mode must have been activated at least ONCE
+** TODO [#C] Show progress bar or super-section using in 'header-line-format'

@@ -133,21 +133,22 @@ https://karthinks.com/software/avy-can-do-anything/
   as inline image viz?
 - See https://orgmode.org/manual/Adding-Hyperlink-Types.html#Adding-Hyperlink-Types
 * ORG Presentations
-** ORG BEAMER presentations
+** DONE ORG BEAMER presentations
 - Powerful and complex
 - Tutorial https://orgmode.org/worg/exporters/beamer/tutorial.html
 - Refcard: https://github.com/fniessen/refcard-org-beamer
 - Export https://orgmode.org/manual/Beamer-Export.html
 - Tricks: https://github.com/jgoerzen/public-snippets/blob/master/emacs/emacs-org-beamer/emacs-org-beamer.org
-** ORG TREE SLIDES (presentations)
+** GOOD ORG TREE SLIDES (presentations)
 - A bit clunky
 - Howto video (30min) https://www.youtube.com/watch?v=vz9aLmxYJB0
-** org-present
+** DONE org-present
 - Simple and nice
 - https://github.com/rlister/org-present
 - Good tips to get nicer look here
   https://systemcrafters.net/emacs-tips/presentations-with-org-present/
-** epresent
+- See [[file:OrgPresent.org]]
+** GOOD epresent
 - clunky, avoid
 * Quoting functions with #'
 - If looks like #'something is the proper way to "quote a function", equivalent
