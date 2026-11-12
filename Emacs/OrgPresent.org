@@ -32,7 +32,7 @@ Eval this code to customize org-present behaviour
     (org-present-big)
     (org-display-inline-images)
     (org-latex-preview '(16)) ;16 -> show all formulas (C-u C-u org-latex-preview)
-    (setq header-line-format "🌐phMulitBodySystem") ;Custom header in all slides --> TODO ideally set :lighter to 💬
+    (setq header-line-format "🌐TITLE🌐") ;Custom header in all slides --> TODO ideally set :lighter to 💬
     (setq cursor-type nil) ;Hide cursor directly instead of buggy (org-present-hide-cursor)
     (setq buffer-read-only t)) ;Similar to (org-present-read-only), but avoids interferring with cursor
 
