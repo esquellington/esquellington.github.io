@@ -32,7 +32,7 @@ Eval this code to customize org-present behaviour
     (org-present-big)
     (org-display-inline-images)
     (org-latex-preview '(16)) ;16 -> show all formulas (C-u C-u org-latex-preview)
-    (setq header-line-format "💬") ;Custom header in all slides
+    (setq header-line-format "🌐phMulitBodySystem") ;Custom header in all slides --> TODO ideally set :lighter to 💬
     (setq cursor-type nil) ;Hide cursor directly instead of buggy (org-present-hide-cursor)
     (setq buffer-read-only t)) ;Similar to (org-present-read-only), but avoids interferring with cursor
 
@@ -46,20 +46,6 @@ Eval this code to customize org-present behaviour
     (setq buffer-read-only nil)) ;Similar to (org-present-read-write), but avoids interferring with cursor
 
   (defun my/org-present-prepare-slide (buffer-name heading)
-    ;; (message heading)
-    ;; Skip :noexport:
-    ;; TODO here we should skip and go to next, but not sure how!? calling
-    ;; org-present-next, maybe we need to intercept org-present calls to
-    ;; (org-get-next/last-sibling) and skip there instead
-
-    ;;temp try to move to next sibling (TODO
-    ;;org-present-prepare-slide does not know if we're moving to
-    ;;next/prev, but we should) --> this doesn-t work,
-    ;;org-get-next-sibling runs too late
-    ;; (org-get-next-sibling)
-    ;;(when (my/org-present-heading-has-tag-noexport-p)
-    ;;  (message "TODO: should skip :noexport: " heading))
-
     ;; Show only top-level headlines
     (org-overview)
     ;; Unfold the current entry
@@ -164,10 +150,12 @@ Eval this code to customize org-present behaviour
 
 #+END_SRC
 
-** TODO [#A] Skip :noexport: headers during org-present
+** GOOD [#A] Skip :noexport: headers during org-present
 - Hard to do in hooks, may need to patch org-present instead, maybe
   contrib?
 - Calls to (org-get-next-sibling) and (org-get-last-sibling) should skip any :noexport:
+- No SKIP, we just STOP on 1st :noexport: and backtrack, simple but
+  enough for now
 ** GOOD [#B] Better keybindings, original ones are weird and unnecessary
 - Favour "toggle" keybindings, instead of enable/disable separate ones
 ** TODO [#C] SETUP code requires org-present-mode must have been activated at least ONCE
