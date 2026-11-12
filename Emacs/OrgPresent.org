@@ -16,9 +16,10 @@ This is good because:
 - don't forget
 * Appendix
 Optional content just in case
-
 Some fancy math to impress
 \[ \alpha \sum_i^\infty \frac{i}{\beta^{i} \]
+* Prependum                                                        :noexport:
+Latin words sound fancy
 * Addendum                                                         :noexport:
 Latin words sound fancy
 * Details                                                          :noexport:
@@ -44,18 +45,6 @@ Eval this code to customize org-present behaviour
     (setq cursor-type t) ;(org-present-show-cursor)
     (setq buffer-read-only nil)) ;Similar to (org-present-read-write), but avoids interferring with cursor
 
-  (defun my/org-present-heading-has-tag-noexport-p ()
-    ;;(interactive)
-    (let (lt tag is-noexport)
-      (setq lt (org-get-tags))
-      (setq is-noexport nil)
-      (while lt
-        (setq tag (pop lt))
-        (when (string-match-p tag "noexport")
-          ;;(message "FOUND!")
-          (setq is-noexport t)))
-      is-noexport))
-
   (defun my/org-present-prepare-slide (buffer-name heading)
     ;; (message heading)
     ;; Skip :noexport:
@@ -68,15 +57,9 @@ Eval this code to customize org-present behaviour
     ;;next/prev, but we should) --> this doesn-t work,
     ;;org-get-next-sibling runs too late
     ;; (org-get-next-sibling)
-    (when (my/org-present-heading-has-tag-noexport-p)
-      (message "TODO: should skip :noexport: " heading))
-    ;; (let (lt tag)
-    ;;   (setq lt (org-get-tags))
-    ;;   (while lt
-    ;;     (setq tag (pop lt))
-    ;;     (when (string-match-p tag "noexport")
+    ;;(when (my/org-present-heading-has-tag-noexport-p)
+    ;;  (message "TODO: should skip :noexport: " heading))
 
-    ;;       (message "TODO: should skip :noexport: " heading))))
     ;; Show only top-level headlines
     (org-overview)
     ;; Unfold the current entry
@@ -84,13 +67,46 @@ Eval this code to customize org-present behaviour
     ;; Show only direct subheadings of the slide but don't expand them by default
     (org-fold-show-children))
 
+  (defun org-present-heading-has-tag-noexport-p ()
+    ;;(interactive)
+    (let (lt tag is-noexport)
+      (setq lt (org-get-tags))
+      (setq is-noexport nil)
+      (while lt
+        (setq tag (pop lt))
+        (when (string-match-p tag "noexport")
+          ;;(message "FOUND!")
+          (setq is-noexport t)))
+      is-noexport))
+
+  ;; Reimplement org-present-next that stops on 1st :noexport: header
+  (defun org-present-next-unless-noexport ()
+    "Jump to next top-level heading, skipping :noexport:"
+    (interactive)
+    (widen)
+    ;; Advance normally
+    (if (org-current-level) ;inside any heading
+        (progn
+          (org-present-top)
+          (or
+           (org-get-next-sibling) ;next top-level heading
+           (org-present-top)))    ;if that was last, go back to top before narrow
+      ;; else handle title page before first heading
+      (outline-next-heading))
+    ;; Backtrace if :noexport:, will ignore anything after 1st :noexport: header
+    (when (org-present-heading-has-tag-noexport-p) (outline-previous-heading))
+    ;; Revert to prev if current is :noexport:
+    (org-present-narrow)
+    (org-present-run-after-navigate-functions))
+  ;;TODO similar for org-present-prev-skip-noexport
+
   ;; Register hooks with org-present
   (add-hook 'org-present-mode-hook 'my/org-present-start-hook)
   (add-hook 'org-present-mode-quit-hook 'my/org-present-quit-hook)
   (add-hook 'org-present-after-navigate-functions 'my/org-present-prepare-slide)
 
   ;; Easier keybindings during org-present
-  (define-key org-present-mode-keymap (kbd "n") 'org-present-next)
+  (define-key org-present-mode-keymap (kbd "n") 'org-present-next-unless-noexport)
   (define-key org-present-mode-keymap (kbd "p") 'org-present-prev)
   (define-key org-present-mode-keymap (kbd "q") 'org-present-quit)
   (define-key org-present-mode-keymap (kbd "t") 'org-present-toggle-one-big-page)
