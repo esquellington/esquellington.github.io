@@ -1117,6 +1117,9 @@ would be interesting to prove but not really necessary. I suspect
 worse case of a perfectly vertical stack won't change significantly
 wrt 1D case.
 * TODO [#B] NEXT: OTHER SOLVERS                                    :noexport:
+** TODO [#B] Jacobi-like solvers?
+- Try to find recurrence for Jacobi 2-body problem, and compute $k^*(\xi)$
+- Implement for N bodies and plot convergence?
 ** TODO [#C] PGS vs TGS
 PGS convergence wrt iter (1 substep) vs TGS convergence wrt substeps (1 iter)
 
@@ -1242,7 +1245,6 @@ l'Active Set i reduir el cost total.
 
 Presolve could be a Block-GS and then iterate with full PGS, no need
 to solve whole system with Pre-solve
-
 * TODO [#B] General 1D problems                                    :noexport:
 
 Box1D: Don’t call it this, but the SeaImp experiments are basically
@@ -1276,7 +1278,14 @@ Stiffness means time-dependent so no longer instantaneous contact,
 must consider timestep
 
 Can we derive direct system and infer PGS behaviour based on stiffnesses/masses?
+** SeqImp analisis es aplicable a equality i soft constraints
+Soft hauria de modular convergencia supoos, som mes soft millor
+convergeix, intentar veure factor analiticament
 
+Si perl algun motiu suposar que impact compressiu son tot igualtats,
+no passa res, el resultat splicaria a una “columna” de rigids units
+per ciment rigid pero fracturablr, per exemple, i continua sent un
+problema interessant i que permet raonarhi intuitivament i visualment
 * LOCAL VARIABLES                                                  :noexport:
 Local Variables:
 org-confirm-babel-evaluate: nil

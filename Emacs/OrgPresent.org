@@ -1,4 +1,5 @@
 #+STARTUP: indent overview
+#+TITLE: Org-Present
 Welcome to my org-present test
 * Intro
 What are we talking about?
@@ -158,5 +159,14 @@ Eval this code to customize org-present behaviour
   enough for now
 ** GOOD [#B] Better keybindings, original ones are weird and unnecessary
 - Favour "toggle" keybindings, instead of enable/disable separate ones
+** TODO [#B] Speaker Notes in separate frame or speedbar?
+- DO not show in shared window that audience sees, only in separate
+  window or screen (separate frame?)
+- Sync to current slide
+*** GOOD Speedbar --> NO it's terrible
+- It's very ugly
 ** TODO [#C] SETUP code requires org-present-mode must have been activated at least ONCE
+** TODO [#C] Some interesting customization of org-present
+- https://xenodium.com/emacs-org-present-in-style/
 ** TODO [#C] Show progress bar or super-section using in 'header-line-format'
+** TODO Hide mode line?
