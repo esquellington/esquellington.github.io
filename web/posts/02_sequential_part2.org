@@ -333,66 +333,44 @@ eix
 - See https://gnuplotting.org/tag/colormap/
 - See http://gnuplot.info/docs_4.2/node332.html#matrix_ascii
 
-** Table iter wrt N                                               :noexport:
-No point in exporting table, it was manualy generated, so keep
-explicit and tag with noexport
-
-last colum is 2 bodies with $\xi=1:N-1$
-
-#+CAPTION: iter count per N bodies
-#+ATTR_HTML: :width 50%
-#+NAME: table-iter-per-N
-| N bodies | Mass ratio | iter(N) | iter(2) |
-|        2 |        1:1 |      14 |      14 |
-|        3 |        1:2 |      31 |      23 |
-|        4 |        1:3 |      54 |      33 |
-|        5 |        1:4 |      83 |      42 |
-|        6 |        1:5 |     117 |      51 |
-|        7 |        1:6 |     157 |      60 |
-|        8 |        1:7 |     202 |      69 |
-|        9 |        1:8 |     252 |      79 |
-|       10 |        1:9 |     307 |      88 |
-|       11 |       1:10 |     367 |      97 |
-|       12 |       1:11 |     432 |     106 |
-|       13 |       1:12 |     502 |     116 |
-|       14 |       1:13 |     576 |     125 |
-|       15 |       1:14 |     655 |     134 |
-|       16 |       1:15 |     739 |     143 |
-|       17 |       1:16 |     827 |     152 |
-|       18 |       1:17 |     920 |     162 |
-|       19 |       1:18 |    1018 |     171 |
-|       20 |       1:19 |    1119 |     180 |
-|       21 |       1:20 |    1225 |     189 |
-
-Extra rows, not plotted but keep quadratic shape
-|       51 |       1:50 |    6295 |     466 |
-|      101 |      1:100 |   21863 |     926 |
-|      151 |      1:150 |   44618 |     ?? |
-|      201 |      1:200 |   74659 |     ?? |
-
-** Plot iter(N) and iter($\xi$)
-
-#+NAME: plot-iter-per-N
-#+BEGIN_SRC gnuplot :var data=table-iter-per-N :results file :file ../img/plot-iter-per-N.png :exports results
-  plot data u 1:3 title 'iter(N)' with lines, \
-       data u 1:4 title 'iter(xi=1:N-1)' with lines
+** Generate tables automatically calling GSimulateStack1D         :noexport:
+#+NAME: table-iter-per-N-auto-v1
+#+BEGIN_SRC C++ :includes <stdio.h> :results drawer :noweb strip-export :exports results
+  <<GSimulateStack1D>>
+  int main( int argc, char** argv )
+  {
+      const int K(200000);
+      const float xi(1.0f);
+      const float V0(1.0f);
+      const float eps(1e-3f);
+      printf("3 %d\n", GSimulateStack1D    <3>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("4 %d\n", GSimulateStack1D    <4>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("5 %d\n", GSimulateStack1D    <5>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("6 %d\n", GSimulateStack1D    <6>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("7 %d\n", GSimulateStack1D    <7>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("8 %d\n", GSimulateStack1D    <8>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("9 %d\n", GSimulateStack1D    <9>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("10 %d\n", GSimulateStack1D  <10>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("11 %d\n", GSimulateStack1D  <11>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("12 %d\n", GSimulateStack1D  <12>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("13 %d\n", GSimulateStack1D  <13>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("14 %d\n", GSimulateStack1D  <14>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("15 %d\n", GSimulateStack1D  <15>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("16 %d\n", GSimulateStack1D  <16>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("17 %d\n", GSimulateStack1D  <17>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("18 %d\n", GSimulateStack1D  <18>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("19 %d\n", GSimulateStack1D  <19>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("20 %d\n", GSimulateStack1D  <20>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("21 %d\n", GSimulateStack1D  <21>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("51 %d\n", GSimulateStack1D  <51>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("101 %d\n", GSimulateStack1D<101>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("151 %d\n", GSimulateStack1D<151>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("201 %d\n", GSimulateStack1D<201>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      return 0;
+  }
 #+END_SRC
 
-#+RESULTS: plot-iter-per-N
-[[file:../img/plot-iter-per-N.png]]
-
-So iter count seems to grow linearly with body count $N$, and also
-linearly with mass ratio $1:N-1$ (analogous to 2-body $\xi$), so
-combined iter count grows *quadratically* with $N \xi = N(N-1)$.
-
-Computational cost grows *cubically* with $N$, as per iter is linear
-in $N$, and we need $N^2$ iter.
-
-TODO this is not clear, finish [[Analytic convergence]] first before
-drawing any conclusions
-
-** TODO Generate table automatically calling GSimulateStack1D     :noexport:
-#+NAME: table-iter-per-N-auto
+#+NAME: table-iter-per-N-auto-v10
 #+BEGIN_SRC C++ :includes <stdio.h> :results drawer :noweb strip-export :exports results
   <<GSimulateStack1D>>
   int main( int argc, char** argv )
@@ -428,16 +406,170 @@ drawing any conclusions
   }
 #+END_SRC
 
-** TODO Plot iter(N) from automatic table above
-#+NAME: plot-iter-per-N-auto
-#+BEGIN_SRC gnuplot :var data=table-iter-per-N-auto :results file :file ../img/plot-iter-per-N-auto.png :exports results
-  set term png size 600, 300
-  set size ratio 0.5
-  plot data u 1:2 title 'iter(N)' with lines
+#+NAME: table-iter-per-N-auto-v100
+#+BEGIN_SRC C++ :includes <stdio.h> :results drawer :noweb strip-export :exports results
+  <<GSimulateStack1D>>
+  int main( int argc, char** argv )
+  {
+      const int K(200000);
+      const float xi(1.0f);
+      const float V0(100.0f);
+      const float eps(1e-3f);
+      printf("3 %d\n", GSimulateStack1D    <3>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("4 %d\n", GSimulateStack1D    <4>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("5 %d\n", GSimulateStack1D    <5>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("6 %d\n", GSimulateStack1D    <6>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("7 %d\n", GSimulateStack1D    <7>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("8 %d\n", GSimulateStack1D    <8>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("9 %d\n", GSimulateStack1D    <9>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("10 %d\n", GSimulateStack1D  <10>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("11 %d\n", GSimulateStack1D  <11>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("12 %d\n", GSimulateStack1D  <12>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("13 %d\n", GSimulateStack1D  <13>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("14 %d\n", GSimulateStack1D  <14>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("15 %d\n", GSimulateStack1D  <15>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("16 %d\n", GSimulateStack1D  <16>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("17 %d\n", GSimulateStack1D  <17>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("18 %d\n", GSimulateStack1D  <18>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("19 %d\n", GSimulateStack1D  <19>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("20 %d\n", GSimulateStack1D  <20>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("21 %d\n", GSimulateStack1D  <21>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("51 %d\n", GSimulateStack1D  <51>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("101 %d\n", GSimulateStack1D<101>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("151 %d\n", GSimulateStack1D<151>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("201 %d\n", GSimulateStack1D<201>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      return 0;
+  }
 #+END_SRC
 
-#+RESULTS: plot-iter-per-N-auto
-[[file:../img/plot-iter-per-N-auto.png]]
+#+NAME: table-iter-per-N-auto-v10-e4
+#+BEGIN_SRC C++ :includes <stdio.h> :results drawer :noweb strip-export :exports results
+  <<GSimulateStack1D>>
+  int main( int argc, char** argv )
+  {
+      const int K(200000);
+      const float xi(1.0f);
+      const float V0(10.0f);
+      const float eps(1e-4f);
+      printf("3 %d\n", GSimulateStack1D    <3>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("4 %d\n", GSimulateStack1D    <4>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("5 %d\n", GSimulateStack1D    <5>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("6 %d\n", GSimulateStack1D    <6>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("7 %d\n", GSimulateStack1D    <7>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("8 %d\n", GSimulateStack1D    <8>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("9 %d\n", GSimulateStack1D    <9>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("10 %d\n", GSimulateStack1D  <10>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("11 %d\n", GSimulateStack1D  <11>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("12 %d\n", GSimulateStack1D  <12>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("13 %d\n", GSimulateStack1D  <13>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("14 %d\n", GSimulateStack1D  <14>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("15 %d\n", GSimulateStack1D  <15>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("16 %d\n", GSimulateStack1D  <16>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("17 %d\n", GSimulateStack1D  <17>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("18 %d\n", GSimulateStack1D  <18>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("19 %d\n", GSimulateStack1D  <19>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("20 %d\n", GSimulateStack1D  <20>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("21 %d\n", GSimulateStack1D  <21>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("51 %d\n", GSimulateStack1D  <51>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("101 %d\n", GSimulateStack1D<101>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("151 %d\n", GSimulateStack1D<151>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("201 %d\n", GSimulateStack1D<201>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      return 0;
+  }
+#+END_SRC
+
+#+NAME: table-iter-per-N-auto-v10-xi101
+#+BEGIN_SRC C++ :includes <stdio.h> :results drawer :noweb strip-export :exports results
+  <<GSimulateStack1D>>
+  int main( int argc, char** argv )
+  {
+      const int K(200000);
+      const float xi(1.01f);
+      const float V0(10.0f);
+      const float eps(1e-3f);
+      printf("3 %d\n", GSimulateStack1D    <3>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("4 %d\n", GSimulateStack1D    <4>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("5 %d\n", GSimulateStack1D    <5>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("6 %d\n", GSimulateStack1D    <6>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("7 %d\n", GSimulateStack1D    <7>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("8 %d\n", GSimulateStack1D    <8>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("9 %d\n", GSimulateStack1D    <9>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("10 %d\n", GSimulateStack1D  <10>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("11 %d\n", GSimulateStack1D  <11>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("12 %d\n", GSimulateStack1D  <12>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("13 %d\n", GSimulateStack1D  <13>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("14 %d\n", GSimulateStack1D  <14>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("15 %d\n", GSimulateStack1D  <15>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("16 %d\n", GSimulateStack1D  <16>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("17 %d\n", GSimulateStack1D  <17>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("18 %d\n", GSimulateStack1D  <18>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("19 %d\n", GSimulateStack1D  <19>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("20 %d\n", GSimulateStack1D  <20>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("21 %d\n", GSimulateStack1D  <21>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("51 %d\n", GSimulateStack1D  <51>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("101 %d\n", GSimulateStack1D<101>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("151 %d\n", GSimulateStack1D<151>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      printf("201 %d\n", GSimulateStack1D<201>( xi, V0, 0.0f, 1, 0.0f, eps, K, true, false, 1.0f, 0 ) );
+      return 0;
+  }
+#+END_SRC
+
+** Plot iter(N) from automatic tables above
+#+NAME: plot-iter-per-N-auto-v1
+#+BEGIN_SRC gnuplot :var data=table-iter-per-N-auto-v1 :results file :file ../img/plot-iter-per-N-auto-v1.png :exports results
+  set term png size 600, 300
+  set size ratio 0.5
+  plot data u 1:2 title 'iter(N), V_N^0=1' with lines
+#+END_SRC
+
+#+RESULTS: plot-iter-per-N-auto-v1
+[[file:../img/plot-iter-per-N-auto-v1.png]]
+
+#+NAME: plot-iter-per-N-auto-v10
+#+BEGIN_SRC gnuplot :var data=table-iter-per-N-auto-v10 :results file :file ../img/plot-iter-per-N-auto-v10.png :exports results
+  set term png size 600, 300
+  set size ratio 0.5
+  plot data u 1:2 title 'iter(N), V_N^0=10' with lines
+#+END_SRC
+
+#+RESULTS: plot-iter-per-N-auto-v10
+[[file:../img/plot-iter-per-N-auto-v10.png]]
+
+#+NAME: plot-iter-per-N-auto-v100
+#+BEGIN_SRC gnuplot :var data1=table-iter-per-N-auto-v100 data2=table-iter-per-N-auto-v10-e4 :results file :file ../img/plot-iter-per-N-auto-v100.png :exports results
+  set term png size 600, 300
+  set size ratio 0.5
+  plot data1 u 1:2 title 'iter(N), V_N^0=100, eps=10^{-3}' with linespoints, \
+       data2 u 1:2 title 'iter(N), V_N^0=10, eps=10^{-4}' with lines
+#+END_SRC
+
+#+RESULTS: plot-iter-per-N-auto-v100
+[[file:../img/plot-iter-per-N-auto-v100.png]]
+
+Iter count seems to grow super-linearly with body count $N$, while
+2-body iter count grows with mass ratio $\xi$. Looks almost
+*quadratic*, which would mean computational cost grows *cubically*
+with $N$, as per iter is linear in $N$, and we need $N^2$ iter.
+
+TODO this is not clear, finish [[Analytic convergence]] first before
+drawing any conclusions
+
+1, 10, 100 duplicate and triplicate iter, which means dependency is
+logarithmic. SAME with $\epsilon$, V0=100 eps=10^-3 returns SAME
+results as V0=10, eps=10^-4, so scaling factor is certainly
+\[ k^* \approx -\log(\epsilon/V_b^{(0)}) F(N,w)\]
+
+*** Dependency on $\xi$
+#+NAME: plot-iter-per-N-auto-v10-xi101
+#+BEGIN_SRC gnuplot :var data=table-iter-per-N-auto-v10 data2=table-iter-per-N-auto-v10-xi101 :results file :file ../img/plot-iter-per-N-auto-v10-xi101.png :exports results
+  set term png size 600, 300
+  set size ratio 0.5
+  plot data u 1:2 title 'iter(N), V_N^0=10, xi=1' with lines, \
+       data2 u 1:2 title 'iter(N), V_N^0=10, xi=1.01' with lines
+#+END_SRC
+
+#+RESULTS: plot-iter-per-N-auto-v10-xi101
+[[file:../img/plot-iter-per-N-auto-v10-xi101.png]]
 
 ** Implementation of GSimulateStack1D                             :noexport:
 NOTE:, func uses printf but include "<stdio.h>" must be added to caller
@@ -567,10 +699,6 @@ Write recurrence for body V_N depending on V_N-1...V_0 per iter
 Deterime iter count to converge with N objects, does it grows more
 than linearly?
 
-FROM Numeric results, convergence rate is the same as with 2 bodies
-and mass ratio, error decreases exponentially, fast first, slow so log
-error plot is linear.
-
 TODO try to isolate role of object count and mass ratio, because if
 they're mixed, increasing obj count also increases mr for bottommost
 object vs everything above
@@ -614,12 +742,12 @@ it's less and less accurate.
 Plot below shows how closely numeric/predicted values match
 
 #+NAME: image-kN
-#+BEGIN_SRC gnuplot :var data=table-iter-per-N :file ../img/sequential_kN.png :exports results
+#+BEGIN_SRC gnuplot :var data=table-iter-per-N-auto-v10 :file ../img/sequential_kN.png :exports results
   set term png size 600, 300
   set size ratio 0.5
   set xrange [0:220]
   plot -log((1e-3)/10) * (0.25) * (x+2)**2 with lines title 'best match for k^* up to 100', \
-       data u 1:3 title 'data iter(N)' with lines, \
+       data u 1:2 title 'data iter(N)' with linespoints, \
        log((1e-3)/10)/log(x/(x+1)) with lines
   unset xrange
   unset yrange
