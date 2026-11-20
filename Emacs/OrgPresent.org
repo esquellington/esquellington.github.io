@@ -10,6 +10,12 @@ Meat
 ** Details
 ** Here
 *** Even mode retails
+* Something Else
+Same for N=50 and N=150 in table below, iter count seems to grow
+approx linearly with $\Xi$ which is NOT surprising. The interesting
+bit is that $\Xi$ does NOT grow linearly with body count, so for
+$\xi=1$ iter count grows FASTER than N. So, for SAME N, iter grow
+linearly with $\Xi$, but not over different N
 * Conclusions
 This is good because:
 - reason
@@ -24,22 +30,34 @@ Latin words sound fancy
 * Addendum                                                         :noexport:
 Latin words sound fancy
 * Details                                                          :noexport:
-** TODO elisp customization of org-present                    :TESTTAG:TAG2:
+** TODO elisp customization of org-present
 Eval this code to customize org-present behaviour
 #+BEGIN_SRC elisp :results none
+
+  ;;---- Center presentation (from SystemCrafters)
+  ;; Configure fill width, later enable/disable
+  ;; visual-fill-column-mode. This is cool but doesn't work very well if
+  ;; text is scaled, does not visibly center slides.
+  (setq visual-fill-column-width 40
+        visual-fill-column-center-text t)
+
   (defun my/org-present-start-hook ()
     (message "OP-START")
-    (setq org-present-text-scale 2) ;;default 5, too large!
+    (setq org-present-text-scale 2) ;default 5, too large!
+    ;;(visual-fill-column-mode 1) ;center the presentation and wrap lines
+    ;;(visual-line-mode 1)
     (org-present-big)
     (org-display-inline-images)
     (org-latex-preview '(16)) ;16 -> show all formulas (C-u C-u org-latex-preview)
-    (setq header-line-format "🌐TITLE🌐") ;Custom header in all slides --> TODO ideally set :lighter to 💬
+    (setq header-line-format "🔘TITLE🔘") ;Custom header in all slides --> TODO ideally set modeline :lighter to 💬
     (setq cursor-type nil) ;Hide cursor directly instead of buggy (org-present-hide-cursor)
     (setq buffer-read-only t)) ;Similar to (org-present-read-only), but avoids interferring with cursor
 
   (defun my/org-present-quit-hook ()
     (message "OP-QUIT")
-    (org-present-small)
+    (org-present-small) ;undo scaling
+    (visual-fill-column-mode 0) ;stop centering the document
+    (visual-line-mode 0)
     (org-remove-inline-images)
     (org-latex-preview '(64)) ;64 -> hide all formulas (C-u C-u C-u org-latex-preview)
     (setq header-line-format nil)

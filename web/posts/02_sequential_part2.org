@@ -541,6 +541,33 @@ eix
   }
 #+END_SRC
 
+#+RESULTS: table-iter-per-N-auto-v10-xi101
+:results:
+|   3 |     14 |
+|   4 |     31 |
+|   5 |     55 |
+|   6 |     85 |
+|   7 |    120 |
+|   8 |    162 |
+|   9 |    209 |
+|  10 |    262 |
+|  11 |    321 |
+|  12 |    385 |
+|  13 |    455 |
+|  14 |    531 |
+|  15 |    612 |
+|  16 |    699 |
+|  17 |    792 |
+|  18 |    890 |
+|  19 |    995 |
+|  20 |   1105 |
+|  21 |   1220 |
+|  51 |   7587 |
+| 101 |  34088 |
+| 151 |  91214 |
+| 201 | 199189 |
+:end:
+
 #+NAME: table-iter-per-N-auto-v10-xi099
 #+BEGIN_SRC C++ :includes <stdio.h> :results drawer :noweb strip-export :exports results
   <<GSimulateStack1D>>
@@ -670,12 +697,12 @@ huge/tiny depending on how close to $w=1$ we are
 Total mass
 \[M = \sum_{i=1}^N m \xi^i = m \sum_{i=1}^N \xi^i\]
 assume $m=1$, $N=100$
-Wolfram Alpha
+Wolfram Alpha ("sum 0.99^n for n=1..10")
 - compute M for xi=1.01 -> M = 172
 - compute M for xi=1 -> M = 100
 - compute M for xi=0.99 -> M = 62
 NOT so much, total mass ratio is 1:0.6 < 1:1 < 1:1.7, which seems to
-roughly matchi iter required at N=100... does it also at N=200??
+roughly match iter required at N=100... does it also at N=200??
 
 N=200
 - compute M for xi=1.01 -> M = 637
@@ -684,27 +711,35 @@ N=200
 
 Same for N=50 and N=150 in table below, iter count seems to grow
 approx linearly with $\Xi$ which is NOT surprising. The interesting
-bit is that $Xi$ does NOT grow linearly with body count, so for
+bit is that $\Xi$ does NOT grow linearly with body count, so for
 $\xi=1$ iter count grows FASTER than N. So, for SAME N, iter grow
 linearly with $\Xi$, but not over different N
 
-|   N | Ref k*1000 |   xi |   M | K*1000 |        M/N |        K/k |
-|-----+------------+------+-----+--------+------------+------------|
-|  50 |          6 | 0.99 |  39 |    4.9 |       0.78 | 0.81666667 |
-|  50 |          6 |    1 |  50 |      6 |          1 |          1 |
-|  50 |          6 | 1.01 |  65 |    7.5 |        1.3 |       1.25 |
-|-----+------------+------+-----+--------+------------+------------|
-| 100 |         21 | 0.99 |  62 |     14 |       0.62 | 0.66666667 |
-| 100 |         21 |    1 | 100 |     21 |          1 |          1 |
-| 100 |         21 | 1.01 | 172 |     34 |       1.72 |  1.6190476 |
-|-----+------------+------+-----+--------+------------+------------|
-| 150 |         44 | 0.99 |  77 |     24 | 0.51333333 | 0.54545455 |
-| 150 |         44 |    1 | 150 |     44 |          1 |          1 |
-| 150 |         44 | 1.01 | 348 |     91 |       2.32 |  2.0681818 |
-|-----+------------+------+-----+--------+------------+------------|
-| 200 |         74 | 0.99 |  85 |     33 |      0.425 | 0.44594595 |
-| 200 |         74 |    1 | 200 |     74 |          1 |          1 |
-| 200 |         74 | 1.01 | 637 |    199 |      3.185 |  2.6891892 |
+|   N | k($\xi=1$)/1000 | $\xi$ |    M | K/1000 |        M/N |        K/k |
+|-----+-----------------+-------+------+--------+------------+------------|
+|  10 |           0.252 |  0.99 | 9.45 |  0.243 |      0.945 | 0.96428571 |
+|  10 |           0.252 |     1 |   10 |  0.252 |          1 |         1. |
+|  10 |           0.252 |  1.01 | 10.5 |  0.262 |       1.05 |  1.0396825 |
+|-----+-----------------+-------+------+--------+------------+------------|
+|  20 |               1 |  0.99 | 18.2 |   0.93 |       0.91 |       0.93 |
+|  20 |               1 |     1 |   20 |    1.0 |          1 |         1. |
+|  20 |               1 |  1.01 | 22.2 |    1.1 |       1.11 |        1.1 |
+|-----+-----------------+-------+------+--------+------------+------------|
+|  50 |               6 |  0.99 |   39 |    4.9 |       0.78 | 0.81666667 |
+|  50 |               6 |     1 |   50 |      6 |          1 |          1 |
+|  50 |               6 |  1.01 |   65 |    7.5 |        1.3 |       1.25 |
+|-----+-----------------+-------+------+--------+------------+------------|
+| 100 |              21 |  0.99 |   62 |     14 |       0.62 | 0.66666667 |
+| 100 |              21 |     1 |  100 |     21 |          1 |          1 |
+| 100 |              21 |  1.01 |  172 |     34 |       1.72 |  1.6190476 |
+|-----+-----------------+-------+------+--------+------------+------------|
+| 150 |              44 |  0.99 |   77 |     24 | 0.51333333 | 0.54545455 |
+| 150 |              44 |     1 |  150 |     44 |          1 |          1 |
+| 150 |              44 |  1.01 |  348 |     91 |       2.32 |  2.0681818 |
+|-----+-----------------+-------+------+--------+------------+------------|
+| 200 |              74 |  0.99 |   85 |     33 |      0.425 | 0.44594595 |
+| 200 |              74 |     1 |  200 |     74 |          1 |          1 |
+| 200 |              74 |  1.01 |  637 |    199 |      3.185 |  2.6891892 |
 #+TBLFM: $6=$4/$1::$7=$5/$2
 
 OH WOW I think iter ratio is similar to TOTAL mass ratio actually?
@@ -714,6 +749,9 @@ and iter count for a GIVEN N grows with $\Xi$
 
 Not exact, but so close that I'm sure there's some
 relationship... pity it doesn't hold for different N too
+
+NOTE: See org-mode table formulas tutorial here
+https://orgmode.org/worg/org-tutorials/org-spreadsheet-intro.html
 
 ** Implementation of GSimulateStack1D                             :noexport:
 NOTE:, func uses printf but include "<stdio.h>" must be added to caller
