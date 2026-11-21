@@ -43,18 +43,23 @@ Eval this code to customize org-present behaviour
 
   (defun my/org-present-start-hook ()
     (message "OP-START")
+    (toggle-frame-fullscreen) ;much nicer
+    (hide-mode-line-mode +1) ;no modeline interferrence
     (setq org-present-text-scale 2) ;default 5, too large!
     ;;(visual-fill-column-mode 1) ;center the presentation and wrap lines
     ;;(visual-line-mode 1)
     (org-present-big)
     (org-display-inline-images)
     (org-latex-preview '(16)) ;16 -> show all formulas (C-u C-u org-latex-preview)
-    (setq header-line-format "🔘TITLE🔘") ;Custom header in all slides --> TODO ideally set modeline :lighter to 💬
+    (setq-local header-line-format (propertize "💬TITLE💬" 'face '(:height 200)))
+    ;(setq header-line-format "🔘TITLE🔘") ;Custom header in all slides --> TODO ideally center heading, and also set modeline :lighter to 💬
     (setq cursor-type nil) ;Hide cursor directly instead of buggy (org-present-hide-cursor)
     (setq buffer-read-only t)) ;Similar to (org-present-read-only), but avoids interferring with cursor
 
   (defun my/org-present-quit-hook ()
     (message "OP-QUIT")
+    (toggle-frame-fullscreen)
+    (hide-mode-line-mode -1)
     (org-present-small) ;undo scaling
     (visual-fill-column-mode 0) ;stop centering the document
     (visual-line-mode 0)
@@ -183,8 +188,14 @@ Eval this code to customize org-present behaviour
 - Sync to current slide
 *** GOOD Speedbar --> NO it's terrible
 - It's very ugly
+** TODO [#B] Center slide text/images
+- SysCrafters way does not seem to work well, visual-fill-column-mode
+  has unpredictable results if text size changes
+- Ideally we'd have a way to change the centering interactively
 ** TODO [#C] SETUP code requires org-present-mode must have been activated at least ONCE
 ** TODO [#C] Some interesting customization of org-present
+- DOES reveal childs one by one as I wanted, expanding next and
+  collapsing current when necessary
 - https://xenodium.com/emacs-org-present-in-style/
 ** TODO [#C] Show progress bar or super-section using in 'header-line-format'
 ** TODO Hide mode line?
