@@ -7,9 +7,12 @@ What are we talking about?
 * Middle
 Meat
 ** Some
+additional
 ** Details
+will be discussed
 ** Here
 *** Even mode retails
+**** too many details
 * Something Else
 Same for N=50 and N=150 in table below, iter count seems to grow
 approx linearly with $\Xi$ which is NOT surprising. The interesting
@@ -51,7 +54,7 @@ Eval this code to customize org-present behaviour
     (org-present-big)
     (org-display-inline-images)
     (org-latex-preview '(16)) ;16 -> show all formulas (C-u C-u org-latex-preview)
-    (setq-local header-line-format (propertize "💬TITLE💬" 'face '(:height 200)))
+    (setq-local header-line-format (propertize "💬TITLE💬" 'face '(:height 400)))
     ;(setq header-line-format "🔘TITLE🔘") ;Custom header in all slides --> TODO ideally center heading, and also set modeline :lighter to 💬
     (setq cursor-type nil) ;Hide cursor directly instead of buggy (org-present-hide-cursor)
     (setq buffer-read-only t)) ;Similar to (org-present-read-only), but avoids interferring with cursor
@@ -139,10 +142,35 @@ Eval this code to customize org-present behaviour
     (org-fold-show-entry)) ;;TODO IF it was visible
   (define-key org-present-mode-keymap (kbd "C") 'my/org-fold-hide-children)
 
-  (setq lb (org-get-tags))
-  (while lb
-    (setq be (pop lb))
-    (message be))
+  ;;----- EXPERIMENTS
+  (setq-local header-line-format (propertize "PROVA" 'face '(:height 400)))
+  (setq-local header-line-format
+              ;;list of strings or string-evaluating funcs --> NO! they don't reeval, should be a func to ensure it reevals and rereads window-total-width
+              (list ;;"prefix"
+                    ;;(spaces-string 32) ;;TODO just calc this to align,
+                                       ;;using func that returns string
+                                       ;;of spaces req to center a given
+                                       ;;"PROVA" string and thats's
+                                       ;;it. Even could right-justify
+               (spaces-string (/ (window-total-width) 2)) ;;TODO should add spaces to center PROPERTIZED string, otherwise we use pre-propertized char width for TITLE width
+               ;;(propertize "low" 'face '(:height 200))
+               ;;(spaces-string 10)
+                    (propertize "💬TITLE💬" 'face '(:height 250))
+                    ;;"CENTRA'T"
+                    ))
+  ;; TOOD ideally re-compute every time but that would req hl-format to
+  ;; call a func on display, not sure if feasible. We could just re-set header per-slide, that's acceptable
+  (setq-local header-line-format (eval
+                                  (concat
+                                   (spaces-string (/ (window-total-width) 2))
+                                   (propertize "💬TITLE💬" 'face '(:height 200)))))
+
+  (window-total-width)
+
+  ;; (setq lb (org-get-tags))
+  ;; (while lb
+  ;;   (setq be (pop lb))
+  ;;   (message be))
 
   ;;----- EXPERIMENTS
   ;; Required to draw emoji properly
@@ -193,6 +221,24 @@ Eval this code to customize org-present behaviour
   has unpredictable results if text size changes
 - Ideally we'd have a way to change the centering interactively
 ** TODO [#C] SETUP code requires org-present-mode must have been activated at least ONCE
+** TODO [#B] Improve header line
+- see docs https://emacsdocs.org/docs/elisp/Header-Lines
+*** [#A] Center title text
+- Requires header-line-indent-mode
+- See docs, says this
+  The ‘header-line-indent-width’ variable is also kept updated,
+and can be used, for instance, in ‘:align-to’ specs as part
+of ‘header-line-format’, like this:
+
+(space :align-to (+ header-line-indent-width 10))
+
+FOR
+(setq-local header-line-format (propertize "PROVA" 'face '(:height 400)))
+Its value is #("PROVA" 0 5 (face (:height 400)))
+
+How do I add the align-to?
+
+*** [#B] Draw slide count/progress?
 ** TODO [#C] Some interesting customization of org-present
 - DOES reveal childs one by one as I wanted, expanding next and
   collapsing current when necessary
