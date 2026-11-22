@@ -54,8 +54,22 @@ Eval this code to customize org-present behaviour
     (org-present-big)
     (org-display-inline-images)
     (org-latex-preview '(16)) ;16 -> show all formulas (C-u C-u org-latex-preview)
-    (setq-local header-line-format (propertize "💬TITLE💬" 'face '(:height 400)))
-    ;(setq header-line-format "🔘TITLE🔘") ;Custom header in all slides --> TODO ideally center heading, and also set modeline :lighter to 💬
+    ;;(setq-local header-line-format (propertize "💬TITLE💬" 'face '(:height 400)))
+    ;; CUSTOM CENTERED HEADER
+    (setq-local my/propertized-title (propertize "💬Very Important Title💬" 'face '(:height 300)))
+    (setq-local pixels-per-column (/ (window-pixel-width) (window-total-width)))
+    (setq-local header-line-format
+                ;;list of strings or string-evaluating funcs, NOTE this does NOT reeval on window resize, should force somehow, maybe in win resize hook?
+                (list
+                 ;;"PREFIX"
+                 ;; Spaces to center propertized title, must use "pixel" width
+                 (spaces-string (/ (/ (- (window-pixel-width)
+                                         (string-pixel-width my/propertized-title))
+                                      2)
+                                   pixels-per-column))
+                 ;; Actual title to be centered
+                 my/propertized-title))
+
     (setq cursor-type nil) ;Hide cursor directly instead of buggy (org-present-hide-cursor)
     (setq buffer-read-only t)) ;Similar to (org-present-read-only), but avoids interferring with cursor
 
@@ -143,29 +157,35 @@ Eval this code to customize org-present behaviour
   (define-key org-present-mode-keymap (kbd "C") 'my/org-fold-hide-children)
 
   ;;----- EXPERIMENTS
-  (setq-local header-line-format (propertize "PROVA" 'face '(:height 400)))
-  (setq-local header-line-format
-              ;;list of strings or string-evaluating funcs --> NO! they don't reeval, should be a func to ensure it reevals and rereads window-total-width
-              (list ;;"prefix"
-                    ;;(spaces-string 32) ;;TODO just calc this to align,
-                                       ;;using func that returns string
-                                       ;;of spaces req to center a given
-                                       ;;"PROVA" string and thats's
-                                       ;;it. Even could right-justify
-               (spaces-string (/ (window-total-width) 2)) ;;TODO should add spaces to center PROPERTIZED string, otherwise we use pre-propertized char width for TITLE width
-               ;;(propertize "low" 'face '(:height 200))
-               ;;(spaces-string 10)
-                    (propertize "💬TITLE💬" 'face '(:height 250))
-                    ;;"CENTRA'T"
-                    ))
-  ;; TOOD ideally re-compute every time but that would req hl-format to
-  ;; call a func on display, not sure if feasible. We could just re-set header per-slide, that's acceptable
-  (setq-local header-line-format (eval
-                                  (concat
-                                   (spaces-string (/ (window-total-width) 2))
-                                   (propertize "💬TITLE💬" 'face '(:height 200)))))
+  (setq-local header-line-format (propertize "PROVA" 'face '(:height 400))) ;;plain propertize, no centerning
 
-  (window-total-width)
+  ;; Centered propertized title using pixels widths
+  ;;TODO convert this into a func that given title text returns header-line-format
+  (setq-local my/propertized-title (propertize "💬Very Important Title💬" 'face '(:height 300)))
+  (setq-local pixels-per-column (/ (window-pixel-width) (window-total-width)))
+  (setq-local header-line-format
+              ;;list of strings or string-evaluating funcs, NOTE this does NOT reeval on window resize, should force somehow, maybe in win resize hook?
+              (list
+               ;;"PREFIX"
+               ;; Spaces to center propertized title, must use "pixel" width
+               (spaces-string (/ (/ (- (window-pixel-width)
+                                       (string-pixel-width my/propertized-title))
+                                    2)
+                                 pixels-per-column))
+               ;; Actual title to be centered
+               my/propertized-title))
+
+  ;; Window width in chars, but ignores text size, so not useful due to properize->height/width change
+  ;;(window-total-width)
+  ;;(window-pixel-width)
+  ;;(string-pixel-width "HOLA") ;same, no change when scaling height?
+  ;;(string-pixel-width (propertize "💬TITLE💬" 'face '(:height 200))) ;;THIS respects propertize change with height! so we could use it to center IF we had window pixel width
+  ;;(string-width (propertize "💬TITLE💬" 'face '(:height 300))) ;;this ignores propertize
+  ;;(propertize "💬TITLE💬" 'face '(:height 250))
+  ;;(spaces-string (/ (/ (- (window-pixel-width)
+  ;;                        (string-pixel-width (propertize "💬TITLE💬" 'face '(:height 200))))
+  ;;                     2)
+  ;;               factor-pixels-to-columns))
 
   ;; (setq lb (org-get-tags))
   ;; (while lb
