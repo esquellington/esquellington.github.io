@@ -49,6 +49,26 @@ Eval this code to customize org-present behaviour
   (setq visual-fill-column-width 40
         visual-fill-column-center-text t)
 
+  ;; Set custom heading text per-slide
+  ;; NOTE: header-line-format is a var, must be updated per slide
+  ;; CUSTOM CENTERED HEADER NOTE: this centers to non-fullscreen window first
+  ;; TODO title could include slide number somewhere, maybe on right end?
+  (defun my/org-present-set-heading ()
+    ;;(setq-local header-line-format (propertize "💬TITLE💬" 'face '(:height 400)))
+    (setq-local my/propertized-title (propertize "💬Very Important Title💬" 'face '(:height 300)))
+    (setq-local pixels-per-column (/ (window-pixel-width) (window-total-width)))
+    (setq-local header-line-format
+                ;;list of strings
+                (list
+                 ;;"PREFIX" ;;TODO if we enable this, subtract from centering spaces
+                 ;; Spaces to center propertized title, must use "pixel" width
+                 (spaces-string (/ (/ (- (window-pixel-width)
+                                         (string-pixel-width my/propertized-title))
+                                      2)
+                                   pixels-per-column))
+                 ;; Actual title to be centered
+                 my/propertized-title)))
+
   (defun my/org-present-start-hook ()
     (message "OP-START")
     (toggle-frame-fullscreen) ;much nicer
@@ -59,22 +79,6 @@ Eval this code to customize org-present behaviour
     (org-present-big)
     (org-display-inline-images)
     (org-latex-preview '(16)) ;16 -> show all formulas (C-u C-u org-latex-preview)
-    ;;(setq-local header-line-format (propertize "💬TITLE💬" 'face '(:height 400)))
-    ;; CUSTOM CENTERED HEADER
-    (setq-local my/propertized-title (propertize "💬Very Important Title💬" 'face '(:height 300)))
-    (setq-local pixels-per-column (/ (window-pixel-width) (window-total-width)))
-    (setq-local header-line-format
-                ;;list of strings or string-evaluating funcs, NOTE this does NOT reeval on window resize, should force somehow, maybe in win resize hook?
-                (list
-                 ;;"PREFIX"
-                 ;; Spaces to center propertized title, must use "pixel" width
-                 (spaces-string (/ (/ (- (window-pixel-width)
-                                         (string-pixel-width my/propertized-title))
-                                      2)
-                                   pixels-per-column))
-                 ;; Actual title to be centered
-                 my/propertized-title))
-
     (setq cursor-type nil) ;Hide cursor directly instead of buggy (org-present-hide-cursor)
     ;;Similar to (org-present-read-only), but avoids interferring with cursor
     (setq buffer-read-only t))
@@ -93,6 +97,8 @@ Eval this code to customize org-present behaviour
     (setq buffer-read-only nil)) ;Similar to (org-present-read-write), but avoids interferring with cursor
 
   (defun my/org-present-prepare-slide (buffer-name heading)
+    ;; Set heading for current slide
+    (my/org-present-set-heading)
     ;; Show only top-level headlines
     (org-overview)
     ;; Unfold the current entry
