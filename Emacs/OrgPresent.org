@@ -18,7 +18,12 @@ Same for N=50 and N=150 in table below, iter count seems to grow
 approx linearly with $\Xi$ which is NOT surprising. The interesting
 bit is that $\Xi$ does NOT grow linearly with body count, so for
 $\xi=1$ iter count grows FASTER than N. So, for SAME N, iter grow
-linearly with $\Xi$, but not over different N
+linearly with $\Xi$, but not over different
+** Minor detail
+#+BEGIN_SRC C++
+  // Some literary code
+  int main() { __builtin_printf("Hello org-present"); return 0; }
+#+END_SRC
 * Conclusions
 This is good because:
 - reason
@@ -71,7 +76,8 @@ Eval this code to customize org-present behaviour
                  my/propertized-title))
 
     (setq cursor-type nil) ;Hide cursor directly instead of buggy (org-present-hide-cursor)
-    (setq buffer-read-only t)) ;Similar to (org-present-read-only), but avoids interferring with cursor
+    ;;Similar to (org-present-read-only), but avoids interferring with cursor
+    (setq buffer-read-only t))
 
   (defun my/org-present-quit-hook ()
     (message "OP-QUIT")
@@ -138,52 +144,72 @@ Eval this code to customize org-present behaviour
   (define-key org-present-mode-keymap (kbd "q") 'org-present-quit)
   (define-key org-present-mode-keymap (kbd "t") 'org-present-toggle-one-big-page)
 
-  ;; Show/Hide (TODO ideally same keybinding would toggle instead of e/E) TODO
+  ;; Navigate headings in slide (TOOD should navigate and expand, back and collapse)
+  (defun my/org-present-forward ()
+    "Move to next heading and expand it"
+    (interactive)
+    (org-next-visible-heading 1)
+    (org-fold-show-subtree))
+  (defun my/org-present-backward ()
+    "Hide current heading and move to prev"
+    (interactive)
+    (org-fold-hide-subtree)
+    (org-previous-visible-heading 1))
+  (define-key org-present-mode-keymap (kbd "f") 'my/org-present-forward)
+  (define-key org-present-mode-keymap (kbd "b") 'my/org-present-backward)
+
+  ;; NOTE: These are disabled because they're more confusing than
+  ;; useful, let's stick to simple n/p for slide next/prev and f/b for
+  ;; in-slide heading expand/collapse, anything else is too complex
+  ;; while presenting
+  ;;
+  ;; Show specific structuers (entry,subtree,children)
+  ;; TODO: ideally same keybinding would toggle show/hide instead of e/E
   ;; could make method my/org-fold-toggle-XXXX that checks if open/closed and
   ;; toggles TODO is there a predicate to check if visible? there must
-  (define-key org-present-mode-keymap (kbd "e") 'org-fold-show-entry) ;current node text entry right below
-  (define-key org-present-mode-keymap (kbd "c") 'org-fold-show-children) ;current node direct children
-  (define-key org-present-mode-keymap (kbd "s") 'org-fold-show-subtree) ;current node entire subtree
-
-  ;; Hide
-  (define-key org-present-mode-keymap (kbd "E") 'org-fold-hide-entry)
-  (define-key org-present-mode-keymap (kbd "S") 'org-fold-hide-subtree)
-  ;; NOTE: hide children without hiding entry is not possible apparently, would
-  ;; need to hide all, show entry and show children
-  (defun my/org-fold-hide-children ()
-    (interactive)
-    (org-fold-hide-subtree) ;TODO IF visible
-    (org-fold-show-entry)) ;;TODO IF it was visible
-  (define-key org-present-mode-keymap (kbd "C") 'my/org-fold-hide-children)
+  ;;(define-key org-present-mode-keymap (kbd "e") 'org-fold-show-entry) ;current node text entry right below
+  ;;(define-key org-present-mode-keymap (kbd "c") 'org-fold-show-children) ;current node direct children
+  ;;(define-key org-present-mode-keymap (kbd "s") 'org-fold-show-subtree) ;current node entire subtree
+  ;;
+  ;; Hide specific structuers (entry,subtree,children)
+  ;;(define-key org-present-mode-keymap (kbd "E") 'org-fold-hide-entry)
+  ;;(define-key org-present-mode-keymap (kbd "S") 'org-fold-hide-subtree)
+  ;;;; NOTE: hide children without hiding entry is not possible apparently, would
+  ;;;; need to hide all, show entry and show children
+  ;;(defun my/org-fold-hide-children ()
+  ;;  (interactive)
+  ;;  (org-fold-hide-subtree) ;TODO IF visible
+  ;;  (org-fold-show-entry)) ;;TODO IF it was visible
+  ;;(define-key org-present-mode-keymap (kbd "C") 'my/org-fold-hide-children)
 
   ;;----- EXPERIMENTS
-  (setq-local header-line-format (propertize "PROVA" 'face '(:height 400))) ;;plain propertize, no centerning
+  ;;(setq-local header-line-format (propertize "PROVA" 'face '(:height 400))) ;;plain propertize, no centerning
 
   ;; Centered propertized title using pixels widths
-  ;;TODO convert this into a func that given title text returns header-line-format
-  (setq-local my/propertized-title (propertize "💬Very Important Title💬" 'face '(:height 300)))
-  (setq-local pixels-per-column (/ (window-pixel-width) (window-total-width)))
-  (setq-local header-line-format
-              ;;list of strings or string-evaluating funcs, NOTE this does NOT reeval on window resize, should force somehow, maybe in win resize hook?
-              (list
-               ;;"PREFIX"
-               ;; Spaces to center propertized title, must use "pixel" width
-               (spaces-string (/ (/ (- (window-pixel-width)
-                                       (string-pixel-width my/propertized-title))
-                                    2)
-                                 pixels-per-column))
-               ;; Actual title to be centered
-               my/propertized-title))
+  ;;TODO convert this into a func that given title text returns header-line-format --> moved to my/org-present-start-hook instead
+  ;;(setq-local my/propertized-title (propertize "Very Important Title" 'face '(:height 300)))
+  ;;(setq-local pixels-per-column (/ (window-pixel-width) (window-total-width)))
+  ;;(setq-local header-line-format
+  ;;            ;;list of strings or string-evaluating funcs, NOTE this does NOT reeval on window resize, should force somehow, maybe in win resize hook?
+  ;;            (list
+  ;;             ;;"PREFIX"
+  ;;             ;; Spaces to center propertized title, must use "pixel" width
+  ;;             (spaces-string (/ (/ (- (window-pixel-width)
+  ;;                                     (string-pixel-width my/propertized-title))
+  ;;                                  2)
+  ;;                               pixels-per-column))
+  ;;             ;; Actual title to be centered
+  ;;             my/propertized-title))
 
   ;; Window width in chars, but ignores text size, so not useful due to properize->height/width change
   ;;(window-total-width)
   ;;(window-pixel-width)
   ;;(string-pixel-width "HOLA") ;same, no change when scaling height?
-  ;;(string-pixel-width (propertize "💬TITLE💬" 'face '(:height 200))) ;;THIS respects propertize change with height! so we could use it to center IF we had window pixel width
-  ;;(string-width (propertize "💬TITLE💬" 'face '(:height 300))) ;;this ignores propertize
-  ;;(propertize "💬TITLE💬" 'face '(:height 250))
+  ;;(string-pixel-width (propertize "TITLE" 'face '(:height 200))) ;;THIS respects propertize change with height! so we could use it to center IF we had window pixel width
+  ;;(string-width (propertize "TITLE" 'face '(:height 300))) ;;this ignores propertize
+  ;;(propertize "TITLE" 'face '(:height 250))
   ;;(spaces-string (/ (/ (- (window-pixel-width)
-  ;;                        (string-pixel-width (propertize "💬TITLE💬" 'face '(:height 200))))
+  ;;                        (string-pixel-width (propertize "TITLE" 'face '(:height 200))))
   ;;                     2)
   ;;               factor-pixels-to-columns))
 
@@ -241,27 +267,16 @@ Eval this code to customize org-present behaviour
   has unpredictable results if text size changes
 - Ideally we'd have a way to change the centering interactively
 ** TODO [#C] SETUP code requires org-present-mode must have been activated at least ONCE
-** TODO [#B] Improve header line
+** TODO [#B] Better header line
 - see docs https://emacsdocs.org/docs/elisp/Header-Lines
-*** [#A] Center title text
-- Requires header-line-indent-mode
-- See docs, says this
-  The ‘header-line-indent-width’ variable is also kept updated,
-and can be used, for instance, in ‘:align-to’ specs as part
-of ‘header-line-format’, like this:
-
-(space :align-to (+ header-line-indent-width 10))
-
-FOR
-(setq-local header-line-format (propertize "PROVA" 'face '(:height 400)))
-Its value is #("PROVA" 0 5 (face (:height 400)))
-
-How do I add the align-to?
-
-*** [#B] Draw slide count/progress?
+*** DONE [#A] Center title text
+- Messy but works, does NOT re-center with window width changes
+- See docs for header-line-format, accepts list of strings but should
+  accept func too I guess?
+*** TODO [#B] Draw slide count/progress?
+- Would need refreshing header-line-format per-slide, seems feasible
 ** TODO [#C] Some interesting customization of org-present
 - DOES reveal childs one by one as I wanted, expanding next and
   collapsing current when necessary
 - https://xenodium.com/emacs-org-present-in-style/
-** TODO [#C] Show progress bar or super-section using in 'header-line-format'
 ** TODO Hide mode line?
