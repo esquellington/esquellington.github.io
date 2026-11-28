@@ -269,6 +269,9 @@ Couldn't we just do this in a compilation hook, similar to beardbolt?
 * TODO [#C] Flycheck or Flymake?
 - Make is the default!?
 - eglot only supports Flymake?
+- Flycheck is SUPER-SLOW in org-mode, had to disable
+  flycheck-global-mode and instead enable it in prog-mode-hook only
+  for prog modes, seems enough
 * TODO Debugging in Emacs
 ** GUD
 - Builtin... ugly but works
@@ -408,7 +411,7 @@ https://systemcrafters.net/learning-emacs-lisp/
 (define-key map (kbd "C-c C-d") #'bb-clear-rainbow-overlays)
 *** DONE CUSTOMIZE
 **** DONE Ensure *bb-asm* is visible
-- See [[Function to set Layout, port idea from compiler-explorer]]
+- See Function to set Layout, port idea from compiler-explorer
 - By default seems hidden, not sure why, maybe bury-successful-compilation?? -->
   YES, incompatible!
 - Write keybinding that just does that, on beardbolt-compile open bb-asm and
@@ -658,7 +661,7 @@ SHOW?
 **** TODO See effect of Exceptions
 - How much overhead do they add? ASM should make it apparent
 * GOOD Sketches in org-mode file:OrgSketch/OrgSketch.org
-* DONE Latex in comments file:LatexInComments/LatexInComments.org
+* DONE Latex in comments LatexInComments/LatexInComments.org
 * TODO emacs-clion
 - Interop with CLion IDE from Emacs
 - Main use-case is debugging in CLion, much less painful than

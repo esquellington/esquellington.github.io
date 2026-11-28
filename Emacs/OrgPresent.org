@@ -79,7 +79,8 @@ Eval this code to customize org-present behaviour
     (org-present-big)
     (org-display-inline-images)
     (org-latex-preview '(16)) ;16 -> show all formulas (C-u C-u org-latex-preview)
-    (setq cursor-type nil) ;Hide cursor directly instead of buggy (org-present-hide-cursor)
+    ;;(setq cursor-type nil) ;Hide cursor directly instead of buggy (org-present-hide-cursor)
+    (setq cursor-type 'hollow) ;Hide cursor directly instead of buggy (org-present-hide-cursor)
     ;;Similar to (org-present-read-only), but avoids interferring with cursor
     (setq buffer-read-only t))
 
@@ -175,7 +176,7 @@ Eval this code to customize org-present behaviour
   ;; toggles TODO is there a predicate to check if visible? there must
   ;;(define-key org-present-mode-keymap (kbd "e") 'org-fold-show-entry) ;current node text entry right below
   ;;(define-key org-present-mode-keymap (kbd "c") 'org-fold-show-children) ;current node direct children
-  ;;(define-key org-present-mode-keymap (kbd "s") 'org-fold-show-subtree) ;current node entire subtree
+  (define-key org-present-mode-keymap (kbd "s") 'org-fold-show-subtree) ;current node entire subtree
   ;;
   ;; Hide specific structuers (entry,subtree,children)
   ;;(define-key org-present-mode-keymap (kbd "E") 'org-fold-hide-entry)
